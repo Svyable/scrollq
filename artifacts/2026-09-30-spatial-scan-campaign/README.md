@@ -12,7 +12,7 @@ scroliq-scan-map --root community-uploads/forrest/volcomp/PHerc1447/volumes/2025
 ```
 
 Base URL: `https://dl.ash2txt.org`. Level: full-resolution L0.
-Source commit: `fed5e31e412ee8d7ca158b6d5910fcf285e8d235`.
+Source commit: `430a77394fb17fc284f51fd11661efa82dbfbd02`.
 
 ## Observed survey coverage
 
@@ -23,6 +23,10 @@ Source commit: `fed5e31e412ee8d7ca158b6d5910fcf285e8d235`.
 
 See `summary.json` for machine-readable campaign metadata and each
 `*.scan-map.json` for level-0 voxel bounding boxes and local metrics.
+
+`unstored-shard` means the masked Zarr has no stored shard at that
+sampled location. This is expected for masked background and is **not**
+evidence of corruption by itself.
 
 ## Scope
 
