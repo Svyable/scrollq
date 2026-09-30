@@ -77,6 +77,7 @@ jobs:
                   "coordinate_space": report["coordinate_space"],
                   "sampling": report["sampling"],
                   "metric_distribution": report["metric_distribution"],
+                  "absence_semantics": report["absence_semantics"],
               })
 
           summary = {
@@ -144,6 +145,10 @@ jobs:
 
           See `summary.json` for machine-readable campaign metadata and each
           `*.scan-map.json` for level-0 voxel bounding boxes and local metrics.
+
+          `unstored-shard` means the masked Zarr has no stored shard at that
+          sampled location. This is expected for masked background and is **not**
+          evidence of corruption by itself.
 
           ## Scope
 
