@@ -1,67 +1,213 @@
-# ScrollQ — train on the best first
+# ScrollQ
 
-Data-quality triage for Vesuvius scroll volumes. Every scroll volume gets a
-**0–100 quality score** from its actual voxels, so segmentation and
-ink-detection effort goes where the data is healthiest first.
+**Train on the best first.**
 
-**Live leaderboard:** https://svyable.github.io/scrollq/
+ScrollQ is an open, reproducible data-quality triage system for the [Vesuvius Challenge](https://scrollprize.org/) scroll volumes. It decodes **real level-0 voxels** from volcomp-sharded Zarr data, measures signal and acquisition quality, and assigns each volume a transparent **0–100 quality score** so scarce segmentation, labeling, and GPU effort can be directed toward the healthiest data first.
 
-## What it measures
+**[Live leaderboard](https://svyable.github.io/scrollq/)** · **[September 2026 Progress Prize write-up](https://svyable.github.io/scrollq/september-2026.html)** · **[Reproducible campaign artifacts](artifacts/2026-09-30-scrollq/)**
 
-For each volume, 4 × 128³ chunks are sampled at full resolution (level 0)
-and decoded with the real volcomp decoder (via the
-[zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit) package,
-which vendors MIT-licensed libvolcomp). Per-chunk metrics:
+> ScrollQ is a **triage signal, not a readability claim**. It does not detect ink and it does not predict which scroll will be read first.
 
-| metric | what it says |
+## Why this exists
+
+The Vesuvius pipeline has an allocation problem as well as an algorithm problem. Expert segmentation time, labeling effort, and GPU budgets are limited, while scan quality varies substantially across volumes.
+
+ScrollQ makes that hidden variable visible.
+
+Instead of treating every volume as equally promising, it answers three practical questions:
+
+1. **Is the underlying volume structurally trustworthy?**
+2. **How healthy are the sampled voxels?**
+3. **Where could the next labeling or training hour have the most leverage?**
+
+The result is a public, auditable ranking that can be challenged, re-weighted, or reproduced rather than a black-box recommendation.
+
+## September 2026 evidence snapshot
+
+The repository includes the exact outputs behind the September 30, 2026 campaign in [`artifacts/2026-09-30-scrollq/`](artifacts/2026-09-30-scrollq/).
+
+| Result | Evidence |
 |---|---|
-| `nonzero_frac` | fraction of voxels carrying signal vs fill |
-| `grad_energy` | mean neighbor difference — texture/edge energy |
-| `dyn_range` | p99 − p1 intensity spread |
-| `sat_frac` | fraction clipped at 255 |
-| `dead_slices` | all-zero z-planes inside populated chunks (acquisition dropout) |
+| **64 / 64** listed volcomp scroll volumes scored | [`volumes.json`](artifacts/2026-09-30-scrollq/volumes.json) |
+| Ranking remained stable under an independent deterministic resample | **Spearman ρ = 0.876**, mean **|Δscore| = 3.07**, top-10 overlap **8 / 10** |
+| Acquisition dropout scan found no verified dead slices in the campaign | **0 hits across 64 volumes** |
+| Label coverage was highly concentrated in the open-data snapshot | **70 / 70** discovered ink-detection roots were on PHercParis4; the top 12 quality-ranked scrolls had none |
+| High-quality, unlabeled targets were made actionable | **16** top-quartile volumes were flagged **“label next”** |
 
-Score (documented heuristic, re-weight freely): **40** signal presence +
-**30** texture energy + **20** dynamic range − saturation penalty −
-15 per dead slice.
+The point is not that one heuristic ranking is final. The point is that **data quality and label coverage can be measured together**, turning an implicit resource-allocation decision into an inspectable one.
 
-## Honest scope
+## How ScrollQ works
 
-This is a **triage signal, not a readability claim**. It does not detect
-ink and does not predict which scroll will read first. It tells you which
-volumes have the healthiest voxels. The weights are a judgment call and are
-published with every score — audit them, don't worship the ranking.
+For each volume, ScrollQ samples up to four **128³** chunks from the full-resolution level and decodes them through the real volcomp decoder provided by [zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit), which vendors MIT-licensed `libvolcomp`.
 
-## Install & run
+Sampling is deterministic and spread across the three-dimensional shard grid. Masked background is skipped rather than misclassified as bad data, and every result records whether the requested sampling budget was actually achieved.
 
-```bash
-pip install git+https://github.com/Svyable/scrollq.git
-# volumes.txt: one dl.ash2txt.org volume root per line
-scrollq-score --volumes volumes.txt --samples 4 --workers 4 --out-dir out/
-scrollq-leaderboard --in out/volumes.json --out docs/index.html
-# one-volume health report: integrity (zarr-pyramid-audit) + quality
-scrollq-health --root community-uploads/forrest/volcomp/PHerc0009B/volumes/....zarr
+```text
+Vesuvius Zarr volume
+        │
+        ▼
+ shard/index inspection
+        │
+        ▼
+ deterministic L0 chunk sampling
+        │
+        ▼
+ real volcomp decode
+        │
+        ▼
+ voxel-quality metrics
+        │
+        ├── signal presence
+        ├── texture / gradient energy
+        ├── dynamic range
+        ├── saturation
+        └── dead-slice detection
+        │
+        ▼
+ transparent 0–100 score
+        │
+        ├── leaderboard
+        ├── label-coverage join
+        └── unified TRAIN / CAUTION / DO NOT TRAIN health report
 ```
 
-## Companion project
+### Metrics
 
-ScrollQ is the second half of a data-quality suite. The first half is
-[zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit) —
-corruption detection for OME-Zarr pyramids ("don't train on lies"):
-header-only audits, a publish-time gate, and a sampled chunk-content probe.
-`scrollq-health` runs both halves and issues one verdict per volume:
-**TRAIN / CAUTION / DO NOT TRAIN**.
+| Metric | What it measures |
+|---|---|
+| `nonzero_frac` | Fraction of voxels carrying signal rather than fill |
+| `grad_energy` | Mean neighbor difference; a texture / edge-energy proxy |
+| `dyn_range` | p99 − p1 intensity spread |
+| `sat_frac` | Fraction of voxels clipped at 255 |
+| `dead_slices` | Zero z-planes surrounded by populated neighbors in dense chunks |
 
-## Why this increases the probability of reading the scrolls
+### Score
 
-Segmentation is the bottleneck: expert hours are scarce and every volume
-costs GPU time. A public, reproducible quality ranking directs that scarce
-effort at the volumes most likely to repay it — and the dead-slice scan
-flags acquisition artifacts before anyone trains on them. Companion to
-[zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit)
-("don't train on lies"); this one is "train on the best first."
+The current documented heuristic is:
 
-## License
+- **40 points** — signal presence
+- **30 points** — texture energy
+- **20 points** — dynamic range
+- minus a saturation penalty
+- minus **15 points per verified dead slice**, capped at 30
 
-MIT. Built September 2026 for the Vesuvius Challenge September Progress
-Prize by Sven + Muse (AI assistant).
+The calibration and weights are deliberately visible in [`src/scrollq/score.py`](src/scrollq/score.py). They are a judgment call, not ground truth. Re-weight them if you disagree.
+
+## Sampling provenance is part of the result
+
+A quality score should not quietly look authoritative when the requested data could not be read. ScrollQ therefore emits sampling provenance alongside every score:
+
+```json
+{
+  "requested": 4,
+  "decoded": 4,
+  "complete": true,
+  "rotate": 0,
+  "shard_candidates": 27,
+  "missing_shards": 0,
+  "shard_read_failures": 0
+}
+```
+
+Missing shards and transport/read failures are tracked separately, and partial sampling is explicitly marked incomplete.
+
+## The data-quality suite
+
+ScrollQ is the prioritization half of a two-part data-quality suite:
+
+- **[zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit)** — integrity: *don’t train on lies*
+- **ScrollQ** — quality prioritization: *train on the best first*
+
+`scrollq-health` combines both into one volume-level report:
+
+- **TRAIN** — integrity passes and quality is usable
+- **CAUTION** — integrity warns, quality is low, or quality cannot be scored
+- **DO NOT TRAIN** — high-severity integrity findings
+
+This creates a practical gate before expensive downstream work begins.
+
+## Quick start
+
+Requires **Python 3.11+**.
+
+```bash
+git clone https://github.com/Svyable/scrollq.git
+cd scrollq
+
+python -m venv .venv
+source .venv/bin/activate
+
+pip install -e .
+```
+
+Score the repository’s 64-volume list and build a local leaderboard:
+
+```bash
+scrollq-score \
+  --volumes volumes.txt \
+  --samples 4 \
+  --workers 4 \
+  --out-dir out/
+
+scrollq-leaderboard \
+  --in out/volumes.json \
+  --out out/index.html
+```
+
+Run one unified integrity + quality report:
+
+```bash
+scrollq-health \
+  --root community-uploads/forrest/volcomp/PHerc0009B/volumes/....zarr
+```
+
+For the tested development setup, install the CI requirements first. They pin the companion decoder/audit dependency to a verified immutable commit:
+
+```bash
+pip install -r requirements-ci.txt
+pip install -e .
+python -m pytest tests/ -q
+```
+
+## Label-coverage analysis
+
+ScrollQ can join quality scores with discovered ink-detection and surface-volume roots from the open-data audit:
+
+```bash
+scrollq-coverage \
+  --s3-roots discover_zarr.roots.jsonl \
+  --volumes out/volumes.json \
+  --out out/coverage.json
+
+scrollq-leaderboard \
+  --in out/volumes.json \
+  --coverage out/coverage.json \
+  --out out/index.html
+```
+
+Volumes in the top quality quartile with no discovered ink labels are flagged **“label next.”** This is intentionally a prioritization cue, not a claim that ink is present.
+
+## Evaluation path
+
+A fast way to inspect the project end to end:
+
+1. Open the **[live leaderboard](https://svyable.github.io/scrollq/)**.
+2. Read the **[September Progress Prize write-up](https://svyable.github.io/scrollq/september-2026.html)**.
+3. Inspect the frozen **[campaign artifacts](artifacts/2026-09-30-scrollq/)** behind the published numbers.
+4. Review the scoring implementation in [`src/scrollq/score.py`](src/scrollq/score.py).
+5. Run `scrollq-health` on any supported volume to reproduce the combined integrity/quality verdict.
+
+## Design principles
+
+- **Real voxels, real decoder.** No metadata-only proxy for the quality score.
+- **Transparent heuristics.** Every component and weight is exposed.
+- **Honest failures.** Partial sampling, missing shards, and read failures are reported.
+- **Reproducible evidence.** Published numbers trace to versioned artifacts.
+- **Action over vanity metrics.** The output is designed to change what gets labeled, segmented, or trained next.
+- **No readability overclaim.** Data health is not ink detection.
+
+## License and authorship
+
+MIT licensed.
+
+Built in September 2026 for the **Vesuvius Challenge September Progress Prize** by **Sven + Muse (AI assistant)**.
