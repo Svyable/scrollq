@@ -1,12 +1,15 @@
 # Grand Prize blind probe protocol
 
 This protocol is the second stage after `scrollq-grand-prize`. Its purpose is
-to decide whether to commit the full unrolling campaign to **PHerc0813** or
-**PHerc1447** using evidence from the actual prize-eligible volumes.
+to decide whether to commit the full unrolling campaign to **PHerc0800**,
+**PHerc0813**, or **PHerc1447** using evidence from the actual prize-eligible
+volumes.
 
-PHerc0800 is retained as a geometry-control / fallback target because it has
-six existing public segments, but it is not on the current weight-free
-ScrollQ/segment Pareto frontier.
+These are intentionally different hypotheses rather than the top three rows of
+a weighted ranking: PHerc0813 is the scan-quality leader, PHerc1447 has the
+strongest existing public-segment bootstrap, and PHerc0800 combines six public
+segments with better exact-volume imported surface-support evidence than either.
+The imported support metric is sensitivity evidence, not a readability claim.
 
 Official references:
 
@@ -23,7 +26,7 @@ held-out geometry checks and falsification controls.
 The comparison is deliberately blind and symmetric:
 
 - same number of sampled regions per scroll;
-- same tools and hyperparameters;
+- same tools and hyperparameters across all three first-wave targets;
 - same maximum human-verification time;
 - same held-out fraction;
 - fixed random seed where randomness is unavoidable;
@@ -147,19 +150,22 @@ No papyrological interpolation is used to decide whether this stage passes.
 
 ## Stage G — target commitment
 
-Commit the whole-scroll campaign only after the evidence table exists for both
-PHerc0813 and PHerc1447.
+Commit the whole-scroll campaign only after the evidence table exists for all
+three first-wave targets: PHerc0800, PHerc0813, and PHerc1447.
 
 The decision record must state:
 
 - which target was selected;
 - which evidence dimensions drove the decision;
-- where the losing target was stronger;
+- where each non-selected target was stronger;
 - unresolved risks;
 - exact artifact paths supporting every claim.
 
-If neither target produces credible held-out geometry, run the same protocol
-on PHerc0800 before expanding the search.
+If none of the three produces credible held-out geometry, expand the same
+protocol to PHerc0191, PHerc0211, and PHerc0268. PHerc1203 should not enter a
+surface-support comparison until its prize-eligible 9.362 µm volume has been
+audited directly; the currently imported PHerc1203 support survey used the
+ineligible same-scroll 2.403 µm volume.
 
 ## Human-time accounting
 
