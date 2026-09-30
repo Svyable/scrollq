@@ -5,13 +5,21 @@ contributing guide lives at `.github/CONTRIBUTING.md`.
 
 ## What this is
 
-ScrollQ scores Vesuvius scroll volumes 0–100 on *data quality* (signal
-presence, texture/gradient energy, dynamic range, saturation penalty,
-dead-slice scan) by decoding sampled 128³ volcomp chunks over HTTP.
+ScrolIQ is a Challenge-aligned diagnostic layer for Vesuvius scroll data and
+virtual unwrapping. The Python package and existing CLI names remain `scrollq`
+for compatibility.
+
+The current implemented core still scores sampled real level-0 voxels 0–100 on
+*scan health* (signal presence, texture/gradient energy, dynamic range,
+saturation penalty, dead-slice scan). That number is deliberately narrow: it
+must never be presented as readability, surface quality, ink quality, or Grand
+Prize readiness.
+
+`scroliq-passport` organizes current evidence around the Vesuvius Challenge
+2026 Open Problems and leaves unmeasured stages explicitly `unknown`.
 Companion: [zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit)
-("don't train on lies" — corruption detection). This is "train on the best
-first." `scrollq-health` unifies both into one TRAIN / CAUTION / DO NOT TRAIN
-verdict.
+("don't train on lies" — corruption detection). `scrollq-health` unifies
+integrity and scan quality into TRAIN / CAUTION / DO NOT TRAIN.
 
 ## Layout
 
@@ -56,7 +64,7 @@ python -m pytest tests/ -q
 - Branch from `main`; never force-push to `main`.
 - New scoring behavior needs a deterministic test in `tests/`.
 - Every number in docs/PRs must trace to a command + artifact in this repo.
-- Do not claim readability prediction. Triage signal only.
+- Do not claim readability prediction. The 0–100 score is scan-health triage only.\n- Do not infer surface, mesh, spiral, fiber, label-localization, or ink state from the scan score; missing evidence stays `unknown`.
 - Opening PRs/issues upstream or publishing to PyPI needs the maintainer's
   explicit approval — prepare the branch, don't ship it.
 - For the tested development setup, install `requirements-ci.txt`, then
