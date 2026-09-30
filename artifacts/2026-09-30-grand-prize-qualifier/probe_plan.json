@@ -1,0 +1,74 @@
+{
+  "schema_version": 2,
+  "created": "2026-09-30",
+  "purpose": "Blind geometry/ink target probe before full 2027 Grand Prize commitment",
+  "primary_targets": [
+    {
+      "scroll": "PHerc0800",
+      "volume_id": "20250521135224",
+      "regions": 24,
+      "rationale": "6 public segments and exact-volume imported surface support 0.583; preserves the original PHerc0800 hypothesis."
+    },
+    {
+      "scroll": "PHerc0813",
+      "volume_id": "20250821151723",
+      "regions": 24,
+      "rationale": "Highest ScrollQ scan-quality score among current Grand Prize targets."
+    },
+    {
+      "scroll": "PHerc1447",
+      "volume_id": "20250521151220",
+      "regions": 24,
+      "rationale": "15 public segments and second-highest ScrollQ score; strongest existing segmentation bootstrap."
+    }
+  ],
+  "design": {
+    "axial_bands": [
+      "lower",
+      "middle",
+      "upper"
+    ],
+    "radial_shells": [
+      "inner",
+      "outer"
+    ],
+    "sectors": 4,
+    "fit_regions": 18,
+    "held_out_regions": 6,
+    "pilot_z_slices": 1000
+  },
+  "invariants": [
+    "exact prize-eligible volume only",
+    "same pipeline and settings across targets",
+    "failed sampled regions remain in denominator",
+    "held-out regions never used as fit inputs",
+    "fixed seeds for stochastic work",
+    "manual verification time logged",
+    "no same-scroll higher-resolution data",
+    "ink candidates must survive physical falsification controls"
+  ],
+  "second_wave_targets": [
+    {
+      "scroll": "PHerc0191",
+      "volume_id": "20250821151635",
+      "reason": "Support-augmented Pareto frontier; no existing public segments."
+    },
+    {
+      "scroll": "PHerc0211",
+      "volume_id": "20250821151803",
+      "reason": "Support-augmented Pareto frontier; no existing public segments."
+    },
+    {
+      "scroll": "PHerc0268",
+      "volume_id": "20251110183117",
+      "reason": "Highest exact-volume imported surface-support fraction among currently comparable targets, but lower ScrollQ quality."
+    }
+  ],
+  "deferred_until_eligible_support_audit": [
+    {
+      "scroll": "PHerc1203",
+      "volume_id": "20250820131727",
+      "reason": "Existing imported CT-support survey used the ineligible same-scroll 2.403 µm scan; run an eligible-volume audit before using support evidence."
+    }
+  ]
+}

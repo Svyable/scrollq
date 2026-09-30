@@ -187,6 +187,58 @@ scrollq-leaderboard \
 
 Volumes in the top quality quartile with no discovered ink labels are flagged **“label next.”** This is intentionally a prioritization cue, not a claim that ink is present.
 
+
+## 2027 Grand Prize target qualification
+
+`scrollq-grand-prize` narrows the 13 current Grand Prize volumes without
+pretending that scan quality predicts readability. It joins the exact
+prize-eligible volume IDs to ScrollQ scores and compares candidates on a
+**Pareto frontier** over two auditable axes: scan-quality score and the number
+of existing public segments. Released surface and lasagna predictions are
+treated as bootstrap requirements rather than arbitrary weighted bonuses.
+
+```bash
+scrollq-grand-prize \
+  --volumes artifacts/2026-09-30-scrollq/volumes.json \
+  --out out/grand-prize-targets.json
+```
+
+The built-in target manifest is dated **2026-09-30** and links each row back
+to its Scroll Prize data-browser page. The matcher uses only the exact
+prize-listed volume ID. This is especially important for PHerc1203: its
+higher-resolution 2.403 µm scan is recorded as excluded rather than silently
+substituted for the eligible 9.362 µm volume.
+
+With the September 30 campaign scores and current public segment counts, the
+weight-free frontier contains **PHerc0813** (highest ScrollQ quality among the
+13) and **PHerc1447** (15 existing segments). PHerc0800 remains useful as a
+geometry testbed because it has six segments, but it is dominated by PHerc1447
+on both current qualifier axes. This is campaign triage only, not an
+ink-presence or Grand Prize success prediction.
+
+An optional sensitivity pass can add externally measured **surface-prediction
+CT support** without changing the primary ScrollQ score or frontier:
+
+```bash
+scrollq-grand-prize \
+  --volumes artifacts/2026-09-30-scrollq/volumes.json \
+  --surface-support artifacts/2026-09-30-grand-prize-qualifier/surface_support_external.json \
+  --out out/grand-prize-targets-with-support.json
+```
+
+The imported evidence is pinned to the source file SHA for every scroll and
+fails closed unless the recorded CT URL contains the exact prize volume ID.
+That guard intentionally excludes the published PHerc1203 support survey
+because it used the same scroll's 2.403 µm scan rather than the eligible
+9.362 µm volume. PHerc0125 and PHerc1218 are also excluded from this
+sensitivity pass because their salvaged survey records do not retain a CT URL.
+
+Among the ten targets with exact-volume imported support evidence, the
+three-axis frontier is **PHerc0191, PHerc0211, PHerc0268, PHerc0800,
+PHerc0813, and PHerc1447**. The larger frontier is a useful warning: this
+external geometry proxy creates real trade-offs and should drive focused
+held-out geometry tests, not an opaque weighted winner score.
+
 ## Evaluation path
 
 A fast way to inspect the project end to end:
