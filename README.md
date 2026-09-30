@@ -72,7 +72,7 @@ The repository includes the exact outputs behind the September 30, 2026 campaign
 | Result | Evidence |
 |---|---|
 | **64 / 64** listed volcomp scroll volumes scored | [`volumes.json`](artifacts/2026-09-30-scrollq/volumes.json) |
-| Ranking remained stable under an independent deterministic resample | **Spearman ρ = 0.876**, mean **|Δscore| = 3.07**, top-10 overlap **8 / 10** |
+| Ranking is sample-dependent: read as bands, not precise ranks | Disjoint-shard resample ([`stability.json`](artifacts/2026-09-30-resampling-stability/stability.json)): **Spearman ρ = 0.76**, mean **|Δscore| = 7.4**, top-10 overlap **6 / 10** — below our ρ ≥ 0.85 gate; scores carry ≈±5 pts of sampling noise |
 | Acquisition dropout scan found no verified dead slices in the campaign | **0 hits across 64 volumes** |
 | Label coverage was highly concentrated in the open-data snapshot | **70 / 70** discovered ink-detection roots were on PHercParis4; the top 12 quality-ranked scrolls had none |
 | High-quality, unlabeled targets were made actionable | **16** top-quartile volumes were flagged **“label next”** |
