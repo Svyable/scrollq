@@ -169,6 +169,12 @@ ScrollQ is the prioritization half of a two-part data-quality suite:
 
 This creates a practical gate before expensive downstream work begins.
 
+Both verdict paths are proven against live data
+(`artifacts/2026-09-30-health-verdicts/`): **TRAIN** on the healthy PHerc0813
+dl volume (integrity PASS, quality 77.4); **DO NOT TRAIN** on the defective
+PHerc0814 S3 pyramid (6 high-severity integrity findings — quality honestly
+unscorable, verdict from the audit alone).
+
 ## Quick start
 
 Requires **Python 3.11+**.
