@@ -1,0 +1,157 @@
+{
+ "schema_version": 1,
+ "manifest_as_of": "2026-09-30",
+ "prize_url": "https://scrollprize.org/prizes",
+ "method": {
+  "axes": [
+   "scrollq_quality_score",
+   "existing_segment_count"
+  ],
+  "rule": "Pareto frontier: maximize scan-quality triage score and existing segment count. Surface and lasagna predictions are required bootstrap assets but are not weighted when common to all targets.",
+  "warning": "This is campaign triage, not a readability, ink-presence, or Grand Prize success prediction."
+ },
+ "frontier": [
+  "PHerc0813",
+  "PHerc1447"
+ ],
+ "targets": [
+  {
+   "scroll": "PHerc0800",
+   "volume_id": "20250521135224",
+   "voxel_size_um": 8.64,
+   "energy_kev": 116,
+   "segments": 6,
+   "surface_prediction": "20260413222639",
+   "lasagna_prediction": "20260419180421",
+   "source_url": "https://scrollprize.org/data_browser/PHerc0800",
+   "excluded_same_scroll_higher_res": [],
+   "quality_score": 42.6,
+   "quality_root": "community-uploads/forrest/volcomp/PHerc0800/volumes/20250521135224-8.640um-1.2m-116keV-masked.zarr",
+   "quality_ok": true,
+   "qualification": "dominated-on-current-evidence",
+   "dominated_by": [
+    "PHerc1447"
+   ]
+  },
+  {
+   "scroll": "PHerc0813",
+   "volume_id": "20250821151723",
+   "voxel_size_um": 9.362,
+   "energy_kev": 113,
+   "segments": 0,
+   "surface_prediction": "20260413222639",
+   "lasagna_prediction": "20260419180421",
+   "source_url": "https://scrollprize.org/data_browser/PHerc0813",
+   "excluded_same_scroll_higher_res": [],
+   "quality_score": 77.4,
+   "quality_root": "community-uploads/forrest/volcomp/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr",
+   "quality_ok": true,
+   "qualification": "pareto-frontier"
+  },
+  {
+   "scroll": "PHerc0826",
+   "volume_id": "20250821151701",
+   "voxel_size_um": 9.362,
+   "energy_kev": 113,
+   "segments": 0,
+   "surface_prediction": "20260413222639",
+   "lasagna_prediction": "20260419180421",
+   "source_url": "https://scrollprize.org/data_browser/PHerc0826",
+   "excluded_same_scroll_higher_res": [],
+   "quality_score": 28.2,
+   "quality_root": "community-uploads/forrest/volcomp/PHerc0826/volumes/20250821151701-9.362um-1.2m-113keV-masked.zarr",
+   "quality_ok": true,
+   "qualification": "dominated-on-current-evidence",
+   "dominated_by": [
+    "PHerc0800",
+    "PHerc0813",
+    "PHerc1203",
+    "PHerc1218",
+    "PHerc1447",
+    "PHerc1545"
+   ]
+  },
+  {
+   "scroll": "PHerc1203",
+   "volume_id": "20250820131727",
+   "voxel_size_um": 9.362,
+   "energy_kev": 113,
+   "segments": 0,
+   "surface_prediction": "20260413222639",
+   "lasagna_prediction": "20260419180421",
+   "source_url": "https://scrollprize.org/data_browser/PHerc1203",
+   "excluded_same_scroll_higher_res": [
+    {
+     "volume_id": "20260319130212",
+     "voxel_size_um": 2.403,
+     "reason": "The Grand Prize fixes PHerc1203 to volume 20250820131727. The prize rules prohibit using data derived from a higher-resolution scan of the submitted scroll volume."
+    }
+   ],
+   "quality_score": 53.2,
+   "quality_root": "community-uploads/forrest/volcomp/PHerc1203/volumes/20250820131727-9.362um-1.2m-113keV-masked.zarr",
+   "quality_ok": true,
+   "qualification": "dominated-on-current-evidence",
+   "dominated_by": [
+    "PHerc0813",
+    "PHerc1447"
+   ]
+  },
+  {
+   "scroll": "PHerc1218",
+   "volume_id": "20250521120456",
+   "voxel_size_um": 8.64,
+   "energy_kev": 116,
+   "segments": 0,
+   "surface_prediction": "20260413222639",
+   "lasagna_prediction": "20260419180421",
+   "source_url": "https://scrollprize.org/data_browser/PHerc1218",
+   "excluded_same_scroll_higher_res": [],
+   "quality_score": 45.1,
+   "quality_root": "community-uploads/forrest/volcomp/PHerc1218/volumes/20250521120456-8.640um-1.2m-116keV-masked.zarr",
+   "quality_ok": true,
+   "qualification": "dominated-on-current-evidence",
+   "dominated_by": [
+    "PHerc0813",
+    "PHerc1203",
+    "PHerc1447"
+   ]
+  },
+  {
+   "scroll": "PHerc1447",
+   "volume_id": "20250521151220",
+   "voxel_size_um": 8.64,
+   "energy_kev": 116,
+   "segments": 15,
+   "surface_prediction": "20260413222639",
+   "lasagna_prediction": "20260419180421",
+   "source_url": "https://scrollprize.org/data_browser/PHerc1447",
+   "excluded_same_scroll_higher_res": [],
+   "quality_score": 70.7,
+   "quality_root": "community-uploads/forrest/volcomp/PHerc1447/volumes/20250521151220-8.640um-1.2m-116keV-masked.zarr",
+   "quality_ok": true,
+   "qualification": "pareto-frontier"
+  },
+  {
+   "scroll": "PHerc1545",
+   "volume_id": "20250821151648",
+   "voxel_size_um": 9.362,
+   "energy_kev": 113,
+   "segments": 0,
+   "surface_prediction": "20260413222639",
+   "lasagna_prediction": "20260419180421",
+   "source_url": "https://scrollprize.org/data_browser/PHerc1545",
+   "excluded_same_scroll_higher_res": [],
+   "quality_score": 30.8,
+   "quality_root": "community-uploads/forrest/volcomp/PHerc1545/volumes/20250821151648-9.362um-1.2m-113keV-masked.zarr",
+   "quality_ok": true,
+   "qualification": "dominated-on-current-evidence",
+   "dominated_by": [
+    "PHerc0800",
+    "PHerc0813",
+    "PHerc1203",
+    "PHerc1218",
+    "PHerc1447"
+   ]
+  }
+ ]
+}
