@@ -83,6 +83,29 @@ to test whether the fitted surface predicts independently verified geometry.
 
 Store the split in a checked-in JSON manifest.
 
+## Stage C.5 — optional certified winding constraints
+
+Before the spiral pilot, run a target-local diagnostic of the public PCU
+certified-winding method from `Jashann/vesuvius-scrolling`, pinned to commit
+`4f4997adcccaa9124ab5af02605233f7e3388c69`.
+
+PCU is not assumed to transfer at its published Paris 4 precision. Its own
+report shows strong improvement in one band and no measurable improvement in a
+harder band, so use it conditionally:
+
+1. Generate certificate statistics on the **fit cores only**.
+2. Record certified/gold constraint density and coverage by axial band.
+3. If coverage is sparse or unstable, keep the baseline spiral fit rather than
+   forcing low-confidence constraints.
+4. If used, feed only the pre-declared confidence tier into the fit and keep
+   the configuration/weight fixed across the first-wave targets.
+5. Never use PCU output as the sole held-out reference: PCU and the spiral fit
+   share Lasagna-derived information. Held-out scoring remains based on
+   independently verified CT/fiber geometry.
+
+The upstream code is MIT. Upstream scroll-derived constraints/checkpoints are
+CC BY-NC-SA 4.0; preserve attribution and do not silently relicense them.
+
 ## Stage D — 1,000-slice pilot spiral
 
 The official spiral-fitting tutorial recommends beginning with roughly a
