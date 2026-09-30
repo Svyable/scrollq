@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ScrollQ — Train on the best first</title>
-<meta name="description" content="Data-quality triage for Vesuvius scroll volumes. 64 volumes scored 0-100 on voxel health.">
+<title>ScrolIQ — Diagnostics for reading Herculaneum scrolls</title>
+<meta name="description" content="Challenge-aligned diagnostics for Vesuvius scrolls: scan health, surface/mesh readiness, label quality, ink reliability, and reproducibility.">
 <style>
 :root{
   --bg:#0d0b08; --panel:#161310; --panel2:#1c1813; --line:#2c251b;
@@ -46,6 +46,17 @@ a{color:var(--amber)}
 .card p{margin:.35rem 0;color:var(--muted);line-height:1.6;font-size:.94rem}
 .card p b{color:var(--ink)}
 .card .big{font-size:1.5rem;font-weight:800;color:var(--gold)}
+
+.problem-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.75rem}
+.problem{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:1rem}
+.problem>div{display:flex;justify-content:space-between;gap:.5rem;align-items:center}
+.problem h3{margin:0;font-size:.92rem;color:var(--ink)}
+.problem p{margin:.55rem 0 0;color:var(--muted);line-height:1.5;font-size:.84rem}
+.state{font-size:.62rem;font-weight:800;letter-spacing:.08em;border-radius:999px;padding:.18rem .45rem}
+.state.live{color:var(--good);border:1px solid rgba(143,214,148,.4)}
+.state.next{color:var(--gold);border:1px solid rgba(255,209,102,.4)}
+.state.plan{color:var(--muted);border:1px solid var(--line)}
+.alignment-links{color:var(--muted);font-size:.88rem;margin:.9rem 0 0}
 /* ---------- panels ---------- */
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;
   padding:1.5rem;margin:0 0 2rem}
@@ -117,13 +128,9 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 
 <header class="hero"><div class="wrap">
   <div class="eyebrow">VESUVIUS CHALLENGE · SEPTEMBER 2026</div>
-  <h1>Scroll<span class="q">Q</span></h1>
-  <p class="tagline">Data-quality triage for Vesuvius scroll volumes. <em>Train on the best first.</em></p>
-  <p class="lede">Every scroll volume's full-resolution level is sampled — four
-  128&sup3; chunks, decoded from volcomp over HTTP — and scored 0&ndash;100 on
-  signal presence, texture energy, dynamic range, and artifact penalties.
-  Click any row for the full breakdown. Method and weights are published in
-  the <a href="https://github.com/Svyable/scrollq">repo</a>; re-weight it however you like.</p>
+  <h1>Scrol<span class="q">IQ</span></h1>
+  <p class="tagline">Diagnostics for reading Herculaneum scrolls. <em>Find the bottleneck.</em></p>
+  <p class="lede">ScrolIQ is evolving from a scan-quality survey into an observability layer for the Vesuvius Challenge pipeline. The current score still measures sampled CT health from real level-0 voxels; surface, mesh, fiber, spiral, label-localization, and ink state remain explicitly unknown until direct evidence exists. See the <a href="https://scrollprize.org/2026_open_problems">official open problems</a> and the <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">alignment roadmap</a>.</p>
   <div class="stats">
     <div class="stat"><div class="n">64</div><div class="l">scroll volumes scored</div></div>
     <div class="stat"><div class="n">27.4&ndash;77.4</div><div class="l">score range (0&ndash;100)</div></div>
@@ -133,6 +140,21 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 </div></header>
 
 <div class="wrap">
+
+
+<div class="panel alignment"><h2>Open-problem diagnostics<span class="sub">ScrolIQ maps evidence to the Vesuvius Challenge pipeline instead of treating one score as readiness.</span></h2>
+<div class="problem-grid">
+  <div class="problem"><div><h3>Scan + data</h3><span class="state live">LIVE</span></div><p>Real-voxel health, decode provenance, cloud-read failures. Next: local degradation maps.</p></div>
+  <div class="problem"><div><h3>Surface topology</h3><span class="state next">NEXT</span></div><p>CT support, competing sheets, topology risk, and surface-placement uncertainty.</p></div>
+  <div class="problem"><div><h3>Mesh connectivity</h3><span class="state next">NEXT</span></div><p>Holes, mergers, sheet switches, self-intersections, and flattening distortion.</p></div>
+  <div class="problem"><div><h3>Fiber connectivity</h3><span class="state plan">PLANNED</span></div><p>Continuity and orientation confidence for long-range papyrus fiber traces.</p></div>
+  <div class="problem"><div><h3>Spiral fitting</h3><span class="state plan">PLANNED</span></div><p>Held-out constraint residuals, sensitivity, and under-constrained regions.</p></div>
+  <div class="problem"><div><h3>Label quality</h3><span class="state next">NEXT</span></div><p>Physical label offset, snapping candidates, and active-learning review queues.</p></div>
+  <div class="problem"><div><h3>Ink reliability</h3><span class="state plan">PLANNED</span></div><p>Leakage checks, held-out validation, perturbation stability, cross-scroll evidence.</p></div>
+  <div class="problem"><div><h3>Grand Prize</h3><span class="state plan">TARGET</span></div><p>One evidence trail from full recto coverage to tifxyz, renders, validation, and VC3D.</p></div>
+</div>
+<p class="alignment-links"><a href="https://scrollprize.org/2026_open_problems">Official 2026 Open Problems</a> · <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">ScrolIQ alignment roadmap</a></p>
+</div>
 
 <div class="insights">
   <div class="card"><h3>Healthiest volume</h3>
@@ -152,14 +174,14 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     weights, don't worship it.</p></div>
 </div>
 
-<div class="panel"><h2>Score distribution<span class="sub">64 volumes · 5-point bins</span></h2>
+<div class="panel"><h2>Scan-quality distribution<span class="sub">64 volumes · 5-point bins</span></h2>
   <div class="hist"><div class="bar"><div class="bv">3</div><div class="fill" style="height:25%"></div><div class="bl">25</div></div><div class="bar"><div class="bv">2</div><div class="fill" style="height:17%"></div><div class="bl">30</div></div><div class="bar"><div class="bv">1</div><div class="fill" style="height:8%"></div><div class="bl">35</div></div><div class="bar"><div class="bv">5</div><div class="fill" style="height:42%"></div><div class="bl">40</div></div><div class="bar"><div class="bv">6</div><div class="fill" style="height:50%"></div><div class="bl">45</div></div><div class="bar"><div class="bv">10</div><div class="fill" style="height:83%"></div><div class="bl">50</div></div><div class="bar"><div class="bv">10</div><div class="fill" style="height:83%"></div><div class="bl">55</div></div><div class="bar"><div class="bv">7</div><div class="fill" style="height:58%"></div><div class="bl">60</div></div><div class="bar"><div class="bv">12</div><div class="fill" style="height:100%"></div><div class="bl">65</div></div><div class="bar"><div class="bv">5</div><div class="fill" style="height:42%"></div><div class="bl">70</div></div><div class="bar"><div class="bv">3</div><div class="fill" style="height:25%"></div><div class="bl">75</div></div></div>
-  <p style="color:var(--muted);font-size:.88rem">Tiers: <span class="tier S">S</span> ≥ 70 ·
+  <p style="color:var(--muted);font-size:.88rem">Legacy triage bands: <span class="tier S">S</span> ≥ 70 ·
   <span class="tier A">A</span> 60&ndash;70 · <span class="tier B">B</span> 45&ndash;60 ·
   <span class="tier C">C</span> &lt; 45</p>
 </div>
 
-<div class="panel"><h2>Leaderboard<span class="sub">Click a column to sort · click a row for the full breakdown</span></h2>
+<div class="panel"><h2>Scan-quality survey<span class="sub">Click a column to sort · click a row for the full breakdown</span></h2>
   <div class="controls">
     <input id="q" type="search" placeholder="Filter by scroll id, e.g. PHerc0139…" aria-label="filter">
     <button class="tierbtn on" data-t="">all</button>
@@ -240,7 +262,7 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 <tr class="vol" data-rank="64" data-id="pherc0841 20250821151531-9.366um-1.2m-113kev-masked" data-score="27.4" data-tier="C" data-signal="20.8" data-tex="1.5" data-dyn="5.1" data-pen="0.0" data-ink="0" data-seg="6" data-label="0"><td class="num rn">64</td><td><span class="scrollid">PHerc0841</span><br><span class="volsub">9.366µm · 113keV</span></td><td class="num score" style="color:rgb(143,130,105)">27.4</td><td><span class="tier C">C</span></td><td><div class="compbar" title="signal 20.8 / texture 1.5 / dynamic 5.1"><span class="cb-s" style="width:23.1%"></span><span class="cb-t" style="width:1.7%"></span><span class="cb-d" style="width:5.7%"></span></div></td><td class="num">20.8</td><td class="num">1.5</td><td class="num">5.1</td><td class="num pen">−0.0</td><td class="num">0</td><td class="num">6</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0841/volumes/20250821151531-9.366um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.4680</div></div><div><div class="k">gradient energy</div><div class="v">0.594</div></div><div><div class="k">dynamic range</div><div class="v">51</div></div><div><div class="k">chunks decoded</div><div class="v">7</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 20.8/40 — nonzero voxel fraction 0.468 · texture 1.5/30 — gradient energy 0.59 · dynamic 5.1/20 — range 51 · 6 segment roots in open data</div></td></tr></tbody></table></div>
 </div>
 
-<div class="panel"><h2>How the score works</h2>
+<div class="panel"><h2>Scan-health score (one diagnostic)</h2>
 <div class="method">
   <div><table class="wtable">
     <tr><td>Signal presence (nonzero voxel fraction)</td><td>40</td></tr>
@@ -283,7 +305,7 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 </div><!-- /wrap -->
 
 <footer><div class="wrap">
-  Generated by <a href="https://github.com/Svyable/scrollq">ScrollQ</a> from public dl.ash2txt.org volumes,
+  Generated by <a href="https://github.com/Svyable/scrollq">ScrolIQ</a> from public dl.ash2txt.org volumes,
   2026-09-30 19:08 UTC. Scores are heuristic and published with their components — audit the
   weights, don't worship the ranking. Companion:
   <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>.

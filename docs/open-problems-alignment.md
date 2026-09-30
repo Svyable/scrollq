@@ -1,0 +1,77 @@
+# ScrolIQ × Vesuvius Challenge Open Problems
+
+ScrolIQ is evolving from a scan-quality leaderboard into a diagnostic layer for the full virtual-unwrapping pipeline.
+
+The design target is the Vesuvius Challenge's **Open Problems: Why Reading Every Herculaneum Scroll Is Still a Challenge**, last updated July 10, 2026:
+
+https://scrollprize.org/2026_open_problems
+
+The central rule is simple:
+
+> Diagnose the limiting stage with explicit evidence. Do not collapse unknown downstream state into one synthetic readiness score.
+
+The existing ScrollQ score remains useful, but it means one narrow thing: sampled CT health. It is not a surface, mesh, ink, or Grand Prize readiness score.
+
+## Alignment map
+
+| Challenge bottleneck | ScrolIQ role | Current state | Next measurable output |
+|---|---|---|---|
+| Local scan degradation / compressed regions | Scan diagnostics | Partial: deterministic real-voxel sampling, signal/texture/dynamic-range/artifact metrics, sampling provenance | Spatial quality map and local layer-separability/decohesion proxies |
+| Surface topology | Surface IQ | Planned | CT support, competing-surface ambiguity, topology-risk map |
+| Mesh connectivity | Mesh IQ | Planned | Holes, mergers, self-intersections, sheet-switch risk, local distortion |
+| Fiber connectivity | Fiber IQ | Planned | Continuity/orientation confidence and trace-break candidates |
+| Spiral fitting | Spiral IQ | Planned | Held-out constraint residuals, sensitivity, under-constrained regions |
+| Label quality | Label IQ | Partial: label/segment coverage and `label_next` triage | Normal-direction label offset, snapping candidates, active-learning queue |
+| Ink generalization and false positives | Ink IQ | Planned | Leakage audit, held-out validation, depth/perturbation stability, cross-scroll checks |
+| Data scale / reproducibility | Data Integrity | Partial: cloud reads, decode provenance, companion zarr-pyramid-audit | Coordinate/provenance contract across all downstream artifacts |
+
+## Diagnostic passport
+
+`scroliq-passport` turns the current evidence for one volume into a machine-readable record organized around those bottlenecks.
+
+```bash
+scroliq-passport \
+  --volumes artifacts/2026-09-30-scrollq/volumes.json \
+  --coverage artifacts/2026-09-30-scrollq/coverage.json \
+  --root PHerc0813 \
+  --out out/PHerc0813.passport.json
+```
+
+A passport does **not** infer unmeasured stages from the scan-quality score. Today a typical result will contain:
+
+- `data`: measured or partial, based on actual read/decode provenance;
+- `scan`: measured, based on sampled level-0 voxels;
+- `labels`: partial when coverage data is supplied;
+- `surface`, `mesh`, `fibers`, `spiral`, `ink`: `unknown` until direct evidence is supplied.
+
+That asymmetry is intentional. It makes missing evidence visible instead of disguising it as confidence.
+
+## Prize-oriented sequence
+
+### 1. Surface IQ
+
+Accept a CT volume plus surface prediction and/or tifxyz mesh. Produce spatial diagnostics for CT support, nearby competing surfaces, abrupt depth displacement, holes, suspicious bridges and mergers, normal discontinuity, self-intersection, sheet-switch risk, and parameterization distortion.
+
+The success criterion is not a prettier score. It is evidence that the diagnostic identifies real failure regions which, when corrected, improve unwrapping.
+
+### 2. Label IQ
+
+Measure whether surface/fiber labels are physically localized on the feature they claim to annotate. Sample along local normals, estimate likely offsets, identify ambiguous regions, and emit a review queue ranked by uncertainty and downstream leverage.
+
+### 3. Spiral IQ
+
+Evaluate candidate spiral fits rather than merely producing them. Use held-out winding constraints, residual distributions, constraint sensitivity, deformation pathologies, and uncertainty in sparsely constrained regions.
+
+### 4. Ink IQ
+
+Make validation and false-positive mitigation reproducible. Check train/prediction overlap, checkpoint and pseudo-label lineage, random seeds, held-out performance, depth stability, local perturbation stability, and cross-scroll generalization.
+
+### 5. VC3D integration
+
+The end state is not a standalone dashboard. A ScrolIQ diagnostic should point to a region that can be opened directly in VC3D for inspection or correction, and corrections should be able to flow back into a new diagnostic pass.
+
+## Grand Prize readiness
+
+The final passport should be able to answer, with evidence, what prevents a candidate scroll from satisfying the 2027 Grand Prize requirements: complete recto coverage; valid per-column tifxyz meshes; low-distortion 2D parameterization; programmatic flattened renders; visible/legible ink across columns; no training/prediction leakage; reproducible training and inference provenance; held-out validation; documented human-input time; and VC3D-compatible outputs.
+
+ScrolIQ should not decide whether a scroll is "good." It should expose the bottleneck that prevents the next verified step.
