@@ -14,6 +14,12 @@ def _volume(scroll, volume_id, score, ok=True):
 
 def test_current_campaign_frontier_is_weight_free():
     scores = {
+        "PHerc0125": 58.5,
+        "PHerc0191": 43.5,
+        "PHerc0211": 48.1,
+        "PHerc0257": 63.9,
+        "PHerc0268": 38.3,
+        "PHerc0358": 53.4,
         "PHerc0800": 42.6,
         "PHerc0813": 77.4,
         "PHerc0826": 28.2,
@@ -28,6 +34,7 @@ def test_current_campaign_frontier_is_weight_free():
     ]
     result = qualify(volumes)
 
+    assert len(result["targets"]) == 13
     assert result["frontier"] == ["PHerc0813", "PHerc1447"]
     assert "score" not in result["method"]
 
