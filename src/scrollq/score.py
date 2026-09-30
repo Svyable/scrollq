@@ -16,6 +16,10 @@ from .metrics import chunk_metrics
 
 
 def _spread(n: int, k: int) -> list[int]:
+    if n <= 0 or k <= 0:
+        return []
+    if k == 1:
+        return [0]
     if n <= k:
         return list(range(n))
     return sorted({round(i * (n - 1) / (k - 1)) for i in range(k)})
