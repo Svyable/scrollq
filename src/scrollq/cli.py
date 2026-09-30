@@ -41,7 +41,13 @@ def main() -> None:
     with open(out, "w", encoding="utf-8") as fh:
         json.dump(results, fh, indent=1)
     ok = sum(1 for r in results if r.get("ok"))
+    partial = sum(
+        1 for r in results
+        if r.get("ok") and not r.get("sampling", {}).get("complete", True)
+    )
     print(f"\nscored {ok}/{len(results)} volumes -> {out}")
+    if partial:
+        print(f"warning: {partial} scored volume(s) used fewer chunks than requested")
     for r in results[:10]:
         if r.get("ok"):
             print(f"  {r['score']:5.1f}  {r['root'].split('/')[-1]}")
