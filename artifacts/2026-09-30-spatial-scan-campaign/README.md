@@ -7,19 +7,19 @@ recorded in ScrolIQ's frozen Grand Prize manifest.
 ## Reproduce
 
 ```bash
-scroliq-scan-map --root community-uploads/forrest/volcomp/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr --grid 4 --chunks-per-shard 1 --out PHerc0813.scan-map.json
-scroliq-scan-map --root community-uploads/forrest/volcomp/PHerc1447/volumes/20250521151220-8.640um-1.2m-116keV-masked.zarr --grid 4 --chunks-per-shard 1 --out PHerc1447.scan-map.json
+scroliq-scan-map --root community-uploads/forrest/volcomp/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr --grid 6 --chunks-per-shard 1 --out PHerc0813.scan-map.json
+scroliq-scan-map --root community-uploads/forrest/volcomp/PHerc1447/volumes/20250521151220-8.640um-1.2m-116keV-masked.zarr --grid 6 --chunks-per-shard 1 --out PHerc1447.scan-map.json
 ```
 
 Base URL: `https://dl.ash2txt.org`. Level: full-resolution L0.
-Source commit: `a615cee1680055ec2894550c6d2696c8dfdb8dc3`.
+Source commit: `fed5e31e412ee8d7ca158b6d5910fcf285e8d235`.
 
 ## Observed survey coverage
 
 | Scroll | Candidate shards | Chunks decoded | Spatial states | Gradient-energy range | Dynamic-range range |
 |---|---:|---:|---|---:|---:|
-| PHerc0813 | 64 | 9 | decoded=9, missing-shard=53, sparse-mask=2 | 0.042696–9.809569 | 1.0–155.0 |
-| PHerc1447 | 64 | 22 | decoded=22, missing-shard=34, sparse-mask=8 | 0.022452–10.378062 | 0.0–154.0 |
+| PHerc0813 | 216 | 48 | decoded=48, sparse-mask=9, unstored-shard=159 | 0.013853–11.854323 | 0.0–188.0 |
+| PHerc1447 | 216 | 83 | decoded=83, sparse-mask=19, unstored-shard=114 | 0.011722–11.700658 | 0.0–188.0 |
 
 See `summary.json` for machine-readable campaign metadata and each
 `*.scan-map.json` for level-0 voxel bounding boxes and local metrics.

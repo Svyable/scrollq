@@ -27,45 +27,45 @@
     8
   ],
   "sampling": {
-    "grid_per_dimension": 4,
+    "grid_per_dimension": 6,
     "chunks_per_shard": 1,
     "rotate": 0,
-    "candidate_shards": 64,
-    "chunks_decoded": 9,
+    "candidate_shards": 216,
+    "chunks_decoded": 48,
     "status_counts": {
-      "missing-shard": 53,
-      "decoded": 9,
-      "sparse-mask": 2
+      "unstored-shard": 159,
+      "decoded": 48,
+      "sparse-mask": 9
     }
   },
   "metric_distribution": {
     "nonzero_frac": {
-      "min": 0.010856,
-      "p10": 0.015843,
-      "median": 0.726644,
-      "p90": 0.999959,
-      "max": 0.999995
+      "min": 0.004282,
+      "p10": 0.009461,
+      "median": 0.903377,
+      "p90": 0.999997,
+      "max": 1.0
     },
     "grad_energy": {
-      "min": 0.042696,
-      "p10": 0.061524,
-      "median": 2.208782,
-      "p90": 9.397664,
-      "max": 9.809569
+      "min": 0.013853,
+      "p10": 0.030983,
+      "median": 7.107719,
+      "p90": 11.011927,
+      "max": 11.854323
     },
     "dyn_range": {
-      "min": 1.0,
-      "p10": 37.8,
-      "median": 129.0,
-      "p90": 155.0,
-      "max": 155.0
+      "min": 0.0,
+      "p10": 0.0,
+      "median": 138.0,
+      "p90": 157.3,
+      "max": 188.0
     },
     "sat_frac": {
       "min": 0.0,
       "p10": 0.0,
-      "median": 0.0,
-      "p90": 0.000153,
-      "max": 0.000241
+      "median": 5e-05,
+      "p90": 0.000359,
+      "max": 0.001195
     }
   },
   "regions": [
@@ -87,49 +87,91 @@
           1024
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         0,
         0,
-        2
+        1
       ],
       "shard_voxel_bbox": {
         "start": [
           0,
           0,
+          1024
+        ],
+        "stop": [
+          1024,
+          1024,
           2048
-        ],
-        "stop": [
-          1024,
-          1024,
-          3072
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         0,
         0,
-        5
+        3
       ],
       "shard_voxel_bbox": {
         "start": [
           0,
           0,
-          5120
+          3072
         ],
         "stop": [
           1024,
           1024,
-          6144
+          4096
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        0,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          0,
+          4096
+        ],
+        "stop": [
+          1024,
+          1024,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        0,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          0,
+          6144
+        ],
+        "stop": [
+          1024,
+          1024,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
       "chunks": []
     },
     {
@@ -150,175 +192,511 @@
           7947
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         0,
-        2,
+        1,
         0
       ],
       "shard_voxel_bbox": {
         "start": [
           0,
-          2048,
+          1024,
           0
         ],
         "stop": [
           1024,
-          3072,
+          2048,
           1024
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         0,
-        2,
-        2
+        1,
+        1
       ],
       "shard_voxel_bbox": {
         "start": [
           0,
+          1024,
+          1024
+        ],
+        "stop": [
+          1024,
           2048,
           2048
-        ],
-        "stop": [
-          1024,
-          3072,
-          3072
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         0,
-        2,
-        5
+        1,
+        3
       ],
       "shard_voxel_bbox": {
         "start": [
           0,
-          2048,
-          5120
+          1024,
+          3072
         ],
         "stop": [
           1024,
-          3072,
-          6144
+          2048,
+          4096
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         0,
-        2,
+        1,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          1024,
+          4096
+        ],
+        "stop": [
+          1024,
+          2048,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        1,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          1024,
+          6144
+        ],
+        "stop": [
+          1024,
+          2048,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        1,
         7
       ],
       "shard_voxel_bbox": {
         "start": [
           0,
-          2048,
+          1024,
           7168
         ],
         "stop": [
           1024,
-          3072,
+          2048,
           7947
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         0,
-        5,
+        3,
         0
       ],
       "shard_voxel_bbox": {
         "start": [
           0,
-          5120,
+          3072,
           0
         ],
         "stop": [
           1024,
-          6144,
+          4096,
           1024
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         0,
-        5,
-        2
+        3,
+        1
       ],
       "shard_voxel_bbox": {
         "start": [
           0,
-          5120,
+          3072,
+          1024
+        ],
+        "stop": [
+          1024,
+          4096,
           2048
-        ],
-        "stop": [
-          1024,
-          6144,
-          3072
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         0,
-        5,
-        5
+        3,
+        3
       ],
       "shard_voxel_bbox": {
         "start": [
           0,
-          5120,
-          5120
+          3072,
+          3072
         ],
         "stop": [
           1024,
-          6144,
-          6144
+          4096,
+          4096
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         0,
-        5,
+        3,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          3072,
+          4096
+        ],
+        "stop": [
+          1024,
+          4096,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        3,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          3072,
+          6144
+        ],
+        "stop": [
+          1024,
+          4096,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        3,
         7
       ],
       "shard_voxel_bbox": {
         "start": [
           0,
-          5120,
+          3072,
           7168
         ],
         "stop": [
           1024,
-          6144,
+          4096,
           7947
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        4,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          4096,
+          0
+        ],
+        "stop": [
+          1024,
+          5120,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        4,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          4096,
+          1024
+        ],
+        "stop": [
+          1024,
+          5120,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        4,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          4096,
+          3072
+        ],
+        "stop": [
+          1024,
+          5120,
+          4096
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        4,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          4096,
+          4096
+        ],
+        "stop": [
+          1024,
+          5120,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        4,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          4096,
+          6144
+        ],
+        "stop": [
+          1024,
+          5120,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        4,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          4096,
+          7168
+        ],
+        "stop": [
+          1024,
+          5120,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        6,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          6144,
+          0
+        ],
+        "stop": [
+          1024,
+          7168,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        6,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          6144,
+          1024
+        ],
+        "stop": [
+          1024,
+          7168,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        6,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          6144,
+          3072
+        ],
+        "stop": [
+          1024,
+          7168,
+          4096
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        6,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          6144,
+          4096
+        ],
+        "stop": [
+          1024,
+          7168,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        6,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          6144,
+          6144
+        ],
+        "stop": [
+          1024,
+          7168,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        6,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          6144,
+          7168
+        ],
+        "stop": [
+          1024,
+          7168,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
       "chunks": []
     },
     {
@@ -339,49 +717,91 @@
           1024
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         0,
         7,
-        2
+        1
       ],
       "shard_voxel_bbox": {
         "start": [
           0,
           7168,
+          1024
+        ],
+        "stop": [
+          1024,
+          7947,
           2048
-        ],
-        "stop": [
-          1024,
-          7947,
-          3072
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         0,
         7,
-        5
+        3
       ],
       "shard_voxel_bbox": {
         "start": [
           0,
           7168,
-          5120
+          3072
         ],
         "stop": [
           1024,
           7947,
-          6144
+          4096
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        7,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          7168,
+          4096
+        ],
+        "stop": [
+          1024,
+          7947,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        0,
+        7,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          0,
+          7168,
+          6144
+        ],
+        "stop": [
+          1024,
+          7947,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
       "chunks": []
     },
     {
@@ -402,130 +822,172 @@
           7947
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        5,
+        3,
         0,
         0
       ],
       "shard_voxel_bbox": {
         "start": [
-          5120,
+          3072,
           0,
           0
         ],
         "stop": [
-          6144,
+          4096,
           1024,
           1024
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        5,
+        3,
         0,
-        2
+        1
       ],
       "shard_voxel_bbox": {
         "start": [
-          5120,
+          3072,
           0,
+          1024
+        ],
+        "stop": [
+          4096,
+          1024,
           2048
-        ],
-        "stop": [
-          6144,
-          1024,
-          3072
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        5,
+        3,
         0,
-        5
+        3
       ],
       "shard_voxel_bbox": {
         "start": [
-          5120,
+          3072,
           0,
-          5120
+          3072
         ],
         "stop": [
-          6144,
+          4096,
           1024,
-          6144
+          4096
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        5,
+        3,
+        0,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          0,
+          4096
+        ],
+        "stop": [
+          4096,
+          1024,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        3,
+        0,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          0,
+          6144
+        ],
+        "stop": [
+          4096,
+          1024,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        3,
         0,
         7
       ],
       "shard_voxel_bbox": {
         "start": [
-          5120,
+          3072,
           0,
           7168
         ],
         "stop": [
-          6144,
+          4096,
           1024,
           7947
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        5,
-        2,
+        3,
+        1,
         0
       ],
       "shard_voxel_bbox": {
         "start": [
-          5120,
-          2048,
+          3072,
+          1024,
           0
         ],
         "stop": [
-          6144,
-          3072,
+          4096,
+          2048,
           1024
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        5,
-        2,
-        2
+        3,
+        1,
+        1
       ],
       "shard_voxel_bbox": {
         "start": [
-          5120,
-          2048,
-          2048
+          3072,
+          1024,
+          1024
         ],
         "stop": [
-          6144,
-          3072,
-          3072
+          4096,
+          2048,
+          2048
         ]
       },
       "status": "decoded",
@@ -533,224 +995,60 @@
         {
           "inner_coord": [
             0,
-            0,
-            3
+            5,
+            7
           ],
           "global_chunk_coord": [
-            40,
-            16,
-            19
+            24,
+            13,
+            15
           ],
           "voxel_bbox": {
             "start": [
-              5120,
-              2048,
-              2432
+              3072,
+              1664,
+              1920
             ],
             "stop": [
-              5248,
-              2176,
-              2560
-            ]
-          },
-          "metrics": {
-            "n": 2097152,
-            "nonzero_frac": 0.017090320587158203,
-            "mean": 0.8088912963867188,
-            "std": 6.410991191864014,
-            "p1": 0.0,
-            "p50": 0.0,
-            "p99": 51.0,
-            "dyn_range": 51.0,
-            "sat_frac": 0.0,
-            "grad_energy": 0.04269577438632647,
-            "dead_slices": 0
-          }
-        }
-      ],
-      "present_frac": 0.648438,
-      "decode_failures": 0
-    },
-    {
-      "shard_coord": [
-        5,
-        2,
-        5
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          5120,
-          2048,
-          5120
-        ],
-        "stop": [
-          6144,
-          3072,
-          6144
-        ]
-      },
-      "status": "decoded",
-      "chunks": [
-        {
-          "inner_coord": [
-            0,
-            1,
-            0
-          ],
-          "global_chunk_coord": [
-            40,
-            17,
-            40
-          ],
-          "voxel_bbox": {
-            "start": [
-              5120,
-              2176,
-              5120
-            ],
-            "stop": [
-              5248,
-              2304,
-              5248
-            ]
-          },
-          "metrics": {
-            "n": 2097152,
-            "nonzero_frac": 0.010855674743652344,
-            "mean": 0.5754942893981934,
-            "std": 7.238316059112549,
-            "p1": 0.0,
-            "p50": 0.0,
-            "p99": 1.0,
-            "dyn_range": 1.0,
-            "sat_frac": 0.0,
-            "grad_energy": 0.06623131471375625,
-            "dead_slices": 0
-          }
-        }
-      ],
-      "present_frac": 0.638672,
-      "decode_failures": 0
-    },
-    {
-      "shard_coord": [
-        5,
-        2,
-        7
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          5120,
-          2048,
-          7168
-        ],
-        "stop": [
-          6144,
-          3072,
-          7947
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        5,
-        5,
-        0
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          5120,
-          5120,
-          0
-        ],
-        "stop": [
-          6144,
-          6144,
-          1024
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        5,
-        5,
-        2
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          5120,
-          5120,
-          2048
-        ],
-        "stop": [
-          6144,
-          6144,
-          3072
-        ]
-      },
-      "status": "decoded",
-      "chunks": [
-        {
-          "inner_coord": [
-            0,
-            0,
-            0
-          ],
-          "global_chunk_coord": [
-            40,
-            40,
-            16
-          ],
-          "voxel_bbox": {
-            "start": [
-              5120,
-              5120,
+              3200,
+              1792,
               2048
-            ],
-            "stop": [
-              5248,
-              5248,
-              2176
             ]
           },
           "metrics": {
             "n": 2097152,
-            "nonzero_frac": 0.9999337196350098,
-            "mean": 120.68447875976562,
-            "std": 31.733644485473633,
-            "p1": 33.0,
-            "p50": 126.0,
-            "p99": 188.0,
-            "dyn_range": 155.0,
-            "sat_frac": 0.00013065338134765625,
-            "grad_energy": 8.889695167541504,
+            "nonzero_frac": 0.016945838928222656,
+            "mean": 0.8321266174316406,
+            "std": 7.044198036193848,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 59.0,
+            "dyn_range": 59.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.060155030960838,
             "dead_slices": 0
           }
         }
       ],
-      "present_frac": 0.886719,
+      "present_frac": 0.216797,
       "decode_failures": 0
     },
     {
       "shard_coord": [
-        5,
-        5,
-        5
+        3,
+        1,
+        3
       ],
       "shard_voxel_bbox": {
         "start": [
-          5120,
-          5120,
-          5120
+          3072,
+          1024,
+          3072
         ],
         "stop": [
-          6144,
-          6144,
-          6144
+          4096,
+          2048,
+          4096
         ]
       },
       "status": "decoded",
@@ -758,270 +1056,163 @@
         {
           "inner_coord": [
             0,
-            0,
+            4,
             0
           ],
           "global_chunk_coord": [
-            40,
-            40,
-            40
+            24,
+            12,
+            24
           ],
           "voxel_bbox": {
             "start": [
-              5120,
-              5120,
-              5120
+              3072,
+              1536,
+              3072
             ],
             "stop": [
-              5248,
-              5248,
-              5248
+              3200,
+              1664,
+              3200
             ]
           },
           "metrics": {
             "n": 2097152,
-            "nonzero_frac": 0.999995231628418,
-            "mean": 99.21288299560547,
-            "std": 33.51591491699219,
-            "p1": 34.0,
-            "p50": 105.0,
-            "p99": 163.0,
-            "dyn_range": 129.0,
-            "sat_frac": 2.9087066650390625e-05,
-            "grad_energy": 8.13667631149292,
+            "nonzero_frac": 0.004617214202880859,
+            "mean": 0.2720627784729004,
+            "std": 4.744791507720947,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 0.0,
+            "dyn_range": 0.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.028294360265135765,
             "dead_slices": 0
           }
         }
       ],
-      "present_frac": 1.0,
+      "present_frac": 0.5,
       "decode_failures": 0
     },
     {
       "shard_coord": [
-        5,
-        5,
-        7
+        3,
+        1,
+        4
       ],
       "shard_voxel_bbox": {
         "start": [
-          5120,
-          5120,
-          7168
-        ],
-        "stop": [
-          6144,
-          6144,
-          7947
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        5,
-        7,
-        0
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          5120,
-          7168,
-          0
-        ],
-        "stop": [
-          6144,
-          7947,
-          1024
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        5,
-        7,
-        2
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          5120,
-          7168,
-          2048
-        ],
-        "stop": [
-          6144,
-          7947,
-          3072
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        5,
-        7,
-        5
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          5120,
-          7168,
-          5120
-        ],
-        "stop": [
-          6144,
-          7947,
-          6144
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        5,
-        7,
-        7
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          5120,
-          7168,
-          7168
-        ],
-        "stop": [
-          6144,
-          7947,
-          7947
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        11,
-        0,
-        0
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          11264,
-          0,
-          0
-        ],
-        "stop": [
-          12288,
+          3072,
           1024,
-          1024
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        11,
-        0,
-        2
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          11264,
-          0,
-          2048
+          4096
         ],
         "stop": [
-          12288,
-          1024,
-          3072
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        11,
-        0,
-        5
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          11264,
-          0,
+          4096,
+          2048,
           5120
-        ],
-        "stop": [
-          12288,
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            4,
+            0
+          ],
+          "global_chunk_coord": [
+            24,
+            12,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              3072,
+              1536,
+              4096
+            ],
+            "stop": [
+              3200,
+              1664,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.04317140579223633,
+            "mean": 2.5065784454345703,
+            "std": 12.118062019348145,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 63.0,
+            "dyn_range": 63.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.1146461305518945,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.330078,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        3,
+        1,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
           1024,
           6144
+        ],
+        "stop": [
+          4096,
+          2048,
+          7168
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        11,
-        0,
+        3,
+        1,
         7
       ],
       "shard_voxel_bbox": {
         "start": [
-          11264,
-          0,
+          3072,
+          1024,
           7168
         ],
         "stop": [
-          12288,
-          1024,
+          4096,
+          2048,
           7947
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        11,
-        2,
+        3,
+        3,
         0
       ],
       "shard_voxel_bbox": {
         "start": [
-          11264,
-          2048,
+          3072,
+          3072,
           0
         ],
         "stop": [
-          12288,
-          3072,
+          4096,
+          4096,
           1024
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        11,
-        2,
-        2
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          11264,
-          2048,
-          2048
-        ],
-        "stop": [
-          12288,
-          3072,
-          3072
         ]
       },
       "status": "decoded",
@@ -1033,56 +1224,56 @@
             4
           ],
           "global_chunk_coord": [
-            88,
-            16,
-            20
+            24,
+            24,
+            4
           ],
           "voxel_bbox": {
             "start": [
-              11264,
-              2048,
-              2560
+              3072,
+              3072,
+              512
             ],
             "stop": [
-              11392,
-              2176,
-              2688
+              3200,
+              3200,
+              640
             ]
           },
           "metrics": {
             "n": 2097152,
-            "nonzero_frac": 0.5487766265869141,
-            "mean": 35.416961669921875,
-            "std": 39.88078689575195,
+            "nonzero_frac": 0.039755821228027344,
+            "mean": 2.3339037895202637,
+            "std": 14.916150093078613,
             "p1": 0.0,
-            "p50": 46.0,
-            "p99": 154.0,
-            "dyn_range": 154.0,
-            "sat_frac": 4.76837158203125e-07,
-            "grad_energy": 2.208781878153483,
+            "p50": 0.0,
+            "p99": 53.0,
+            "dyn_range": 53.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.3181785096724828,
             "dead_slices": 0
           }
         }
       ],
-      "present_frac": 0.925781,
+      "present_frac": 0.431641,
       "decode_failures": 0
     },
     {
       "shard_coord": [
-        11,
-        2,
-        5
+        3,
+        3,
+        1
       ],
       "shard_voxel_bbox": {
         "start": [
-          11264,
-          2048,
-          5120
+          3072,
+          3072,
+          1024
         ],
         "stop": [
-          12288,
-          3072,
-          6144
+          4096,
+          4096,
+          2048
         ]
       },
       "status": "decoded",
@@ -1094,33 +1285,33 @@
             0
           ],
           "global_chunk_coord": [
-            88,
-            16,
-            40
+            24,
+            24,
+            8
           ],
           "voxel_bbox": {
             "start": [
-              11264,
-              2048,
-              5120
+              3072,
+              3072,
+              1024
             ],
             "stop": [
-              11392,
-              2176,
-              5248
+              3200,
+              3200,
+              1152
             ]
           },
           "metrics": {
             "n": 2097152,
-            "nonzero_frac": 0.9999499320983887,
-            "mean": 114.12583923339844,
-            "std": 33.98160934448242,
-            "p1": 27.0,
-            "p50": 120.0,
-            "p99": 177.0,
-            "dyn_range": 150.0,
-            "sat_frac": 0.00024127960205078125,
-            "grad_energy": 9.809569040934244,
+            "nonzero_frac": 0.9998688697814941,
+            "mean": 110.3512191772461,
+            "std": 32.52568817138672,
+            "p1": 32.0,
+            "p50": 116.0,
+            "p99": 173.0,
+            "dyn_range": 141.0,
+            "sat_frac": 0.0006947517395019531,
+            "grad_energy": 9.362722396850586,
             "dead_slices": 0
           }
         }
@@ -1130,123 +1321,20 @@
     },
     {
       "shard_coord": [
-        11,
-        2,
-        7
+        3,
+        3,
+        3
       ],
       "shard_voxel_bbox": {
         "start": [
-          11264,
-          2048,
-          7168
-        ],
-        "stop": [
-          12288,
           3072,
-          7947
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        11,
-        5,
-        0
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          11264,
-          5120,
-          0
-        ],
-        "stop": [
-          12288,
-          6144,
-          1024
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        11,
-        5,
-        2
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          11264,
-          5120,
-          2048
-        ],
-        "stop": [
-          12288,
-          6144,
+          3072,
           3072
-        ]
-      },
-      "status": "decoded",
-      "chunks": [
-        {
-          "inner_coord": [
-            0,
-            0,
-            2
-          ],
-          "global_chunk_coord": [
-            88,
-            40,
-            18
-          ],
-          "voxel_bbox": {
-            "start": [
-              11264,
-              5120,
-              2304
-            ],
-            "stop": [
-              11392,
-              5248,
-              2432
-            ]
-          },
-          "metrics": {
-            "n": 2097152,
-            "nonzero_frac": 0.05019092559814453,
-            "mean": 2.1224021911621094,
-            "std": 9.660449028015137,
-            "p1": 0.0,
-            "p50": 0.0,
-            "p99": 47.0,
-            "dyn_range": 47.0,
-            "sat_frac": 0.0,
-            "grad_energy": 0.10700119783480962,
-            "dead_slices": 0
-          }
-        }
-      ],
-      "present_frac": 0.253906,
-      "decode_failures": 0
-    },
-    {
-      "shard_coord": [
-        11,
-        5,
-        5
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          11264,
-          5120,
-          5120
         ],
         "stop": [
-          12288,
-          6144,
-          6144
+          4096,
+          4096,
+          4096
         ]
       },
       "status": "decoded",
@@ -1258,245 +1346,4516 @@
             0
           ],
           "global_chunk_coord": [
-            88,
-            40,
-            40
+            24,
+            24,
+            24
           ],
           "voxel_bbox": {
             "start": [
-              11264,
-              5120,
-              5120
+              3072,
+              3072,
+              3072
             ],
             "stop": [
-              11392,
-              5248,
-              5248
+              3200,
+              3200,
+              3200
             ]
           },
           "metrics": {
             "n": 2097152,
-            "nonzero_frac": 0.9998998641967773,
-            "mean": 115.97039794921875,
-            "std": 35.838829040527344,
-            "p1": 28.0,
-            "p50": 123.0,
-            "p99": 183.0,
-            "dyn_range": 155.0,
-            "sat_frac": 6.198883056640625e-05,
-            "grad_energy": 9.294688065846762,
+            "nonzero_frac": 0.9999775886535645,
+            "mean": 104.67782592773438,
+            "std": 32.7237548828125,
+            "p1": 33.0,
+            "p50": 109.0,
+            "p99": 177.0,
+            "dyn_range": 144.0,
+            "sat_frac": 8.058547973632812e-05,
+            "grad_energy": 9.36972459157308,
             "dead_slices": 0
           }
         }
       ],
-      "present_frac": 0.46875,
+      "present_frac": 1.0,
       "decode_failures": 0
     },
     {
       "shard_coord": [
-        11,
-        5,
+        3,
+        3,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          3072,
+          4096
+        ],
+        "stop": [
+          4096,
+          4096,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            24,
+            24,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              3072,
+              3072,
+              4096
+            ],
+            "stop": [
+              3200,
+              3200,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999842643737793,
+            "mean": 102.18058776855469,
+            "std": 35.05689239501953,
+            "p1": 31.0,
+            "p50": 106.0,
+            "p99": 189.0,
+            "dyn_range": 158.0,
+            "sat_frac": 0.0006041526794433594,
+            "grad_energy": 10.428622881571451,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        3,
+        3,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          3072,
+          6144
+        ],
+        "stop": [
+          4096,
+          4096,
+          7168
+        ]
+      },
+      "status": "sparse-mask",
+      "chunks": [],
+      "present_frac": 0.037109
+    },
+    {
+      "shard_coord": [
+        3,
+        3,
         7
       ],
       "shard_voxel_bbox": {
         "start": [
+          3072,
+          3072,
+          7168
+        ],
+        "stop": [
+          4096,
+          4096,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        3,
+        4,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          4096,
+          0
+        ],
+        "stop": [
+          4096,
+          5120,
+          1024
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            4
+          ],
+          "global_chunk_coord": [
+            24,
+            32,
+            4
+          ],
+          "voxel_bbox": {
+            "start": [
+              3072,
+              4096,
+              512
+            ],
+            "stop": [
+              3200,
+              4224,
+              640
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.34377098083496094,
+            "mean": 20.455955505371094,
+            "std": 34.251461029052734,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 146.0,
+            "dyn_range": 146.0,
+            "sat_frac": 0.0,
+            "grad_energy": 1.5473812421162922,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.183594,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        3,
+        4,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          4096,
+          1024
+        ],
+        "stop": [
+          4096,
+          5120,
+          2048
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            24,
+            32,
+            8
+          ],
+          "voxel_bbox": {
+            "start": [
+              3072,
+              4096,
+              1024
+            ],
+            "stop": [
+              3200,
+              4224,
+              1152
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9998984336853027,
+            "mean": 110.46015930175781,
+            "std": 33.45398712158203,
+            "p1": 28.0,
+            "p50": 117.0,
+            "p99": 171.0,
+            "dyn_range": 143.0,
+            "sat_frac": 7.82012939453125e-05,
+            "grad_energy": 9.702249844868978,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.919922,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        3,
+        4,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          4096,
+          3072
+        ],
+        "stop": [
+          4096,
+          5120,
+          4096
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            24,
+            32,
+            24
+          ],
+          "voxel_bbox": {
+            "start": [
+              3072,
+              4096,
+              3072
+            ],
+            "stop": [
+              3200,
+              4224,
+              3200
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999771118164062,
+            "mean": 108.27152252197266,
+            "std": 30.419679641723633,
+            "p1": 36.0,
+            "p50": 113.0,
+            "p99": 166.0,
+            "dyn_range": 130.0,
+            "sat_frac": 0.00018215179443359375,
+            "grad_energy": 9.125221411387125,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        3,
+        4,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          4096,
+          4096
+        ],
+        "stop": [
+          4096,
+          5120,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            24,
+            32,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              3072,
+              4096,
+              4096
+            ],
+            "stop": [
+              3200,
+              4224,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999971389770508,
+            "mean": 110.42790222167969,
+            "std": 31.999786376953125,
+            "p1": 32.0,
+            "p50": 117.0,
+            "p99": 166.0,
+            "dyn_range": 134.0,
+            "sat_frac": 9.822845458984375e-05,
+            "grad_energy": 9.371847788492838,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        3,
+        4,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          4096,
+          6144
+        ],
+        "stop": [
+          4096,
+          5120,
+          7168
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            4,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            28,
+            32,
+            48
+          ],
+          "voxel_bbox": {
+            "start": [
+              3584,
+              4096,
+              6144
+            ],
+            "stop": [
+              3712,
+              4224,
+              6272
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.009255409240722656,
+            "mean": 0.38846349716186523,
+            "std": 4.362497806549072,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 0.0,
+            "dyn_range": 0.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.028668420544515055,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.080078,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        3,
+        4,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          4096,
+          7168
+        ],
+        "stop": [
+          4096,
+          5120,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        3,
+        6,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          6144,
+          0
+        ],
+        "stop": [
+          4096,
+          7168,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        3,
+        6,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          6144,
+          1024
+        ],
+        "stop": [
+          4096,
+          7168,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        3,
+        6,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          6144,
+          3072
+        ],
+        "stop": [
+          4096,
+          7168,
+          4096
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            3,
+            0,
+            4
+          ],
+          "global_chunk_coord": [
+            27,
+            48,
+            28
+          ],
+          "voxel_bbox": {
+            "start": [
+              3456,
+              6144,
+              3584
+            ],
+            "stop": [
+              3584,
+              6272,
+              3712
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.0042819976806640625,
+            "mean": 0.1977238655090332,
+            "std": 3.1539173126220703,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 0.0,
+            "dyn_range": 0.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.013852577656507492,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.070312,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        3,
+        6,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          6144,
+          4096
+        ],
+        "stop": [
+          4096,
+          7168,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            3,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            27,
+            48,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              3456,
+              6144,
+              4096
+            ],
+            "stop": [
+              3584,
+              6272,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.14557218551635742,
+            "mean": 9.243780136108398,
+            "std": 26.803485870361328,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 138.0,
+            "dyn_range": 138.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.7033608009417852,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.138672,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        3,
+        6,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          6144,
+          6144
+        ],
+        "stop": [
+          4096,
+          7168,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        3,
+        6,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          6144,
+          7168
+        ],
+        "stop": [
+          4096,
+          7168,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        3,
+        7,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          7168,
+          0
+        ],
+        "stop": [
+          4096,
+          7947,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        3,
+        7,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          7168,
+          1024
+        ],
+        "stop": [
+          4096,
+          7947,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        3,
+        7,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          7168,
+          3072
+        ],
+        "stop": [
+          4096,
+          7947,
+          4096
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        3,
+        7,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          7168,
+          4096
+        ],
+        "stop": [
+          4096,
+          7947,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        3,
+        7,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          7168,
+          6144
+        ],
+        "stop": [
+          4096,
+          7947,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        3,
+        7,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          3072,
+          7168,
+          7168
+        ],
+        "stop": [
+          4096,
+          7947,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        0,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          0,
+          0
+        ],
+        "stop": [
+          7168,
+          1024,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        0,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          0,
+          1024
+        ],
+        "stop": [
+          7168,
+          1024,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        0,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          0,
+          3072
+        ],
+        "stop": [
+          7168,
+          1024,
+          4096
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        0,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          0,
+          4096
+        ],
+        "stop": [
+          7168,
+          1024,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        0,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          0,
+          6144
+        ],
+        "stop": [
+          7168,
+          1024,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        0,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          0,
+          7168
+        ],
+        "stop": [
+          7168,
+          1024,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        1,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          1024,
+          0
+        ],
+        "stop": [
+          7168,
+          2048,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        1,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          1024,
+          1024
+        ],
+        "stop": [
+          7168,
+          2048,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        1,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          1024,
+          3072
+        ],
+        "stop": [
+          7168,
+          2048,
+          4096
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        1,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          1024,
+          4096
+        ],
+        "stop": [
+          7168,
+          2048,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        1,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          1024,
+          6144
+        ],
+        "stop": [
+          7168,
+          2048,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        1,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          1024,
+          7168
+        ],
+        "stop": [
+          7168,
+          2048,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        3,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          3072,
+          0
+        ],
+        "stop": [
+          7168,
+          4096,
+          1024
+        ]
+      },
+      "status": "sparse-mask",
+      "chunks": [],
+      "present_frac": 0.003906
+    },
+    {
+      "shard_coord": [
+        6,
+        3,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          3072,
+          1024
+        ],
+        "stop": [
+          7168,
+          4096,
+          2048
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            7
+          ],
+          "global_chunk_coord": [
+            48,
+            24,
+            15
+          ],
+          "voxel_bbox": {
+            "start": [
+              6144,
+              3072,
+              1920
+            ],
+            "stop": [
+              6272,
+              3200,
+              2048
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.11308097839355469,
+            "mean": 6.983142852783203,
+            "std": 23.206462860107422,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 141.0,
+            "dyn_range": 141.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.4936637282371521,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.564453,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        6,
+        3,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          3072,
+          3072
+        ],
+        "stop": [
+          7168,
+          4096,
+          4096
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            48,
+            24,
+            24
+          ],
+          "voxel_bbox": {
+            "start": [
+              6144,
+              3072,
+              3072
+            ],
+            "stop": [
+              6272,
+              3200,
+              3200
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999828338623047,
+            "mean": 106.60906219482422,
+            "std": 36.04022979736328,
+            "p1": 28.0,
+            "p50": 113.0,
+            "p99": 173.0,
+            "dyn_range": 145.0,
+            "sat_frac": 0.00015211105346679688,
+            "grad_energy": 11.02575651804606,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        6,
+        3,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          3072,
+          4096
+        ],
+        "stop": [
+          7168,
+          4096,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            48,
+            24,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              6144,
+              3072,
+              4096
+            ],
+            "stop": [
+              6272,
+              3200,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999876022338867,
+            "mean": 100.60617065429688,
+            "std": 37.977596282958984,
+            "p1": 29.0,
+            "p50": 106.0,
+            "p99": 180.0,
+            "dyn_range": 151.0,
+            "sat_frac": 0.00018835067749023438,
+            "grad_energy": 11.006000518798828,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        6,
+        3,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          3072,
+          6144
+        ],
+        "stop": [
+          7168,
+          4096,
+          7168
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            48,
+            24,
+            48
+          ],
+          "voxel_bbox": {
+            "start": [
+              6144,
+              3072,
+              6144
+            ],
+            "stop": [
+              6272,
+              3200,
+              6272
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9986696243286133,
+            "mean": 76.36148071289062,
+            "std": 42.91600036621094,
+            "p1": 14.0,
+            "p50": 56.0,
+            "p99": 182.0,
+            "dyn_range": 168.0,
+            "sat_frac": 6.151199340820312e-05,
+            "grad_energy": 11.0683962504069,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.908203,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        6,
+        3,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          3072,
+          7168
+        ],
+        "stop": [
+          7168,
+          4096,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        4,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          4096,
+          0
+        ],
+        "stop": [
+          7168,
+          5120,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        4,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          4096,
+          1024
+        ],
+        "stop": [
+          7168,
+          5120,
+          2048
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            48,
+            32,
+            8
+          ],
+          "voxel_bbox": {
+            "start": [
+              6144,
+              4096,
+              1024
+            ],
+            "stop": [
+              6272,
+              4224,
+              1152
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.10256814956665039,
+            "mean": 7.106553077697754,
+            "std": 24.94609260559082,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 130.0,
+            "dyn_range": 130.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.6656233171621958,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.814453,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        6,
+        4,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          4096,
+          3072
+        ],
+        "stop": [
+          7168,
+          5120,
+          4096
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            48,
+            32,
+            24
+          ],
+          "voxel_bbox": {
+            "start": [
+              6144,
+              4096,
+              3072
+            ],
+            "stop": [
+              6272,
+              4224,
+              3200
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999833106994629,
+            "mean": 107.62367248535156,
+            "std": 33.71717071533203,
+            "p1": 32.0,
+            "p50": 112.0,
+            "p99": 177.0,
+            "dyn_range": 145.0,
+            "sat_frac": 9.393692016601562e-05,
+            "grad_energy": 10.48008950551351,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        6,
+        4,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          4096,
+          4096
+        ],
+        "stop": [
+          7168,
+          5120,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            48,
+            32,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              6144,
+              4096,
+              4096
+            ],
+            "stop": [
+              6272,
+              4224,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9998974800109863,
+            "mean": 83.55424499511719,
+            "std": 38.697242736816406,
+            "p1": 27.0,
+            "p50": 65.0,
+            "p99": 177.0,
+            "dyn_range": 150.0,
+            "sat_frac": 0.0001087188720703125,
+            "grad_energy": 7.85599152247111,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        6,
+        4,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          4096,
+          6144
+        ],
+        "stop": [
+          7168,
+          5120,
+          7168
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            48,
+            32,
+            48
+          ],
+          "voxel_bbox": {
+            "start": [
+              6144,
+              4096,
+              6144
+            ],
+            "stop": [
+              6272,
+              4224,
+              6272
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999685287475586,
+            "mean": 95.58695983886719,
+            "std": 39.527286529541016,
+            "p1": 25.0,
+            "p50": 100.0,
+            "p99": 175.0,
+            "dyn_range": 150.0,
+            "sat_frac": 7.43865966796875e-05,
+            "grad_energy": 10.329205830891928,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.878906,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        6,
+        4,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          4096,
+          7168
+        ],
+        "stop": [
+          7168,
+          5120,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        6,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          6144,
+          0
+        ],
+        "stop": [
+          7168,
+          7168,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        6,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          6144,
+          1024
+        ],
+        "stop": [
+          7168,
+          7168,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        6,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          6144,
+          3072
+        ],
+        "stop": [
+          7168,
+          7168,
+          4096
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            48,
+            48,
+            24
+          ],
+          "voxel_bbox": {
+            "start": [
+              6144,
+              6144,
+              3072
+            ],
+            "stop": [
+              6272,
+              6272,
+              3200
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.999997615814209,
+            "mean": 111.03627014160156,
+            "std": 40.560794830322266,
+            "p1": 32.0,
+            "p50": 123.0,
+            "p99": 180.0,
+            "dyn_range": 148.0,
+            "sat_frac": 3.4332275390625e-05,
+            "grad_energy": 6.990916728973389,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.380859,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        6,
+        6,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          6144,
+          4096
+        ],
+        "stop": [
+          7168,
+          7168,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            48,
+            48,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              6144,
+              6144,
+              4096
+            ],
+            "stop": [
+              6272,
+              6272,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 1.0,
+            "mean": 124.80577087402344,
+            "std": 24.58072280883789,
+            "p1": 55.0,
+            "p50": 127.0,
+            "p99": 178.0,
+            "dyn_range": 123.0,
+            "sat_frac": 0.00015735626220703125,
+            "grad_energy": 7.224521160125732,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.632812,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        6,
+        6,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          6144,
+          6144
+        ],
+        "stop": [
+          7168,
+          7168,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        6,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          6144,
+          7168
+        ],
+        "stop": [
+          7168,
+          7168,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        7,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          7168,
+          0
+        ],
+        "stop": [
+          7168,
+          7947,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        7,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          7168,
+          1024
+        ],
+        "stop": [
+          7168,
+          7947,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        7,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          7168,
+          3072
+        ],
+        "stop": [
+          7168,
+          7947,
+          4096
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        7,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          7168,
+          4096
+        ],
+        "stop": [
+          7168,
+          7947,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        7,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          7168,
+          6144
+        ],
+        "stop": [
+          7168,
+          7947,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        6,
+        7,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          6144,
+          7168,
+          7168
+        ],
+        "stop": [
+          7168,
+          7947,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        0,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          0,
+          0
+        ],
+        "stop": [
+          11264,
+          1024,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        0,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          0,
+          1024
+        ],
+        "stop": [
+          11264,
+          1024,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        0,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          0,
+          3072
+        ],
+        "stop": [
+          11264,
+          1024,
+          4096
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        0,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          0,
+          4096
+        ],
+        "stop": [
+          11264,
+          1024,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        0,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          0,
+          6144
+        ],
+        "stop": [
+          11264,
+          1024,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        0,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          0,
+          7168
+        ],
+        "stop": [
+          11264,
+          1024,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        1,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          1024,
+          0
+        ],
+        "stop": [
+          11264,
+          2048,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        1,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          1024,
+          1024
+        ],
+        "stop": [
+          11264,
+          2048,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        1,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          1024,
+          3072
+        ],
+        "stop": [
+          11264,
+          2048,
+          4096
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            2,
+            7
+          ],
+          "global_chunk_coord": [
+            80,
+            10,
+            31
+          ],
+          "voxel_bbox": {
+            "start": [
+              10240,
+              1280,
+              3968
+            ],
+            "stop": [
+              10368,
+              1408,
+              4096
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.006414890289306641,
+            "mean": 0.32257938385009766,
+            "std": 4.196033954620361,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 0.0,
+            "dyn_range": 0.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.018315032434960205,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.625,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        10,
+        1,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          1024,
+          4096
+        ],
+        "stop": [
+          11264,
+          2048,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            1,
+            2
+          ],
+          "global_chunk_coord": [
+            80,
+            9,
+            34
+          ],
+          "voxel_bbox": {
+            "start": [
+              10240,
+              1152,
+              4352
+            ],
+            "stop": [
+              10368,
+              1280,
+              4480
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.007659912109375,
+            "mean": 0.37183713912963867,
+            "std": 4.4916672706604,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 0.0,
+            "dyn_range": 0.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.027104414999485016,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.871094,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        10,
+        1,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          1024,
+          6144
+        ],
+        "stop": [
+          11264,
+          2048,
+          7168
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            5,
+            0
+          ],
+          "global_chunk_coord": [
+            80,
+            13,
+            48
+          ],
+          "voxel_bbox": {
+            "start": [
+              10240,
+              1664,
+              6144
+            ],
+            "stop": [
+              10368,
+              1792,
+              6272
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.39512109756469727,
+            "mean": 24.629304885864258,
+            "std": 33.48926544189453,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 130.0,
+            "dyn_range": 130.0,
+            "sat_frac": 0.0,
+            "grad_energy": 1.0631609757741292,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.105469,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        10,
+        1,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          1024,
+          7168
+        ],
+        "stop": [
+          11264,
+          2048,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        3,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          3072,
+          0
+        ],
+        "stop": [
+          11264,
+          4096,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        3,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          3072,
+          1024
+        ],
+        "stop": [
+          11264,
+          4096,
+          2048
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            7
+          ],
+          "global_chunk_coord": [
+            80,
+            24,
+            15
+          ],
+          "voxel_bbox": {
+            "start": [
+              10240,
+              3072,
+              1920
+            ],
+            "stop": [
+              10368,
+              3200,
+              2048
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.02472209930419922,
+            "mean": 1.4238405227661133,
+            "std": 10.032208442687988,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 51.0,
+            "dyn_range": 51.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.1018277828892072,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.205078,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        10,
+        3,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          3072,
+          3072
+        ],
+        "stop": [
+          11264,
+          4096,
+          4096
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            80,
+            24,
+            24
+          ],
+          "voxel_bbox": {
+            "start": [
+              10240,
+              3072,
+              3072
+            ],
+            "stop": [
+              10368,
+              3200,
+              3200
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999990463256836,
+            "mean": 115.64497375488281,
+            "std": 31.962657928466797,
+            "p1": 33.0,
+            "p50": 122.0,
+            "p99": 171.0,
+            "dyn_range": 138.0,
+            "sat_frac": 4.482269287109375e-05,
+            "grad_energy": 10.043462753295898,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        10,
+        3,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          3072,
+          4096
+        ],
+        "stop": [
+          11264,
+          4096,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            80,
+            24,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              10240,
+              3072,
+              4096
+            ],
+            "stop": [
+              10368,
+              3200,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999856948852539,
+            "mean": 92.82749938964844,
+            "std": 38.9582405090332,
+            "p1": 25.0,
+            "p50": 96.0,
+            "p99": 170.0,
+            "dyn_range": 145.0,
+            "sat_frac": 0.00034427642822265625,
+            "grad_energy": 11.433592796325684,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        10,
+        3,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          3072,
+          6144
+        ],
+        "stop": [
+          11264,
+          4096,
+          7168
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            80,
+            24,
+            48
+          ],
+          "voxel_bbox": {
+            "start": [
+              10240,
+              3072,
+              6144
+            ],
+            "stop": [
+              10368,
+              3200,
+              6272
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999995231628418,
+            "mean": 122.89217376708984,
+            "std": 27.656564712524414,
+            "p1": 39.0,
+            "p50": 127.0,
+            "p99": 174.0,
+            "dyn_range": 135.0,
+            "sat_frac": 0.00014972686767578125,
+            "grad_energy": 8.190172036488852,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.390625,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        10,
+        3,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          3072,
+          7168
+        ],
+        "stop": [
+          11264,
+          4096,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        4,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          4096,
+          0
+        ],
+        "stop": [
+          11264,
+          5120,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        4,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          4096,
+          1024
+        ],
+        "stop": [
+          11264,
+          5120,
+          2048
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            3,
+            0,
+            7
+          ],
+          "global_chunk_coord": [
+            83,
+            32,
+            15
+          ],
+          "voxel_bbox": {
+            "start": [
+              10624,
+              4096,
+              1920
+            ],
+            "stop": [
+              10752,
+              4224,
+              2048
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.2199106216430664,
+            "mean": 10.967857360839844,
+            "std": 23.133182525634766,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 120.0,
+            "dyn_range": 120.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.6067011455694834,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.083984,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        10,
+        4,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          4096,
+          3072
+        ],
+        "stop": [
+          11264,
+          5120,
+          4096
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            80,
+            32,
+            24
+          ],
+          "voxel_bbox": {
+            "start": [
+              10240,
+              4096,
+              3072
+            ],
+            "stop": [
+              10368,
+              4224,
+              3200
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999732971191406,
+            "mean": 116.56842041015625,
+            "std": 28.80030059814453,
+            "p1": 31.0,
+            "p50": 121.0,
+            "p99": 168.0,
+            "dyn_range": 137.0,
+            "sat_frac": 1.430511474609375e-05,
+            "grad_energy": 9.246805985768637,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        10,
+        4,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          4096,
+          4096
+        ],
+        "stop": [
+          11264,
+          5120,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            80,
+            32,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              10240,
+              4096,
+              4096
+            ],
+            "stop": [
+              10368,
+              4224,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999756813049316,
+            "mean": 106.65261840820312,
+            "std": 36.2650260925293,
+            "p1": 26.0,
+            "p50": 112.0,
+            "p99": 176.0,
+            "dyn_range": 150.0,
+            "sat_frac": 0.0005669593811035156,
+            "grad_energy": 11.668377876281738,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        10,
+        4,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          4096,
+          6144
+        ],
+        "stop": [
           11264,
           5120,
           7168
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            80,
+            32,
+            48
+          ],
+          "voxel_bbox": {
+            "start": [
+              10240,
+              4096,
+              6144
+            ],
+            "stop": [
+              10368,
+              4224,
+              6272
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999995231628418,
+            "mean": 115.13611602783203,
+            "std": 29.367961883544922,
+            "p1": 36.0,
+            "p50": 119.0,
+            "p99": 172.0,
+            "dyn_range": 136.0,
+            "sat_frac": 0.00015735626220703125,
+            "grad_energy": 8.666730244954428,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.232422,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        10,
+        4,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          4096,
+          7168
         ],
         "stop": [
-          12288,
+          11264,
+          5120,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        6,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
           6144,
-          7947
+          0
+        ],
+        "stop": [
+          11264,
+          7168,
+          1024
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        11,
+        10,
+        6,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          6144,
+          1024
+        ],
+        "stop": [
+          11264,
+          7168,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        6,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          6144,
+          3072
+        ],
+        "stop": [
+          11264,
+          7168,
+          4096
+        ]
+      },
+      "status": "sparse-mask",
+      "chunks": [],
+      "present_frac": 0.027344
+    },
+    {
+      "shard_coord": [
+        10,
+        6,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          6144,
+          4096
+        ],
+        "stop": [
+          11264,
+          7168,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            80,
+            48,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              10240,
+              6144,
+              4096
+            ],
+            "stop": [
+              10368,
+              6272,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.7155013084411621,
+            "mean": 40.80924606323242,
+            "std": 33.65537643432617,
+            "p1": 0.0,
+            "p50": 48.0,
+            "p99": 138.0,
+            "dyn_range": 138.0,
+            "sat_frac": 0.0,
+            "grad_energy": 1.6962902148564656,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.193359,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        10,
+        6,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          6144,
+          6144
+        ],
+        "stop": [
+          11264,
+          7168,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        6,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          6144,
+          7168
+        ],
+        "stop": [
+          11264,
+          7168,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
         7,
         0
       ],
       "shard_voxel_bbox": {
         "start": [
-          11264,
+          10240,
           7168,
           0
         ],
         "stop": [
-          12288,
+          11264,
           7947,
           1024
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        11,
+        10,
         7,
-        2
+        1
       ],
       "shard_voxel_bbox": {
         "start": [
-          11264,
+          10240,
           7168,
+          1024
+        ],
+        "stop": [
+          11264,
+          7947,
           2048
-        ],
-        "stop": [
-          12288,
-          7947,
-          3072
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        11,
+        10,
         7,
-        5
+        3
       ],
       "shard_voxel_bbox": {
         "start": [
-          11264,
+          10240,
           7168,
-          5120
+          3072
         ],
         "stop": [
-          12288,
+          11264,
           7947,
-          6144
+          4096
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        11,
+        10,
+        7,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          7168,
+          4096
+        ],
+        "stop": [
+          11264,
+          7947,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
+        7,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          10240,
+          7168,
+          6144
+        ],
+        "stop": [
+          11264,
+          7947,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        10,
         7,
         7
       ],
       "shard_voxel_bbox": {
         "start": [
-          11264,
+          10240,
           7168,
           7168
         ],
         "stop": [
-          12288,
+          11264,
           7947,
           7947
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        16,
+        13,
         0,
         0
       ],
       "shard_voxel_bbox": {
         "start": [
-          16384,
+          13312,
           0,
           0
         ],
         "stop": [
-          16993,
+          14336,
           1024,
           1024
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        16,
+        13,
         0,
-        2
+        1
       ],
       "shard_voxel_bbox": {
         "start": [
-          16384,
+          13312,
           0,
+          1024
+        ],
+        "stop": [
+          14336,
+          1024,
           2048
-        ],
-        "stop": [
-          16993,
-          1024,
-          3072
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        16,
+        13,
         0,
-        5
+        3
       ],
       "shard_voxel_bbox": {
         "start": [
-          16384,
+          13312,
           0,
-          5120
+          3072
         ],
         "stop": [
-          16993,
+          14336,
           1024,
-          6144
+          4096
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        16,
+        13,
+        0,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          0,
+          4096
+        ],
+        "stop": [
+          14336,
+          1024,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        0,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          0,
+          6144
+        ],
+        "stop": [
+          14336,
+          1024,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
         0,
         7
       ],
       "shard_voxel_bbox": {
         "start": [
-          16384,
+          13312,
           0,
           7168
         ],
         "stop": [
-          16993,
+          14336,
           1024,
           7947
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
-        16,
-        2,
+        13,
+        1,
         0
       ],
       "shard_voxel_bbox": {
         "start": [
-          16384,
+          13312,
+          1024,
+          0
+        ],
+        "stop": [
+          14336,
           2048,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        1,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          1024,
+          1024
+        ],
+        "stop": [
+          14336,
+          2048,
+          2048
+        ]
+      },
+      "status": "sparse-mask",
+      "chunks": [],
+      "present_frac": 0.017578
+    },
+    {
+      "shard_coord": [
+        13,
+        1,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          1024,
+          3072
+        ],
+        "stop": [
+          14336,
+          2048,
+          4096
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            1,
+            0
+          ],
+          "global_chunk_coord": [
+            104,
+            9,
+            24
+          ],
+          "voxel_bbox": {
+            "start": [
+              13312,
+              1152,
+              3072
+            ],
+            "stop": [
+              13440,
+              1280,
+              3200
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.026020050048828125,
+            "mean": 1.4419007301330566,
+            "std": 9.11100959777832,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 60.0,
+            "dyn_range": 60.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.07086293896039327,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.871094,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        13,
+        1,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          1024,
+          4096
+        ],
+        "stop": [
+          14336,
+          2048,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            2,
+            0
+          ],
+          "global_chunk_coord": [
+            104,
+            10,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              13312,
+              1280,
+              4096
+            ],
+            "stop": [
+              13440,
+              1408,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.8080849647521973,
+            "mean": 58.69612121582031,
+            "std": 41.501041412353516,
+            "p1": 0.0,
+            "p50": 58.0,
+            "p99": 165.0,
+            "dyn_range": 165.0,
+            "sat_frac": 3.2901763916015625e-05,
+            "grad_energy": 4.32452917098999,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.539062,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        13,
+        1,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          1024,
+          6144
+        ],
+        "stop": [
+          14336,
+          2048,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        1,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          1024,
+          7168
+        ],
+        "stop": [
+          14336,
+          2048,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        3,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          3072,
           0
         ],
         "stop": [
-          16993,
+          14336,
+          4096,
+          1024
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            4,
+            7
+          ],
+          "global_chunk_coord": [
+            104,
+            28,
+            7
+          ],
+          "voxel_bbox": {
+            "start": [
+              13312,
+              3584,
+              896
+            ],
+            "stop": [
+              13440,
+              3712,
+              1024
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.009548664093017578,
+            "mean": 0.41977739334106445,
+            "std": 4.711400508880615,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 0.0,
+            "dyn_range": 0.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.031975372694432735,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.162109,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        13,
+        3,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
           3072,
           1024
+        ],
+        "stop": [
+          14336,
+          4096,
+          2048
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            104,
+            24,
+            8
+          ],
+          "voxel_bbox": {
+            "start": [
+              13312,
+              3072,
+              1024
+            ],
+            "stop": [
+              13440,
+              3200,
+              1152
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.2956123352050781,
+            "mean": 19.42302131652832,
+            "std": 35.9249153137207,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 145.0,
+            "dyn_range": 145.0,
+            "sat_frac": 5.4836273193359375e-05,
+            "grad_energy": 1.5699646870295207,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        13,
+        3,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          3072,
+          3072
+        ],
+        "stop": [
+          14336,
+          4096,
+          4096
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            104,
+            24,
+            24
+          ],
+          "voxel_bbox": {
+            "start": [
+              13312,
+              3072,
+              3072
+            ],
+            "stop": [
+              13440,
+              3200,
+              3200
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999299049377441,
+            "mean": 76.42697143554688,
+            "std": 39.861000061035156,
+            "p1": 23.0,
+            "p50": 57.0,
+            "p99": 173.0,
+            "dyn_range": 150.0,
+            "sat_frac": 6.4849853515625e-05,
+            "grad_energy": 9.36521577835083,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        13,
+        3,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          3072,
+          4096
+        ],
+        "stop": [
+          14336,
+          4096,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            104,
+            24,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              13312,
+              3072,
+              4096
+            ],
+            "stop": [
+              13440,
+              3200,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999170303344727,
+            "mean": 90.37548828125,
+            "std": 41.53743362426758,
+            "p1": 23.0,
+            "p50": 89.0,
+            "p99": 180.0,
+            "dyn_range": 157.0,
+            "sat_frac": 0.0001087188720703125,
+            "grad_energy": 10.505662282307943,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        13,
+        3,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          3072,
+          6144
+        ],
+        "stop": [
+          14336,
+          4096,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        3,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          3072,
+          7168
+        ],
+        "stop": [
+          14336,
+          4096,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        4,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          4096,
+          0
+        ],
+        "stop": [
+          14336,
+          5120,
+          1024
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            1,
+            0,
+            7
+          ],
+          "global_chunk_coord": [
+            105,
+            32,
+            7
+          ],
+          "voxel_bbox": {
+            "start": [
+              13440,
+              4096,
+              896
+            ],
+            "stop": [
+              13568,
+              4224,
+              1024
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.010798454284667969,
+            "mean": 0.5683817863464355,
+            "std": 6.965149402618408,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 1.0,
+            "dyn_range": 1.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.06887953666349252,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.107422,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        13,
+        4,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          4096,
+          1024
+        ],
+        "stop": [
+          14336,
+          5120,
+          2048
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            104,
+            32,
+            8
+          ],
+          "voxel_bbox": {
+            "start": [
+              13312,
+              4096,
+              1024
+            ],
+            "stop": [
+              13440,
+              4224,
+              1152
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.2110276222229004,
+            "mean": 10.449298858642578,
+            "std": 20.815631866455078,
+            "p1": 0.0,
+            "p50": 0.0,
+            "p99": 55.0,
+            "dyn_range": 55.0,
+            "sat_frac": 0.0,
+            "grad_energy": 0.3475015014410019,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.980469,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        13,
+        4,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          4096,
+          3072
+        ],
+        "stop": [
+          14336,
+          5120,
+          4096
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            104,
+            32,
+            24
+          ],
+          "voxel_bbox": {
+            "start": [
+              13312,
+              4096,
+              3072
+            ],
+            "stop": [
+              13440,
+              4224,
+              3200
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9998531341552734,
+            "mean": 87.06365966796875,
+            "std": 41.01789474487305,
+            "p1": 19.510000000002037,
+            "p50": 85.0,
+            "p99": 173.0,
+            "dyn_range": 153.48999999999796,
+            "sat_frac": 0.0002040863037109375,
+            "grad_energy": 11.854323069254557,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        13,
+        4,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          4096,
+          4096
+        ],
+        "stop": [
+          14336,
+          5120,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            0,
+            0
+          ],
+          "global_chunk_coord": [
+            104,
+            32,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              13312,
+              4096,
+              4096
+            ],
+            "stop": [
+              13440,
+              4224,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.9999895095825195,
+            "mean": 105.58602905273438,
+            "std": 38.59049606323242,
+            "p1": 28.0,
+            "p50": 112.0,
+            "p99": 181.0,
+            "dyn_range": 153.0,
+            "sat_frac": 0.00022983551025390625,
+            "grad_energy": 10.434261322021484,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 1.0,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        13,
+        4,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          4096,
+          6144
+        ],
+        "stop": [
+          14336,
+          5120,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        4,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          4096,
+          7168
+        ],
+        "stop": [
+          14336,
+          5120,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        6,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          6144,
+          0
+        ],
+        "stop": [
+          14336,
+          7168,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        6,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          6144,
+          1024
+        ],
+        "stop": [
+          14336,
+          7168,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        6,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          6144,
+          3072
+        ],
+        "stop": [
+          14336,
+          7168,
+          4096
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        6,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          6144,
+          4096
+        ],
+        "stop": [
+          14336,
+          7168,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        6,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          6144,
+          6144
+        ],
+        "stop": [
+          14336,
+          7168,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        6,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          6144,
+          7168
+        ],
+        "stop": [
+          14336,
+          7168,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        7,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          7168,
+          0
+        ],
+        "stop": [
+          14336,
+          7947,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        7,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          7168,
+          1024
+        ],
+        "stop": [
+          14336,
+          7947,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        7,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          7168,
+          3072
+        ],
+        "stop": [
+          14336,
+          7947,
+          4096
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        7,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          7168,
+          4096
+        ],
+        "stop": [
+          14336,
+          7947,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        7,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          7168,
+          6144
+        ],
+        "stop": [
+          14336,
+          7947,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        13,
+        7,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          13312,
+          7168,
+          7168
+        ],
+        "stop": [
+          14336,
+          7947,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        0,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          0,
+          0
+        ],
+        "stop": [
+          16993,
+          1024,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        0,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          0,
+          1024
+        ],
+        "stop": [
+          16993,
+          1024,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        0,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          0,
+          3072
+        ],
+        "stop": [
+          16993,
+          1024,
+          4096
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        0,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          0,
+          4096
+        ],
+        "stop": [
+          16993,
+          1024,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        0,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          0,
+          6144
+        ],
+        "stop": [
+          16993,
+          1024,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        0,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          0,
+          7168
+        ],
+        "stop": [
+          16993,
+          1024,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        1,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          1024,
+          0
+        ],
+        "stop": [
+          16993,
+          2048,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        1,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          1024,
+          1024
+        ],
+        "stop": [
+          16993,
+          2048,
+          2048
         ]
       },
       "status": "sparse-mask",
@@ -1506,19 +5865,19 @@
     {
       "shard_coord": [
         16,
-        2,
-        2
+        1,
+        3
       ],
       "shard_voxel_bbox": {
         "start": [
           16384,
-          2048,
-          2048
+          1024,
+          3072
         ],
         "stop": [
           16993,
-          3072,
-          3072
+          2048,
+          4096
         ]
       },
       "status": "decoded",
@@ -1526,60 +5885,163 @@
         {
           "inner_coord": [
             0,
-            0,
+            3,
             0
           ],
           "global_chunk_coord": [
             128,
-            16,
-            16
+            11,
+            24
           ],
           "voxel_bbox": {
             "start": [
               16384,
-              2048,
-              2048
+              1408,
+              3072
             ],
             "stop": [
               16512,
-              2176,
-              2176
+              1536,
+              3200
             ]
           },
           "metrics": {
             "n": 2097152,
-            "nonzero_frac": 0.7266440391540527,
-            "mean": 37.36522674560547,
-            "std": 23.744611740112305,
+            "nonzero_frac": 0.7865371704101562,
+            "mean": 73.98857116699219,
+            "std": 53.748172760009766,
             "p1": 0.0,
-            "p50": 51.0,
-            "p99": 57.0,
-            "dyn_range": 57.0,
-            "sat_frac": 0.0,
-            "grad_energy": 0.7158909638722738,
+            "p50": 64.0,
+            "p99": 188.0,
+            "dyn_range": 188.0,
+            "sat_frac": 0.0011954307556152344,
+            "grad_energy": 7.89320723215739,
             "dead_slices": 0
           }
         }
       ],
-      "present_frac": 0.171875,
+      "present_frac": 0.25,
       "decode_failures": 0
     },
     {
       "shard_coord": [
         16,
-        2,
-        5
+        1,
+        4
       ],
       "shard_voxel_bbox": {
         "start": [
           16384,
-          2048,
-          5120
+          1024,
+          4096
         ],
         "stop": [
           16993,
-          3072,
+          2048,
+          5120
+        ]
+      },
+      "status": "decoded",
+      "chunks": [
+        {
+          "inner_coord": [
+            0,
+            3,
+            0
+          ],
+          "global_chunk_coord": [
+            128,
+            11,
+            32
+          ],
+          "voxel_bbox": {
+            "start": [
+              16384,
+              1408,
+              4096
+            ],
+            "stop": [
+              16512,
+              1536,
+              4224
+            ]
+          },
+          "metrics": {
+            "n": 2097152,
+            "nonzero_frac": 0.5030002593994141,
+            "mean": 53.88120651245117,
+            "std": 63.6383171081543,
+            "p1": 0.0,
+            "p50": 2.0,
+            "p99": 181.0,
+            "dyn_range": 181.0,
+            "sat_frac": 0.0003924369812011719,
+            "grad_energy": 5.143007914225261,
+            "dead_slices": 0
+          }
+        }
+      ],
+      "present_frac": 0.15,
+      "decode_failures": 0
+    },
+    {
+      "shard_coord": [
+        16,
+        1,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          1024,
           6144
+        ],
+        "stop": [
+          16993,
+          2048,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        1,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          1024,
+          7168
+        ],
+        "stop": [
+          16993,
+          2048,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        3,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          3072,
+          0
+        ],
+        "stop": [
+          16993,
+          4096,
+          1024
         ]
       },
       "status": "sparse-mask",
@@ -1589,106 +6051,361 @@
     {
       "shard_coord": [
         16,
-        2,
-        7
+        3,
+        1
       ],
       "shard_voxel_bbox": {
         "start": [
           16384,
-          2048,
-          7168
-        ],
-        "stop": [
-          16993,
           3072,
-          7947
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        16,
-        5,
-        0
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          16384,
-          5120,
-          0
-        ],
-        "stop": [
-          16993,
-          6144,
           1024
-        ]
-      },
-      "status": "missing-shard",
-      "chunks": []
-    },
-    {
-      "shard_coord": [
-        16,
-        5,
-        2
-      ],
-      "shard_voxel_bbox": {
-        "start": [
-          16384,
-          5120,
+        ],
+        "stop": [
+          16993,
+          4096,
           2048
-        ],
-        "stop": [
-          16993,
-          6144,
-          3072
         ]
       },
-      "status": "missing-shard",
-      "chunks": []
+      "status": "sparse-mask",
+      "chunks": [],
+      "present_frac": 0.0
     },
     {
       "shard_coord": [
         16,
-        5,
-        5
+        3,
+        3
       ],
       "shard_voxel_bbox": {
         "start": [
           16384,
-          5120,
-          5120
+          3072,
+          3072
         ],
         "stop": [
           16993,
-          6144,
-          6144
+          4096,
+          4096
         ]
       },
-      "status": "missing-shard",
+      "status": "sparse-mask",
+      "chunks": [],
+      "present_frac": 0.0
+    },
+    {
+      "shard_coord": [
+        16,
+        3,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          3072,
+          4096
+        ],
+        "stop": [
+          16993,
+          4096,
+          5120
+        ]
+      },
+      "status": "sparse-mask",
+      "chunks": [],
+      "present_frac": 0.0
+    },
+    {
+      "shard_coord": [
+        16,
+        3,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          3072,
+          6144
+        ],
+        "stop": [
+          16993,
+          4096,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         16,
-        5,
+        3,
         7
       ],
       "shard_voxel_bbox": {
         "start": [
           16384,
-          5120,
+          3072,
           7168
         ],
         "stop": [
           16993,
-          6144,
+          4096,
           7947
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        4,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          4096,
+          0
+        ],
+        "stop": [
+          16993,
+          5120,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        4,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          4096,
+          1024
+        ],
+        "stop": [
+          16993,
+          5120,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        4,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          4096,
+          3072
+        ],
+        "stop": [
+          16993,
+          5120,
+          4096
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        4,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          4096,
+          4096
+        ],
+        "stop": [
+          16993,
+          5120,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        4,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          4096,
+          6144
+        ],
+        "stop": [
+          16993,
+          5120,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        4,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          4096,
+          7168
+        ],
+        "stop": [
+          16993,
+          5120,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        6,
+        0
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          6144,
+          0
+        ],
+        "stop": [
+          16993,
+          7168,
+          1024
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        6,
+        1
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          6144,
+          1024
+        ],
+        "stop": [
+          16993,
+          7168,
+          2048
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        6,
+        3
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          6144,
+          3072
+        ],
+        "stop": [
+          16993,
+          7168,
+          4096
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        6,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          6144,
+          4096
+        ],
+        "stop": [
+          16993,
+          7168,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        6,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          6144,
+          6144
+        ],
+        "stop": [
+          16993,
+          7168,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        6,
+        7
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          6144,
+          7168
+        ],
+        "stop": [
+          16993,
+          7168,
+          7947
+        ]
+      },
+      "status": "unstored-shard",
       "chunks": []
     },
     {
@@ -1709,49 +6426,91 @@
           1024
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         16,
         7,
-        2
+        1
       ],
       "shard_voxel_bbox": {
         "start": [
           16384,
           7168,
+          1024
+        ],
+        "stop": [
+          16993,
+          7947,
           2048
-        ],
-        "stop": [
-          16993,
-          7947,
-          3072
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     },
     {
       "shard_coord": [
         16,
         7,
-        5
+        3
       ],
       "shard_voxel_bbox": {
         "start": [
           16384,
           7168,
-          5120
+          3072
         ],
         "stop": [
           16993,
           7947,
-          6144
+          4096
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        7,
+        4
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          7168,
+          4096
+        ],
+        "stop": [
+          16993,
+          7947,
+          5120
+        ]
+      },
+      "status": "unstored-shard",
+      "chunks": []
+    },
+    {
+      "shard_coord": [
+        16,
+        7,
+        6
+      ],
+      "shard_voxel_bbox": {
+        "start": [
+          16384,
+          7168,
+          6144
+        ],
+        "stop": [
+          16993,
+          7947,
+          7168
+        ]
+      },
+      "status": "unstored-shard",
       "chunks": []
     },
     {
@@ -1772,9 +6531,10 @@
           7947
         ]
       },
-      "status": "missing-shard",
+      "status": "unstored-shard",
       "chunks": []
     }
   ],
-  "interpretation": "Measurements are local sampled CT diagnostics. Missing, sparse, or failed regions are retained explicitly. No readability, surface correctness, ink-presence, or Grand Prize readiness score is inferred."
+  "absence_semantics": "An unstored shard is expected for masked background and is not evidence of corruption by itself.",
+  "interpretation": "Measurements are local sampled CT diagnostics. Unstored, sparse, or failed regions are retained explicitly. No readability, surface correctness, ink-presence, or Grand Prize readiness score is inferred."
 }
