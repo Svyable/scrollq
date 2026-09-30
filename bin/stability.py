@@ -1,8 +1,9 @@
 """Resampling stability for ScrolIQ scan-health scores.
 
 Scores every volume in volumes.txt twice with different deterministic
-samples (rotate=0 vs rotate=1 — cyclically shifted shard-candidate order)
-and reports:
+samples (rotate=0 vs rotate=13 by default — cyclically shifted
+shard-candidate order; 13 gives fully disjoint candidate sets at 4 or 12
+samples from the 27-spread) and reports:
   - Spearman rank correlation between the two runs
   - mean absolute score difference
   - top-10 overlap
@@ -18,7 +19,8 @@ sys.path.insert(0, "src")
 from scrollq.score import score_volume
 
 BASE = "https://dl.ash2txt.org"
-SAMPLES = 4
+SAMPLES = int(sys.argv[2]) if len(sys.argv) > 2 else 4
+ROTATE_B = int(sys.argv[3]) if len(sys.argv) > 3 else 13
 WORKERS = 8
 
 
@@ -48,8 +50,9 @@ def spearman(a, b):
 
 def main():
     roots = load_volumes()
+    rotate_b = ROTATE_B
     r0 = run(roots, rotate=0)
-    r1 = run(roots, rotate=1)
+    r1 = run(roots, rotate=rotate_b)
     s0 = {r["root"]: r["score"] for r in r0 if r.get("ok")}
     s1 = {r["root"]: r["score"] for r in r1 if r.get("ok")}
     common = sorted(set(s0) & set(s1))
@@ -63,6 +66,9 @@ def main():
 
     out = {
         "n_volumes": len(common),
+        "samples": SAMPLES,
+        "rotate_a": 0,
+        "rotate_b": rotate_b,
         "spearman_rho": round(rho, 4),
         "mean_abs_diff": round(mad, 3),
         "top10_overlap": overlap,

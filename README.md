@@ -67,15 +67,15 @@ The result is a public, auditable ranking that can be challenged, re-weighted, o
 
 ## September 2026 evidence snapshot
 
-The repository includes the exact outputs behind the September 30, 2026 campaign in [`artifacts/2026-09-30-scrollq/`](artifacts/2026-09-30-scrollq/).
+The repository includes the exact outputs behind the September 30, 2026 campaign in [`artifacts/2026-09-30-scrollq-n12/`](artifacts/2026-09-30-scrollq-n12/) (12 samples/volume; supersedes the 4-sample `artifacts/2026-09-30-scrollq/`).
 
 | Result | Evidence |
 |---|---|
-| **64 / 64** listed volcomp scroll volumes scored | [`volumes.json`](artifacts/2026-09-30-scrollq/volumes.json) |
-| Ranking is sample-dependent: read as bands, not precise ranks | Disjoint-shard resample ([`stability.json`](artifacts/2026-09-30-resampling-stability/stability.json)): **Spearman ρ = 0.76**, mean **|Δscore| = 7.4**, top-10 overlap **6 / 10** — below our ρ ≥ 0.85 gate; scores carry ≈±5 pts of sampling noise |
+| **64 / 64** listed volcomp scroll volumes scored | [`volumes.json`](artifacts/2026-09-30-scrollq-n12/volumes.json) |
+| Ranking is **stable under resampling**: clears our own gate | Disjoint-shard resample ([`stability-n12.json`](artifacts/2026-09-30-resampling-stability/stability-n12.json)): **Spearman ρ = 0.99**, mean **|Δscore| = 0.56**, top-10 overlap **10 / 10** — clears our ρ ≥ 0.85 gate. (We first measured at 4 samples: ρ = 0.76, ≈±5 pts noise — below the gate — so we tripled the sampling and re-measured.) |
 | Acquisition dropout scan found no verified dead slices in the campaign | **0 hits across 64 volumes** |
 | Label coverage was highly concentrated in the open-data snapshot | **70 / 70** discovered ink-detection roots were on PHercParis4; the top 12 quality-ranked scrolls had none |
-| High-quality, unlabeled targets were made actionable | **16** top-quartile volumes were flagged **“label next”** |
+| High-quality, unlabeled targets were made actionable | **14** top-quartile volumes were flagged **“label next”** |
 
 The point is not that one heuristic ranking is final. The point is that **data quality and label coverage can be measured together**, turning an implicit resource-allocation decision into an inspectable one.
 

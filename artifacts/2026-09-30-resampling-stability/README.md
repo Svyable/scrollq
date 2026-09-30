@@ -8,8 +8,10 @@ them and do not reproduce — they are retired, not defended.
 ## Method
 
 `bin/stability.py` scores all 64 volumes twice via `score_volume(...,
-samples=4, rotate=R)`. `rotate` cyclically shifts the 27-candidate shard
-list before the first 4 are taken:
+samples=N, rotate=R)`. `rotate` cyclically shifts the 27-candidate shard
+list before the first N are taken.
+
+### At 4 samples/volume (`stability.json`)
 
 - **rotate=0 vs 1** (weak resample): candidates [0,1,2,3] vs [1,2,3,4] —
   3 of 4 shards shared. ρ = 0.9929, mean |Δ| = 0.60, top-10 10/10.
@@ -17,30 +19,40 @@ list before the first 4 are taken:
   as stability evidence.
 - **rotate=0 vs 13** (strong resample): candidates [0,1,2,3] vs
   [13,14,15,16] — fully disjoint shard sets. ρ = 0.7575, mean |Δ| = 7.39,
-  top-10 overlap 6/10. This is the honest measurement.
+  top-10 overlap 6/10. This is the honest measurement: ≈ ±5 points of
+  sampling noise, below our ρ ≥ 0.85 gate.
 
-`stability.json` holds the strong-resample result plus both full score
-tables (`run0`, `run13`).
+### At 12 samples/volume (`stability-n12.json`) — current
+
+- **rotate=0 vs 13**: candidates [0..11] vs [13..24] — fully disjoint
+  shard sets (verified: zero shared candidates). ρ = **0.9948**,
+  mean |Δ| = **0.56**, top-10 overlap **10/10** — clears the ρ ≥ 0.85 gate.
+- Only 12 of 64 volumes moved at all between runs (largest move 5.8
+  points); 52 were byte-identical. The score function has ceiling effects
+  (components saturate via `min(1.0, …)`), so part of the stability is
+  coarse resolution — the honest reading is ~±1 point of sampling noise,
+  not infinite precision.
+- Sparse volumes decode fewer than the requested 12 (spread candidates hit
+  absent shards; 49/64 decoded < 12). The check is apples-to-apples: both
+  rotations face the same sparsity.
+
+`stability-n12.json` holds the n=12 result plus both full score tables
+(`run0`, `run13`); `stability-n12.log` is the run log.
 
 ## Reading
 
-- Scores carry ≈ ±5 points of sampling noise (single-estimate SE ≈
-  7.4/√2). Ranks within ~10 points are interchangeable — read the
-  leaderboard as a triage **band**, not a precise order.
-- The measurement is **below** our own ρ ≥ 0.85 quality gate. The gate
-  stays; the score does not clear it at 4 samples/volume.
-- Robust findings: PHerc0813 is #1 in both runs (77.4, 77.4).
-  PHerc0139 is top-5 in both (74.7→75.1). The Grand Prize Pareto frontier
-  (PHerc0813 + PHerc1447) survives even at PHerc1447's low draw (53.2),
-  because its 15 existing segments dominate the segment axis.
-- Sample-sensitive: PHerc1447 swings 67.3 → 53.2 (rank 13 → 46).
-  The 🎯 label-next flags: 16 on the published run, 10 stable across
-  the resample.
+- At 12 samples/volume the leaderboard is a real ranking with ~±1 point
+  of sampling noise — the n=4 triage-band caveat is retired.
+- Robust across both campaigns: PHerc0813 is #1 (77.4) everywhere;
+  the Grand Prize Pareto frontier (PHerc0813 + PHerc1447) is unchanged.
+- The n=4 campaign's sample-sensitive findings (PHerc1447's 67.3 → 53.2
+  swing) were noise, not signal — which is exactly why we re-measured.
 
 ## Reproduce
 
 ```bash
+# n=12 disjoint resample (the current measurement; ~3 min)
+.venv/bin/python bin/stability.py artifacts/2026-09-30-resampling-stability/stability-n12.json 12
+# n=4 (the retired campaign's noise measurement; ~4 min)
 .venv/bin/python bin/stability.py artifacts/2026-09-30-resampling-stability/stability.json
 ```
-
-(~4 minutes, 8 workers, live dl.ash2txt.org reads.)
