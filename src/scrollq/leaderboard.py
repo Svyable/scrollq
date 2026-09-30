@@ -167,7 +167,7 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
   <div class="problem"><div><h3>Mesh connectivity</h3><span class="state next">NEXT</span></div><p>Holes, mergers, sheet switches, self-intersections, and flattening distortion.</p></div>
   <div class="problem"><div><h3>Fiber connectivity</h3><span class="state plan">PLANNED</span></div><p>Continuity and orientation confidence for long-range papyrus fiber traces.</p></div>
   <div class="problem"><div><h3>Spiral fitting</h3><span class="state plan">PLANNED</span></div><p>Held-out constraint residuals, sensitivity, and under-constrained regions.</p></div>
-  <div class="problem"><div><h3>Label quality</h3><span class="state next">NEXT</span></div><p>Physical label offset, snapping candidates, and active-learning review queues.</p></div>
+  <div class="problem"><div><h3>Label quality</h3><span class="state live">LIVE</span></div><p>Label–volume coverage join: all 70 published ink-detection labels sit on PHercParis4 while 16 top-quartile zero-label volumes are flagged 🎯 label next. Next: physical label offset, snapping candidates, review queues.</p></div>
   <div class="problem"><div><h3>Ink reliability</h3><span class="state plan">PLANNED</span></div><p>Leakage checks, held-out validation, perturbation stability, cross-scroll evidence.</p></div>
   <div class="problem"><div><h3>Grand Prize</h3><span class="state plan">TARGET</span></div><p>One evidence trail from full recto coverage to tifxyz, renders, validation, and VC3D.</p></div>
 </div>

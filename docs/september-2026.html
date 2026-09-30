@@ -99,7 +99,9 @@ data health varies more than hardware does.</p></div>
 <tr><td><b>64/64</b> scroll volumes scored</td><td><code>artifacts/2026-09-30-scrollq/volumes.json</code> in the repo; every score ships its components</td></tr>
 <tr><td>Ranking is <b>stable</b>, not sampling noise</td><td>Independent resample: Spearman ρ = 0.876, mean |Δscore| = 3.07, top-10 overlap 8/10</td></tr>
 <tr><td><b>No</b> acquisition dropouts</td><td>Dead-slice scan (dense-chunk, both-neighbor rule): 0 hits across 64 volumes — a clean bill, published as a result</td></tr>
-<tr><td>Labels are <b>misallocated</b></td><td>Join with the full S3 bucket crawl (957 roots): 70/70 ink-detection roots on PHercParis4; top-12 quality scrolls hold 0</td></tr>
+<tr><td>Label coverage is <b>concentrated</b> on PHercParis4</td><td>Join with the full S3 bucket crawl (957 roots): 70/70 ink-detection roots on PHercParis4 (quality rank 13/39); 16 top-quartile zero-label volumes flagged 🎯 label next</td></tr>
+<tr><td>Grand Prize targets <b>qualified</b> against auditable evidence</td><td><code>artifacts/2026-09-30-grand-prize-qualifier/</code> — weight-free Pareto frontier over scan-quality score × public segment count across all 13 current Grand Prize volumes: <b>PHerc0813, PHerc1447</b></td></tr>
+<tr><td>Metrics guarded by a <b>known-success control</b></td><td><code>artifacts/2026-09-30-pherc1667-scan-control/</code> — PHerc1667 (first fully read scroll) p10–p90 intervals overlap targets (nonzero-fraction Jaccard ≈ 1.0), so no metric value inside the control's range can be called a failure elsewhere</td></tr>
 <tr><td><b>Reproducible</b></td><td><code>pip install git+https://github.com/Svyable/scrollq.git</code>, then <code>scrollq-score</code> / <code>scrollq-coverage</code> / <code>scrollq-leaderboard</code></td></tr>
 </tbody></table></div>
 
