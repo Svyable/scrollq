@@ -182,20 +182,79 @@ def _match_volume(volumes: list[dict], scroll: str, volume_id: str) -> dict | No
     return matches[0]
 
 
-def _dominates(a: dict, b: dict) -> bool:
-    """Return True when a is no worse on both evidence axes and better on >=1."""
-    qa = a.get("quality_score")
-    qb = b.get("quality_score")
-    if qa is None or qb is None:
+def _dominates(a: dict, b: dict, axes: tuple[str, ...]) -> bool:
+    """Return True when a is no worse on every axis and better on at least one."""
+    av = [a.get(k) for k in axes]
+    bv = [b.get(k) for k in axes]
+    if any(v is None for v in av) or any(v is None for v in bv):
         return False
-    sa = int(a.get("segments", 0))
-    sb = int(b.get("segments", 0))
-    return qa >= qb and sa >= sb and (qa > qb or sa > sb)
+    return all(x >= y for x, y in zip(av, bv)) and any(
+        x > y for x, y in zip(av, bv)
+    )
 
 
-def qualify(volumes: list[dict], manifest: dict | None = None) -> dict:
-    """Build a transparent target-qualification report."""
+def _pareto(rows: list[dict], axes: tuple[str, ...]) -> list[str]:
+    """Scroll IDs on the weight-free Pareto frontier for complete rows."""
+    complete = [r for r in rows if all(r.get(k) is not None for k in axes)]
+    return [
+        r["scroll"]
+        for r in complete
+        if not any(
+            _dominates(other, r, axes)
+            for other in complete
+            if other is not r
+        )
+    ]
+
+
+def _support_record(
+    support_by_scroll: dict[str, dict], target: dict
+) -> tuple[dict | None, float | None, str | None]:
+    """Validate imported surface-support evidence against the exact prize volume.
+
+    A support number is usable only when its own provenance says it is exact,
+    it records the prize-eligible volume ID, and its CT URL contains that same
+    volume ID. This makes accidental use of a same-scroll higher-resolution scan
+    fail closed.
+    """
+    record = support_by_scroll.get(target["scroll"])
+    if record is None:
+        return None, None, "no imported surface-support record"
+    if not record.get("usable_for_qualification"):
+        return record, None, record.get(
+            "exclusion_reason", "surface-support record marked unusable"
+        )
+    if record.get("volume_match") != "exact":
+        return record, None, "surface-support record is not exact-volume evidence"
+    if record.get("eligible_volume_id") != target["volume_id"]:
+        return record, None, "surface-support record names a different eligible volume"
+    ct = str(record.get("survey_ct") or "")
+    if target["volume_id"] not in ct:
+        return record, None, "surface-support CT URL does not contain prize volume ID"
+    support = record.get("sampled_support_frac")
+    if not isinstance(support, (int, float)):
+        return record, None, "surface-support fraction is missing"
+    if not 0.0 <= float(support) <= 1.0:
+        return record, None, "surface-support fraction is outside [0, 1]"
+    return record, float(support), None
+
+
+def qualify(
+    volumes: list[dict],
+    manifest: dict | None = None,
+    surface_support: dict | None = None,
+) -> dict:
+    """Build a transparent target-qualification report.
+
+    The primary result always uses ScrollQ quality and public segment count.
+    Optional imported surface-support evidence is reported as a separate
+    sensitivity analysis and never changes ScrollQ's published quality score.
+    """
     manifest = manifest or DEFAULT_MANIFEST
+    support_by_scroll = {
+        r["scroll"]: r for r in (surface_support or {}).get("rows", [])
+        if isinstance(r, dict) and r.get("scroll")
+    }
     rows: list[dict] = []
 
     for target in manifest["targets"]:
@@ -215,6 +274,7 @@ def qualify(volumes: list[dict], manifest: dict | None = None) -> dict:
             "quality_score": None,
             "quality_root": None,
             "quality_ok": False,
+            "surface_support_frac": None,
         }
         if v is not None:
             row["quality_ok"] = bool(v.get("ok"))
@@ -222,20 +282,34 @@ def qualify(volumes: list[dict], manifest: dict | None = None) -> dict:
             row["quality_root"] = v.get("root")
             if not v.get("ok"):
                 row["quality_error"] = v.get("error")
+
+        if surface_support is not None:
+            record, support, reason = _support_record(support_by_scroll, target)
+            row["surface_support_frac"] = support
+            row["surface_support_usable"] = support is not None
+            if record is not None:
+                row["surface_support_evidence"] = {
+                    "survey_path": record.get("survey_path"),
+                    "survey_sha": record.get("survey_sha"),
+                    "mode": record.get("mode"),
+                    "planes_sampled": record.get("planes_sampled"),
+                    "planned_planes": record.get("planned_planes"),
+                    "survey_ct": record.get("survey_ct"),
+                    "volume_match": record.get("volume_match"),
+                }
+            if reason:
+                row["surface_support_exclusion_reason"] = reason
         rows.append(row)
 
-    comparable = [
+    baseline_axes = ("quality_score", "segments")
+    baseline_comparable = [
         r
         for r in rows
         if r["quality_score"] is not None
         and r["surface_prediction"]
         and r["lasagna_prediction"]
     ]
-    frontier = [
-        r["scroll"]
-        for r in comparable
-        if not any(_dominates(other, r) for other in comparable if other is not r)
-    ]
+    frontier = _pareto(baseline_comparable, baseline_axes)
     frontier_set = set(frontier)
 
     for r in rows:
@@ -249,20 +323,21 @@ def qualify(volumes: list[dict], manifest: dict | None = None) -> dict:
             r["qualification"] = "dominated-on-current-evidence"
             r["dominated_by"] = sorted(
                 o["scroll"]
-                for o in comparable
-                if o is not r and _dominates(o, r)
+                for o in baseline_comparable
+                if o is not r and _dominates(o, r, baseline_axes)
             )
 
-    return {
-        "schema_version": 1,
+    result = {
+        "schema_version": 2,
         "manifest_as_of": manifest["as_of"],
         "prize_url": manifest.get("prize_url"),
         "method": {
             "axes": ["scrollq_quality_score", "existing_segment_count"],
             "rule": (
-                "Pareto frontier: maximize scan-quality triage score and existing "
-                "segment count. Surface and lasagna predictions are required "
-                "bootstrap assets but are not weighted when common to all targets."
+                "Primary Pareto frontier: maximize scan-quality triage score and "
+                "existing segment count. Surface and lasagna predictions are "
+                "required bootstrap assets but are not weighted when common to "
+                "all targets."
             ),
             "warning": (
                 "This is campaign triage, not a readability, ink-presence, or "
@@ -272,6 +347,41 @@ def qualify(volumes: list[dict], manifest: dict | None = None) -> dict:
         "frontier": frontier,
         "targets": rows,
     }
+
+    if surface_support is not None:
+        support_axes = ("quality_score", "segments", "surface_support_frac")
+        support_comparable = [
+            r
+            for r in baseline_comparable
+            if r["surface_support_frac"] is not None
+        ]
+        support_frontier = _pareto(support_comparable, support_axes)
+        excluded = {}
+        comparable_scrolls = {r["scroll"] for r in support_comparable}
+        for r in rows:
+            if r["scroll"] not in comparable_scrolls:
+                excluded[r["scroll"]] = r.get(
+                    "surface_support_exclusion_reason",
+                    "incomplete evidence for support-augmented comparison",
+                )
+        result["surface_support_analysis"] = {
+            "source": surface_support.get("source"),
+            "axes": [
+                "scrollq_quality_score",
+                "existing_segment_count",
+                "external_surface_support_fraction",
+            ],
+            "rule": (
+                "Sensitivity-only Pareto frontier among targets with exact-volume "
+                "surface-support evidence. It does not replace the primary frontier "
+                "and does not alter ScrollQ scores."
+            ),
+            "comparable_targets": sorted(comparable_scrolls),
+            "excluded_targets": excluded,
+            "frontier": support_frontier,
+        }
+
+    return result
 
 
 def main() -> None:
@@ -286,6 +396,13 @@ def main() -> None:
         "--targets",
         help="optional JSON manifest overriding the versioned built-in target metadata",
     )
+    ap.add_argument(
+        "--surface-support",
+        help=(
+            "optional normalized external surface-support evidence; reported as "
+            "a separate sensitivity analysis"
+        ),
+    )
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -293,13 +410,21 @@ def main() -> None:
     manifest = DEFAULT_MANIFEST
     if args.targets:
         manifest = json.loads(Path(args.targets).read_text(encoding="utf-8"))
+    support = None
+    if args.surface_support:
+        support = json.loads(Path(args.surface_support).read_text(encoding="utf-8"))
 
-    result = qualify(volumes, manifest)
+    result = qualify(volumes, manifest, support)
     Path(args.out).write_text(json.dumps(result, indent=1) + "\n", encoding="utf-8")
     print(
         f"qualified {len(result['targets'])} targets; "
-        f"Pareto frontier: {', '.join(result['frontier']) or 'none'}"
+        f"primary Pareto frontier: {', '.join(result['frontier']) or 'none'}"
     )
+    if "surface_support_analysis" in result:
+        print(
+            "surface-support sensitivity frontier: "
+            + (", ".join(result["surface_support_analysis"]["frontier"]) or "none")
+        )
 
 
 if __name__ == "__main__":
