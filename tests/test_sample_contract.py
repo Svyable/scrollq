@@ -68,3 +68,67 @@ def test_score_volume_rejects_nonpositive_sample_budget():
     result = score_mod.score_volume("https://example.test", "root", samples=0)
     assert result["ok"] is False
     assert result["error"] == "samples must be >= 1"
+
+
+def test_score_volume_reports_sampling_completeness(monkeypatch):
+    from types import SimpleNamespace
+    import scrollq.score as score_mod
+
+    class Response:
+        status_code = 206
+        content = b"index"
+
+        def raise_for_status(self):
+            return None
+
+    class Session:
+        def get(self, *args, **kwargs):
+            return Response()
+
+    class Store:
+        def get_json(self, path):
+            return {}
+
+        def _session(self):
+            return Session()
+
+        def get_range(self, path, start, length):
+            return b"blob"
+
+    info = SimpleNamespace(
+        shape=(2, 1, 1),
+        outer_chunks=(1, 1, 1),
+        inner_chunks=(1, 1, 1),
+        inner_codec="volcomp",
+        index_codecs=[],
+    )
+    metrics = {
+        "nonzero_frac": 1.0,
+        "std": 1.0,
+        "dyn_range": 1.0,
+        "sat_frac": 0.0,
+        "grad_energy": 1.0,
+        "dead_slices": 0,
+    }
+
+    monkeypatch.setattr(score_mod, "open_store", lambda base: Store())
+    monkeypatch.setattr(score_mod.vc, "available", lambda: (True, None))
+    monkeypatch.setattr(score_mod.vc, "parse_zarr_json", lambda meta: info)
+    monkeypatch.setattr(score_mod.vc, "shard_key", lambda root, level, sc: "shard")
+    monkeypatch.setattr(score_mod.vc, "inner_chunks_per_shard", lambda info, sc: (2, 1, 1))
+    monkeypatch.setattr(score_mod.vc, "index_encoded_size", lambda n, codecs: 4)
+    monkeypatch.setattr(score_mod.vc, "parse_index", lambda raw, n, codecs: [(0, 1)] * n)
+    monkeypatch.setattr(score_mod.vc, "decode_chunk", lambda blob: b"\x01")
+    monkeypatch.setattr(score_mod, "chunk_metrics", lambda vox: metrics.copy())
+
+    result = score_mod.score_volume("https://example.test", "root", samples=4, rotate=3)
+
+    assert result["ok"] is True
+    assert result["sampling"] == {
+        "requested": 4,
+        "decoded": 2,
+        "complete": False,
+        "rotate": 0,
+        "shard_candidates": 1,
+        "missing_shards": 0,
+    }
