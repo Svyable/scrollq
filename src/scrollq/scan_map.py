@@ -151,7 +151,7 @@ def scan_volume_map(
                 timeout=60,
             )
             if response.status_code == 404:
-                record["status"] = "missing-shard"
+                record["status"] = "unstored-shard"
                 records.append(record)
                 continue
             response.raise_for_status()
@@ -267,8 +267,12 @@ def scan_volume_map(
             },
             "metric_distribution": _metric_distribution(decoded_chunks),
             "regions": records,
+            "absence_semantics": (
+                "An unstored shard is expected for masked background and is not "
+                "evidence of corruption by itself."
+            ),
             "interpretation": (
-                "Measurements are local sampled CT diagnostics. Missing, sparse, "
+                "Measurements are local sampled CT diagnostics. Unstored, sparse, "
                 "or failed regions are retained explicitly. No readability, surface "
                 "correctness, ink-presence, or Grand Prize readiness score is inferred."
             ),
