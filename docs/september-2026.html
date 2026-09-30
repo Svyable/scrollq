@@ -60,7 +60,7 @@ footer a{color:var(--muted)}
 <a href="open-problems-alignment.md">ScrolIQ × 2026 open problems →</a></p>
 <div class="stats">
 <div class="stat"><div class="n">64</div><div class="l">scroll volumes scored<br>0–100, all components published</div></div>
-<div class="stat"><div class="n">0.876</div><div class="l">Spearman ρ vs resample<br>stable, not sampling noise</div></div>
+<div class="stat"><div class="n">0.76</div><div class="l">Spearman ρ vs disjoint resample<br>below our 0.85 gate — read ranks as bands</div></div>
 <div class="stat"><div class="n">0</div><div class="l">dead slices<br>strict detector, clean bill</div></div>
 <div class="stat"><div class="n">16</div><div class="l">🎯 label-next volumes<br>top quartile, zero ink labels</div></div>
 </div>
@@ -97,7 +97,7 @@ data health varies more than hardware does.</p></div>
 <div class="panel"><h2><span class="q">3.</span> Evidence</h2>
 <table><thead><tr><th>claim</th><th>evidence</th></tr></thead><tbody>
 <tr><td><b>64/64</b> scroll volumes scored</td><td><code>artifacts/2026-09-30-scrollq/volumes.json</code> in the repo; every score ships its components</td></tr>
-<tr><td>Ranking is <b>stable</b>, not sampling noise</td><td>Independent resample: Spearman ρ = 0.876, mean |Δscore| = 3.07, top-10 overlap 8/10</td></tr>
+<tr><td>Ranking is <b>sample-dependent</b> — read as bands, not precise ranks</td><td>Independent resample with fully disjoint shard sets (<code>artifacts/2026-09-30-resampling-stability/</code>): Spearman ρ = 0.76, mean |Δscore| = 7.4, top-10 overlap 6/10 — below our ρ ≥ 0.85 gate. Scores carry ≈±5 points of sampling noise; #1 (PHerc0813, 77.4 in both runs) is robust, neighbors within ~10 points are interchangeable. An earlier near-duplicate resample scored ρ = 0.99 — that measured the resample, not the score.</td></tr>
 <tr><td><b>No</b> acquisition dropouts</td><td>Dead-slice scan (dense-chunk, both-neighbor rule): 0 hits across 64 volumes — a clean bill, published as a result</td></tr>
 <tr><td>Label coverage is <b>concentrated</b> on PHercParis4</td><td>Join with the full S3 bucket crawl (957 roots): 70/70 ink-detection roots on PHercParis4 (quality rank 13/39); 16 top-quartile zero-label volumes flagged 🎯 label next</td></tr>
 <tr><td>Grand Prize targets <b>qualified</b> against auditable evidence</td><td><code>artifacts/2026-09-30-grand-prize-qualifier/</code> — weight-free Pareto frontier over scan-quality score × public segment count across all 13 current Grand Prize volumes: <b>PHerc0813, PHerc1447</b></td></tr>
@@ -135,7 +135,9 @@ issues one verdict: <b>TRAIN / CAUTION / DO NOT TRAIN</b>. Fresh runs 2026-09-30
 (<code>artifacts/2026-09-30-health-verdicts/</code>): TRAIN on the healthy
 PHerc0813 dl volume (integrity PASS, quality 77.4); DO NOT TRAIN on the
 defective PHerc0814 S3 pyramid (6 high-severity integrity findings — quality
-honestly unscorable, verdict from the audit alone).</p>
+honestly unscorable, verdict from the audit alone); CAUTION on the v2 dev
+mesh <code>other/dev/meshes/20231022170900-ome.zarr</code> (integrity PASS,
+quality honestly unscorable — outside the scorer's volcomp domain).</p>
 <p><code>scrollq-health --root &lt;volume&gt;</code></p></div>
 <div class="card"><h3>ScrolIQ</h3>
 <p><b>Find the bottleneck.</b> The project is evolving from the scan-quality

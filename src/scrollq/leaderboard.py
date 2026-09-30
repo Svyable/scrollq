@@ -184,12 +184,18 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     <p>All <b>70</b> published ink-detection labels sit on
     <b>PHercParis4</b> — quality rank <b>13 of 39 scrolls</b> (each scroll
     ranked by its best volume). The healthiest volumes (<b>{top_id}</b> {top_score}, <b>PHerc0139</b> 75.9) have
-    <b>zero</b> ink labels. Labeling effort goes furthest at the 🎯 rows.</p></div>
+    <b>zero</b> ink labels. Labeling effort goes furthest at the 🎯 rows —
+    16 flagged on the published run, 10 of them stable across an independent
+    resample.</p></div>
   <div class="card"><h3>Stable, not sacred</h3>
-    <p>An independent deterministic resample re-scored all 64 volumes:
-    rank correlation <b>&rho; = 0.876</b>, mean |&Delta;| <b>3.07</b>,
-    top-10 overlap <b>8/10</b>. The ranking is a triage signal — audit the
-    weights, don't worship it.</p></div>
+    <p>An independent deterministic resample (fully disjoint shard sets)
+    re-scored all 64 volumes: rank correlation <b>&rho; = 0.76</b>,
+    mean |&Delta;| <b>7.4</b>, top-10 overlap <b>6/10</b> — below our
+    &rho; &ge; 0.85 gate. Scores carry roughly &plusmn;5 points of sampling
+    noise, so treat the ranking as a triage <i>band</i>: the #1 pick
+    (PHerc0813, 77.4 in both runs) is robust, but neighbors within ~10 points
+    are interchangeable. Full method + both runs:
+    <code>artifacts/2026-09-30-resampling-stability/</code>.</p></div>
 </div>
 
 <div class="panel"><h2>Scan-quality distribution<span class="sub">64 volumes · 5-point bins</span></h2>

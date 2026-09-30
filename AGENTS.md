@@ -55,7 +55,14 @@ python -m pytest tests/ -q
    shard index — that is legitimate, not a defect. Never report them as empty.
 4. **Scores are sample-dependent by design.** Resampling stability is the
    quality gate: Spearman ρ ≥ 0.85, mean |Δ| small, top-10 overlap high.
-   Current: ρ = 0.876, mean |Δ| = 3.07, overlap 8/10.
+   Reproducible measurement 2026-09-30 (`artifacts/2026-09-30-resampling-stability/`,
+   `bin/stability.py`, rotate=0 vs 13 = fully disjoint shard sets):
+   ρ = 0.76, mean |Δ| = 7.4, overlap 6/10 — **below the gate**. Scores carry
+   ≈±5 points of sampling noise; present rankings as bands, not precise
+   orders. (A rotate=1 resample gives ρ = 0.99 — it re-uses 3 of 4 shards,
+   so it measures the resample, not the score. Don't cite it.)
+   Earlier published numbers (ρ = 0.876, |Δ| = 3.07, 8/10) had no artifact
+   and do not reproduce — they were replaced 2026-09-30.
 5. **Weights are a judgment call, published with every score.** Changing them
    is fine; hiding them is not. Update the September page when they change.
 
