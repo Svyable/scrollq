@@ -59,6 +59,7 @@ def score_volume(base_url: str, root: str, samples: int = 4,
 
     chunk_results = []
     missing_shards = 0
+    shard_read_failures = 0
     sess = store._session()
     # Spread shard candidates per-dimension (flat-index spread degenerates
     # to an edge line on non-cubic grids). Skip shards that are nearly
@@ -90,7 +91,7 @@ def score_volume(base_url: str, root: str, samples: int = 4,
             raw_index = (r.content[-idx_size:] if r.status_code == 200
                          else r.content)
         except Exception:
-            missing_shards += 1
+            shard_read_failures += 1
             continue
         entries = vc.parse_index(raw_index, n_inner, info.index_codecs)
         if not entries:
@@ -145,11 +146,13 @@ def score_volume(base_url: str, root: str, samples: int = 4,
         "rotate": rotate,
         "shard_candidates": len(cands),
         "missing_shards": missing_shards,
+        "shard_read_failures": shard_read_failures,
     }
     result["sampling"] = sampling
     if not chunk_results:
         result["error"] = (f"no chunks decoded "
-                           f"({missing_shards} shards absent)")
+                           f"({missing_shards} shards absent, "
+                           f"{shard_read_failures} shard read failures)")
         return result
 
     agg: dict[str, float] = {}
