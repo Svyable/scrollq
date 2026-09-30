@@ -190,7 +190,7 @@ Volumes in the top quality quartile with no discovered ink labels are flagged **
 
 ## 2027 Grand Prize target qualification
 
-`scrollq-grand-prize` narrows the seven fixed Grand Prize volumes without
+`scrollq-grand-prize` narrows the 13 current Grand Prize volumes without
 pretending that scan quality predicts readability. It joins the exact
 prize-eligible volume IDs to ScrollQ scores and compares candidates on a
 **Pareto frontier** over two auditable axes: scan-quality score and the number
