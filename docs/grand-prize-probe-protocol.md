@@ -1,0 +1,170 @@
+# Grand Prize blind probe protocol
+
+This protocol is the second stage after `scrollq-grand-prize`. Its purpose is
+to decide whether to commit the full unrolling campaign to **PHerc0813** or
+**PHerc1447** using evidence from the actual prize-eligible volumes.
+
+PHerc0800 is retained as a geometry-control / fallback target because it has
+six existing public segments, but it is not on the current weight-free
+ScrollQ/segment Pareto frontier.
+
+Official references:
+
+- Grand Prize rules: https://scrollprize.org/prizes
+- Spiral fitting: https://scrollprize.org/tutorial_spiral
+- Winding constraints: https://scrollprize.org/open_problems/winding_annotations
+- Ink detection: https://scrollprize.org/tutorial5
+
+## Principle
+
+Do not optimize for pretty renders. Optimize for evidence that survives
+held-out geometry checks and falsification controls.
+
+The comparison is deliberately blind and symmetric:
+
+- same number of sampled regions per scroll;
+- same tools and hyperparameters;
+- same maximum human-verification time;
+- same held-out fraction;
+- fixed random seed where randomness is unavoidable;
+- exact prize-eligible volume only;
+- no same-scroll higher-resolution data.
+
+## Stage A — provenance and integrity gate
+
+For each target:
+
+1. Record exact volume ID, voxel size, energy, source URLs, and hashes/ETags
+   where available.
+2. Run zarr-pyramid-audit against the CT, surface prediction, and lasagna
+   inputs.
+3. Run ScrollQ against the exact eligible CT volume.
+4. Record the surface-prediction and lasagna model IDs and pyramid levels.
+5. Fail closed on high-severity storage/integrity findings.
+
+No geometry or ink result is considered interpretable until this gate passes.
+
+## Stage B — deterministic 24-region geometry sample
+
+Define the occupied scroll support and umbilicus in CT coordinates. Sample 24
+seed regions per scroll using a fixed spatial design:
+
+- 3 axial bands: lower / middle / upper;
+- 2 radial shells: inner / outer;
+- 4 sectors around the umbilicus.
+
+This yields 3 x 2 x 4 = 24 regions distributed across the body rather than
+whatever areas happen to look easiest.
+
+For each region:
+
+1. Inspect the released surface and lasagna predictions.
+2. Generate a local patch using the same method and settings on both targets.
+3. Verify whether the patch follows exactly one sheet using CT continuity and,
+   where visible, horizontal papyrus fibers.
+4. Record failures explicitly: no usable seed, sheet switch, prediction
+   unsupported by CT, topology break, ambiguous winding, or tool failure.
+5. Record human-verification time.
+
+Do not delete failed regions from the denominator.
+
+## Stage C — hold-out split before spiral fitting
+
+Before any global fit, deterministically assign the 24 regions:
+
+- 18 fit regions;
+- 6 held-out geometry regions.
+
+The six held-out regions must never become spiral-fit inputs. They exist only
+to test whether the fitted surface predicts independently verified geometry.
+
+Store the split in a checked-in JSON manifest.
+
+## Stage D — 1,000-slice pilot spiral
+
+The official spiral-fitting tutorial recommends beginning with roughly a
+1,000-slice range before scaling to the whole written region.
+
+For each target, run the same pilot configuration with:
+
+- verified fit patches;
+- same-winding fibers/lines where available;
+- relative-winding annotations where needed;
+- umbilicus;
+- released lasagna normals / gradient guidance at the metadata-declared scale;
+- fixed optimizer seed;
+- online experiment tracking for any stochastic run.
+
+Keep the generated run folder intact: checkpoint, satisfaction metrics,
+overlays, and winding meshes.
+
+## Stage E — geometry decision metrics
+
+Evaluate the pilot on the six held-out regions, not just the fit inputs.
+
+Record at minimum:
+
+- held-out patch-to-fitted-surface distance distribution in voxels;
+- held-out single-winding agreement;
+- observed sheet-switch count;
+- self-intersection / topology failures;
+- fit-input satisfaction metrics;
+- axial coverage achieved;
+- human minutes spent creating/verifying constraints;
+- failed-region count from the original 24-region denominator.
+
+Do not collapse these into a single opaque score. Compare the targets as a
+multi-objective evidence table.
+
+A target advances only if its global fit is geometrically credible on held-out
+regions, not merely on the annotations used to fit it.
+
+## Stage F — blind ink probe
+
+Only after Stage E passes:
+
+1. Flatten/render the held-out-correct geometry.
+2. Run identical ink inference on both targets.
+3. Keep model windows physically small enough that outputs are tied to local CT
+   evidence rather than long linguistic context.
+4. Use checkpoints/training data that do not overlap the prediction regions.
+5. Record all seeds and exact model/checkpoint hashes.
+
+Every promising ink region gets falsification controls:
+
+- correct surface;
+- +3 voxel normal offset;
+- -3 voxel normal offset;
+- adjacent winding;
+- perturbed geometry;
+- independent checkpoint / fold.
+
+A candidate is stronger when the signal is stable across independent models
+but localized to the correct physical surface and degrades under the offset
+controls.
+
+No papyrological interpolation is used to decide whether this stage passes.
+
+## Stage G — target commitment
+
+Commit the whole-scroll campaign only after the evidence table exists for both
+PHerc0813 and PHerc1447.
+
+The decision record must state:
+
+- which target was selected;
+- which evidence dimensions drove the decision;
+- where the losing target was stronger;
+- unresolved risks;
+- exact artifact paths supporting every claim.
+
+If neither target produces credible held-out geometry, run the same protocol
+on PHerc0800 before expanding the search.
+
+## Human-time accounting
+
+Start the Grand Prize manual-input ledger now, even though this is still a
+pilot. Record each manual activity with start/end time and purpose. This keeps
+the eventual automated pipeline comfortably inside the prize's documented
+human-input allowance and prevents undocumented annotation debt from building
+up during experimentation.
