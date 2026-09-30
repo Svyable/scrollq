@@ -131,7 +131,11 @@ probes.</p>
 <a href="https://svyable.github.io/zarr-pyramid-audit/">dashboard</a></p></div>
 <div class="card"><h3>scrollq-health</h3>
 <p>Runs the integrity audit <b>and</b> the quality score on any volume and
-issues one verdict: <b>TRAIN / CAUTION / DO NOT TRAIN</b>.</p>
+issues one verdict: <b>TRAIN / CAUTION / DO NOT TRAIN</b>. Fresh runs 2026-09-30
+(<code>artifacts/2026-09-30-health-verdicts/</code>): TRAIN on the healthy
+PHerc0813 dl volume (integrity PASS, quality 77.4); DO NOT TRAIN on the
+defective PHerc0814 S3 pyramid (6 high-severity integrity findings — quality
+honestly unscorable, verdict from the audit alone).</p>
 <p><code>scrollq-health --root &lt;volume&gt;</code></p></div>
 <div class="card"><h3>ScrolIQ</h3>
 <p><b>Find the bottleneck.</b> The project is evolving from the scan-quality
