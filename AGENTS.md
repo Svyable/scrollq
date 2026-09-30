@@ -59,5 +59,7 @@ python -m pytest tests/ -q
 - Do not claim readability prediction. Triage signal only.
 - Opening PRs/issues upstream or publishing to PyPI needs the maintainer's
   explicit approval — prepare the branch, don't ship it.
-- Install with `pip install -e .`; the companion dependency
-  `zarr-pyramid-audit>=0.3.0` comes from PyPI.
+- For the tested development setup, install `requirements-ci.txt`, then
+  `pip install -e .`. CI pins the companion to a verified immutable commit.
+  The public package keeps its `zarr-pyramid-audit>=0.3.0` requirement.
+- Do not commit environments, caches, egg-info or build archives.

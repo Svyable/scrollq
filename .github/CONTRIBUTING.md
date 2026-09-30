@@ -19,8 +19,15 @@ welcome.
 git clone https://github.com/Svyable/scrollq.git
 cd scrollq
 python -m venv .venv && . .venv/bin/activate
-pip install -e ".[dev]"   # or: pip install -e .
+python -m pip install -r requirements-ci.txt
+python -m pip install -e .
 ```
+
+CI builds a source distribution, builds its wheel, installs that wheel, and
+runs the tests and command help checks against the installed package.
+`requirements-ci.txt` pins the companion revision; other dependencies retain
+their declared ranges, so this is not a fully locked dependency environment.
+Generated environments, caches, metadata and release archives stay untracked.
 
 ## Running the tools
 
