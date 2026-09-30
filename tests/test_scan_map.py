@@ -103,7 +103,7 @@ def test_scan_map_preserves_spatial_coordinates_without_readiness_score(monkeypa
     }
 
 
-def test_scan_map_retains_missing_and_failed_shards(monkeypatch):
+def test_scan_map_retains_unstored_and_failed_shards(monkeypatch):
     info = _info(shape=(3, 1, 1), outer=(1, 1, 1), inner=(1, 1, 1))
     _patch_common(
         monkeypatch,
@@ -121,7 +121,7 @@ def test_scan_map_retains_missing_and_failed_shards(monkeypatch):
 
     assert report["sampling"]["status_counts"] == {
         "decoded": 1,
-        "missing-shard": 1,
+        "unstored-shard": 1,
         "read-failure": 1,
     }
     statuses = {
@@ -129,8 +129,9 @@ def test_scan_map_retains_missing_and_failed_shards(monkeypatch):
         for region in report["regions"]
     }
     assert statuses[(0, 0, 0)] == "decoded"
-    assert statuses[(1, 0, 0)] == "missing-shard"
+    assert statuses[(1, 0, 0)] == "unstored-shard"
     assert statuses[(2, 0, 0)] == "read-failure"
+    assert "not evidence of corruption" in report["absence_semantics"]
 
 
 def test_scan_map_marks_sparse_mask_instead_of_silently_dropping(monkeypatch):
