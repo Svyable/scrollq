@@ -74,7 +74,14 @@ volumes. It decodes real voxels from every scroll volume — via the vendored
 volcomp decoder, no approximations — and scores each volume 0–100 on signal
 presence, texture energy, dynamic range, and an acquisition-artifact
 (dead-slice) scan. All 64 scroll volumes on dl.ash2txt.org scored, published
-as a ranked <a href="./">leaderboard</a> with every component exposed.</p></div>
+as a ranked <a href="./">leaderboard</a> with every component exposed.
+The project is evolving into <b>ScrolIQ</b>, an open diagnostic layer for the
+Challenge's 2026 open problems: <code>scroliq-scan-map</code> preserves
+spatial provenance instead of collapsing observations into one score,
+<code>scroliq-passport</code> turns one volume's evidence into a
+machine-readable record, and a Grand Prize probe protocol scores targets
+against auditable evidence. Alignment:
+<a href="open-problems-alignment.md">docs/open-problems-alignment.md</a>.</p></div>
 
 <div class="panel"><h2><span class="q">2.</span> How does this increase the probability of reading complete scrolls?</h2>
 <p>Segmentation is the bottleneck: expert hours and GPU time are scarce, and
@@ -102,7 +109,15 @@ It does not detect ink and does not predict which scroll reads first. The
 weights are a judgment call, published with every score — audit them, don't
 worship the ranking. During development a naive dead-slice rule false-positived
 on mask geometry; it was tightened, and the clean bill above is what survived
-verification.</div></div>
+verification.</div>
+<div class="panel"><h2><span class="q">5.</span> Known-success control</h2>
+<p>PHerc1667 — the Challenge's first completely virtually unwrapped and read
+scroll — now serves as a <b>scroll-level control</b> for the spatial scan
+metrics. Its p10–p90 intervals overlap the targets' substantially (nonzero
+fraction Jaccard ≈ 1.0 vs PHerc0813), which is a guardrail, not a score: any
+metric value inside the control's range cannot be called a failure on another
+scroll. Artifacts:
+<code>artifacts/2026-09-30-pherc1667-scan-control/</code>.</p></div>
 
 <div class="panel"><h2>One suite, two halves</h2>
 <div class="suite">
