@@ -134,6 +134,7 @@ jobs:
                       f"{overlap['jaccard']} |"
                   )
 
+          table_rows = "\n".join(lines)
           readme = f"""# PHerc1667 spatial-scan control — 2026-09-30
 
           PHerc1667 is the Challenge's first completely virtually unwrapped and
@@ -155,7 +156,7 @@ jobs:
 
           | Target | Metric | PHerc1667 p10–p90 | Target p10–p90 | interval Jaccard |
           |---|---|---:|---:|---:|
-          {"\n".join(lines)}
+          {table_rows}
 
           Interval overlap is not a quality score. It is a guard against inventing
           universal thresholds from visually appealing statistics: substantial
