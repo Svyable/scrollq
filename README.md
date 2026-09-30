@@ -24,6 +24,33 @@ Today the passport can directly populate data-access/decode provenance, sampled 
 
 The implementation roadmap is mapped directly to the Challenge's open problems in [`docs/open-problems-alignment.md`](docs/open-problems-alignment.md).
 
+
+## Spatial scan diagnostics
+
+The Challenge notes that scan quality is local: usable and severely degraded regions can coexist inside one volume. `scroliq-scan-map` therefore preserves spatial provenance instead of collapsing every observation into the legacy volume score.
+
+```bash
+scroliq-scan-map \
+  --root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
+  --grid 3 \
+  --chunks-per-shard 1 \
+  --out out/PHerc0813.scan-map.json
+```
+
+The report records sampled shard coordinates, level-0 voxel bounding boxes, decoded-chunk metrics, metric distributions, and explicit states for missing shards, sparse/background shards, read failures, and decode failures. It deliberately emits **no aggregate readability or readiness score**.
+
+A matching map can be attached to a passport:
+
+```bash
+scroliq-passport \
+  --volumes artifacts/2026-09-30-scrollq/volumes.json \
+  --root PHerc0813 \
+  --scan-map out/PHerc0813.scan-map.json \
+  --out out/PHerc0813.passport.json
+```
+
+The passport rejects a spatial artifact whose volume root does not exactly match the selected volume.
+
 ## Why this exists
 
 The Vesuvius pipeline has an allocation problem as well as an algorithm problem. Expert segmentation time, labeling effort, and GPU budgets are limited, while scan quality varies substantially across volumes.
