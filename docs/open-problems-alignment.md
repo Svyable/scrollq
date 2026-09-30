@@ -16,7 +16,7 @@ The existing ScrollQ score remains useful, but it means one narrow thing: sample
 
 | Challenge bottleneck | ScrolIQ role | Current state | Next measurable output |
 |---|---|---|---|
-| Local scan degradation / compressed regions | Scan diagnostics | Partial: deterministic real-voxel sampling, signal/texture/dynamic-range/artifact metrics, sampling provenance | Spatial quality map and local layer-separability/decohesion proxies |
+| Local scan degradation / compressed regions | Scan diagnostics | Implemented: deterministic coordinate-preserving spatial sampling, real-voxel metrics, explicit missing/masked/read-failure states | Validate on real scrolls; add local layer-separability/decohesion proxies |
 | Surface topology | Surface IQ | Planned | CT support, competing-surface ambiguity, topology-risk map |
 | Mesh connectivity | Mesh IQ | Planned | Holes, mergers, self-intersections, sheet-switch risk, local distortion |
 | Fiber connectivity | Fiber IQ | Planned | Continuity/orientation confidence and trace-break candidates |
@@ -45,6 +45,15 @@ A passport does **not** infer unmeasured stages from the scan-quality score. Tod
 - `surface`, `mesh`, `fibers`, `spiral`, `ink`: `unknown` until direct evidence is supplied.
 
 That asymmetry is intentional. It makes missing evidence visible instead of disguising it as confidence.
+
+
+## Spatial scan map
+
+`scroliq-scan-map` is the first diagnostic added after the passport contract. It samples a deterministic grid of L0 shards, decodes spread present inner chunks, and retains each observation's level-0 voxel bounding box.
+
+The output also keeps missing shards, sparse/background shards, transport failures, and decode failures as explicit spatial records. A volume can therefore contain a mix of usable and problematic observations without those states disappearing into an average.
+
+The current map is descriptive. It does not yet identify papyrus-layer separability, compression, or decohesion directly; those require validated local metrics against known-good and known-bad regions. This distinction is important for prize evidence: raw locality is implemented, while physical interpretation remains a validation task.
 
 ## Prize-oriented sequence
 
