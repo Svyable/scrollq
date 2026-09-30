@@ -1,0 +1,465 @@
+{
+  "schema_version": 1,
+  "created": "2026-09-30",
+  "purpose": "Locked geometry candidate pool before visual/ink screening.",
+  "selection_policy": {
+    "atlas": "For PHerc0800 and PHerc0813, choose 12 approximately equally spaced available window_z values and take w020 and w100 from each. Existing eye/gate verdicts are not read for selection.",
+    "PHerc1447": "Use all 15 official published segments; extract tifxyz centroids/bounds before fit/held-out assignment.",
+    "split": "Assign fit versus held-out only from geometry/proximity after bounds are complete; never use ink output or visual quality verdicts."
+  },
+  "sources": {
+    "atlas": {
+      "repository": "pscamillo/vesuvius-eligible-meshes",
+      "url": "https://github.com/pscamillo/vesuvius-eligible-meshes",
+      "index_path": "data/index.csv",
+      "index_sha": "ccc4f4c88f96e608f75cc7cf2f1a184489c13014",
+      "license": "MIT; Vesuvius-derived data retain CC BY-NC 4.0 terms documented by source."
+    },
+    "official_inventory": {
+      "repository": "Svyable/zarr-pyramid-audit",
+      "path": "artifacts/2026-09-29-s3/audit_pyramid.pyramids.jsonl",
+      "sha": "7a3595d3db72cd9f02bc1842d57ceac68c05886e"
+    }
+  },
+  "targets": {
+    "PHerc0800": {
+      "prize_volume_id": "20250521135224",
+      "base_shape_zyx": [
+        24298,
+        9867,
+        9867
+      ],
+      "atlas_total_meshes": 95,
+      "locked_candidates": [
+        {
+          "scroll": "PHerc0800",
+          "window_z": 5664,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z5664_w020",
+          "area_cm2": 1.74,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 5664,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z5664_w100",
+          "area_cm2": 8.48,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 6864,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z6864_w020",
+          "area_cm2": 1.78,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 6864,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z6864_w100",
+          "area_cm2": 8.53,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 7472,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z7472_w020",
+          "area_cm2": 1.66,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 7472,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z7472_w100",
+          "area_cm2": 8.36,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 8672,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z8672_w020",
+          "area_cm2": 2.04,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 8672,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z8672_w100",
+          "area_cm2": 8.04,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 9872,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z9872_w020",
+          "area_cm2": 1.88,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 9872,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z9872_w100",
+          "area_cm2": 8.69,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 10464,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z10464_w020",
+          "area_cm2": 1.93,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 10464,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z10464_w100",
+          "area_cm2": 8.76,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 12272,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z12272_w020",
+          "area_cm2": 1.95,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 12272,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z12272_w100",
+          "area_cm2": 8.84,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 12864,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z12864_w020",
+          "area_cm2": 1.87,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 12864,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z12864_w100",
+          "area_cm2": 8.55,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 14064,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z14064_w020",
+          "area_cm2": 1.91,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 14064,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z14064_w100",
+          "area_cm2": 9.18,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 15264,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z15264_w020",
+          "area_cm2": 1.71,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 15264,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z15264_w100",
+          "area_cm2": 8.93,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 15872,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z15872_w020",
+          "area_cm2": 1.63,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 15872,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z15872_w100",
+          "area_cm2": 9.08,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 17072,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z17072_w020",
+          "area_cm2": 1.67,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 17072,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z17072_w100",
+          "area_cm2": 8.25,
+          "bounds_status": "pending meta.json import"
+        }
+      ]
+    },
+    "PHerc0813": {
+      "prize_volume_id": "20250821151723",
+      "base_shape_zyx": [
+        16993,
+        7947,
+        7947
+      ],
+      "atlas_total_meshes": 75,
+      "locked_candidates": [
+        {
+          "scroll": "PHerc0813",
+          "window_z": 4704,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z4704_w020",
+          "area_cm2": 1.5,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 4704,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z4704_w100",
+          "area_cm2": 9.85,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 5296,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z5296_w020",
+          "area_cm2": 1.41,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 5296,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z5296_w100",
+          "area_cm2": 9.64,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 6496,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z6496_w020",
+          "area_cm2": 2.21,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 6496,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z6496_w100",
+          "area_cm2": 10.01,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 7104,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z7104_w020",
+          "area_cm2": 2.27,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 7104,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z7104_w100",
+          "area_cm2": 9.69,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 7696,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z7696_w020",
+          "area_cm2": 1.81,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 7696,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z7696_w100",
+          "area_cm2": 9.29,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 8288,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z8288_w020",
+          "area_cm2": 1.78,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 8288,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z8288_w100",
+          "area_cm2": 9.32,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 11296,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z11296_w020",
+          "area_cm2": 1.72,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 11296,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z11296_w100",
+          "area_cm2": 10.15,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 11904,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z11904_w020",
+          "area_cm2": 1.75,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 11904,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z11904_w100",
+          "area_cm2": 9.98,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 12496,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z12496_w020",
+          "area_cm2": 1.73,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 12496,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z12496_w100",
+          "area_cm2": 10.18,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 13088,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z13088_w020",
+          "area_cm2": 1.73,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 13088,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z13088_w100",
+          "area_cm2": 9.93,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 14304,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z14304_w020",
+          "area_cm2": 2.02,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 14304,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z14304_w100",
+          "area_cm2": 9.58,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 14896,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z14896_w020",
+          "area_cm2": 1.81,
+          "bounds_status": "pending meta.json import"
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 14896,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z14896_w100",
+          "area_cm2": 9.29,
+          "bounds_status": "pending meta.json import"
+        }
+      ]
+    },
+    "PHerc1447": {
+      "prize_volume_id": "20250521151220",
+      "base_shape_zyx": [
+        24297,
+        8343,
+        8343
+      ],
+      "official_segment_count": 15,
+      "official_segment_ids": [
+        "20250502180708-auto_grown_20250502160708188",
+        "20250502180748-auto_grown_20250502160748721",
+        "20250502182142-auto_grown_20250502161324419",
+        "20250502182456-auto_grown_20250502161202782",
+        "20250502183138-auto_grown_20250502162038685",
+        "20250502183421-auto_grown_20250502161744358",
+        "20250502184201-auto_grown_20250502163549332",
+        "20250502184658-auto_grown_20250502163923577",
+        "20250502184845-auto_grown_20250502164121265",
+        "20250502185519-auto_grown_20250502164303733",
+        "20250502205333-auto_grown_20250502181030065",
+        "20250702235910-auto_grown_20250702235910292",
+        "20250703025628-auto_grown_20250703025628283",
+        "20250703034159-auto_grown_20250703034159599",
+        "20251105093211-z_dbg_gen_00320"
+      ],
+      "bounds_status": "pending tifxyz centroid/bounds extraction"
+    }
+  },
+  "anti_cherrypick": [
+    "Do not remove candidates because a published eye verdict is poor.",
+    "Do not inspect ink maps before the geometry split is frozen.",
+    "Record failed candidates in the denominator.",
+    "Use exact prize-eligible CT volumes only."
+  ]
+}
