@@ -162,7 +162,7 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 
 <div class="panel alignment"><h2>Open-problem diagnostics<span class="sub">ScrolIQ maps evidence to the Vesuvius Challenge pipeline instead of treating one score as readiness.</span></h2>
 <div class="problem-grid">
-  <div class="problem"><div><h3>Scan + data</h3><span class="state live">LIVE</span></div><p>Real-voxel health, decode provenance, cloud-read failures. Next: local degradation maps.</p></div>
+  <div class="problem"><div><h3>Scan + data</h3><span class="state live">LIVE</span></div><p>Real-voxel health, decode provenance, and coordinate-preserving spatial scan maps. Next: validated layer-separability and decohesion diagnostics.</p></div>
   <div class="problem"><div><h3>Surface topology</h3><span class="state next">NEXT</span></div><p>CT support, competing sheets, topology risk, and surface-placement uncertainty.</p></div>
   <div class="problem"><div><h3>Mesh connectivity</h3><span class="state next">NEXT</span></div><p>Holes, mergers, sheet switches, self-intersections, and flattening distortion.</p></div>
   <div class="problem"><div><h3>Fiber connectivity</h3><span class="state plan">PLANNED</span></div><p>Continuity and orientation confidence for long-range papyrus fiber traces.</p></div>
