@@ -85,7 +85,9 @@ def alignment_manifest() -> dict[str, Any]:
     }
 
 
-def _scan_stage(volume: dict[str, Any]) -> dict[str, Any]:
+def _scan_stage(
+    volume: dict[str, Any], scan_map: dict[str, Any] | None = None
+) -> dict[str, Any]:
     if not volume.get("ok"):
         return {
             "status": "blocked",
@@ -96,7 +98,7 @@ def _scan_stage(volume: dict[str, Any]) -> dict[str, Any]:
     sampling = dict(volume.get("sampling") or {})
     metrics = dict(volume.get("metrics") or {})
     components = dict(volume.get("components") or {})
-    return {
+    stage = {
         "status": "measured",
         "open_problem": "scan-diagnostics",
         "quality_score": volume.get("score"),
@@ -115,10 +117,34 @@ def _scan_stage(volume: dict[str, Any]) -> dict[str, Any]:
         "components": components,
         "sampling": sampling,
         "limitation": (
-            "Current ScrollQ measurements are sparse whole-volume triage, not a "
-            "spatial map of compressed/degraded regions."
+            "The legacy ScrollQ score is sparse whole-volume triage. Spatial "
+            "diagnostics, when supplied, remain sampled observations rather than "
+            "a claim that every voxel has been characterized."
         ),
     }
+    if scan_map is None:
+        stage["spatial_map"] = {
+            "status": "unknown",
+            "reason": "no spatial scan-diagnostic artifact was supplied",
+        }
+    elif scan_map.get("root") != volume.get("root"):
+        stage["spatial_map"] = {
+            "status": "excluded",
+            "reason": "spatial scan artifact names a different volume root",
+        }
+    elif scan_map.get("diagnostic") != "spatial-scan-map":
+        stage["spatial_map"] = {
+            "status": "excluded",
+            "reason": "artifact is not a ScrolIQ spatial-scan-map",
+        }
+    else:
+        stage["spatial_map"] = {
+            "status": "measured" if scan_map.get("ok") else "partial",
+            "coordinate_space": scan_map.get("coordinate_space"),
+            "sampling": scan_map.get("sampling", {}),
+            "metric_distribution": scan_map.get("metric_distribution", {}),
+        }
+    return stage
 
 
 def _data_stage(volume: dict[str, Any]) -> dict[str, Any]:
@@ -168,13 +194,15 @@ def _unknown_stage(open_problem: str, reason: str) -> dict[str, str]:
 
 
 def build_passport(
-    volume: dict[str, Any], coverage: dict[str, Any] | None = None
+    volume: dict[str, Any],
+    coverage: dict[str, Any] | None = None,
+    scan_map: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build one evidence-preserving diagnostic passport from current artifacts."""
     root = str(volume.get("root", ""))
     stages = {
         "data": _data_stage(volume),
-        "scan": _scan_stage(volume),
+        "scan": _scan_stage(volume, scan_map),
         "surface": _unknown_stage(
             "surface-topology",
             "no surface-prediction or surface-support diagnostic was supplied",
@@ -210,6 +238,15 @@ def build_passport(
                 "priority": "high",
                 "action": "resolve incomplete sampling/read provenance before trusting scan triage",
                 "open_problem": "data-scale",
+            }
+        )
+
+    if stages["scan"].get("spatial_map", {}).get("status") == "unknown":
+        actions.append(
+            {
+                "priority": "next-evidence",
+                "action": "run scroliq-scan-map so local scan variation is coordinate-traceable",
+                "open_problem": "scan-diagnostics",
             }
         )
 
@@ -276,6 +313,7 @@ def main() -> None:
     ap.add_argument("--volumes", required=True, help="ScrollQ volumes.json")
     ap.add_argument("--root", required=True, help="exact volume root or unique substring")
     ap.add_argument("--coverage", default=None, help="optional ScrollQ coverage.json")
+    ap.add_argument("--scan-map", default=None, help="optional ScrolIQ spatial scan map")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -287,7 +325,12 @@ def main() -> None:
         else {}
     )
     coverage = coverage_map.get(volume.get("root")) if coverage_map else None
-    passport = build_passport(volume, coverage)
+    scan_map = (
+        json.loads(Path(args.scan_map).read_text(encoding="utf-8"))
+        if args.scan_map
+        else None
+    )
+    passport = build_passport(volume, coverage, scan_map)
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
