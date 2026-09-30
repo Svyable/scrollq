@@ -51,6 +51,11 @@ def test_passport_keeps_unmeasured_downstream_stages_unknown():
 
     assert passport["stages"]["scan"]["status"] == "measured"
     assert passport["stages"]["scan"]["quality_score"] == 71.2
+    assert passport["stages"]["scan"]["spatial_map"]["status"] == "unknown"
+    assert any(
+        action["open_problem"] == "scan-diagnostics"
+        for action in passport["next_actions"]
+    )
     for stage in ("surface", "mesh", "fibers", "spiral", "ink"):
         assert passport["stages"][stage]["status"] == "unknown"
 
@@ -79,3 +84,49 @@ def test_incomplete_sampling_is_a_high_priority_data_scale_action():
     assert passport["stages"]["data"]["status"] == "partial"
     assert passport["next_actions"][0]["priority"] == "high"
     assert passport["next_actions"][0]["open_problem"] == "data-scale"
+
+
+
+def test_passport_accepts_matching_spatial_scan_evidence():
+    volume = _volume()
+    scan_map = {
+        "diagnostic": "spatial-scan-map",
+        "root": volume["root"],
+        "ok": True,
+        "coordinate_space": "level0-voxel-index",
+        "sampling": {
+            "candidate_shards": 27,
+            "chunks_decoded": 24,
+            "status_counts": {"decoded": 24, "sparse-mask": 3},
+        },
+        "metric_distribution": {
+            "grad_energy": {"min": 2.0, "median": 8.0, "max": 14.0}
+        },
+    }
+
+    passport = build_passport(volume, scan_map=scan_map)
+    spatial = passport["stages"]["scan"]["spatial_map"]
+
+    assert spatial["status"] == "measured"
+    assert spatial["coordinate_space"] == "level0-voxel-index"
+    assert spatial["sampling"]["chunks_decoded"] == 24
+    assert not any(
+        action["open_problem"] == "scan-diagnostics"
+        for action in passport["next_actions"]
+    )
+
+
+def test_passport_fails_closed_on_spatial_map_for_different_volume():
+    volume = _volume()
+    scan_map = {
+        "diagnostic": "spatial-scan-map",
+        "root": "different-volume",
+        "ok": True,
+    }
+
+    passport = build_passport(volume, scan_map=scan_map)
+
+    assert passport["stages"]["scan"]["spatial_map"]["status"] == "excluded"
+    assert "different volume root" in (
+        passport["stages"]["scan"]["spatial_map"]["reason"]
+    )
