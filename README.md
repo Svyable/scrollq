@@ -1,12 +1,28 @@
-# ScrollQ
+# ScrolIQ
 
-**Train on the best first.**
+**Find the bottleneck. Fix the bottleneck. Read the scroll.**
 
-ScrollQ is an open, reproducible data-quality triage system for the [Vesuvius Challenge](https://scrollprize.org/) scroll volumes. It decodes **real level-0 voxels** from volcomp-sharded Zarr data, measures signal and acquisition quality, and assigns each volume a transparent **0–100 quality score** so scarce segmentation, labeling, and GPU effort can be directed toward the healthiest data first.
+ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](https://scrollprize.org/) virtual-unwrapping pipeline. The existing `scrollq` package measures **real level-0 CT voxels** and keeps its current commands for compatibility, but the project is expanding beyond a single volume-quality ranking toward evidence-backed diagnostics for the Challenge's published [2026 Open Problems](https://scrollprize.org/2026_open_problems): scan degradation, surface topology, mesh connectivity, fibers, spiral fitting, label quality, ink reliability, and data-scale reproducibility.
 
-**[Live leaderboard](https://svyable.github.io/scrollq/)** · **[September 2026 Progress Prize write-up](https://svyable.github.io/scrollq/september-2026.html)** · **[Reproducible campaign artifacts](artifacts/2026-09-30-scrollq/)**
+**[Live scan-quality survey](https://svyable.github.io/scrollq/)** · **[Open-problems alignment](docs/open-problems-alignment.md)** · **[September 2026 Progress Prize write-up](https://svyable.github.io/scrollq/september-2026.html)** · **[Reproducible campaign artifacts](artifacts/2026-09-30-scrollq/)**
 
-> ScrollQ is a **triage signal, not a readability claim**. It does not detect ink and it does not predict which scroll will be read first.
+> The existing 0–100 ScrollQ score is a **scan-health triage signal, not a readability or Grand Prize readiness score**. ScrolIQ treats unmeasured downstream stages as unknown rather than inferring them from CT quality.
+
+## Diagnostic passport
+
+The first ScrolIQ interface organizes the evidence for one volume around the Challenge's actual pipeline bottlenecks:
+
+```bash
+scroliq-passport \
+  --volumes artifacts/2026-09-30-scrollq/volumes.json \
+  --coverage artifacts/2026-09-30-scrollq/coverage.json \
+  --root PHerc0813 \
+  --out out/PHerc0813.passport.json
+```
+
+Today the passport can directly populate data-access/decode provenance, sampled scan-health evidence, and label/segment coverage. Surface, mesh, fiber, spiral, label-localization, and ink-reliability fields stay explicitly `unknown` until direct diagnostics are supplied. That is the contract: **measure the limiting stage; never manufacture confidence for missing evidence.**
+
+The implementation roadmap is mapped directly to the Challenge's open problems in [`docs/open-problems-alignment.md`](docs/open-problems-alignment.md).
 
 ## Why this exists
 
