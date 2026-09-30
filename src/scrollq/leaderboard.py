@@ -193,7 +193,7 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 </div>
 
 <div class="panel"><h2>Scan-quality distribution<span class="sub">64 volumes · 5-point bins</span></h2>
-  <div class="hist">{hist}</div>
+  {hist}
   <p style="color:var(--muted);font-size:.88rem">Legacy triage bands: <span class="tier S">S</span> ≥ 70 ·
   <span class="tier A">A</span> 60&ndash;70 · <span class="tier B">B</span> 45&ndash;60 ·
   <span class="tier C">C</span> &lt; 45</p>
@@ -272,7 +272,7 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
   const tb = document.querySelector("#lb tbody");
   const rows = Array.from(tb.querySelectorAll("tr.vol"));
   rows.forEach(r => {{ r._detail = r.nextElementSibling; }});
-  let sortK = "rank", asc = true, tierF = "", qF = "";
+  let sortK = "score", asc = false, tierF = "", qF = "";
   function tierOf(r){{ return r.dataset.tier; }}
   function apply(){{
     let vis = rows.filter(r =>
@@ -316,6 +316,12 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
   rows.forEach(r => r.addEventListener("click", () => {{
     if (r._detail) r._detail.classList.toggle("hidden");
   }}));
+  // reflect the initial sort (score, descending) in the header
+  const scoreTh = document.querySelector('#lb thead th[data-k="score"]');
+  if (scoreTh) {{
+    const s0 = document.createElement("span"); s0.className = "arr";
+    s0.textContent = " ▼"; scoreTh.appendChild(s0);
+  }}
   apply();
 }})();
 </script>
@@ -376,11 +382,14 @@ def main() -> None:
     counts = [sum(1 for s in scores if b0 <= s < b1 or (b1 == 80 and s == b1))
               for b0, b1 in bins]
     cmax = max(counts) or 1
+    aria = "Score distribution, 5-point bins: " + ", ".join(
+        f"{b0}\u2013{b0 + 5}: {c}" for (b0, _), c in zip(bins, counts))
     hist = "".join(
         f'<div class="bar"><div class="bv">{c}</div>'
         f'<div class="fill" style="height:{100 * c / cmax:.0f}%"></div>'
-        f'<div class="bl">{b0}</div></div>'
+        f'<div class="bl" aria-hidden="false">{b0}</div></div>'
         for (b0, _), c in zip(bins, counts))
+    hist = f'<div class="hist" role="img" aria-label="{html.escape(aria)}">{hist}</div>'
 
     rows = []
     for i, v in enumerate(ok, 1):
