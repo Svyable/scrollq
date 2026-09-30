@@ -138,6 +138,15 @@ def score_volume(base_url: str, root: str, samples: int = 4,
             chunk_results.append(chunk_metrics(vox))
             decoded_here += 1
 
+    sampling = {
+        "requested": samples,
+        "decoded": len(chunk_results),
+        "complete": len(chunk_results) == samples,
+        "rotate": rotate,
+        "shard_candidates": len(cands),
+        "missing_shards": missing_shards,
+    }
+    result["sampling"] = sampling
     if not chunk_results:
         result["error"] = (f"no chunks decoded "
                            f"({missing_shards} shards absent)")
