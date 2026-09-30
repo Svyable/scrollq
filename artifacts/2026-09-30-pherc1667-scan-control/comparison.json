@@ -1,0 +1,231 @@
+{
+  "schema_version": "1.0",
+  "campaign": "2026-09-30-pherc1667-scan-control",
+  "generated_at": "2026-09-30T22:07:32.044537+00:00",
+  "source_commit": "7323b7108b5ff91351fc299ef80b535500600f9e",
+  "control": {
+    "scroll": "PHerc1667",
+    "root": "community-uploads/forrest/volcomp/PHerc1667/volumes/20251217075048-2.399um-0.2m-78keV-masked.zarr",
+    "sampling": {
+      "grid_per_dimension": 6,
+      "chunks_per_shard": 1,
+      "rotate": 0,
+      "candidate_shards": 216,
+      "chunks_decoded": 45,
+      "status_counts": {
+        "unstored-shard": 167,
+        "decoded": 45,
+        "sparse-mask": 4
+      }
+    },
+    "metric_distribution": {
+      "nonzero_frac": {
+        "min": 0.000946,
+        "p10": 0.012546,
+        "median": 0.999852,
+        "p90": 1.0,
+        "max": 1.0
+      },
+      "grad_energy": {
+        "min": 0.003701,
+        "p10": 0.069284,
+        "median": 3.576119,
+        "p90": 6.752949,
+        "max": 8.079731
+      },
+      "dyn_range": {
+        "min": 0.0,
+        "p10": 0.8,
+        "median": 151.0,
+        "p90": 174.0,
+        "max": 194.0
+      },
+      "sat_frac": {
+        "min": 0.0,
+        "p10": 0.0,
+        "median": 0.00024,
+        "p90": 0.001026,
+        "max": 0.003602
+      }
+    },
+    "known_scroll_level_outcome": "PHerc1667 was publicly announced as completely virtually unwrapped and read on 2026-06-25.",
+    "outcome_source": "https://scrollprize.org/firstscroll",
+    "limitation": "This is a scroll-level known-success control. The sampled voxel boxes are not yet aligned to the published readable surface, so this is not local ground truth."
+  },
+  "target_comparisons": {
+    "PHerc0813": {
+      "nonzero_frac": {
+        "control": {
+          "min": 0.000946,
+          "p10": 0.012546,
+          "median": 0.999852,
+          "p90": 1.0,
+          "max": 1.0
+        },
+        "target": {
+          "min": 0.004282,
+          "p10": 0.009461,
+          "median": 0.903377,
+          "p90": 0.999997,
+          "max": 1.0
+        },
+        "central80_interval_overlap": {
+          "intersection": 0.987451,
+          "union": 0.990539,
+          "jaccard": 0.996883
+        }
+      },
+      "grad_energy": {
+        "control": {
+          "min": 0.003701,
+          "p10": 0.069284,
+          "median": 3.576119,
+          "p90": 6.752949,
+          "max": 8.079731
+        },
+        "target": {
+          "min": 0.013853,
+          "p10": 0.030983,
+          "median": 7.107719,
+          "p90": 11.011927,
+          "max": 11.854323
+        },
+        "central80_interval_overlap": {
+          "intersection": 6.683665,
+          "union": 10.980944,
+          "jaccard": 0.60866
+        }
+      },
+      "dyn_range": {
+        "control": {
+          "min": 0.0,
+          "p10": 0.8,
+          "median": 151.0,
+          "p90": 174.0,
+          "max": 194.0
+        },
+        "target": {
+          "min": 0.0,
+          "p10": 0.0,
+          "median": 138.0,
+          "p90": 157.3,
+          "max": 188.0
+        },
+        "central80_interval_overlap": {
+          "intersection": 156.5,
+          "union": 174.0,
+          "jaccard": 0.899425
+        }
+      },
+      "sat_frac": {
+        "control": {
+          "min": 0.0,
+          "p10": 0.0,
+          "median": 0.00024,
+          "p90": 0.001026,
+          "max": 0.003602
+        },
+        "target": {
+          "min": 0.0,
+          "p10": 0.0,
+          "median": 5e-05,
+          "p90": 0.000359,
+          "max": 0.001195
+        },
+        "central80_interval_overlap": {
+          "intersection": 0.000359,
+          "union": 0.001026,
+          "jaccard": 0.349903
+        }
+      }
+    },
+    "PHerc1447": {
+      "nonzero_frac": {
+        "control": {
+          "min": 0.000946,
+          "p10": 0.012546,
+          "median": 0.999852,
+          "p90": 1.0,
+          "max": 1.0
+        },
+        "target": {
+          "min": 0.002794,
+          "p10": 0.012022,
+          "median": 0.662608,
+          "p90": 0.999994,
+          "max": 1.0
+        },
+        "central80_interval_overlap": {
+          "intersection": 0.987448,
+          "union": 0.987978,
+          "jaccard": 0.999464
+        }
+      },
+      "grad_energy": {
+        "control": {
+          "min": 0.003701,
+          "p10": 0.069284,
+          "median": 3.576119,
+          "p90": 6.752949,
+          "max": 8.079731
+        },
+        "target": {
+          "min": 0.011722,
+          "p10": 0.118442,
+          "median": 3.085169,
+          "p90": 9.084437,
+          "max": 11.700658
+        },
+        "central80_interval_overlap": {
+          "intersection": 6.634507,
+          "union": 9.015153,
+          "jaccard": 0.735928
+        }
+      },
+      "dyn_range": {
+        "control": {
+          "min": 0.0,
+          "p10": 0.8,
+          "median": 151.0,
+          "p90": 174.0,
+          "max": 194.0
+        },
+        "target": {
+          "min": 0.0,
+          "p10": 1.6,
+          "median": 122.0,
+          "p90": 150.4,
+          "max": 188.0
+        },
+        "central80_interval_overlap": {
+          "intersection": 148.8,
+          "union": 173.2,
+          "jaccard": 0.859122
+        }
+      },
+      "sat_frac": {
+        "control": {
+          "min": 0.0,
+          "p10": 0.0,
+          "median": 0.00024,
+          "p90": 0.001026,
+          "max": 0.003602
+        },
+        "target": {
+          "min": 0.0,
+          "p10": 0.0,
+          "median": 0.0,
+          "p90": 0.000182,
+          "max": 0.001045
+        },
+        "central80_interval_overlap": {
+          "intersection": 0.000182,
+          "union": 0.001026,
+          "jaccard": 0.177388
+        }
+      }
+    }
+  },
+  "interpretation": "Central-80 interval overlap is descriptive only. It can falsify naive universal thresholds when a target range overlaps a known-success scroll range, but it cannot prove scan quality or causality.",
+  "next_validation": "Align sampled voxel boxes to published PHerc1667 surface/mesh coordinates and compare diagnostics against locally verified successful and difficult unwrapping regions."
+}
