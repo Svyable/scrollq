@@ -32,8 +32,11 @@ def score_volume(base_url: str, root: str, samples: int = 4,
     ``rotate`` cyclically shifts the shard-candidate order, giving a
     different deterministic sample for stability checks.
     """
-    store = open_store(base_url)
     result: dict = {"root": root, "ok": False}
+    if samples < 1:
+        result["error"] = "samples must be >= 1"
+        return result
+    store = open_store(base_url)
     ok, reason = vc.available()
     if not ok:
         result["error"] = f"volcomp unavailable: {reason}"
@@ -68,7 +71,7 @@ def score_volume(base_url: str, root: str, samples: int = 4,
         rotate %= max(1, len(cands))
         cands = cands[rotate:] + cands[:rotate]
     for sc in cands:
-        if len(chunk_results) >= 6:
+        if len(chunk_results) >= samples:
             break
         skey = vc.shard_key(root, "0", sc)
         cps = vc.inner_chunks_per_shard(info, sc)
@@ -103,7 +106,7 @@ def score_volume(base_url: str, root: str, samples: int = 4,
             inner_grid_n *= c
         decoded_here = 0
         for flat_i in _spread(inner_grid_n, 6):
-            if decoded_here >= 2:
+            if decoded_here >= 2 or len(chunk_results) >= samples:
                 break
             ic = []
             rem = flat_i
