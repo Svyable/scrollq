@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScrollQ — Vesuvius scroll volume quality leaderboard</title>
+<style>
+body{font-family:-apple-system,system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#1a1a1a}
+table{border-collapse:collapse;width:100%;font-size:.85rem}
+th,td{border:1px solid #ddd;padding:.35rem .5rem;text-align:right}
+th:first-child,td:first-child,td:nth-child(2){text-align:left}
+th{background:#f5f5f5;position:sticky;top:0}
+tr:nth-child(even){background:#fafafa}
+.score{font-weight:700}
+.warn{color:#b35400;font-weight:700}
+code{font-size:.78rem}
+.note{background:#fff8e6;border:1px solid #e6c200;padding:.8rem 1rem;border-radius:6px}
+</style></head><body>
+<h1>ScrollQ leaderboard</h1>
+<p>Data-quality triage for Vesuvius scroll volumes: <strong>train on the best
+first.</strong> Each volume's full-resolution level is sampled (4 &times;
+128&sup3; chunks), decoded, and scored 0&ndash;100 on signal presence, texture
+energy, dynamic range, and acquisition-artifact penalties. Method and weights
+are published in the <a href="https://github.com/Svyable/scrollq">repo</a> —
+re-weight it however you like.</p>
+<div class="note"><strong>Honest scope:</strong> this is a triage signal, not a
+readability claim. It does not detect ink and does not predict which scroll
+will read. It tells you which volumes have the healthiest voxels, so
+segmentation effort goes where the data is strongest.</div>
+<p>64 volumes scored, 2026-09-30 15:32 UTC.</p>
+<table><thead><tr>
+<th>#</th><th>volume</th><th>score</th><th>signal/40</th><th>texture/30</th>
+<th>dynamic/20</th><th>sat pen</th><th>dead-slice pen</th>
+<th>nonzero</th><th>grad</th><th>dyn range</th><th>dead slices</th>
+</tr></thead><tbody>
+<tr><td>1</td><td><code>PHerc0813/20250821151723-9.362um-1.2m-113keV-masked</code></td><td class="score">77.4</td><td>40.0</td><td>22.8</td><td>14.6</td><td>0.0</td><td>0.0</td><td>1.000</td><td>9.14</td><td>146</td><td>0</td></tr>
+<tr><td>2</td><td><code>PHerc0139/20250728140407-9.362um-1.2m-113keV-masked</code></td><td class="score">75.9</td><td>39.0</td><td>19.6</td><td>17.2</td><td>0.0</td><td>0.0</td><td>0.879</td><td>7.85</td><td>172</td><td>0</td></tr>
+<tr><td>3</td><td><code>PHerc0139/20250822062710-2.403um-0.2m-77keV-masked</code></td><td class="score">75.8</td><td>40.0</td><td>17.0</td><td>19.4</td><td>0.6</td><td>0.0</td><td>1.000</td><td>6.80</td><td>194</td><td>0</td></tr>
+<tr><td>4</td><td><code>PHerc0009B/20250820154339-2.401um-0.3m-77keV-masked</code></td><td class="score">74.5</td><td>40.0</td><td>16.9</td><td>18.9</td><td>1.3</td><td>0.0</td><td>0.999</td><td>6.75</td><td>189</td><td>0</td></tr>
+<tr><td>5</td><td><code>PHerc0332/20251211183505-2.399um-0.2m-78keV-masked</code></td><td class="score">74.0</td><td>40.0</td><td>17.4</td><td>16.8</td><td>0.2</td><td>0.0</td><td>1.000</td><td>6.96</td><td>168</td><td>0</td></tr>
+<tr><td>6</td><td><code>PHerc0846A/20250728152254-9.362um-1.2m-113keV-masked</code></td><td class="score">71.5</td><td>40.0</td><td>14.0</td><td>17.6</td><td>0.1</td><td>0.0</td><td>0.943</td><td>5.59</td><td>176</td><td>0</td></tr>
+<tr><td>7</td><td><code>PHerc1447/20250521151220-8.640um-1.2m-116keV-masked</code></td><td class="score">70.7</td><td>40.0</td><td>17.8</td><td>13.0</td><td>0.0</td><td>0.0</td><td>0.917</td><td>7.13</td><td>130</td><td>0</td></tr>
+<tr><td>8</td><td><code>PHerc0139/20250820105138-2.403um-0.2m-77keV-masked</code></td><td class="score">70.0</td><td>40.0</td><td>13.0</td><td>17.4</td><td>0.3</td><td>0.0</td><td>0.916</td><td>5.20</td><td>174</td><td>0</td></tr>
+<tr><td>9</td><td><code>PHerc0343P/20250521134555-8.640um-1.2m-116keV-masked</code></td><td class="score">69.4</td><td>35.5</td><td>19.8</td><td>14.2</td><td>0.1</td><td>0.0</td><td>0.798</td><td>7.91</td><td>142</td><td>0</td></tr>
+<tr><td>10</td><td><code>PHerc0009B/20260319104112-2.401um-0.3m-77keV-masked</code></td><td class="score">69.0</td><td>40.0</td><td>12.3</td><td>18.6</td><td>1.8</td><td>0.0</td><td>1.000</td><td>4.91</td><td>186</td><td>0</td></tr>
+<tr><td>11</td><td><code>PHerc0139/20260319133050-2.403um-0.2m-77keV-masked</code></td><td class="score">68.8</td><td>40.0</td><td>13.5</td><td>15.4</td><td>0.1</td><td>0.0</td><td>1.000</td><td>5.38</td><td>154</td><td>0</td></tr>
+<tr><td>12</td><td><code>PHerc0841/20260319124803-2.403um-0.2m-77keV-masked</code></td><td class="score">67.7</td><td>40.0</td><td>12.4</td><td>15.8</td><td>0.6</td><td>0.0</td><td>0.973</td><td>4.98</td><td>158</td><td>0</td></tr>
+<tr><td>13</td><td><code>PHerc0172/20241024131839-7.910um-53keV-masked</code></td><td class="score">67.6</td><td>32.1</td><td>20.7</td><td>15.3</td><td>0.4</td><td>0.0</td><td>0.721</td><td>8.28</td><td>153</td><td>0</td></tr>
+<tr><td>14</td><td><code>PHerc1667/20251217075048-2.399um-0.2m-78keV-masked</code></td><td class="score">67.3</td><td>40.0</td><td>10.9</td><td>17.5</td><td>1.0</td><td>0.0</td><td>1.000</td><td>4.34</td><td>174</td><td>0</td></tr>
+<tr><td>15</td><td><code>PHerc0139/20260319133554-2.403um-0.2m-77keV-masked</code></td><td class="score">67.2</td><td>40.0</td><td>11.8</td><td>15.4</td><td>0.1</td><td>0.0</td><td>0.999</td><td>4.71</td><td>154</td><td>0</td></tr>
+<tr><td>16</td><td><code>PHerc0846B/20250804142305-9.362um-1.2m-113keV-masked</code></td><td class="score">67.1</td><td>33.4</td><td>17.7</td><td>16.1</td><td>0.1</td><td>0.0</td><td>0.751</td><td>7.09</td><td>161</td><td>0</td></tr>
+<tr><td>17</td><td><code>PHerc0814/20260309142202-2.399um-0.2m-78keV-masked</code></td><td class="score">66.7</td><td>40.0</td><td>13.8</td><td>13.1</td><td>0.3</td><td>0.0</td><td>1.000</td><td>5.53</td><td>132</td><td>0</td></tr>
+<tr><td>18</td><td><code>PHercParis4/20260323153942-2.400um-0.2m-137keV-masked</code></td><td class="score">66.2</td><td>39.0</td><td>14.6</td><td>12.6</td><td>0.1</td><td>0.0</td><td>0.877</td><td>5.86</td><td>126</td><td>0</td></tr>
+<tr><td>19</td><td><code>PHerc0814/20260521123630-1.129um-0.2m-59keV-masked</code></td><td class="score">65.4</td><td>40.0</td><td>9.7</td><td>17.9</td><td>2.2</td><td>0.0</td><td>0.958</td><td>3.90</td><td>179</td><td>0</td></tr>
+<tr><td>20</td><td><code>PHerc1299/20260309130042-2.399um-0.2m-78keV-masked</code></td><td class="score">65.2</td><td>40.0</td><td>12.1</td><td>13.1</td><td>0.0</td><td>0.0</td><td>1.000</td><td>4.82</td><td>132</td><td>0</td></tr>
+<tr><td>21</td><td><code>PHerc0257/20250821151750-9.362um-1.2m-113keV-masked</code></td><td class="score">63.9</td><td>40.0</td><td>15.1</td><td>8.9</td><td>0.2</td><td>0.0</td><td>0.985</td><td>6.06</td><td>90</td><td>0</td></tr>
+<tr><td>22</td><td><code>PHerc1203/20260319130212-2.403um-0.2m-77keV-masked</code></td><td class="score">63.8</td><td>40.0</td><td>10.2</td><td>13.7</td><td>0.0</td><td>0.0</td><td>0.973</td><td>4.08</td><td>137</td><td>0</td></tr>
+<tr><td>23</td><td><code>PHercParis3/20260427095331-2.400um-0.2m-78keV-masked</code></td><td class="score">63.5</td><td>40.0</td><td>10.1</td><td>13.4</td><td>0.0</td><td>0.0</td><td>1.000</td><td>4.06</td><td>134</td><td>0</td></tr>
+<tr><td>24</td><td><code>PHercParis4/20260411134726-2.400um-0.2m-78keV-masked</code></td><td class="score">63.0</td><td>40.0</td><td>10.7</td><td>12.5</td><td>0.2</td><td>0.0</td><td>1.000</td><td>4.29</td><td>124</td><td>0</td></tr>
+<tr><td>25</td><td><code>PHerc0846A/20260319102732-2.403um-0.2m-77keV-masked</code></td><td class="score">62.7</td><td>38.5</td><td>11.0</td><td>14.3</td><td>1.0</td><td>0.0</td><td>0.866</td><td>4.40</td><td>143</td><td>0</td></tr>
+<tr><td>26</td><td><code>PHercMAN5/20260311104824-2.399um-0.2m-78keV-masked</code></td><td class="score">62.3</td><td>40.0</td><td>10.7</td><td>11.6</td><td>0.0</td><td>0.0</td><td>1.000</td><td>4.28</td><td>116</td><td>0</td></tr>
+<tr><td>27</td><td><code>PHerc0500P2/20250526151718-2.215um-0.4m-111keV-masked</code></td><td class="score">60.2</td><td>40.0</td><td>9.0</td><td>11.2</td><td>0.1</td><td>0.0</td><td>1.000</td><td>3.62</td><td>112</td><td>0</td></tr>
+<tr><td>28</td><td><code>PHercParis4/20260310173927-45.532um-11.0m-110keV-masked</code></td><td class="score">59.8</td><td>28.4</td><td>18.8</td><td>12.7</td><td>0.0</td><td>0.0</td><td>0.638</td><td>7.51</td><td>127</td><td>0</td></tr>
+<tr><td>29</td><td><code>PHerc0175A/20250521115057-8.640um-1.2m-116keV-masked</code></td><td class="score">59.7</td><td>28.8</td><td>15.2</td><td>15.7</td><td>0.0</td><td>0.0</td><td>0.647</td><td>6.08</td><td>157</td><td>0</td></tr>
+<tr><td>30</td><td><code>PHerc0175B/20250521125822-8.640um-1.2m-116keV-masked</code></td><td class="score">59.0</td><td>30.1</td><td>14.1</td><td>14.9</td><td>0.0</td><td>0.0</td><td>0.677</td><td>5.62</td><td>149</td><td>0</td></tr>
+<tr><td>31</td><td><code>PHercParis4/20260608103018-1.129um-0.2m-78keV-masked</code></td><td class="score">58.7</td><td>40.0</td><td>6.5</td><td>12.9</td><td>0.7</td><td>0.0</td><td>0.934</td><td>2.60</td><td>129</td><td>0</td></tr>
+<tr><td>32</td><td><code>PHerc0125/20250821151825-9.362um-1.2m-113keV-masked</code></td><td class="score">58.5</td><td>34.2</td><td>10.9</td><td>13.5</td><td>0.1</td><td>0.0</td><td>0.769</td><td>4.37</td><td>135</td><td>0</td></tr>
+<tr><td>33</td><td><code>PHercMANBp/20260427100434-1.129um-0.2m-59keV-masked</code></td><td class="score">58.2</td><td>40.0</td><td>7.1</td><td>11.1</td><td>0.0</td><td>0.0</td><td>1.000</td><td>2.86</td><td>111</td><td>0</td></tr>
+<tr><td>34</td><td><code>PHerc0483B/20251124083638-8.640um-1.2m-116keV-masked</code></td><td class="score">58.1</td><td>33.3</td><td>13.0</td><td>11.8</td><td>0.0</td><td>0.0</td><td>0.750</td><td>5.22</td><td>118</td><td>0</td></tr>
+<tr><td>35</td><td><code>PHercMANB/20260323091048-2.399um-0.2m-78keV-masked</code></td><td class="score">58.0</td><td>40.0</td><td>8.2</td><td>9.8</td><td>0.0</td><td>0.0</td><td>0.999</td><td>3.29</td><td>98</td><td>0</td></tr>
+<tr><td>36</td><td><code>PHerc0814/20250804134230-9.362um-1.2m-113keV-masked</code></td><td class="score">57.3</td><td>27.0</td><td>18.8</td><td>11.7</td><td>0.2</td><td>0.0</td><td>0.607</td><td>7.51</td><td>117</td><td>0</td></tr>
+<tr><td>37</td><td><code>PHerc0139/20260413113053-1.129um-0.2m-59keV-masked</code></td><td class="score">56.4</td><td>39.8</td><td>3.6</td><td>12.9</td><td>0.0</td><td>0.0</td><td>0.896</td><td>1.46</td><td>129</td><td>0</td></tr>
+<tr><td>38</td><td><code>PHerc1451/20260319101107-2.399um-0.2m-78keV-masked</code></td><td class="score">53.8</td><td>31.2</td><td>11.1</td><td>11.5</td><td>0.1</td><td>0.0</td><td>0.703</td><td>4.43</td><td>115</td><td>0</td></tr>
+<tr><td>39</td><td><code>PHerc0306B/20250521133212-8.640um-1.2m-116keV-masked</code></td><td class="score">53.5</td><td>25.3</td><td>14.4</td><td>13.8</td><td>0.1</td><td>0.0</td><td>0.569</td><td>5.77</td><td>138</td><td>0</td></tr>
+<tr><td>40</td><td><code>PHerc0358/20250821151737-9.362um-1.2m-113keV-masked</code></td><td class="score">53.4</td><td>35.9</td><td>10.7</td><td>6.8</td><td>0.0</td><td>0.0</td><td>0.808</td><td>4.27</td><td>68</td><td>0</td></tr>
+<tr><td>41</td><td><code>PHerc0343/20250521140437-8.640um-1.2m-116keV-masked</code></td><td class="score">53.3</td><td>31.3</td><td>10.7</td><td>11.3</td><td>0.0</td><td>0.0</td><td>0.705</td><td>4.28</td><td>113</td><td>0</td></tr>
+<tr><td>42</td><td><code>PHerc1203/20250820131727-9.362um-1.2m-113keV-masked</code></td><td class="score">53.2</td><td>29.2</td><td>11.7</td><td>12.3</td><td>0.0</td><td>0.0</td><td>0.657</td><td>4.66</td><td>123</td><td>0</td></tr>
+<tr><td>43</td><td><code>PHerc0490A/20250521151210-8.640um-1.2m-116keV-masked</code></td><td class="score">53.0</td><td>27.8</td><td>9.9</td><td>15.3</td><td>0.0</td><td>0.0</td><td>0.625</td><td>3.98</td><td>153</td><td>0</td></tr>
+<tr><td>44</td><td><code>PHerc1667/20260323082859-1.129um-0.2m-59keV-masked</code></td><td class="score">52.4</td><td>40.0</td><td>2.9</td><td>9.5</td><td>0.0</td><td>0.0</td><td>0.964</td><td>1.14</td><td>95</td><td>0</td></tr>
+<tr><td>45</td><td><code>PHercMANBp/20251216152116-2.399um-0.2m-78keV-masked</code></td><td class="score">52.2</td><td>30.5</td><td>10.0</td><td>11.7</td><td>0.0</td><td>0.0</td><td>0.687</td><td>3.99</td><td>117</td><td>0</td></tr>
+<tr><td>46</td><td><code>PHercParis4/20260310170716-45.532um-11.0m-74keV-masked</code></td><td class="score">51.0</td><td>28.5</td><td>11.1</td><td>11.5</td><td>0.1</td><td>0.0</td><td>0.641</td><td>4.45</td><td>115</td><td>0</td></tr>
+<tr><td>47</td><td><code>PHerc0490B/20250521151215-8.640um-1.2m-116keV-masked</code></td><td class="score">50.9</td><td>27.6</td><td>9.3</td><td>13.9</td><td>0.0</td><td>0.0</td><td>0.622</td><td>3.73</td><td>139</td><td>0</td></tr>
+<tr><td>48</td><td><code>PHerc0139/20260102150214-2.399um-0.2m-78keV-masked</code></td><td class="score">49.8</td><td>40.0</td><td>3.5</td><td>6.3</td><td>0.0</td><td>0.0</td><td>1.000</td><td>1.40</td><td>63</td><td>0</td></tr>
+<tr><td>49</td><td><code>PHerc1451/20250521151225-8.640um-1.2m-116keV-masked</code></td><td class="score">49.8</td><td>22.7</td><td>12.8</td><td>14.3</td><td>0.0</td><td>0.0</td><td>0.512</td><td>5.12</td><td>143</td><td>0</td></tr>
+<tr><td>50</td><td><code>PHerc0483A/20250521140913-8.640um-1.2m-116keV-masked</code></td><td class="score">48.5</td><td>24.2</td><td>10.0</td><td>14.4</td><td>0.0</td><td>0.0</td><td>0.544</td><td>3.99</td><td>144</td><td>0</td></tr>
+<tr><td>51</td><td><code>PHerc0211/20250821151803-9.362um-1.2m-113keV-masked</code></td><td class="score">48.1</td><td>30.1</td><td>8.4</td><td>9.6</td><td>0.1</td><td>0.0</td><td>0.678</td><td>3.37</td><td>96</td><td>0</td></tr>
+<tr><td>52</td><td><code>PHerc0500P2/20250820143440-9.362um-1.2m-113keV-masked</code></td><td class="score">47.5</td><td>35.6</td><td>4.8</td><td>7.0</td><td>0.0</td><td>0.0</td><td>0.802</td><td>1.94</td><td>70</td><td>0</td></tr>
+<tr><td>53</td><td><code>PHerc1218/20250521120456-8.640um-1.2m-116keV-masked</code></td><td class="score">45.1</td><td>22.7</td><td>9.2</td><td>13.3</td><td>0.0</td><td>0.0</td><td>0.511</td><td>3.68</td><td>133</td><td>0</td></tr>
+<tr><td>54</td><td><code>PHerc0009B/20250521125136-8.640um-1.2m-116keV-masked</code></td><td class="score">44.6</td><td>21.3</td><td>9.9</td><td>13.5</td><td>0.0</td><td>0.0</td><td>0.479</td><td>3.95</td><td>135</td><td>0</td></tr>
+<tr><td>55</td><td><code>PHerc0191/20250821151635-9.362um-1.2m-113keV-masked</code></td><td class="score">43.5</td><td>29.3</td><td>7.0</td><td>7.3</td><td>0.1</td><td>0.0</td><td>0.658</td><td>2.79</td><td>73</td><td>0</td></tr>
+<tr><td>56</td><td><code>PHerc0800/20250521135224-8.640um-1.2m-116keV-masked</code></td><td class="score">42.6</td><td>25.1</td><td>9.3</td><td>8.2</td><td>0.0</td><td>0.0</td><td>0.564</td><td>3.73</td><td>82</td><td>0</td></tr>
+<tr><td>57</td><td><code>PHerc0500P2/20250821110041-0.500um-masked</code></td><td class="score">41.9</td><td>40.0</td><td>0.7</td><td>1.2</td><td>0.0</td><td>0.0</td><td>1.000</td><td>0.27</td><td>12</td><td>0</td></tr>
+<tr><td>58</td><td><code>PHerc0500P2/20250821110041-0.550um-0.1m-65keV-masked</code></td><td class="score">41.9</td><td>40.0</td><td>0.7</td><td>1.2</td><td>0.0</td><td>0.0</td><td>1.000</td><td>0.27</td><td>12</td><td>0</td></tr>
+<tr><td>59</td><td><code>PHerc0268/20251110183117-8.640um-1.2m-116keV-masked</code></td><td class="score">38.3</td><td>25.3</td><td>5.6</td><td>7.5</td><td>0.0</td><td>0.0</td><td>0.568</td><td>2.23</td><td>75</td><td>0</td></tr>
+<tr><td>60</td><td><code>PHerc0343P/20260304131111-2.215um-0.4m-111keV-masked</code></td><td class="score">31.9</td><td>40.0</td><td>4.7</td><td>12.3</td><td>25.0</td><td>0.0</td><td>1.000</td><td>1.87</td><td>123</td><td>0</td></tr>
+<tr><td>61</td><td><code>PHerc1545/20250821151648-9.362um-1.2m-113keV-masked</code></td><td class="score">30.8</td><td>19.8</td><td>2.4</td><td>8.6</td><td>0.0</td><td>0.0</td><td>0.446</td><td>0.97</td><td>86</td><td>0</td></tr>
+<tr><td>62</td><td><code>PHerc0826/20250821151701-9.362um-1.2m-113keV-masked</code></td><td class="score">28.2</td><td>14.9</td><td>3.7</td><td>9.6</td><td>0.0</td><td>0.0</td><td>0.336</td><td>1.48</td><td>96</td><td>0</td></tr>
+<tr><td>63</td><td><code>PHerc0500P2/20250528085330-4.317um-1.2m-111keV-masked</code></td><td class="score">28.1</td><td>14.3</td><td>5.3</td><td>19.7</td><td>11.2</td><td>0.0</td><td>0.323</td><td>2.13</td><td>197</td><td>0</td></tr>
+<tr><td>64</td><td><code>PHerc0841/20250821151531-9.366um-1.2m-113keV-masked</code></td><td class="score">27.4</td><td>20.8</td><td>1.5</td><td>5.1</td><td>0.0</td><td>0.0</td><td>0.468</td><td>0.59</td><td>51</td><td>0</td></tr>
+</tbody></table>
+<p><small>Generated by <a href="https://github.com/Svyable/scrollq">ScrollQ</a>
+from public dl.ash2txt.org volumes. Scores are heuristic and published with
+their components — audit the weights, don't worship the ranking.</small></p>
+</body></html>

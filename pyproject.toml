@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scrollq"
+version = "0.1.0"
+description = "Train on the best first: data-quality scores for Vesuvius scroll volumes"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Sven" }]
+dependencies = [
+    "numpy",
+    "requests",
+    "zarr-pyramid-audit @ git+https://github.com/Svyable/zarr-pyramid-audit.git",
+]
+
+[project.scripts]
+scrollq-score = "scrollq.cli:main"
+scrollq-leaderboard = "scrollq.leaderboard:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

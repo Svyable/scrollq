@@ -1,0 +1,56 @@
+# ScrollQ — train on the best first
+
+Data-quality triage for Vesuvius scroll volumes. Every scroll volume gets a
+**0–100 quality score** from its actual voxels, so segmentation and
+ink-detection effort goes where the data is healthiest first.
+
+**Live leaderboard:** https://svyable.github.io/scrollq/
+
+## What it measures
+
+For each volume, 4 × 128³ chunks are sampled at full resolution (level 0)
+and decoded with the real volcomp decoder (via the
+[zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit) package,
+which vendors MIT-licensed libvolcomp). Per-chunk metrics:
+
+| metric | what it says |
+|---|---|
+| `nonzero_frac` | fraction of voxels carrying signal vs fill |
+| `grad_energy` | mean neighbor difference — texture/edge energy |
+| `dyn_range` | p99 − p1 intensity spread |
+| `sat_frac` | fraction clipped at 255 |
+| `dead_slices` | all-zero z-planes inside populated chunks (acquisition dropout) |
+
+Score (documented heuristic, re-weight freely): **40** signal presence +
+**30** texture energy + **20** dynamic range − saturation penalty −
+15 per dead slice.
+
+## Honest scope
+
+This is a **triage signal, not a readability claim**. It does not detect
+ink and does not predict which scroll will read first. It tells you which
+volumes have the healthiest voxels. The weights are a judgment call and are
+published with every score — audit them, don't worship the ranking.
+
+## Install & run
+
+```bash
+pip install git+https://github.com/Svyable/scrollq.git
+# volumes.txt: one dl.ash2txt.org volume root per line
+scrollq-score --volumes volumes.txt --samples 4 --workers 4 --out-dir out/
+scrollq-leaderboard --in out/volumes.json --out docs/index.html
+```
+
+## Why this increases the probability of reading the scrolls
+
+Segmentation is the bottleneck: expert hours are scarce and every volume
+costs GPU time. A public, reproducible quality ranking directs that scarce
+effort at the volumes most likely to repay it — and the dead-slice scan
+flags acquisition artifacts before anyone trains on them. Companion to
+[zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit)
+("don't train on lies"); this one is "train on the best first."
+
+## License
+
+MIT. Built September 2026 for the Vesuvius Challenge September Progress
+Prize by Sven + Muse (AI assistant).
