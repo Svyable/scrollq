@@ -37,9 +37,9 @@ jobs:
           root_0813="community-uploads/forrest/volcomp/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr"
           root_1447="community-uploads/forrest/volcomp/PHerc1447/volumes/20250521151220-8.640um-1.2m-116keV-masked.zarr"
 
-          scroliq-scan-map --root "$root_0813" --grid 4 --chunks-per-shard 1 \
+          scroliq-scan-map --root "$root_0813" --grid 6 --chunks-per-shard 1 \
             --out "$out/PHerc0813.scan-map.json"
-          scroliq-scan-map --root "$root_1447" --grid 4 --chunks-per-shard 1 \
+          scroliq-scan-map --root "$root_1447" --grid 6 --chunks-per-shard 1 \
             --out "$out/PHerc1447.scan-map.json"
 
           scroliq-passport \
@@ -85,7 +85,7 @@ jobs:
               "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
               "source_commit": os.environ["CAMPAIGN_SOURCE_SHA"],
               "parameters": {
-                  "grid_per_dimension": 4,
+                  "grid_per_dimension": 6,
                   "chunks_per_shard": 1,
                   "level": 0,
                   "base_url": "https://dl.ash2txt.org",
@@ -129,8 +129,8 @@ jobs:
           ## Reproduce
 
           ```bash
-          scroliq-scan-map --root community-uploads/forrest/volcomp/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr --grid 4 --chunks-per-shard 1 --out PHerc0813.scan-map.json
-          scroliq-scan-map --root community-uploads/forrest/volcomp/PHerc1447/volumes/20250521151220-8.640um-1.2m-116keV-masked.zarr --grid 4 --chunks-per-shard 1 --out PHerc1447.scan-map.json
+          scroliq-scan-map --root community-uploads/forrest/volcomp/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr --grid 6 --chunks-per-shard 1 --out PHerc0813.scan-map.json
+          scroliq-scan-map --root community-uploads/forrest/volcomp/PHerc1447/volumes/20250521151220-8.640um-1.2m-116keV-masked.zarr --grid 6 --chunks-per-shard 1 --out PHerc1447.scan-map.json
           ```
 
           Base URL: `https://dl.ash2txt.org`. Level: full-resolution L0.
