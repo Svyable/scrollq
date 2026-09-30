@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScrollQ — September 2026 Progress Prize submission</title>
+<style>
+body{font-family:-apple-system,system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;color:#1a1a1a;line-height:1.55}
+h1{font-size:1.7rem}h2{font-size:1.25rem;margin-top:2rem}
+.note{background:#fff8e6;border:1px solid #e6c200;padding:.8rem 1rem;border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:.85rem;margin:1rem 0}
+th,td{border:1px solid #ddd;padding:.35rem .5rem;text-align:left}
+th{background:#f5f5f5}
+code{font-size:.8rem;background:#f4f4f4;padding:.1rem .3rem;border-radius:3px}
+a{color:#0b5fff}
+</style></head><body>
+<h1>ScrollQ — train on the best first</h1>
+<p><strong>September 2026 Vesuvius Progress Prize submission</strong> by Sven
+(solo) + Muse (AI assistant).
+Repo: <a href="https://github.com/Svyable/scrollq">Svyable/scrollq</a> (MIT) ·
+<a href="https://svyable.github.io/scrollq/">Live leaderboard</a></p>
+
+<h2>1. What did you do?</h2>
+<p>Built <strong>ScrollQ</strong>, a data-quality triage system for the
+Vesuvius scroll volumes. It decodes real voxels from every scroll volume —
+via the vendored volcomp decoder, no approximations — and scores each
+volume 0–100 on signal presence, texture energy, dynamic range, and an
+acquisition-artifact (dead-slice) scan. All 64 scroll volumes on
+dl.ash2txt.org scored, published as a ranked leaderboard with every
+component exposed.</p>
+
+<h2>2. How does this increase the probability of reading complete scrolls?</h2>
+<p>Segmentation is the bottleneck: expert hours and GPU time are scarce, and
+every volume costs both. ScrollQ directs that scarce effort where the data
+is healthiest. The headline finding: <strong>all 70 published ink-detection
+labels sit on PHercParis4 — quality rank 13 of 39</strong> — while the
+healthiest volumes (PHerc0813 at 77.4, PHerc0139 at 75.9 with 114 segments
+but zero ink labels) have no labels at all. The leaderboard flags 16
+top-quartile volumes as <strong>🎯 label next</strong>: the highest-leverage
+labeling targets in the open data. Same scanner, same settings produced both
+the best and worst volumes — data health varies more than hardware does.</p>
+
+<h2>3. Evidence</h2>
+<table>
+<tr><th>claim</th><th>evidence</th></tr>
+<tr><td>64/64 scroll volumes scored</td><td><code>artifacts/2026-09-30-scrollq/volumes.json</code> in the repo; every score ships its components</td></tr>
+<tr><td>Ranking is stable, not sampling noise</td><td>Independent resample: Spearman ρ = 0.876, mean |Δscore| = 3.07, top-10 overlap 8/10</td></tr>
+<tr><td>No acquisition dropouts</td><td>Dead-slice scan (dense-chunk, both-neighbor rule): 0 hits across 64 volumes — a clean bill, published as a result</td></tr>
+<tr><td>Labels are misallocated</td><td>Join with the full S3 bucket crawl (957 roots): 70/70 ink-detection roots on PHercParis4; top-12 quality scrolls hold 0</td></tr>
+<tr><td>Reproducible</td><td><code>pip install git+https://github.com/Svyable/scrollq.git</code>, then <code>scrollq-score</code> / <code>scrollq-coverage</code> / <code>scrollq-leaderboard</code></td></tr>
+</table>
+
+<h2>4. Honest scope</h2>
+<div class="note">ScrollQ is a <strong>triage signal, not a readability
+claim</strong>. It does not detect ink and does not predict which scroll
+reads first. The weights are a judgment call, published with every score —
+audit them, don't worship the ranking. During development a naive dead-slice
+rule false-positived on mask geometry; it was tightened and the clean bill
+above is what survived verification.</div>
+
+<p>Companion entry: <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>
+("don't train on lies" — corruption detection for the open data).
+ScrollQ is "train on the best first."</p>
+</body></html>

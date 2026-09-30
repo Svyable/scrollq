@@ -21,8 +21,13 @@ def _spread(n: int, k: int) -> list[int]:
     return sorted({round(i * (n - 1) / (k - 1)) for i in range(k)})
 
 
-def score_volume(base_url: str, root: str, samples: int = 4) -> dict:
-    """Score one volcomp scroll volume. Returns a result dict."""
+def score_volume(base_url: str, root: str, samples: int = 4,
+                 rotate: int = 0) -> dict:
+    """Score one volcomp scroll volume. Returns a result dict.
+
+    ``rotate`` cyclically shifts the shard-candidate order, giving a
+    different deterministic sample for stability checks.
+    """
     store = open_store(base_url)
     result: dict = {"root": root, "ok": False}
     ok, reason = vc.available()
@@ -55,6 +60,9 @@ def score_volume(base_url: str, root: str, samples: int = 4) -> dict:
              for x in _spread(shard_grid[0], 3)
              for y in _spread(shard_grid[1], 3)
              for z in _spread(shard_grid[2], 3)]
+    if rotate:
+        rotate %= max(1, len(cands))
+        cands = cands[rotate:] + cands[:rotate]
     for sc in cands:
         if len(chunk_results) >= 6:
             break
