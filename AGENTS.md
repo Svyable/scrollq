@@ -70,5 +70,8 @@ python -m pytest tests/ -q
   explicit approval — prepare the branch, don't ship it.
 - For the tested development setup, install `requirements-ci.txt`, then
   `pip install -e .`. CI pins the companion to a verified immutable commit.
-  The public package keeps its `zarr-pyramid-audit>=0.3.0` requirement.
+  The public package declares
+  `zarr-pyramid-audit @ git+https://github.com/Svyable/zarr-pyramid-audit.git`
+  (PyPI publication is intentionally deprioritized — never assume the
+  companion is installable from PyPI).
 - Do not commit environments, caches, egg-info or build archives.

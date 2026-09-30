@@ -2,64 +2,133 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ScrollQ — September 2026 Progress Prize submission</title>
+<meta name="description" content="ScrollQ: data-quality triage for Vesuvius scroll volumes. Train on the best first.">
 <style>
-body{font-family:-apple-system,system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;color:#1a1a1a;line-height:1.55}
-h1{font-size:1.7rem}h2{font-size:1.25rem;margin-top:2rem}
-.note{background:#fff8e6;border:1px solid #e6c200;padding:.8rem 1rem;border-radius:6px}
-table{border-collapse:collapse;width:100%;font-size:.85rem;margin:1rem 0}
-th,td{border:1px solid #ddd;padding:.35rem .5rem;text-align:left}
-th{background:#f5f5f5}
-code{font-size:.8rem;background:#f4f4f4;padding:.1rem .3rem;border-radius:3px}
-a{color:#0b5fff}
+:root{--bg:#0d0b08;--panel:#161310;--panel2:#1c1813;--line:#2c251b;
+--ink:#ece3d2;--muted:#a89880;--dim:#6f6350;
+--ember:#ff7a1a;--gold:#ffd166;--amber:#ffb347;
+--good:#8fd694;--warn:#ff9e5e;--bad:#ff6b6b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+-webkit-font-smoothing:antialiased;line-height:1.65}
+a{color:var(--amber)}
+.wrap{max-width:960px;margin:0 auto;padding:0 1.25rem}
+.hero{padding:4rem 0 2.5rem;
+background:radial-gradient(1200px 500px at 70% -10%,rgba(255,122,26,.14),transparent 60%),
+radial-gradient(800px 400px at 15% 110%,rgba(255,209,102,.08),transparent 60%),var(--bg)}
+.eyebrow{letter-spacing:.28em;font-size:.72rem;color:var(--ember);font-weight:700}
+.hero h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.2rem,5.5vw,3.6rem);
+margin:.4rem 0 .2rem;font-weight:700;letter-spacing:-.02em}
+.tagline{font-size:1.2rem;margin:.2rem 0 1rem}
+.tagline em{color:var(--amber);font-style:normal;font-weight:600}
+.byline{color:var(--muted);font-size:.92rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-top:2rem}
+.stat{background:rgba(22,19,16,.85);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem}
+.stat .n{font-size:1.8rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.stat .l{font-size:.78rem;color:var(--muted);margin-top:.25rem;line-height:1.4}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.5rem;margin:0 0 1.5rem}
+.panel h2{margin:.1rem 0 1rem;font-family:Georgia,serif;font-size:1.5rem}
+.panel h2 .q{color:var(--ember);font-family:inherit;font-size:1.5rem}
+.panel p{color:var(--muted);font-size:.95rem}
+.panel p b{color:var(--ink)}
+table{border-collapse:collapse;width:100%;font-size:.86rem;margin:.8rem 0}
+thead th{text-align:left;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;
+color:var(--muted);padding:.6rem .5rem;border-bottom:1px solid var(--line)}
+tbody td{padding:.6rem .5rem;border-bottom:1px solid #211c14;vertical-align:top;color:var(--muted)}
+tbody td b{color:var(--ink)}
+tbody tr:hover td{background:#1e1913}
+code{font-size:.8rem;color:var(--amber)}
+.honest{border-left:3px solid var(--gold);padding:.6rem 1rem;background:#171208;
+border-radius:0 8px 8px 0;color:var(--muted);font-size:.93rem;margin-top:1rem}
+.suite{display:flex;gap:1rem;flex-wrap:wrap}
+.suite .card{flex:1;min-width:260px;background:var(--panel2);border:1px solid var(--line);
+border-radius:12px;padding:1.1rem 1.25rem}
+.suite .card h3{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.14em;color:var(--ember);text-transform:uppercase}
+.suite .card p{margin:.3rem 0;font-size:.9rem}
+footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.4rem 0 3rem;color:var(--dim);font-size:.82rem}
+footer a{color:var(--muted)}
 </style></head><body>
-<h1>ScrollQ — train on the best first</h1>
-<p><strong>September 2026 Vesuvius Progress Prize submission</strong> by Sven
-(solo) + Muse (AI assistant).
-Repo: <a href="https://github.com/Svyable/scrollq">Svyable/scrollq</a> (MIT) ·
-<a href="https://svyable.github.io/scrollq/">Live leaderboard</a></p>
 
-<h2>1. What did you do?</h2>
-<p>Built <strong>ScrollQ</strong>, a data-quality triage system for the
-Vesuvius scroll volumes. It decodes real voxels from every scroll volume —
-via the vendored volcomp decoder, no approximations — and scores each
-volume 0–100 on signal presence, texture energy, dynamic range, and an
-acquisition-artifact (dead-slice) scan. All 64 scroll volumes on
-dl.ash2txt.org scored, published as a ranked leaderboard with every
-component exposed.</p>
+<header class="hero"><div class="wrap">
+<div class="eyebrow">VESUVIUS CHALLENGE · SEPTEMBER 2026 PROGRESS PRIZE</div>
+<h1>ScrollQ</h1>
+<p class="tagline">The scan-health survey at the heart of <em>ScrolIQ</em>. Train on the best first.</p>
+<p class="byline">Submission by <b>Sven</b> (solo) + Muse (AI assistant) ·
+<a href="https://github.com/Svyable/scrollq">Svyable/scrollq</a> (MIT) ·
+<a href="./">live leaderboard →</a> ·
+<a href="open-problems-alignment.md">ScrolIQ × 2026 open problems →</a></p>
+<div class="stats">
+<div class="stat"><div class="n">64</div><div class="l">scroll volumes scored<br>0–100, all components published</div></div>
+<div class="stat"><div class="n">0.876</div><div class="l">Spearman ρ vs resample<br>stable, not sampling noise</div></div>
+<div class="stat"><div class="n">0</div><div class="l">dead slices<br>strict detector, clean bill</div></div>
+<div class="stat"><div class="n">16</div><div class="l">🎯 label-next volumes<br>top quartile, zero ink labels</div></div>
+</div>
+</div></header>
 
-<h2>2. How does this increase the probability of reading complete scrolls?</h2>
+<div class="wrap" style="margin-top:2.5rem">
+
+<div class="panel"><h2><span class="q">1.</span> What did you do?</h2>
+<p>Built <b>ScrollQ</b>, a data-quality triage system for the Vesuvius scroll
+volumes. It decodes real voxels from every scroll volume — via the vendored
+volcomp decoder, no approximations — and scores each volume 0–100 on signal
+presence, texture energy, dynamic range, and an acquisition-artifact
+(dead-slice) scan. All 64 scroll volumes on dl.ash2txt.org scored, published
+as a ranked <a href="./">leaderboard</a> with every component exposed.</p></div>
+
+<div class="panel"><h2><span class="q">2.</span> How does this increase the probability of reading complete scrolls?</h2>
 <p>Segmentation is the bottleneck: expert hours and GPU time are scarce, and
-every volume costs both. ScrollQ directs that scarce effort where the data
-is healthiest. The headline finding: <strong>all 70 published ink-detection
-labels sit on PHercParis4 — quality rank 13 of 39</strong> — while the
-healthiest volumes (PHerc0813 at 77.4, PHerc0139 at 75.9 with 114 segments
-but zero ink labels) have no labels at all. The leaderboard flags 16
-top-quartile volumes as <strong>🎯 label next</strong>: the highest-leverage
-labeling targets in the open data. Same scanner, same settings produced both
-the best and worst volumes — data health varies more than hardware does.</p>
+every volume costs both. ScrollQ directs that scarce effort where the data is
+healthiest. The headline finding: <b>all 70 published ink-detection labels sit
+on PHercParis4 — quality rank 13 of 39 scrolls</b> — while the healthiest
+volumes (PHerc0813 at 77.4, PHerc0139 at 75.9 with 114 segments but zero ink
+labels) have no labels at all. The leaderboard flags 16 top-quartile volumes
+as <b>🎯 label next</b>: the highest-leverage labeling targets in the open
+data. Same scanner, same settings produced both the best and worst volumes —
+data health varies more than hardware does.</p></div>
 
-<h2>3. Evidence</h2>
-<table>
-<tr><th>claim</th><th>evidence</th></tr>
-<tr><td>64/64 scroll volumes scored</td><td><code>artifacts/2026-09-30-scrollq/volumes.json</code> in the repo; every score ships its components</td></tr>
-<tr><td>Ranking is stable, not sampling noise</td><td>Independent resample: Spearman ρ = 0.876, mean |Δscore| = 3.07, top-10 overlap 8/10</td></tr>
-<tr><td>No acquisition dropouts</td><td>Dead-slice scan (dense-chunk, both-neighbor rule): 0 hits across 64 volumes — a clean bill, published as a result</td></tr>
-<tr><td>Labels are misallocated</td><td>Join with the full S3 bucket crawl (957 roots): 70/70 ink-detection roots on PHercParis4; top-12 quality scrolls hold 0</td></tr>
-<tr><td>Reproducible</td><td><code>pip install git+https://github.com/Svyable/scrollq.git</code>, then <code>scrollq-score</code> / <code>scrollq-coverage</code> / <code>scrollq-leaderboard</code></td></tr>
-</table>
+<div class="panel"><h2><span class="q">3.</span> Evidence</h2>
+<table><thead><tr><th>claim</th><th>evidence</th></tr></thead><tbody>
+<tr><td><b>64/64</b> scroll volumes scored</td><td><code>artifacts/2026-09-30-scrollq/volumes.json</code> in the repo; every score ships its components</td></tr>
+<tr><td>Ranking is <b>stable</b>, not sampling noise</td><td>Independent resample: Spearman ρ = 0.876, mean |Δscore| = 3.07, top-10 overlap 8/10</td></tr>
+<tr><td><b>No</b> acquisition dropouts</td><td>Dead-slice scan (dense-chunk, both-neighbor rule): 0 hits across 64 volumes — a clean bill, published as a result</td></tr>
+<tr><td>Labels are <b>misallocated</b></td><td>Join with the full S3 bucket crawl (957 roots): 70/70 ink-detection roots on PHercParis4; top-12 quality scrolls hold 0</td></tr>
+<tr><td><b>Reproducible</b></td><td><code>pip install git+https://github.com/Svyable/scrollq.git</code>, then <code>scrollq-score</code> / <code>scrollq-coverage</code> / <code>scrollq-leaderboard</code></td></tr>
+</tbody></table></div>
 
-<h2>4. Honest scope</h2>
-<div class="note">ScrollQ is a <strong>triage signal, not a readability
-claim</strong>. It does not detect ink and does not predict which scroll
-reads first. The weights are a judgment call, published with every score —
-audit them, don't worship the ranking. During development a naive dead-slice
-rule false-positived on mask geometry; it was tightened and the clean bill
-above is what survived verification.</div>
+<div class="panel"><h2><span class="q">4.</span> Honest scope</h2>
+<div class="honest">ScrollQ is a <b>triage signal, not a readability claim</b>.
+It does not detect ink and does not predict which scroll reads first. The
+weights are a judgment call, published with every score — audit them, don't
+worship the ranking. During development a naive dead-slice rule false-positived
+on mask geometry; it was tightened, and the clean bill above is what survived
+verification.</div></div>
 
-<p>Companion entry: <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>
-("don't train on lies" — corruption detection for the open data).
-ScrollQ is "train on the best first." Together they are one data-quality
-suite: <code>scrollq-health</code> runs the integrity audit and the quality
-score on any volume and issues a single verdict —
-<strong>TRAIN / CAUTION / DO NOT TRAIN</strong>.</p>
+<div class="panel"><h2>One suite, two halves</h2>
+<div class="suite">
+<div class="card"><h3>zarr-pyramid-audit</h3>
+<p><b>Don't train on lies.</b> Corruption detection for the open data —
+header-only integrity audits, a publish-time gate, and sampled chunk-content
+probes.</p>
+<p><a href="https://github.com/Svyable/zarr-pyramid-audit">repo</a> ·
+<a href="https://svyable.github.io/zarr-pyramid-audit/">dashboard</a></p></div>
+<div class="card"><h3>scrollq-health</h3>
+<p>Runs the integrity audit <b>and</b> the quality score on any volume and
+issues one verdict: <b>TRAIN / CAUTION / DO NOT TRAIN</b>.</p>
+<p><code>scrollq-health --root &lt;volume&gt;</code></p></div>
+<div class="card"><h3>ScrolIQ</h3>
+<p><b>Find the bottleneck.</b> The project is evolving from the scan-quality
+survey into an open diagnostic layer for the Challenge's 2026 open problems —
+scan degradation, surface topology, mesh connectivity, fibers, spiral fitting,
+label quality, ink reliability — with <code>scroliq-passport</code> and
+<code>scroliq-scan-map</code> shipping this month.</p>
+<p><a href="open-problems-alignment.md">alignment roadmap</a></p></div>
+</div></div>
+
+</div>
+
+<footer><div class="wrap">
+<a href="./">← back to the leaderboard</a><br><br>
+Built by Sven + Muse · September 2026
+</div></footer>
 </body></html>
