@@ -39,7 +39,18 @@ pip install git+https://github.com/Svyable/scrollq.git
 # volumes.txt: one dl.ash2txt.org volume root per line
 scrollq-score --volumes volumes.txt --samples 4 --workers 4 --out-dir out/
 scrollq-leaderboard --in out/volumes.json --out docs/index.html
+# one-volume health report: integrity (zarr-pyramid-audit) + quality
+scrollq-health --root community-uploads/forrest/volcomp/PHerc0009B/volumes/....zarr
 ```
+
+## Companion project
+
+ScrollQ is the second half of a data-quality suite. The first half is
+[zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit) —
+corruption detection for OME-Zarr pyramids ("don't train on lies"):
+header-only audits, a publish-time gate, and a sampled chunk-content probe.
+`scrollq-health` runs both halves and issues one verdict per volume:
+**TRAIN / CAUTION / DO NOT TRAIN**.
 
 ## Why this increases the probability of reading the scrolls
 
