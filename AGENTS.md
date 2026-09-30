@@ -64,7 +64,8 @@ python -m pytest tests/ -q
 - Branch from `main`; never force-push to `main`.
 - New scoring behavior needs a deterministic test in `tests/`.
 - Every number in docs/PRs must trace to a command + artifact in this repo.
-- Do not claim readability prediction. The 0–100 score is scan-health triage only.\n- Do not infer surface, mesh, spiral, fiber, label-localization, or ink state from the scan score; missing evidence stays `unknown`.
+- Do not claim readability prediction. The 0–100 score is scan-health triage only.
+- Do not infer surface, mesh, spiral, fiber, label-localization, or ink state from the scan score; missing evidence stays `unknown`.
 - Opening PRs/issues upstream or publishing to PyPI needs the maintainer's
   explicit approval — prepare the branch, don't ship it.
 - For the tested development setup, install `requirements-ci.txt`, then
