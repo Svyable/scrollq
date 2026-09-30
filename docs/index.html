@@ -54,7 +54,7 @@ a{color:var(--amber)}
   font-weight:400;margin-top:.3rem}
 /* histogram */
 .hist{display:flex;align-items:flex-end;gap:6px;height:150px;margin:.5rem 0}
-.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0}
+.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0;height:100%}
 .bar .fill{width:100%;border-radius:5px 5px 0 0;
   background:linear-gradient(180deg,var(--ember),#7a3c0e)}
 .bar .bl{font-size:.62rem;color:var(--dim);margin-top:.35rem;white-space:nowrap}
@@ -142,8 +142,8 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     scores — data condition, not hardware, drives the spread.</p></div>
   <div class="card"><h3>Label-coverage gap</h3>
     <p>All <b>70</b> published ink-detection labels sit on
-    <b>PHercParis4</b> — quality rank <b>13 of 39</b> scrolls. The healthiest
-    volumes (<b>PHerc0813</b> 77.4, <b>PHerc0139</b> 75.9) have
+    <b>PHercParis4</b> — quality rank <b>13 of 39 scrolls</b> (each scroll
+    ranked by its best volume). The healthiest volumes (<b>PHerc0813</b> 77.4, <b>PHerc0139</b> 75.9) have
     <b>zero</b> ink labels. Labeling effort goes furthest at the 🎯 rows.</p></div>
   <div class="card"><h3>Stable, not sacred</h3>
     <p>An independent deterministic resample re-scored all 64 volumes:
@@ -173,7 +173,7 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     <th data-k="rank">#</th><th data-k="id">volume</th><th data-k="score">score</th>
     <th data-k="tier">tier</th><th>components</th>
     <th data-k="signal">signal</th><th data-k="tex">texture</th><th data-k="dyn">dynamic</th>
-    <th data-k="pen">penalties</th><th data-k="ink">ink labels</th><th data-k="seg">segments</th><th></th>
+    <th data-k="pen">penalties</th><th data-k="ink">ink labels</th><th data-k="seg">segments</th><th>note</th>
   </tr></thead><tbody><tr class="vol" data-rank="1" data-id="pherc0813 20250821151723-9.362um-1.2m-113kev-masked" data-score="77.4" data-tier="S" data-signal="40.0" data-tex="22.8" data-dyn="14.6" data-pen="0.0" data-ink="0" data-seg="0" data-label="1"><td class="num rn">1</td><td><span class="scrollid">PHerc0813</span><br><span class="volsub">9.362µm · 113keV</span></td><td class="num score" style="color:rgb(249,205,102)">77.4</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 22.8 / dynamic 14.6"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:25.3%"></span><span class="cb-d" style="width:16.2%"></span></div></td><td class="num">40.0</td><td class="num">22.8</td><td class="num">14.6</td><td class="num pen">−0.0</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">1.0000</div></div><div><div class="k">gradient energy</div><div class="v">9.137</div></div><div><div class="k">dynamic range</div><div class="v">146</div></div><div><div class="k">chunks decoded</div><div class="v">2</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 1.000 · texture 22.8/30 — gradient energy 9.14 · dynamic 14.6/20 — range 146 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
 <tr class="vol" data-rank="2" data-id="pherc0139 20250728140407-9.362um-1.2m-113kev-masked" data-score="75.9" data-tier="S" data-signal="39.0" data-tex="19.6" data-dyn="17.2" data-pen="0.0" data-ink="0" data-seg="114" data-label="1"><td class="num rn">2</td><td><span class="scrollid">PHerc0139</span><br><span class="volsub">9.362µm · 113keV</span></td><td class="num score" style="color:rgb(246,202,102)">75.9</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 39.0 / texture 19.6 / dynamic 17.2"><span class="cb-s" style="width:43.3%"></span><span class="cb-t" style="width:21.8%"></span><span class="cb-d" style="width:19.1%"></span></div></td><td class="num">39.0</td><td class="num">19.6</td><td class="num">17.2</td><td class="num pen">−0.0</td><td class="num">0</td><td class="num">114</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.8786</div></div><div><div class="k">gradient energy</div><div class="v">7.854</div></div><div><div class="k">dynamic range</div><div class="v">172</div></div><div><div class="k">chunks decoded</div><div class="v">6</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 39.0/40 — nonzero voxel fraction 0.879 · texture 19.6/30 — gradient energy 7.85 · dynamic 17.2/20 — range 172 · 114 segment roots in open data · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
 <tr class="vol" data-rank="3" data-id="pherc0139 20250822062710-2.403um-0.2m-77kev-masked" data-score="75.8" data-tier="S" data-signal="40.0" data-tex="17.0" data-dyn="19.4" data-pen="0.6" data-ink="0" data-seg="114" data-label="1"><td class="num rn">3</td><td><span class="scrollid">PHerc0139</span><br><span class="volsub">2.403µm · 77keV</span></td><td class="num score" style="color:rgb(246,202,102)">75.8</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 17.0 / dynamic 19.4"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:18.9%"></span><span class="cb-d" style="width:21.6%"></span></div></td><td class="num">40.0</td><td class="num">17.0</td><td class="num">19.4</td><td class="num pen">−0.6</td><td class="num">0</td><td class="num">114</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0139/volumes/20250822062710-2.403um-0.2m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9997</div></div><div><div class="k">gradient energy</div><div class="v">6.802</div></div><div><div class="k">dynamic range</div><div class="v">194</div></div><div><div class="k">chunks decoded</div><div class="v">6</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 1.000 · texture 17.0/30 — gradient energy 6.80 · dynamic 19.4/20 — range 194 · saturation penalty −0.6 · 114 segment roots in open data · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
@@ -284,7 +284,7 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 
 <footer><div class="wrap">
   Generated by <a href="https://github.com/Svyable/scrollq">ScrollQ</a> from public dl.ash2txt.org volumes,
-  2026-09-30 19:00 UTC. Scores are heuristic and published with their components — audit the
+  2026-09-30 19:08 UTC. Scores are heuristic and published with their components — audit the
   weights, don't worship the ranking. Companion:
   <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>.
   · <a href="./september-2026.html">September 2026 writeup →</a>
@@ -294,6 +294,7 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 (function(){
   const tb = document.querySelector("#lb tbody");
   const rows = Array.from(tb.querySelectorAll("tr.vol"));
+  rows.forEach(r => { r._detail = r.nextElementSibling; });
   let sortK = "rank", asc = true, tierF = "", qF = "";
   function tierOf(r){ return r.dataset.tier; }
   function apply(){
@@ -308,14 +309,15 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
         : x - y;
       return asc ? c : -c;
     });
-    rows.forEach(r => r.classList.add("hidden"));
+    const frag = document.createDocumentFragment();
     vis.forEach((r, i) => {
       r.classList.remove("hidden");
-      const d = r.nextElementSibling;
-      if (d && d.classList.contains("detail")) d.classList.add("hidden");
+      r._detail.classList.add("hidden");
       r.querySelector(".rn").textContent = i + 1;
+      frag.append(r, r._detail);
     });
-    tb.append(...vis);
+    rows.forEach(r => { if (!vis.includes(r)) { r.classList.add("hidden"); r._detail.classList.add("hidden"); } });
+    tb.append(frag);
   }
   document.querySelectorAll("#lb thead th[data-k]").forEach(th => {
     th.addEventListener("click", () => {
@@ -335,8 +337,7 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     qF = e.target.value.trim().toLowerCase(); apply();
   });
   rows.forEach(r => r.addEventListener("click", () => {
-    const d = r.nextElementSibling;
-    if (d && d.classList.contains("detail")) d.classList.toggle("hidden");
+    if (r._detail) r._detail.classList.toggle("hidden");
   }));
   apply();
 })();

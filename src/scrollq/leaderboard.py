@@ -72,7 +72,7 @@ a{{color:var(--amber)}}
   font-weight:400;margin-top:.3rem}}
 /* histogram */
 .hist{{display:flex;align-items:flex-end;gap:6px;height:150px;margin:.5rem 0}}
-.bar{{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0}}
+.bar{{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0;height:100%}}
 .bar .fill{{width:100%;border-radius:5px 5px 0 0;
   background:linear-gradient(180deg,var(--ember),#7a3c0e)}}
 .bar .bl{{font-size:.62rem;color:var(--dim);margin-top:.35rem;white-space:nowrap}}
@@ -160,8 +160,8 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     scores — data condition, not hardware, drives the spread.</p></div>
   <div class="card"><h3>Label-coverage gap</h3>
     <p>All <b>70</b> published ink-detection labels sit on
-    <b>PHercParis4</b> — quality rank <b>13 of 39</b> scrolls. The healthiest
-    volumes (<b>{top_id}</b> {top_score}, <b>PHerc0139</b> 75.9) have
+    <b>PHercParis4</b> — quality rank <b>13 of 39 scrolls</b> (each scroll
+    ranked by its best volume). The healthiest volumes (<b>{top_id}</b> {top_score}, <b>PHerc0139</b> 75.9) have
     <b>zero</b> ink labels. Labeling effort goes furthest at the 🎯 rows.</p></div>
   <div class="card"><h3>Stable, not sacred</h3>
     <p>An independent deterministic resample re-scored all 64 volumes:
@@ -191,7 +191,7 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     <th data-k="rank">#</th><th data-k="id">volume</th><th data-k="score">score</th>
     <th data-k="tier">tier</th><th>components</th>
     <th data-k="signal">signal</th><th data-k="tex">texture</th><th data-k="dyn">dynamic</th>
-    <th data-k="pen">penalties</th><th data-k="ink">ink labels</th><th data-k="seg">segments</th><th></th>
+    <th data-k="pen">penalties</th><th data-k="ink">ink labels</th><th data-k="seg">segments</th><th>note</th>
   </tr></thead><tbody>{rows}</tbody></table></div>
 </div>
 
@@ -249,6 +249,7 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 (function(){{
   const tb = document.querySelector("#lb tbody");
   const rows = Array.from(tb.querySelectorAll("tr.vol"));
+  rows.forEach(r => {{ r._detail = r.nextElementSibling; }});
   let sortK = "rank", asc = true, tierF = "", qF = "";
   function tierOf(r){{ return r.dataset.tier; }}
   function apply(){{
@@ -263,14 +264,15 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
         : x - y;
       return asc ? c : -c;
     }});
-    rows.forEach(r => r.classList.add("hidden"));
+    const frag = document.createDocumentFragment();
     vis.forEach((r, i) => {{
       r.classList.remove("hidden");
-      const d = r.nextElementSibling;
-      if (d && d.classList.contains("detail")) d.classList.add("hidden");
+      r._detail.classList.add("hidden");
       r.querySelector(".rn").textContent = i + 1;
+      frag.append(r, r._detail);
     }});
-    tb.append(...vis);
+    rows.forEach(r => {{ if (!vis.includes(r)) {{ r.classList.add("hidden"); r._detail.classList.add("hidden"); }} }});
+    tb.append(frag);
   }}
   document.querySelectorAll("#lb thead th[data-k]").forEach(th => {{
     th.addEventListener("click", () => {{
@@ -290,8 +292,7 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     qF = e.target.value.trim().toLowerCase(); apply();
   }});
   rows.forEach(r => r.addEventListener("click", () => {{
-    const d = r.nextElementSibling;
-    if (d && d.classList.contains("detail")) d.classList.toggle("hidden");
+    if (r._detail) r._detail.classList.toggle("hidden");
   }}));
   apply();
 }})();
