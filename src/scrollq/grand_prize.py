@@ -251,6 +251,11 @@ def qualify(
     sensitivity analysis and never changes ScrollQ's published quality score.
     """
     manifest = manifest or DEFAULT_MANIFEST
+    # Which released predictions a target needs before it can be compared.
+    # Grand Prize spiral fitting needs both; derived manifests for other
+    # prizes may require fewer (see scrollq.prize_manifest).
+    required = tuple(manifest.get(
+        "required_assets", ("surface_prediction", "lasagna_prediction")))
     support_by_scroll = {
         r["scroll"]: r for r in (surface_support or {}).get("rows", [])
         if isinstance(r, dict) and r.get("scroll")
@@ -270,6 +275,9 @@ def qualify(
             "source_url": target["source_url"],
             "excluded_same_scroll_higher_res": target.get(
                 "excluded_same_scroll_higher_res", []
+            ),
+            "same_scroll_higher_res_scans": target.get(
+                "same_scroll_higher_res_scans", []
             ),
             "quality_score": None,
             "quality_root": None,
@@ -306,8 +314,7 @@ def qualify(
         r
         for r in rows
         if r["quality_score"] is not None
-        and r["surface_prediction"]
-        and r["lasagna_prediction"]
+        and all(r.get(a) for a in required)
     ]
     frontier = _pareto(baseline_comparable, baseline_axes)
     frontier_set = set(frontier)
@@ -315,7 +322,7 @@ def qualify(
     for r in rows:
         if r["quality_score"] is None:
             r["qualification"] = "needs-quality-score"
-        elif not (r["surface_prediction"] and r["lasagna_prediction"]):
+        elif not all(r.get(a) for a in required):
             r["qualification"] = "missing-geometry-prior"
         elif r["scroll"] in frontier_set:
             r["qualification"] = "pareto-frontier"
@@ -335,18 +342,23 @@ def qualify(
             "axes": ["scrollq_quality_score", "existing_segment_count"],
             "rule": (
                 "Primary Pareto frontier: maximize scan-quality triage score and "
-                "existing segment count. Surface and lasagna predictions are "
-                "required bootstrap assets but are not weighted when common to "
-                "all targets."
+                "existing segment count. Released predictions listed in "
+                "required_assets are bootstrap requirements, not weighted "
+                "advantages when common to all targets."
             ),
+            "required_assets": list(required),
             "warning": (
                 "This is campaign triage, not a readability, ink-presence, or "
-                "Grand Prize success prediction."
+                f"{manifest.get('prize_label', 'Grand Prize')} success "
+                "prediction."
             ),
         },
         "frontier": frontier,
         "targets": rows,
     }
+    for key in ("prize_id", "prize_label", "provenance", "problems"):
+        if key in manifest:
+            result[key] = manifest[key]
 
     if surface_support is not None:
         support_axes = ("quality_score", "segments", "surface_support_frac")
