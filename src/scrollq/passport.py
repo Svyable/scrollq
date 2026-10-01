@@ -43,6 +43,12 @@ OPEN_PROBLEMS: tuple[dict[str, str], ...] = (
         "scroliq": "planned",
     },
     {
+        "id": "winding-annotations",
+        "stage": "unwrapping",
+        "challenge": "Create, validate, and prioritize local winding constraints for global spiral fitting.",
+        "scroliq": "partial",
+    },
+    {
         "id": "spiral-fitting",
         "stage": "unwrapping",
         "challenge": "Evaluate global spiral fits, losses, constraints, and under-constrained regions.",
@@ -189,6 +195,70 @@ def _label_stage(coverage: dict[str, Any] | None) -> dict[str, Any]:
     }
 
 
+def _winding_stage(
+    volume_root: str,
+    audit: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if audit is None:
+        return {
+            "status": "unknown",
+            "open_problem": "winding-annotations",
+            "reason": "no winding-annotation audit was supplied",
+        }
+    if audit.get("diagnostic") != "winding-annotation-audit":
+        return {
+            "status": "excluded",
+            "open_problem": "winding-annotations",
+            "reason": "artifact is not a ScrolIQ winding-annotation-audit",
+        }
+
+    audit_root = audit.get("volume_root")
+    if not isinstance(audit_root, str) or not audit_root:
+        return {
+            "status": "excluded",
+            "open_problem": "winding-annotations",
+            "reason": (
+                "winding audit has no exact volume_root binding; rerun "
+                "scroliq-winding with --volume-root"
+            ),
+        }
+    if audit_root != volume_root:
+        return {
+            "status": "excluded",
+            "open_problem": "winding-annotations",
+            "reason": "winding audit names a different volume root",
+        }
+
+    audit_status = audit.get("status")
+    if audit_status not in {"pass", "partial", "fail"}:
+        return {
+            "status": "excluded",
+            "open_problem": "winding-annotations",
+            "reason": f"unsupported winding audit status: {audit_status!r}",
+        }
+
+    stage_status = "blocked" if audit_status == "fail" else "partial"
+    result = {
+        "status": stage_status,
+        "open_problem": "winding-annotations",
+        "audit_status": audit_status,
+        "present_roles": list(audit.get("present_roles") or []),
+        "missing_roles": list(audit.get("missing_roles") or []),
+        "totals": dict(audit.get("totals") or {}),
+        "error_count": int(audit.get("error_count") or 0),
+        "warning_count": int(audit.get("warning_count") or 0),
+        "axial_coverage": dict(audit.get("axial_coverage") or {}),
+        "limitation": (
+            "A passing input audit establishes file/schema/role/provenance checks "
+            "and descriptive axial coverage only. It does not establish CT support, "
+            "patch attachment, winding-graph consistency, or spiral-fit accuracy."
+        ),
+    }
+    if audit_status == "fail":
+        result["reason"] = "winding annotation inputs failed the structural audit"
+    return result
+
+
 def _unknown_stage(open_problem: str, reason: str) -> dict[str, str]:
     return {"status": "unknown", "open_problem": open_problem, "reason": reason}
 
@@ -197,6 +267,7 @@ def build_passport(
     volume: dict[str, Any],
     coverage: dict[str, Any] | None = None,
     scan_map: dict[str, Any] | None = None,
+    winding_audit: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build one evidence-preserving diagnostic passport from current artifacts."""
     root = str(volume.get("root", ""))
@@ -213,6 +284,7 @@ def build_passport(
         "fibers": _unknown_stage(
             "fiber-connectivity", "no fiber tracing evidence was supplied"
         ),
+        "winding": _winding_stage(root, winding_audit),
         "spiral": _unknown_stage(
             "spiral-fitting", "no spiral fit or constraint evaluation was supplied"
         ),
@@ -249,6 +321,52 @@ def build_passport(
                 "open_problem": "scan-diagnostics",
             }
         )
+
+    winding_status = stages["winding"]["status"]
+    if winding_status in {"unknown", "excluded"}:
+        actions.append(
+            {
+                "priority": "next-evidence",
+                "action": (
+                    "run scroliq-winding with the exact --volume-root before "
+                    "using winding annotations as fit evidence"
+                ),
+                "open_problem": "winding-annotations",
+            }
+        )
+    elif winding_status == "blocked":
+        actions.append(
+            {
+                "priority": "high",
+                "action": "repair winding annotation audit errors before spiral fitting",
+                "open_problem": "winding-annotations",
+            }
+        )
+    else:
+        fit_window = stages["winding"].get("axial_coverage", {}).get("fit_window")
+        empty_bins = list((fit_window or {}).get("empty_bins") or [])
+        if empty_bins:
+            actions.append(
+                {
+                    "priority": "next-evidence",
+                    "action": (
+                        "review or add verified winding constraints in empty axial "
+                        f"coverage bins {empty_bins}; coverage is only a prioritization proxy"
+                    ),
+                    "open_problem": "winding-annotations",
+                }
+            )
+        else:
+            actions.append(
+                {
+                    "priority": "next-evidence",
+                    "action": (
+                        "advance winding evidence to patch attachment, graph consistency, "
+                        "and held-out spiral-fit evaluation"
+                    ),
+                    "open_problem": "winding-annotations",
+                }
+            )
 
     if coverage and coverage.get("label_next"):
         actions.append(
@@ -289,7 +407,7 @@ def build_passport(
         "next_actions": actions,
         "interpretation": (
             "The existing quality score describes sampled CT health only. Unknown "
-            "surface, mesh, spiral, label-localization, fiber, or ink state remains unknown."
+            "surface, mesh, winding geometry, spiral, label-localization, fiber, or ink state remains unknown."
         ),
     }
 
@@ -314,6 +432,11 @@ def main() -> None:
     ap.add_argument("--root", required=True, help="exact volume root or unique substring")
     ap.add_argument("--coverage", default=None, help="optional ScrollQ coverage.json")
     ap.add_argument("--scan-map", default=None, help="optional ScrolIQ spatial scan map")
+    ap.add_argument(
+        "--winding-audit",
+        default=None,
+        help="optional volume-bound scroliq-winding JSON artifact",
+    )
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -330,7 +453,17 @@ def main() -> None:
         if args.scan_map
         else None
     )
-    passport = build_passport(volume, coverage, scan_map)
+    winding_audit = (
+        json.loads(Path(args.winding_audit).read_text(encoding="utf-8"))
+        if args.winding_audit
+        else None
+    )
+    passport = build_passport(
+        volume,
+        coverage=coverage,
+        scan_map=scan_map,
+        winding_audit=winding_audit,
+    )
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
