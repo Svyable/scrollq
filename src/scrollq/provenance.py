@@ -17,7 +17,7 @@ from typing import Any
 
 from .grand_prize import DEFAULT_MANIFEST
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 RULES_URL = "https://scrollprize.org/prizes"
 CC_BY_NC_4 = {"CC-BY-NC-4.0", "CC BY-NC 4.0"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -323,6 +323,235 @@ def _verify_local_file(
             )
 
 
+
+def _verify_ink_validation(
+    record: dict[str, Any],
+    models: dict[str, dict[str, Any]],
+    root_dir: Path | None,
+    errors: list[dict[str, str]],
+) -> None:
+    """Validate held-out ink evidence and, when local, cross-check its report."""
+    p = "ink_validation"
+    if record.get("tool") != "scroliq-ink-validate":
+        _error(
+            errors,
+            "GP_INK_VALIDATION_TOOL",
+            f"{p}.tool",
+            "tool must be 'scroliq-ink-validate'",
+        )
+
+    _check_sha(record, p, errors)
+    _verify_local_file(record, p, root_dir, errors)
+
+    model_id = record.get("model_id")
+    model = models.get(model_id) if isinstance(model_id, str) else None
+    if model is None:
+        _error(
+            errors,
+            "GP_INK_VALIDATION_MODEL",
+            f"{p}.model_id",
+            "ink validation must name a model in models[]",
+        )
+
+    checkpoint_sha = record.get("model_checkpoint_sha256")
+    if not isinstance(checkpoint_sha, str) or not SHA256_RE.fullmatch(checkpoint_sha):
+        _error(
+            errors,
+            "GP_INK_VALIDATION_CHECKPOINT",
+            f"{p}.model_checkpoint_sha256",
+            "lowercase 64-hex checkpoint digest is required",
+        )
+    elif model is not None and checkpoint_sha != model.get("sha256"):
+        _error(
+            errors,
+            "GP_INK_VALIDATION_CHECKPOINT",
+            f"{p}.model_checkpoint_sha256",
+            "held-out validation checkpoint must match the submitted model",
+        )
+
+    if record.get("held_out") is not True:
+        _error(
+            errors,
+            "GP_INK_VALIDATION_HELD_OUT",
+            f"{p}.held_out",
+            "held-out validation must be explicitly true",
+        )
+    if record.get("training_overlap") != "none":
+        _error(
+            errors,
+            "GP_INK_VALIDATION_OVERLAP",
+            f"{p}.training_overlap",
+            "held-out validation must explicitly declare no training overlap",
+        )
+    if record.get("known_ground_truth") is not True:
+        _error(
+            errors,
+            "GP_INK_VALIDATION_GROUND_TRUTH",
+            f"{p}.known_ground_truth",
+            "validation must use known ground truth",
+        )
+    _check_public_url(
+        record.get("ground_truth_source_url"),
+        f"{p}.ground_truth_source_url",
+        errors,
+        "GP_INK_VALIDATION_GROUND_TRUTH",
+    )
+
+    split_id = record.get("split_id")
+    if not isinstance(split_id, str) or not split_id:
+        _error(
+            errors,
+            "GP_INK_VALIDATION_SPLIT",
+            f"{p}.split_id",
+            "non-empty held-out split id is required",
+        )
+
+    window = record.get("model_window_voxels_zyx")
+    if (
+        not isinstance(window, list)
+        or len(window) != 3
+        or not all(isinstance(v, int) and v > 0 for v in window)
+    ):
+        _error(
+            errors,
+            "GP_INK_VALIDATION_WINDOW",
+            f"{p}.model_window_voxels_zyx",
+            "positive integer [z,y,x] model window is required",
+        )
+
+    control_names = record.get("control_names")
+    if (
+        not isinstance(control_names, list)
+        or not control_names
+        or not all(isinstance(v, str) and v for v in control_names)
+    ):
+        _error(
+            errors,
+            "GP_INK_VALIDATION_CONTROLS",
+            f"{p}.control_names",
+            "at least one named falsification control is required",
+        )
+
+    evaluated_digest = record.get("evaluated_arrays_sha256")
+    if (
+        not isinstance(evaluated_digest, str)
+        or not SHA256_RE.fullmatch(evaluated_digest)
+    ):
+        _error(
+            errors,
+            "GP_INK_VALIDATION_ARRAY_DIGEST",
+            f"{p}.evaluated_arrays_sha256",
+            "digest of the exact evaluated arrays is required",
+        )
+
+    metrics = record.get("metrics")
+    if not isinstance(metrics, dict):
+        _error(
+            errors,
+            "GP_INK_VALIDATION_METRICS",
+            f"{p}.metrics",
+            "held-out validation metrics are required",
+        )
+    else:
+        if metrics.get("both_classes_present") is not True:
+            _error(
+                errors,
+                "GP_INK_VALIDATION_CLASSES",
+                f"{p}.metrics.both_classes_present",
+                "held-out mask must contain both ink and background",
+            )
+        for name in ("balanced_accuracy", "false_positive_rate"):
+            value = metrics.get(name)
+            if not isinstance(value, (int, float)) or not 0 <= float(value) <= 1:
+                _error(
+                    errors,
+                    "GP_INK_VALIDATION_METRICS",
+                    f"{p}.metrics.{name}",
+                    f"{name} must be a numeric value in [0,1]",
+                )
+
+    if root_dir is None:
+        return
+    rel = record.get("path")
+    if not isinstance(rel, str) or not rel:
+        return
+    target = (root_dir / rel).resolve()
+    try:
+        target.relative_to(root_dir.resolve())
+    except ValueError:
+        return
+    if not target.is_file():
+        return
+
+    try:
+        report = json.loads(target.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        _error(
+            errors,
+            "GP_INK_VALIDATION_REPORT",
+            f"{p}.path",
+            f"cannot read held-out validation report: {exc}",
+        )
+        return
+
+    if report.get("tool") != "scroliq-ink-validate":
+        _error(
+            errors,
+            "GP_INK_VALIDATION_REPORT",
+            f"{p}.path",
+            "report was not produced by scroliq-ink-validate",
+        )
+    if report.get("prize_evidence_ready") is not True:
+        _error(
+            errors,
+            "GP_INK_VALIDATION_REPORT",
+            f"{p}.path",
+            "held-out validation report is not prize_evidence_ready",
+        )
+
+    report_split = report.get("split") if isinstance(report.get("split"), dict) else {}
+    report_model = report.get("model") if isinstance(report.get("model"), dict) else {}
+    report_eval = (
+        report.get("evaluation") if isinstance(report.get("evaluation"), dict) else {}
+    )
+    report_controls = _as_list(report.get("controls"))
+
+    mismatches: list[str] = []
+    if report_split.get("id") != split_id:
+        mismatches.append("split_id")
+    if report_split.get("held_out") is not True:
+        mismatches.append("held_out")
+    if report_split.get("training_overlap") != "none":
+        mismatches.append("training_overlap")
+    if report_model.get("checkpoint_sha256") != checkpoint_sha:
+        mismatches.append("checkpoint_sha256")
+    if report_model.get("window_voxels_zyx") != window:
+        mismatches.append("model_window_voxels_zyx")
+    if report.get("evaluated_arrays_sha256") != evaluated_digest:
+        mismatches.append("evaluated_arrays_sha256")
+    if sorted(
+        str(item.get("name"))
+        for item in report_controls
+        if isinstance(item, dict) and item.get("name")
+    ) != sorted(control_names if isinstance(control_names, list) else []):
+        mismatches.append("control_names")
+    if isinstance(metrics, dict):
+        if report_eval.get("balanced_accuracy") != metrics.get("balanced_accuracy"):
+            mismatches.append("balanced_accuracy")
+        if report_eval.get("false_positive_rate") != metrics.get("false_positive_rate"):
+            mismatches.append("false_positive_rate")
+        if report_eval.get("both_classes_present") != metrics.get("both_classes_present"):
+            mismatches.append("both_classes_present")
+
+    if mismatches:
+        _error(
+            errors,
+            "GP_INK_VALIDATION_MISMATCH",
+            p,
+            "manifest/report mismatch: " + ", ".join(sorted(set(mismatches))),
+        )
+
+
 def validate_manifest(
     manifest: dict[str, Any],
     *,
@@ -529,6 +758,22 @@ def validate_manifest(
     surfaces = _index(manifest.get("surfaces"), "surfaces", errors)
     meshes = _index(manifest.get("meshes"), "meshes", errors)
     renders = _index(manifest.get("renders"), "renders", errors)
+
+    ink_validation = manifest.get("ink_validation")
+    if not isinstance(ink_validation, dict):
+        _error(
+            errors,
+            "GP_INK_VALIDATION",
+            "ink_validation",
+            "held-out ink validation evidence is required",
+        )
+    else:
+        _verify_ink_validation(
+            ink_validation,
+            models,
+            root_dir,
+            errors,
+        )
 
     for name, records in (
         ("datasets", datasets),
