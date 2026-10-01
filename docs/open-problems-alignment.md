@@ -16,7 +16,7 @@ The existing ScrolIQ score remains useful, but it means one narrow thing: sample
 
 | Challenge bottleneck | ScrolIQ role | Current state | Next measurable output |
 |---|---|---|---|
-| Local scan degradation / compressed regions | Scan diagnostics | Implemented: deterministic coordinate-preserving spatial sampling, real-voxel metrics, explicit missing/masked/read-failure states | Validate on real scrolls; add local layer-separability/decohesion proxies |
+| Local scan degradation / compressed regions | Scan diagnostics | Implemented: deterministic coordinate-preserving spatial sampling, real-voxel metrics, explicit missing/masked/read-failure states. Validation attempted: a pre-registered paired-protocol test (`scroliq-pairs`) found two candidate separability/sharpness metrics **discordant** with the documented protocol ordering on four registered pairs, so neither is promoted into the passport | Run the DLS 7.91 µm vs ESRF 2.4 µm pairs (host unreachable in the first run); try metrics that are not contrast-ratio histograms; separate voxel size from energy/propagation effects |
 | Surface topology | Surface IQ | Planned | CT support, competing-surface ambiguity, topology-risk map |
 | Full recto submission coverage | Grand Prize coverage | Partial: declared reference-area accounting via `scroliq-recto-coverage`, plus provenance schema v3 exact CT-root/commit binding and exact equality between ledger mesh IDs and submitted package mesh IDs | Independently validate that the frozen reference inventory itself contains the complete recto surface |
 | Mesh connectivity | Mesh IQ | Partial: native TIFXYZ structure/provenance, mask-aware connected components and enclosed gaps, bbox/scale consistency, local edge jumps, severe normal reversals, quad-area distortion, per-triangle Jacobian singular-value isometry diagnostics, and optional fail-closed validation of the official VC3D `vc_tifxyz_selfcross` census via `scroliq-mesh` | CT support, sheet identity, merger/sheet-switch localization |
@@ -25,7 +25,7 @@ The existing ScrolIQ score remains useful, but it means one narrow thing: sample
 | Spiral fitting | Spiral IQ | Planned | Held-out constraint residuals, sensitivity, under-constrained regions |
 | Label quality | Label IQ | Partial: label/segment coverage and `label_next` triage | Normal-direction label offset, snapping candidates, active-learning queue |
 | Ink generalization and false positives | Ink IQ | Partial: exact-volume experiment manifest, train/evaluation spatial-overlap gate, checkpoint/seed provenance, held-out/run declarations, falsification-control coverage via `scroliq-ink-audit` | Attach measured offset/perturbation results, independent-checkpoint agreement, cross-scroll generalization |
-| Data scale / reproducibility | Data Integrity | Partial: cloud reads, decode provenance, companion zarr-pyramid-audit | Coordinate/provenance contract across all downstream artifacts |
+| Data scale / reproducibility | Data Integrity | Partial: cloud reads, decode provenance, companion zarr-pyramid-audit; strict OME-Zarr v2 reader for the open bucket; declared-vs-stored chunk-size audit (one defect found, in a non-prize volume) | Coordinate/provenance contract across all downstream artifacts |
 
 ## Diagnostic passport
 
@@ -58,7 +58,7 @@ That asymmetry is intentional. It makes missing evidence visible instead of disg
 
 The output also keeps missing shards, sparse/background shards, transport failures, and decode failures as explicit spatial records. A volume can therefore contain a mix of usable and problematic observations without those states disappearing into an average.
 
-The current map is descriptive. It does not yet identify papyrus-layer separability, compression, or decohesion directly; those require validated local metrics against known-good and known-bad regions. This distinction is important for prize evidence: raw locality is implemented, while physical interpretation remains a validation task.
+The current map is descriptive. It does not yet identify papyrus-layer separability, compression, or decohesion directly; those require validated local metrics against known-good and known-bad regions. The first validation attempt (`artifacts/2026-10-01-protocol-pairs/`) was a negative result for two candidate metrics. This distinction is important for prize evidence: raw locality is implemented, while physical interpretation remains a validation task.
 
 ## Prize-oriented sequence
 

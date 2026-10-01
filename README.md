@@ -411,6 +411,32 @@ The gate fails closed on wrong-volume lineage, a failing/mismatched recto ledger
 
 See [the provenance-manifest specification](docs/grand-prize-provenance.md) and [example manifest](examples/grand-prize-provenance.example.json).
 
+## Do the scan metrics recover the documented protocol ordering?
+
+The Challenge's open-problems page names scan-quality metrics as what would help
+with compressed regions, and documents that finer, phase-optimized protocols
+are less affected by haze. Several scrolls were rescanned under a second protocol
+and the rescan ships a `transform.json` registering it to the first. `scroliq-pairs`
+samples the same physical regions from both scans on one ~9 µm grid and asks
+whether two intensity-scale-invariant metrics (`otsu_eta`, `edge_sharpness`) rate
+the documented-better protocol higher. The hypothesis, constants and decision
+rule were committed in [`docs/protocol-pairs-protocol.md`](docs/protocol-pairs-protocol.md)
+before any real-data metric was computed; the verdict is computed by `decide()`.
+
+**Result: both primary metrics are discordant** (`otsu_eta` 3/4 pairs reverse,
+`edge_sharpness` 2/4, the latter exactly at the threshold) on four registered
+pairs from the open bucket. All reversals are in the 1.129 µm vs 2.4 µm pairs,
+`otsu_eta` effects are small (about 1–2 % of its level; `edge_sharpness` 7–25 % in the two
+pairs where it reverses), and all are 5–25× above the resampling null, and a control for aligned-vs-rotated lattice interpolation
+showed the suspected artifact does not explain them. The legacy 0–100 score shows
+no consistent response to protocol quality either, so **do not compare ScrollQ
+scores across different scans of the same scroll**. This is a negative result on
+four pairs; the DLS 7.91 µm vs ESRF 2.4 µm pairs (including PHercParis4) could not
+be run because their host is unreachable from the environment used. Full tables,
+the deviation log (including that two of four deviations were decided after the
+first two pairs' numbers were visible), and limits:
+[`artifacts/2026-10-01-protocol-pairs/`](artifacts/2026-10-01-protocol-pairs/).
+
 ## Open-bucket data access and integrity
 
 The scorer reads the dl.ash2txt.org volcomp (Zarr v3, sharded) store. The
