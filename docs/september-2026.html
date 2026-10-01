@@ -68,7 +68,9 @@ footer a{color:var(--muted)}
 Repo: <a href="https://github.com/Svyable/scrollq">github.com/Svyable/scrollq</a> (MIT)<br>
 Live evaluator dashboard: <a href="./">svyable.github.io/scrollq</a><br>
 Challenge alignment: <a href="open-problems-alignment.md">ScrolIQ × Vesuvius Challenge open problems</a><br>
-Companion integrity gate: <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a></div>
+Companion integrity gate: <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a><br>
+<span class="meta">Updated 2026-10-01: section (3) and the evidence table now describe mesh, ink-validation, and
+held-out geometry work merged on 2026-09-30; no published number changed.</span></div>
 
 <div class="stats">
 <div class="stat"><div class="n good">64 / 64</div><div class="l">listed volcomp scroll volumes scored<br>real L0 voxels decoded</div></div>
@@ -145,11 +147,23 @@ SHA-256 provenance, role semantics, numeric sanity, volume binding, and axial an
 before winding constraints are trusted as geometry evidence.</li>
 <li><b>Native Mesh IQ.</b> <code>scroliq-mesh</code> audits TIFXYZ structure and hashes, mask-aware
 connectivity and enclosed gaps, bbox/scale consistency, local edge jumps, severe normal reversals,
-and symmetric quad-area distortion without pretending those local checks prove sheet identity.</li>
+symmetric quad-area distortion, and per-triangle Jacobian singular-value isometry (which catches
+area-preserving anisotropic stretch that an area check misses). It can also validate an official VC3D
+<code>vc_tifxyz_selfcross</code> census and a Villa <code>vesuvius.surface_preflight</code> CT-support
+report against the exact surface and volume being audited, failing closed on stale or mismatched
+evidence. None of these local checks proves sheet identity.</li>
 <li><b>Ink falsification discipline.</b> <code>scroliq-ink-audit</code> checks exact-volume experiment
 binding, checkpoint identity, train/evaluation separation, held-out declarations, run provenance,
 and controls including normal offsets, adjacent winding, geometry perturbation, and an independent
 checkpoint. Missing controls remain visibly partial rather than being inferred.</li>
+<li><b>Held-out ink validation.</b> <code>scroliq-ink-validate</code> scores a prediction and its
+falsification controls (normal offsets, adjacent winding) against the same known ink labels and
+validation mask, and emits a hash-pinnable report for the provenance graph. It measures ink-signal
+recovery, not reading. See <a href="ink-validation.md">ink-validation.md</a>.</li>
+<li><b>Certified held-out geometry.</b> <code>scrollq-geometry-probe</code> freezes a blind
+fit/held-out regional split for the Grand Prize probe and certifies a predeclared minimum spatial gap
+between fit and held-out boxes, so held-out spiral-fit residuals cannot quietly leak from nearby fit
+inputs. See the <a href="grand-prize-probe-protocol.md">blind probe protocol</a>.</li>
 </ul></div>
 
 <div class="panel"><h2><span class="q">(4)</span> What evidence have you provided?</h2>
@@ -181,10 +195,15 @@ manifest dated 2026-09-30; PHerc1203 higher-resolution substitute explicitly exc
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-health-verdicts"><code>artifacts/2026-09-30-health-verdicts/</code></a> —
 healthy TRAIN case and defective-data DO NOT TRAIN case.</td></tr>
 
-<tr><td>Native TIFXYZ mesh checks and ink falsification controls are implemented and tested</td>
-<td><a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/tifxyz_audit.py"><code>scroliq-mesh</code></a> and
+<tr><td>Native TIFXYZ mesh checks, ink falsification controls, held-out ink validation, and the
+fit/held-out geometry gap certificate are implemented and tested (synthetic fixtures; not yet run on
+real community segments)</td>
+<td><a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/tifxyz_audit.py"><code>scroliq-mesh</code></a>,
 <a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_audit.py"><code>scroliq-ink-audit</code></a>,
-with deterministic coverage in <code>tests/test_tifxyz_audit.py</code> and <code>tests/test_ink_audit.py</code>.</td></tr>
+<a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_validation.py"><code>scroliq-ink-validate</code></a>, and
+<a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/geometry_probe.py"><code>scrollq-geometry-probe</code></a>,
+with deterministic coverage in <code>tests/test_tifxyz_audit.py</code>, <code>tests/test_ink_audit.py</code>,
+<code>tests/test_ink_validation.py</code>, and <code>tests/test_geometry_probe.py</code>.</td></tr>
 
 <tr><td>Grand Prize provenance now requires public held-out validation per trained model</td>
 <td><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-provenance.md"><code>docs/grand-prize-provenance.md</code></a> —
