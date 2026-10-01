@@ -2,7 +2,7 @@
 
 **Find the bottleneck. Fix the bottleneck. Read the scroll.**
 
-ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](https://scrollprize.org/) virtual-unwrapping pipeline. The existing `scrollq` package measures **real level-0 CT voxels** and keeps its current commands for compatibility, but the project is expanding beyond a single volume-quality ranking toward evidence-backed diagnostics for the Challenge's published [2026 Open Problems](https://scrollprize.org/2026_open_problems): scan degradation, surface topology, mesh connectivity, fibers, spiral fitting, label quality, ink reliability, and data-scale reproducibility.
+ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](https://scrollprize.org/) virtual-unwrapping pipeline. The existing `scrollq` package measures **real level-0 CT voxels** and keeps its current commands for compatibility, but the project is expanding beyond a single volume-quality ranking toward evidence-backed diagnostics for the Challenge's published [2026 Open Problems](https://scrollprize.org/2026_open_problems): scan degradation, surface topology, mesh connectivity, fibers, winding annotations, spiral fitting, label quality, ink reliability, and data-scale reproducibility.
 
 **[Live scan-quality survey](https://svyable.github.io/scrollq/)** · **[Open-problems alignment](docs/open-problems-alignment.md)** · **[September 2026 Progress Prize write-up](https://svyable.github.io/scrollq/september-2026.html)** · **[Reproducible campaign artifacts](artifacts/2026-09-30-scrollq/)**
 
@@ -50,6 +50,21 @@ scroliq-passport \
 ```
 
 The passport rejects a spatial artifact whose volume root does not exactly match the selected volume.
+
+
+## Winding annotation audit
+
+`scroliq-winding` audits the conventional VC3D / spiral-fitting point-collection inputs before they are trusted as geometry evidence:
+
+```bash
+scroliq-winding \
+  --dataset /path/to/spiral-dataset \
+  --out out/winding-audit.json
+```
+
+It checks `abs_winding.json`, `relative_windings.json`, and `same_windings.json` against the PointCollections v1 shape used by VC3D and the spiral fitter. The report records exact SHA-256 provenance, collection and point counts, coordinate sanity, role-consistent `wind_a` semantics, winding spans, and machine-readable findings. Missing roles are reported as partial evidence rather than silently treated as failure; `--require-role` can make a role mandatory for a particular experiment.
+
+This is intentionally a **constraint-input audit, not a geometry verdict**. It does not yet establish CT support, patch attachment, relative-winding graph consistency, loop holonomy, or held-out spiral-fit accuracy. Those are the next Winding IQ / Spiral IQ layers.
 
 ## Why this exists
 
