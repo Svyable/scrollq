@@ -36,7 +36,9 @@ Generated environments, caches, metadata and release archives stay untracked.
 scrollq-score --volumes volumes.txt --samples 4 --workers 4 --out-dir out/
 
 # rebuild the leaderboard site
-scrollq-leaderboard --in out/volumes.json --out docs/index.html
+scrollq-leaderboard --in artifacts/2026-09-30-scrollq-n24-dense/volumes.json \
+  --coverage artifacts/2026-09-30-scrollq-n24-dense/coverage.json \
+  --rank-bands artifacts/2026-10-stability-v2/stability-v2.json --out docs/index.html
 
 # join scores with discovered ink-label roots ("label next" flags)
 scrollq-coverage --s3-roots discover_zarr.roots.jsonl --volumes out/volumes.json --out out/coverage.json

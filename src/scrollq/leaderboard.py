@@ -318,9 +318,9 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
     <button class="actionbtn" id="csv" type="button">export CSV</button>
     <span class="control-meta" id="resultCount" aria-live="polite"></span>
   </div>
-  <p class="candidate-note"><b>Label-coverage candidate:</b> a volume in the top quartile of this scan-health survey with zero published ink-detection labels. It is a review-priority flag, not evidence that ink is present or that a usable surface is available.</p>
+  {band_note}<p class="candidate-note"><b>Label-coverage candidate:</b> a volume in the top quartile of this scan-health survey with zero published ink-detection labels. It is a review-priority flag, not evidence that ink is present or that a usable surface is available.</p>
   <div style="overflow-x:auto"><table id="lb"><thead><tr>
-    <th data-k="rank">#</th><th data-k="id">volume</th><th data-k="score">score</th>
+    {rank_th}<th data-k="id">volume</th><th data-k="score">score</th>
     <th data-k="tier">tier</th><th>components</th>
     <th data-k="signal">signal</th><th data-k="tex">texture</th><th data-k="dyn">dynamic</th>
     <th data-k="pen">penalties</th><th data-k="ink">ink labels</th><th data-k="seg">segments</th><th>note</th>
@@ -422,6 +422,7 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
     if (tierF === "segments") return Number(r.dataset.seg) > 0;
     return tierOf(r) === tierF;
   }}
+  const BANDS = {bands_js};
   function apply(){{
     let vis = rows.filter(r =>
       matchesFilter(r) &&
@@ -439,7 +440,7 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
       r.classList.remove("hidden");
       r._detail.classList.add("hidden");
       r.setAttribute("aria-expanded", "false");
-      r.querySelector(".rn").textContent = i + 1;
+      if (!BANDS) r.querySelector(".rn").textContent = i + 1;
       frag.append(r, r._detail);
     }});
     rows.forEach(r => {{
@@ -484,12 +485,12 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
     return '"' + s + '"';
   }}
   document.getElementById("csv").addEventListener("click", () => {{
-    const head = ["view_rank","volume","acquisition","score","tier","signal","texture","dynamic","penalty","ink_labels","segments","label_coverage_candidate","root"];
+    const head = [BANDS ? "rank_band" : "view_rank","volume","acquisition","score","tier","signal","texture","dynamic","penalty","ink_labels","segments","label_coverage_candidate","root"];
     const lines = [head.map(csvCell).join(",")];
     currentRows.forEach((r, i) => {{
       const root = r._detail.querySelector("code")?.textContent.trim() || "";
       const values = [
-        i + 1,
+        BANDS ? (r.dataset.band || "") : i + 1,
         r.querySelector(".scrollid")?.textContent.trim() || "",
         r.querySelector(".volsub")?.textContent.trim() || "",
         r.dataset.score, r.dataset.tier, r.dataset.signal, r.dataset.tex,
@@ -590,12 +591,47 @@ def score_color(score: float) -> str:
     return f"rgb({r},{g},{b})"
 
 
+def _band_note(data: dict, ranked: int, published: dict[str, float]) -> str:
+    d = data["decision"]
+    rho = d.get("rho")
+    rho_text = "undefined" if rho is None else f"{rho:.3f}"
+    pooled = data.get("pooled_scores", {})
+    common = [r for r in pooled if r in published]
+    mad = (sum(abs(pooled[r] - published[r]) for r in common) / len(common)
+           if common else None)
+    bias = ("" if mad is None else
+            f' Those scores came from a sample that can sit in one or two slabs '
+            f'of a scroll: across these {len(common)} volumes they differ from '
+            f'the stability test\u2019s pooled 96-chunk score by {mad:.1f} points '
+            'on average, so treat a single score as approximate too.')
+    return (
+        '<p class="candidate-note"><b>Ranks are bands.</b> The pre-registered '
+        f'stability test (<a href="./stability-v2-protocol.md">protocol</a>) '
+        f'returned <b>{html.escape(d["verdict"])}</b>: Spearman \u03c1 = '
+        f'{rho_text} between two disjoint 48-chunk samples, against a gate of '
+        f'{d["gate_rho"]}. So each volume shows the best\u2013worst rank it takes '
+        f'across the two runs and their pool, among the {ranked} volumes dense '
+        'enough for the test; \u2014 marks a volume too sparse to rank. Scores '
+        f'are the published September campaign.{bias}</p>')
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--in", dest="inp", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--coverage", default=None)
+    ap.add_argument(
+        "--rank-bands", default=None,
+        help="stability-v2.json from bin/stability_v2.py; replaces the rank "
+             "column with each volume's rank band (docs/stability-v2-protocol.md)")
     args = ap.parse_args()
+    bands_data = (json.load(open(args.rank_bands, encoding="utf-8"))
+                  if args.rank_bands else None)
+    if (bands_data is not None
+            and bands_data.get("decision", {}).get("verdict")
+            not in {"FAIL", "INSUFFICIENT"}):
+        ap.error("--rank-bands requires a FAIL or INSUFFICIENT stability verdict")
+    bands = bands_data["rank_bands"] if bands_data else None
     vols = json.load(open(args.inp, encoding="utf-8"))
     cov = json.load(open(args.coverage, encoding="utf-8")) if args.coverage else {}
     ok = sorted((v for v in vols if v.get("ok")),
@@ -663,13 +699,28 @@ def main() -> None:
                         "published ink-detection labels; prioritization flag only, "
                         "not evidence of ink or surface readiness")
         why = " · ".join(html.escape(b) for b in bits)
+        if bands is None:
+            band_attr, rn_cell = "", f'<td class="num rn">{i}</td>'
+        elif v["root"] in bands:
+            b = bands[v["root"]]
+            text = (f'{b["best"]}' if b["best"] == b["worst"]
+                    else f'{b["best"]}\u2013{b["worst"]}')
+            band_attr = f' data-band="{text}"'
+            rn_cell = (f'<td class="num rn" title="best\u2013worst rank of '
+                       f'{len(bands)} across two disjoint 48-chunk runs and '
+                       f'their pool">{text}</td>')
+        else:
+            band_attr = ' data-band=""'
+            rn_cell = ('<td class="num rn" title="too sparse for two disjoint '
+                       '48-chunk samples; not ranked">\u2014</td>')
         rows.append(
             f'<tr class="vol" data-rank="{i}" data-id="{html.escape(scroll.lower())} {html.escape(fname.lower())}"'
             f' data-score="{v["score"]:.1f}" data-tier="{t}"'
             f' data-signal="{s40:.1f}" data-tex="{t30:.1f}" data-dyn="{d20:.1f}"'
             f' data-pen="{pen:.1f}" data-ink="{ink}" data-seg="{seg}"'
-            f' data-label="{"1" if is_label else "0"}">'
-            f'<td class="num rn">{i}</td>'
+            f' data-label="{"1" if is_label else "0"}"'
+            f'{band_attr}>'
+            f'{rn_cell}'
             f'<td><span class="scrollid">{html.escape(scroll)}</span><br>'
             f'<span class="volsub">{html.escape(spec)}</span></td>'
             f'<td class="num score" style="color:{score_color(v["score"])}"'
@@ -702,14 +753,28 @@ def main() -> None:
             f'<div><div class="k">dead slices</div><div class="v">{dead}</div></div>'
             f'</div><div class="why">{why}</div>'
             f'</td></tr>')
-    stamp = datetime.datetime.now(datetime.timezone.utc).strftime(
-        "%Y-%m-%d %H:%M UTC")
+    if bands_data and bands_data.get("generated_at"):
+        generated = datetime.datetime.fromisoformat(
+            bands_data["generated_at"].replace("Z", "+00:00"))
+        stamp = generated.astimezone(datetime.timezone.utc).strftime(
+            "%Y-%m-%d %H:%M UTC")
+    else:
+        stamp = datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%d %H:%M UTC")
     page = PAGE.format(
         repo=REPO, n=len(ok), lo=f"{lo:.1f}", hi=f"{hi:.1f}",
         label_next_n=len(label_next),
         top_id=html.escape(top_scroll), top_score=f"{top['score']:.1f}",
         top_spec=html.escape(top_spec),
-        hist=hist, rows="\n".join(rows), stamp=stamp)
+        hist=hist, rows="\n".join(rows), stamp=stamp,
+        rank_th=(
+            '<th data-k="rank">#</th>' if bands is None else
+            '<th data-k="rank" title="rank band from the pre-registered '
+            'stability v2 test">rank band</th>'),
+        band_note=("" if bands_data is None else
+                   _band_note(bands_data, len(bands),
+                              {v["root"]: v["score"] for v in ok})),
+        bands_js="true" if bands is not None else "false")
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as fh:
         fh.write(page)
