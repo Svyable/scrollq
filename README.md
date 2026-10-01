@@ -408,6 +408,9 @@ pip install -e .
 python -m pytest tests/ -q
 ```
 
+The same full commit is recorded in the package metadata, so fresh editable
+and wheel installs cannot silently follow a newer companion default branch.
+
 ## Label-coverage analysis
 
 ScrolIQ can join quality scores with discovered ink-detection and surface-volume roots from the open-data audit:

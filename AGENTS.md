@@ -208,11 +208,11 @@ console script. A new entry point must therefore be declared in
 - Opening PRs/issues upstream or publishing to PyPI needs the maintainer's
   explicit approval — prepare the branch, don't ship it.
 - For the tested development setup, install `requirements-ci.txt`, then
-  `pip install -e .`. CI pins the companion to a verified immutable commit.
-  The public package declares
-  `zarr-pyramid-audit @ git+https://github.com/Svyable/zarr-pyramid-audit.git`
-  (PyPI publication is intentionally deprioritized — never assume the
-  companion is installable from PyPI).
+  `pip install -e .`. Both CI requirements and public package metadata pin
+  the companion to the same verified immutable commit. Update both pins
+  together only after the companion commit passes its own CI. PyPI publication
+  is intentionally deprioritized — never assume the companion is installable
+  from PyPI.
 - Do not commit environments, caches, egg-info or build archives.
 - PRs follow `.github/pull_request_template.md`: What / Evidence / Stability
   check / Grand Prize + frozen data / Docs.
