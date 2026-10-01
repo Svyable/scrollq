@@ -107,10 +107,25 @@ The implementation has regression coverage for legacy v1 and current v3/v4
 files, schema drift, native/fallback span accounting, geometry findings, input
 hashing, and CLI gating.
 
-As of 2026-10-01, this repository does **not** contain a public campaign over
-the June 2026 VC3D training-fiber corpus. Upstream configs reference that corpus
-by local paths rather than a reproducible public fiber URL. Until a public
-corpus location is pinned, the site describes this layer as implemented and
-tested, not as real-data validated.
+A frozen real-data campaign now audits eight SHA-256-pinned public PHercParis4
+VC3D fibers spanning four filename/annotator prefixes and June–August 2026
+timestamps. Across 53,828 rendered line points and 369 control-point spans, the
+campaign found 11 gap candidates and 26 sharp-turn candidates, while all 377
+control points remained on the rendered lines in forward order. Fifteen spans
+used fallback interpolation; the other 354 used native tracing. See
+[`artifacts/2026-10-01-public-fiber-audit/`](../artifacts/2026-10-01-public-fiber-audit/).
 
-Volume-bound reports can now be attached with `scroliq-passport --fiber-audit fiber.audit.json`; the passport records them as partial evidence, never as proof of fiber/sheet identity. The next Fiber IQ evidence step is a public corpus run followed by CT-conditioned orientation/support diagnostics and cross-fiber connectivity checks.
+All 11 gap candidates occur in one sampled fiber, which also has the highest
+fallback share in this eight-file sample (7/28 spans). That co-occurrence is
+reported for review and is not treated as evidence that fallback interpolation
+caused the gaps.
+
+The public PHercParis4 fiber directory is not asserted here to identify one
+exact CT volume root, so the campaign is intentionally **not** passport
+evidence. Volume-bound reports can be attached with
+`scroliq-passport --fiber-audit fiber.audit.json`; the passport records them
+as partial evidence and fails closed on missing or cross-volume bindings.
+
+The next Fiber IQ evidence step is to establish a defensible exact CT-volume
+mapping for public fibers, add CT-conditioned orientation/support diagnostics,
+and broaden the campaign toward cross-fiber connectivity.
