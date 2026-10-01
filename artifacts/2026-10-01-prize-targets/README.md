@@ -13,21 +13,22 @@ metadata:
 | File | Source | SHA-256 |
 |---|---|---|
 | `prizeEligibility.json` | `ScrollPrize/villa` @ `56d7c3aeea4bbccf5f56b195ce2a44ea2cf601dd`, `scrollprize.org/src/data/prizeEligibility.json` | `d549d8e8…30a7` |
-| `metadata.min.json.gz` | `https://vesuvius-challenge-open-data.s3.us-east-1.amazonaws.com/metadata.min.json` fetched 2026-10-01 | `127be6e7…065c` (gzip bytes); decoded content `15848845…1b22` |
+| `../2026-10-01-bucket-index/metadata.min.json.gz` | the open bucket's `metadata.min.json` fetched 2026-10-01 (see that folder's README) | `127be6e7…065c` (gzip bytes); decoded content `15848845…1b22` |
 | `../2026-09-30-scrollq-n24-dense/volumes.json` | existing campaign scores | `9834414714…decd7` |
 
 ## Reproduce
 
 ```bash
 D=artifacts/2026-10-01-prize-targets
+I=artifacts/2026-10-01-bucket-index/metadata.min.json.gz
 SRC="ScrollPrize/villa@56d7c3aeea4bbccf5f56b195ce2a44ea2cf601dd:scrollprize.org/src/data/prizeEligibility.json"
 
 scroliq-manifest --eligibility $D/prizeEligibility.json --eligibility-source "$SRC" \
-  --index $D/metadata.min.json.gz --prize grand-prize-2027 --as-of 2026-10-01 \
+  --index $I --prize grand-prize-2027 --as-of 2026-10-01 \
   --out $D/grand-prize-manifest.json --compare-builtin      # exit 0 = no drift
 
 scroliq-manifest --eligibility $D/prizeEligibility.json --eligibility-source "$SRC" \
-  --index $D/metadata.min.json.gz --prize first-letters-2027 --as-of 2026-10-01 \
+  --index $I --prize first-letters-2027 --as-of 2026-10-01 \
   --out $D/first-letters-manifest.json
 
 scrollq-grand-prize --volumes artifacts/2026-09-30-scrollq-n24-dense/volumes.json \

@@ -20,7 +20,6 @@ from those constants, so a failing result is reported as failing.
 from __future__ import annotations
 
 import argparse
-import gzip
 import hashlib
 import json
 import re
@@ -31,15 +30,14 @@ from pathlib import Path
 
 import numpy as np
 
+from .bucket import (BUCKET_S3, BUCKET_URL, DEFAULT_INDEX,  # noqa: F401
+                     load_json_maybe_gz, stable_seed as _seed_for)
 from .metrics import chunk_metrics
 from .omezarr import HttpStore, OmeZarrVolume, ReadStats, UnsupportedZarr
 from .registration import Registration, RegistrationError, infer_registration
 from .score import score_from_metrics
 
 SCHEMA_VERSION = 1
-BUCKET_URL = "https://vesuvius-challenge-open-data.s3.us-east-1.amazonaws.com"
-BUCKET_S3 = "s3://vesuvius-challenge-open-data"
-DEFAULT_INDEX = f"{BUCKET_URL}/metadata.min.json"
 
 # --- pre-registered constants (see docs/protocol-pairs-protocol.md) ---------
 TARGET_SPACING_UM = 9.0        # matched physical scale
@@ -157,11 +155,6 @@ def bootstrap_median_ci(values, seed: int, resamples: int = BOOTSTRAP_RESAMPLES,
     med = np.median(v[idx], axis=1)
     lo, hi = np.quantile(med, (alpha / 2, 1 - alpha / 2))
     return float(lo), float(hi)
-
-
-def _seed_for(*parts) -> int:
-    h = hashlib.sha256(":".join(str(p) for p in parts).encode()).digest()
-    return int.from_bytes(h[:8], "big") % (2**32)
 
 
 # --------------------------------------------------------------------------
@@ -548,20 +541,6 @@ def resolve_fixed(volumes: dict, moving_id: str, fixed_name: str,
     if not cands:
         return None, "no candidate volume in sample"
     return None, f"ambiguous: {len(cands)} candidates {sorted(cands)}"
-
-
-def load_json_maybe_gz(location: str):
-    """Load JSON from a path or URL, transparently gunzipping."""
-    if re.match(r"https?://", location):
-        import requests
-        r = requests.get(location, timeout=60)
-        r.raise_for_status()
-        raw = r.content
-    else:
-        raw = Path(location).read_bytes()
-    if raw[:2] == b"\x1f\x8b":
-        raw = gzip.decompress(raw)
-    return json.loads(raw), hashlib.sha256(raw).hexdigest()
 
 
 def discover(index: dict, *, only: set[str] | None = None, fetch=None,

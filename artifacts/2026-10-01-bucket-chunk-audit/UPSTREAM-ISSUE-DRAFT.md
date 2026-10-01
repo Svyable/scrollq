@@ -65,7 +65,7 @@ curl -sI $B/$V/0/0/3/2 | grep -i content-length            # 134217728 (512^3)
 Full enumeration of the level (all 8,543 objects):
 
 ```bash
-scroliq-chunk-audit --index artifacts/2026-10-01-prize-targets/metadata.min.json.gz \
+scroliq-chunk-audit --index artifacts/2026-10-01-bucket-index/metadata.min.json.gz \
   --volume 20250521134555 --full --out pherc0343p-full.json
 ```
 

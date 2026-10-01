@@ -367,7 +367,7 @@ higher-resolution scans are no longer hand-maintained:
 
 ```bash
 scroliq-manifest --eligibility artifacts/2026-10-01-prize-targets/prizeEligibility.json \
-  --index artifacts/2026-10-01-prize-targets/metadata.min.json.gz \
+  --index artifacts/2026-10-01-bucket-index/metadata.min.json.gz \
   --prize grand-prize-2027 --as-of 2026-10-01 --out out/gp-manifest.json --compare-builtin
 ```
 

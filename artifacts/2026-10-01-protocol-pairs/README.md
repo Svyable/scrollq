@@ -148,7 +148,7 @@ accordingly: the first two pairs already pointed the same way.
 ## Reproduce
 
 ```bash
-IDX=artifacts/2026-10-01-prize-targets/metadata.min.json.gz
+IDX=artifacts/2026-10-01-bucket-index/metadata.min.json.gz
 scroliq-pairs --index $IDX --list --out out/discovery.json
 scroliq-pairs --index $IDX --candidate-factor 40 --out out/protocol-pairs.json   # ~40 min, ~2.9 GB read
 scroliq-pairs --index $IDX --sensitivity --candidate-factor 40 --out out/sens.json

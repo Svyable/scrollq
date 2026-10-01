@@ -6,9 +6,11 @@ import pytest
 
 from scrollq import prize_manifest as pm
 from scrollq.grand_prize import DEFAULT_MANIFEST, qualify
-from scrollq.protocol_pairs import load_json_maybe_gz
+from scrollq.bucket import load_json_maybe_gz
 
-SNAP = Path(__file__).resolve().parents[1] / "artifacts" / "2026-10-01-prize-targets"
+ART = Path(__file__).resolve().parents[1] / "artifacts"
+SNAP = ART / "2026-10-01-prize-targets"          # eligibility snapshot
+INDEX = ART / "2026-10-01-bucket-index" / "metadata.min.json.gz"
 KW = dict(as_of="2026-10-01", eligibility_source="test",
           eligibility_sha256="e", index_sha256="i")
 
@@ -131,8 +133,8 @@ def test_compare_targets_flags_each_kind_of_drift():
                pm.compare_targets(extra, ref))
 
 
-@pytest.mark.skipif(not SNAP.exists(), reason="snapshot artifact absent")
 def test_builtin_grand_prize_manifest_matches_pinned_official_sources():
+    assert SNAP.exists() and INDEX.exists(), "pinned snapshots must be committed"
     """Regression for the verified claim in artifacts/2026-10-01-prize-targets.
 
     The hand-copied DEFAULT_MANIFEST agrees with the pinned villa eligibility
@@ -140,7 +142,7 @@ def test_builtin_grand_prize_manifest_matches_pinned_official_sources():
     released predictions, and prohibited higher-resolution scans.
     """
     elig, esha = load_json_maybe_gz(str(SNAP / "prizeEligibility.json"))
-    index, isha = load_json_maybe_gz(str(SNAP / "metadata.min.json.gz"))
+    index, isha = load_json_maybe_gz(str(INDEX))
     derived = pm.derive_manifest("grand-prize-2027", elig, index,
                                  as_of="2026-10-01", eligibility_source="snap",
                                  eligibility_sha256=esha, index_sha256=isha)
@@ -149,10 +151,10 @@ def test_builtin_grand_prize_manifest_matches_pinned_official_sources():
     assert pm.compare_targets(DEFAULT_MANIFEST, derived) == []
 
 
-@pytest.mark.skipif(not SNAP.exists(), reason="snapshot artifact absent")
 def test_first_letters_snapshot_derivation_is_complete_and_flags_0846a():
+    assert SNAP.exists() and INDEX.exists(), "pinned snapshots must be committed"
     elig, esha = load_json_maybe_gz(str(SNAP / "prizeEligibility.json"))
-    index, isha = load_json_maybe_gz(str(SNAP / "metadata.min.json.gz"))
+    index, isha = load_json_maybe_gz(str(INDEX))
     fl = pm.derive_manifest("first-letters-2027", elig, index,
                             as_of="2026-10-01", eligibility_source="snap",
                             eligibility_sha256=esha, index_sha256=isha)

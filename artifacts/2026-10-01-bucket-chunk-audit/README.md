@@ -6,7 +6,7 @@ object must be exactly `prod(chunks) × itemsize` bytes, edge chunks included.
 S3 listings carry object sizes, so the check downloads no chunks.
 
 Tool: `scroliq-chunk-audit` (`src/scrollq/chunk_audit.py`). Input index:
-`../2026-10-01-prize-targets/metadata.min.json.gz`.
+`../2026-10-01-bucket-index/metadata.min.json.gz`.
 
 ## Results
 
@@ -67,7 +67,7 @@ unavailable object (network failure, 5xx, 403). An unavailable `.zattrs`,
 ## Reproduce
 
 ```bash
-IDX=artifacts/2026-10-01-prize-targets/metadata.min.json.gz
+IDX=artifacts/2026-10-01-bucket-index/metadata.min.json.gz
 scroliq-chunk-audit --index $IDX --out chunk-audit.json                       # sampled, ~30 s
 scroliq-chunk-audit --index $IDX --volume 20250521134555 --full --out p.json  # one volume, exhaustive
 ```

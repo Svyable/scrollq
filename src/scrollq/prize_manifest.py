@@ -20,7 +20,7 @@ import json
 import sys
 from pathlib import Path
 
-from .protocol_pairs import load_json_maybe_gz
+from .bucket import load_json_maybe_gz
 
 SCHEMA_VERSION = 1
 

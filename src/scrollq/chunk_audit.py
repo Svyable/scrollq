@@ -36,8 +36,8 @@ from pathlib import Path
 
 import numpy as np
 
-from .protocol_pairs import BUCKET_S3, BUCKET_URL, DEFAULT_INDEX, \
-    _seed_for, load_json_maybe_gz
+from .bucket import BUCKET_S3, BUCKET_URL, DEFAULT_INDEX, \
+    load_json_maybe_gz, stable_seed as _seed_for
 
 SCHEMA_VERSION = 1
 _NS = "{http://s3.amazonaws.com/doc/2006-03-01/}"
