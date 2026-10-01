@@ -216,3 +216,10 @@ def test_invalid_axial_window_is_rejected(tmp_path: Path):
         assert "start < stop" in str(exc)
     else:
         raise AssertionError("invalid z_range should fail")
+
+
+def test_dataset_can_bind_audit_to_exact_volume_root(tmp_path: Path):
+    root = "community-uploads/forrest/volcomp/PHercTEST/volumes/v1.zarr"
+    report = audit_dataset(tmp_path, volume_root=root)
+
+    assert report["volume_root"] == root
