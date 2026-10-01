@@ -417,7 +417,7 @@ See [the example coverage manifest](examples/grand-prize-recto-coverage.example.
 
 ## 2027 Grand Prize provenance gate
 
-`scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. Schema v3 pins the exact eligible CT volume and zarr-pyramid-audit run, validates the nested full-recto coverage ledger, and then links each declared coverage component → numbered tifxyz mesh → render → checkpoint → training datasets/regions → stochastic seeds → public training/inference experiment runs → public held-out validation against known ground truth.
+`scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. Schema v4 pins the exact eligible CT volume and zarr-pyramid-audit run, validates the nested full-recto coverage ledger, and then links each declared coverage component → numbered tifxyz mesh → render → checkpoint → training datasets/regions → stochastic seeds → public training/inference experiment runs → public held-out validation against known ground truth, now (v4) bound to the exact `scroliq-ink-validate` report, checkpoint digest, evaluated-array digest and named falsification controls.
 
 ```bash
 scroliq-provenance \

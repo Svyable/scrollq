@@ -1,12 +1,13 @@
 import copy
 import hashlib
+import json
 
 from scrollq.provenance import validate_manifest
 
 
 def _manifest():
     return {
-        "schema_version": 3,
+        "schema_version": 4,
         "rules": {
             "url": "https://scrollprize.org/prizes",
             "as_of": "2026-09-30",
@@ -178,6 +179,25 @@ def _manifest():
                     "public": True,
                 },
                 "code_commit": "a" * 40,
+                "ink_evidence": {
+                    "tool": "scroliq-ink-validate",
+                    "model_checkpoint_sha256": "d" * 64,
+                    "split_id": "public-held-out-1",
+                    "held_out": True,
+                    "training_overlap": "none",
+                    "known_ground_truth": True,
+                    "ground_truth_source_url": (
+                        "https://example.org/validation/ground-truth"
+                    ),
+                    "model_window_voxels_zyx": [17, 64, 64],
+                    "control_names": ["normal-plus-3"],
+                    "evaluated_arrays_sha256": "4" * 64,
+                    "metrics": {
+                        "balanced_accuracy": 0.9,
+                        "false_positive_rate": 0.05,
+                        "both_classes_present": True,
+                    },
+                },
             }
         ],
         "recto_coverage": {
@@ -219,6 +239,34 @@ def _manifest():
 
 def _codes(report):
     return {item["code"] for item in report["errors"]}
+
+
+def _ink_report(manifest):
+    evidence = manifest["held_out_validations"][0]["ink_evidence"]
+    return {
+        "schema_version": 1,
+        "tool": "scroliq-ink-validate",
+        "purpose": "held-out ink signal recovery / false-positive evidence",
+        "split": {
+            "id": evidence["split_id"],
+            "held_out": True,
+            "training_overlap": "none",
+            "known_ground_truth": True,
+            "ground_truth_source_url": evidence["ground_truth_source_url"],
+        },
+        "model": {
+            "checkpoint_sha256": evidence["model_checkpoint_sha256"],
+            "window_voxels_zyx": evidence["model_window_voxels_zyx"],
+        },
+        "evaluation": dict(evidence["metrics"]),
+        "controls": [
+            {"name": name, "metrics": {}}
+            for name in evidence["control_names"]
+        ],
+        "evaluated_arrays_sha256": evidence["evaluated_arrays_sha256"],
+        "prize_evidence_ready": True,
+        "readiness_reasons": [],
+    }
 
 
 def test_valid_manifest_builds_a_complete_render_chain():
@@ -337,7 +385,9 @@ def test_package_file_hashes_are_verified(tmp_path):
         "column_01.tifxyz": b"mesh",
         "column_01.tif": b"render",
         "banner.tif": b"banner",
-        "held_out_validation.json": b"held-out",
+        "held_out_validation.json": (
+            json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
+        ),
     }
     for name, payload in payloads.items():
         (tmp_path / name).write_bytes(payload)
@@ -477,3 +527,80 @@ def test_recto_coverage_failure_propagates_into_provenance_gate():
 
     assert "GP_RECTO_COVERAGE" in _codes(report)
     assert "GP_RECTO_MESH_SET" in _codes(report)
+
+
+
+def test_held_out_validation_requires_deterministic_ink_evidence():
+    manifest = _manifest()
+    del manifest["held_out_validations"][0]["ink_evidence"]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_INK_EVIDENCE" in _codes(report)
+
+
+def test_ink_evidence_checkpoint_must_match_submitted_model():
+    manifest = _manifest()
+    evidence = manifest["held_out_validations"][0]["ink_evidence"]
+    evidence["model_checkpoint_sha256"] = "9" * 64
+
+    report = validate_manifest(manifest)
+
+    assert "GP_INK_EVIDENCE_CHECKPOINT" in _codes(report)
+
+
+def test_ink_evidence_requires_no_overlap_controls_and_both_classes():
+    manifest = _manifest()
+    evidence = manifest["held_out_validations"][0]["ink_evidence"]
+    evidence["training_overlap"] = "unknown"
+    evidence["control_names"] = []
+    evidence["metrics"]["both_classes_present"] = False
+
+    report = validate_manifest(manifest)
+
+    assert {
+        "GP_INK_EVIDENCE_OVERLAP",
+        "GP_INK_EVIDENCE_CONTROLS",
+        "GP_INK_EVIDENCE_CLASSES",
+    } <= _codes(report)
+
+
+def test_local_ink_report_mismatch_fails_closed(tmp_path):
+    manifest = _manifest()
+    report_payload = _ink_report(manifest)
+    report_payload["model"]["window_voxels_zyx"] = [99, 99, 99]
+    payload = json.dumps(report_payload, sort_keys=True).encode("utf-8")
+
+    for name, data in {
+        "column_01.tifxyz": b"mesh",
+        "column_01.tif": b"render",
+        "banner.tif": b"banner",
+        "held_out_validation.json": payload,
+    }.items():
+        (tmp_path / name).write_bytes(data)
+
+    manifest["meshes"][0]["sha256"] = hashlib.sha256(b"mesh").hexdigest()
+    manifest["renders"][0]["sha256"] = hashlib.sha256(b"render").hexdigest()
+    manifest["banner"]["sha256"] = hashlib.sha256(b"banner").hexdigest()
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        payload
+    ).hexdigest()
+
+    result = validate_manifest(manifest, root_dir=tmp_path)
+
+    assert "GP_INK_EVIDENCE_MISMATCH" in _codes(result)
+
+
+def test_published_example_manifest_validates_under_current_schema():
+    """examples/grand-prize-provenance.example.json is what the docs point
+    people at; it must pass the current schema, not a retired one."""
+    import json
+    from pathlib import Path
+
+    from scrollq.provenance import SCHEMA_VERSION, validate_manifest
+
+    path = (Path(__file__).resolve().parents[1] / "examples"
+            / "grand-prize-provenance.example.json")
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    assert manifest["schema_version"] == SCHEMA_VERSION
+    assert validate_manifest(manifest)["errors"] == []

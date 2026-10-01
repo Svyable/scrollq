@@ -1,6 +1,6 @@
 # Grand Prize provenance manifest
 
-`scroliq-provenance` validates one machine-readable provenance graph for a 2027 Grand Prize submission. Schema v3 binds the recto-coverage ledger into the fail-closed submission graph; held-out validation introduced in v2 remains required. It is intentionally strict about facts that can be checked mechanically; it does **not** claim that text is legible, that the recto surface is complete, or that a reported metric is sufficient for the prize.
+`scroliq-provenance` validates one machine-readable provenance graph for a 2027 Grand Prize submission. Schema v4 (current) requires deterministic held-out ink evidence from `scroliq-ink-validate` for every held-out validation; v3 bound the recto-coverage ledger into the fail-closed submission graph, and held-out validation introduced in v2 remains required. Manifests with an older `schema_version` are rejected. It is intentionally strict about facts that can be checked mechanically; it does **not** claim that text is legible, that the recto surface is complete, or that a reported metric is sufficient for the prize.
 
 The graph ties each submitted render back through the exact eligible CT volume, declared full-recto coverage inventory, surface, numbered tifxyz mesh, ink model/checkpoint, training datasets, training/prediction regions, stochastic seeds, and public experiment runs. Each trained model must also carry public held-out validation evidence: public input and known-ground-truth URLs, an explicit validation region, a public evaluation run, numeric metrics, a hashed results artifact, and a machine-checkable training/validation exclusion proof. The graph also pins the code commit, Docker image digest, Zarr audit manifest digest, package file digests, documented human-input hours, and the full-scroll banner.
 
@@ -77,7 +77,7 @@ This deliberately uses a simple coordinate primitive that can be independently r
 
 ## Recto coverage binding
 
-Schema v3 requires a nested `recto_coverage` manifest in the provenance graph. That object is validated by the same `audit_recto_coverage` implementation used by `scroliq-recto-coverage`.
+Schema v3 (retained in v4) requires a nested `recto_coverage` manifest in the provenance graph. That object is validated by the same `audit_recto_coverage` implementation used by `scroliq-recto-coverage`.
 
 The provenance gate then adds two cross-artifact invariants:
 
@@ -90,7 +90,7 @@ This still does not prove that the upstream reference inventory found every phys
 
 ## Held-out validation evidence
 
-Schema v2 introduced held-out validation; schema v3 retains it and requires at least one held-out validation record for every trained model in the manifest. A minimal record looks like:
+Schema v2 introduced held-out validation; v3 and v4 retain it and require at least one held-out validation record for every trained model in the manifest. A minimal v4 record looks like:
 
 ```json
 {
@@ -105,11 +105,48 @@ Schema v2 introduced held-out validation; schema v3 retains it and requires at l
   "sha256": "<64 hex>",
   "metrics": {"precision": 0.91, "recall": 0.87},
   "experiment_run": {"url": "https://wandb.ai/…", "public": true},
-  "code_commit": "<same 40-hex commit as code.commit>"
+  "code_commit": "<same 40-hex commit as code.commit>",
+  "ink_evidence": {
+    "tool": "scroliq-ink-validate",
+    "model_checkpoint_sha256": "<the submitted model's sha256>",
+    "split_id": "public-held-out-1",
+    "held_out": true,
+    "training_overlap": "none",
+    "known_ground_truth": true,
+    "ground_truth_source_url": "https://…",
+    "model_window_voxels_zyx": [17, 64, 64],
+    "control_names": ["normal-plus-3"],
+    "evaluated_arrays_sha256": "<64 hex>",
+    "metrics": {"balanced_accuracy": 0.9, "false_positive_rate": 0.05, "both_classes_present": true}
+  }
 }
 ```
 
 `protocol` may be `held-out` or `k-fold`; k-fold records must declare `fold_count >= 2`. The validator does not impose a prize-performance threshold on the metric names or values. It verifies that numeric results exist, that the evidence is public and tied to the pinned code commit, and that any same-volume training and validation boxes are disjoint.
+
+### Deterministic ink evidence (schema v4)
+
+Every held-out validation must carry an `ink_evidence` object produced by
+`scroliq-ink-validate` (see [ink-validation.md](ink-validation.md)). The
+validator fails closed (`GP_INK_EVIDENCE_*` codes) unless:
+
+- `tool` is `scroliq-ink-validate` and `model_checkpoint_sha256` equals the
+  submitted model's `sha256`;
+- the split is declared held out, with `training_overlap: "none"`, known
+  ground truth and a public `ground_truth_source_url`;
+- `model_window_voxels_zyx` is a positive integer `[z, y, x]` window, so the
+  hallucination risk of large windows is visible;
+- at least one uniquely named falsification control is listed;
+- `evaluated_arrays_sha256` pins the exact arrays evaluated;
+- `metrics` include `balanced_accuracy`, `false_positive_rate` and
+  `both_classes_present: true`.
+
+With `--root-dir`, the validator also opens the `scroliq-ink-validate` report
+at the record's `path` (it must stay inside the root), requires
+`prize_evidence_ready: true`, and fails with `GP_INK_EVIDENCE_MISMATCH` if the
+report's split, checkpoint, window, array digest, control names or metrics
+differ from the manifest. Like the rest of the gate, this checks that the
+evidence is complete and consistent; it sets no performance threshold.
 
 ## CI gate
 

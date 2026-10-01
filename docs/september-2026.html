@@ -188,7 +188,9 @@ checkpoint. Missing controls remain visibly partial rather than being inferred.<
 <li><b>Held-out ink validation.</b> <code>scroliq-ink-validate</code> scores a prediction and its
 falsification controls (normal offsets, adjacent winding) against the same known ink labels and
 validation mask, and emits a hash-pinnable report for the provenance graph. It measures ink-signal
-recovery, not reading. See <a href="ink-validation.md">ink-validation.md</a>.</li>
+recovery, not reading. See <a href="ink-validation.md">ink-validation.md</a>. Provenance schema v4
+binds each held-out validation to its exact report: checkpoint digest, evaluated-array digest, model
+window and named falsification controls must match, or the gate fails closed.</li>
 <li><b>Certified held-out geometry.</b> <code>scrollq-geometry-probe</code> freezes a blind
 fit/held-out regional split for the Grand Prize probe and certifies a predeclared minimum spatial gap
 between fit and held-out boxes, so held-out spiral-fit residuals cannot quietly leak from nearby fit

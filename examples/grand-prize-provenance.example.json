@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "rules": {
     "url": "https://scrollprize.org/prizes",
     "as_of": "2026-09-30"
@@ -190,7 +190,31 @@
         "url": "https://wandb.ai/OWNER/PROJECT/runs/HELDOUT",
         "public": true
       },
-      "code_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      "code_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "ink_evidence": {
+        "tool": "scroliq-ink-validate",
+        "model_checkpoint_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "split_id": "public-held-out-1",
+        "held_out": true,
+        "training_overlap": "none",
+        "known_ground_truth": true,
+        "ground_truth_source_url": "https://example.org/validation/ground-truth",
+        "model_window_voxels_zyx": [
+          17,
+          64,
+          64
+        ],
+        "control_names": [
+          "normal-plus-3",
+          "adjacent-winding"
+        ],
+        "evaluated_arrays_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "metrics": {
+          "balanced_accuracy": 0.9,
+          "false_positive_rate": 0.05,
+          "both_classes_present": true
+        }
+      }
     }
   ],
   "recto_coverage": {
