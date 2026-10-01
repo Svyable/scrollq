@@ -162,13 +162,11 @@ def audit_recto_coverage(
             excluded = bool(row["excluded"])
 
         mesh_ids_raw = row.get("mesh_ids")
-        mesh_ids = (
-            mesh_ids_raw
-            if isinstance(mesh_ids_raw, list)
-            and all(isinstance(v, str) and v for v in mesh_ids_raw)
-            else []
+        mesh_ids_valid = isinstance(mesh_ids_raw, list) and all(
+            isinstance(v, str) and v for v in mesh_ids_raw
         )
-        if mesh_ids_raw is not None and not mesh_ids:
+        mesh_ids = mesh_ids_raw if mesh_ids_valid else []
+        if mesh_ids_raw is not None and not mesh_ids_valid:
             errors.append(f"{label}.mesh_ids must be a list of non-empty strings")
 
         for mesh_id in mesh_ids:
