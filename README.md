@@ -345,6 +345,22 @@ PHerc0813, and PHerc1447**. The larger frontier is a useful warning: this
 external geometry proxy creates real trade-offs and should drive focused
 held-out geometry tests, not an opaque weighted winner score.
 
+
+## 2027 Grand Prize recto-coverage ledger
+
+`scroliq-recto-coverage` turns the full-recto requirement into an explicit accounting gate. A frozen reference inventory declares the total recto surface area and decomposes it into the main sheet plus attached, detached, or disconnected outer patches. Every in-scope component must be unrolled and linked to submitted mesh IDs; the only permitted exclusion is a `disconnected-outer-patch`, and the sum of excluded area must remain **strictly below 10%** of the declared total surface.
+
+```bash
+scroliq-recto-coverage \
+  --manifest submission/recto-coverage.json \
+  --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
+  --out submission/recto-coverage.audit.json
+```
+
+The audit also catches reference/component area imbalance and mesh IDs reused across multiple components, which would otherwise allow accidental double-counting. A pass means **100% of the declared in-scope reference inventory is accounted for**. It deliberately does not claim that the reference inventory itself discovered every papyrus fragment; that upstream completeness proof remains separate evidence.
+
+See [the example coverage manifest](examples/grand-prize-recto-coverage.example.json).
+
 ## 2027 Grand Prize provenance gate
 
 `scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. Schema v2 pins the exact eligible CT volume and zarr-pyramid-audit run, then links each surface → numbered tifxyz mesh → render → checkpoint → training datasets/regions → stochastic seeds → public training/inference experiment runs → public held-out validation against known ground truth.
