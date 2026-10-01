@@ -1,0 +1,802 @@
+{
+  "schema_version": 1,
+  "created": "2026-09-30",
+  "scroll": "PHerc0800",
+  "prize_volume_id": "20250521135224",
+  "source_candidate_pool": "artifacts/2026-09-30-grand-prize-qualifier/geometry_candidate_pool.json",
+  "split": {
+    "status": "frozen",
+    "method": "Sort the 12 locked axial windows by bbox-derived z center; partition into three equal-count bands of four; in each band hold out the window whose z center is nearest that band's mean (ties to lower z). Both w020 and w100 at that window share the held-out role. Use only the central 256 z-slice core of every candidate as a fit/evaluation unit.",
+    "uses_quality_or_ink": false,
+    "core_depth_slices": 256,
+    "fit_windows": [
+      5664,
+      6864,
+      8672,
+      9872,
+      12272,
+      12864,
+      14064,
+      15264,
+      17072
+    ],
+    "held_out_windows": [
+      7472,
+      10464,
+      15872
+    ],
+    "fit_candidates": 18,
+    "held_out_candidates": 6,
+    "bands": [
+      {
+        "band": 1,
+        "windows": [
+          {
+            "window_z": 5664,
+            "z_center": 6064.3218994140625
+          },
+          {
+            "window_z": 6864,
+            "z_center": 7263.8590087890625
+          },
+          {
+            "window_z": 7472,
+            "z_center": 7872.016845703125
+          },
+          {
+            "window_z": 8672,
+            "z_center": 9071.73388671875
+          }
+        ],
+        "mean_z_center": 7567.98291015625,
+        "held_out_window_z": 7472
+      },
+      {
+        "band": 2,
+        "windows": [
+          {
+            "window_z": 9872,
+            "z_center": 10271.933837890625
+          },
+          {
+            "window_z": 10464,
+            "z_center": 10864.078125
+          },
+          {
+            "window_z": 12272,
+            "z_center": 12672.080322265625
+          },
+          {
+            "window_z": 12864,
+            "z_center": 13264.122802734375
+          }
+        ],
+        "mean_z_center": 11768.053771972656,
+        "held_out_window_z": 10464
+      },
+      {
+        "band": 3,
+        "windows": [
+          {
+            "window_z": 14064,
+            "z_center": 14463.5322265625
+          },
+          {
+            "window_z": 15264,
+            "z_center": 15662.99853515625
+          },
+          {
+            "window_z": 15872,
+            "z_center": 16272.71728515625
+          },
+          {
+            "window_z": 17072,
+            "z_center": 17472.78173828125
+          }
+        ],
+        "mean_z_center": 15968.007446289062,
+        "held_out_window_z": 15872
+      }
+    ],
+    "window_roles": [
+      {
+        "window_z": 5664,
+        "z_center": 6064.3218994140625,
+        "role": "fit",
+        "core_z_half_open": [
+          5936,
+          6192
+        ]
+      },
+      {
+        "window_z": 6864,
+        "z_center": 7263.8590087890625,
+        "role": "fit",
+        "core_z_half_open": [
+          7136,
+          7392
+        ]
+      },
+      {
+        "window_z": 7472,
+        "z_center": 7872.016845703125,
+        "role": "held_out",
+        "core_z_half_open": [
+          7744,
+          8000
+        ]
+      },
+      {
+        "window_z": 8672,
+        "z_center": 9071.73388671875,
+        "role": "fit",
+        "core_z_half_open": [
+          8944,
+          9200
+        ]
+      },
+      {
+        "window_z": 9872,
+        "z_center": 10271.933837890625,
+        "role": "fit",
+        "core_z_half_open": [
+          10144,
+          10400
+        ]
+      },
+      {
+        "window_z": 10464,
+        "z_center": 10864.078125,
+        "role": "held_out",
+        "core_z_half_open": [
+          10736,
+          10992
+        ]
+      },
+      {
+        "window_z": 12272,
+        "z_center": 12672.080322265625,
+        "role": "fit",
+        "core_z_half_open": [
+          12544,
+          12800
+        ]
+      },
+      {
+        "window_z": 12864,
+        "z_center": 13264.122802734375,
+        "role": "fit",
+        "core_z_half_open": [
+          13136,
+          13392
+        ]
+      },
+      {
+        "window_z": 14064,
+        "z_center": 14463.5322265625,
+        "role": "fit",
+        "core_z_half_open": [
+          14336,
+          14592
+        ]
+      },
+      {
+        "window_z": 15264,
+        "z_center": 15662.99853515625,
+        "role": "fit",
+        "core_z_half_open": [
+          15535,
+          15791
+        ]
+      },
+      {
+        "window_z": 15872,
+        "z_center": 16272.71728515625,
+        "role": "held_out",
+        "core_z_half_open": [
+          16145,
+          16401
+        ]
+      },
+      {
+        "window_z": 17072,
+        "z_center": 17472.78173828125,
+        "role": "fit",
+        "core_z_half_open": [
+          17345,
+          17601
+        ]
+      }
+    ],
+    "core_overlap_check": "pass",
+    "minimum_axial_gap_between_any_locked_cores_slices": 336,
+    "minimum_gap_pair_window_z": [
+      9872,
+      10464
+    ]
+  },
+  "candidates": [
+    {
+      "path": "meshes/PHerc0800/z5664_w020",
+      "uuid": "PHerc0800_z5664_w020",
+      "window_z": 5664,
+      "wrap": "w020",
+      "bbox": [
+        [
+          5992.14990234375,
+          3312.139892578125,
+          5666.97021484375
+        ],
+        [
+          6686.7255859375,
+          4564.03662109375,
+          6462.13916015625
+        ]
+      ],
+      "meta_sha": "cd11ffae6a0d0b8d8cdd9348991a412d94aca6c8",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        5936,
+        6192
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z5664_w100",
+      "uuid": "PHerc0800_z5664_w100",
+      "window_z": 5664,
+      "wrap": "w100",
+      "bbox": [
+        [
+          4208.14453125,
+          1907.033447265625,
+          5664.56787109375
+        ],
+        [
+          7979.09716796875,
+          6181.9375,
+          6463.6103515625
+        ]
+      ],
+      "meta_sha": "8eead26cac77c9fb4c1d3bfc4cda68d190a82c71",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        5936,
+        6192
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z6864_w020",
+      "uuid": "PHerc0800_z6864_w020",
+      "window_z": 6864,
+      "wrap": "w020",
+      "bbox": [
+        [
+          5440.0048828125,
+          3854.5048828125,
+          6865.150390625
+        ],
+        [
+          6646.3203125,
+          4853.390625,
+          7661.85107421875
+        ]
+      ],
+      "meta_sha": "50568cdf8b953a83639f879d831296d68681133f",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        7136,
+        7392
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z6864_w100",
+      "uuid": "PHerc0800_z6864_w100",
+      "window_z": 6864,
+      "wrap": "w100",
+      "bbox": [
+        [
+          3918.75439453125,
+          2032.422119140625,
+          6864.9873046875
+        ],
+        [
+          7929.68212890625,
+          6439.5986328125,
+          7663.447265625
+        ]
+      ],
+      "meta_sha": "c7dd69c7b2561784d0537785277e930aa20b095b",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        7136,
+        7392
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z7472_w020",
+      "uuid": "PHerc0800_z7472_w020",
+      "window_z": 7472,
+      "wrap": "w020",
+      "bbox": [
+        [
+          5322.146484375,
+          4129.5341796875,
+          7473.56494140625
+        ],
+        [
+          6388.45947265625,
+          5163.1025390625,
+          8271.107421875
+        ]
+      ],
+      "meta_sha": "60d2c8239b28cdb9b681eea67e0f665d389013d7",
+      "role": "held_out",
+      "evaluation_core_z_half_open": [
+        7744,
+        8000
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z7472_w100",
+      "uuid": "PHerc0800_z7472_w100",
+      "window_z": 7472,
+      "wrap": "w100",
+      "bbox": [
+        [
+          3723.927978515625,
+          2509.562255859375,
+          7473.20947265625
+        ],
+        [
+          7666.96435546875,
+          6723.6083984375,
+          8270.185546875
+        ]
+      ],
+      "meta_sha": "8e07827e69f3334002f270e83c5440482c081385",
+      "role": "held_out",
+      "evaluation_core_z_half_open": [
+        7744,
+        8000
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z8672_w020",
+      "uuid": "PHerc0800_z8672_w020",
+      "window_z": 8672,
+      "wrap": "w020",
+      "bbox": [
+        [
+          4501.26220703125,
+          4235.0517578125,
+          8674.109375
+        ],
+        [
+          5700.51171875,
+          5698.28076171875,
+          9468.93359375
+        ]
+      ],
+      "meta_sha": "946b9c89825c7746c9d6ed7e78ee264074522f7b",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        8944,
+        9200
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z8672_w100",
+      "uuid": "PHerc0800_z8672_w100",
+      "window_z": 8672,
+      "wrap": "w100",
+      "bbox": [
+        [
+          3284.388916015625,
+          2337.9599609375,
+          8673.7216796875
+        ],
+        [
+          6936.14306640625,
+          7193.75,
+          9470.1708984375
+        ]
+      ],
+      "meta_sha": "e57d2fabd1af8c239131644262c6c31da92f1ff0",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        8944,
+        9200
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z9872_w020",
+      "uuid": "PHerc0800_z9872_w020",
+      "window_z": 9872,
+      "wrap": "w020",
+      "bbox": [
+        [
+          4092.859375,
+          4528.73046875,
+          9874.5703125
+        ],
+        [
+          5153.0830078125,
+          5872.46630859375,
+          10668.88671875
+        ]
+      ],
+      "meta_sha": "06ced38fc16752df68d6ca8924ceacadf934c236",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        10144,
+        10400
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z9872_w100",
+      "uuid": "PHerc0800_z9872_w100",
+      "window_z": 9872,
+      "wrap": "w100",
+      "bbox": [
+        [
+          2691.832763671875,
+          1988.8114013671875,
+          9873.013671875
+        ],
+        [
+          6548.6357421875,
+          7668.94775390625,
+          10671.2646484375
+        ]
+      ],
+      "meta_sha": "bc765aa8222b9c91e0e4a7f98ed639918df67c15",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        10144,
+        10400
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z10464_w020",
+      "uuid": "PHerc0800_z10464_w020",
+      "window_z": 10464,
+      "wrap": "w020",
+      "bbox": [
+        [
+          3971.951904296875,
+          4554.97216796875,
+          10466.455078125
+        ],
+        [
+          4980.63232421875,
+          5975.5771484375,
+          11262.732421875
+        ]
+      ],
+      "meta_sha": "6710bc3f78beea723dbb99d3f3154e1dbd9e5317",
+      "role": "held_out",
+      "evaluation_core_z_half_open": [
+        10736,
+        10992
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z10464_w100",
+      "uuid": "PHerc0800_z10464_w100",
+      "window_z": 10464,
+      "wrap": "w100",
+      "bbox": [
+        [
+          2634.171630859375,
+          2014.9814453125,
+          10464.375
+        ],
+        [
+          6389.63720703125,
+          7709.1396484375,
+          11262.75
+        ]
+      ],
+      "meta_sha": "23ca7191424af6eced496bdcc482f26661a5926e",
+      "role": "held_out",
+      "evaluation_core_z_half_open": [
+        10736,
+        10992
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z12272_w020",
+      "uuid": "PHerc0800_z12272_w020",
+      "window_z": 12272,
+      "wrap": "w020",
+      "bbox": [
+        [
+          3436.500732421875,
+          4757.4677734375,
+          12274.376953125
+        ],
+        [
+          4311.36279296875,
+          6255.11279296875,
+          13070.2568359375
+        ]
+      ],
+      "meta_sha": "aacabe210fa97e581d7cb7bb068a3672208f091b",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        12544,
+        12800
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z12272_w100",
+      "uuid": "PHerc0800_z12272_w100",
+      "window_z": 12272,
+      "wrap": "w100",
+      "bbox": [
+        [
+          2302.934814453125,
+          2240.60498046875,
+          12272.5068359375
+        ],
+        [
+          5875.36865234375,
+          8164.0048828125,
+          13071.1806640625
+        ]
+      ],
+      "meta_sha": "3525403ef36d0a1f184d05cf03ef5230c843dae2",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        12544,
+        12800
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z12864_w020",
+      "uuid": "PHerc0800_z12864_w020",
+      "window_z": 12864,
+      "wrap": "w020",
+      "bbox": [
+        [
+          3178.258544921875,
+          4740.072265625,
+          12868.6025390625
+        ],
+        [
+          4036.417724609375,
+          6284.78564453125,
+          13660.2705078125
+        ]
+      ],
+      "meta_sha": "f06959b0512ba9c1f4ebbfe230a3848ba7cea566",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        13136,
+        13392
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z12864_w100",
+      "uuid": "PHerc0800_z12864_w100",
+      "window_z": 12864,
+      "wrap": "w100",
+      "bbox": [
+        [
+          2134.148193359375,
+          2435.03369140625,
+          12864.8935546875
+        ],
+        [
+          5441.5478515625,
+          8103.79736328125,
+          13662.724609375
+        ]
+      ],
+      "meta_sha": "a1fabb73bf81b5769097b5afbfa5de53b382a009",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        13136,
+        13392
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z14064_w020",
+      "uuid": "PHerc0800_z14064_w020",
+      "window_z": 14064,
+      "wrap": "w020",
+      "bbox": [
+        [
+          2928.943359375,
+          4926.4189453125,
+          14065.4716796875
+        ],
+        [
+          3819.53759765625,
+          6469.7900390625,
+          14860.8388671875
+        ]
+      ],
+      "meta_sha": "813eda838412fde82190e5598752ae9be6272b8a",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        14336,
+        14592
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z14064_w100",
+      "uuid": "PHerc0800_z14064_w100",
+      "window_z": 14064,
+      "wrap": "w100",
+      "bbox": [
+        [
+          1604.5794677734375,
+          2871.6591796875,
+          14064.6943359375
+        ],
+        [
+          5416.8662109375,
+          8474.3359375,
+          14863.1240234375
+        ]
+      ],
+      "meta_sha": "b12b376ff3f5e05a07994fb3607e5070e4088323",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        14336,
+        14592
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z15264_w020",
+      "uuid": "PHerc0800_z15264_w020",
+      "window_z": 15264,
+      "wrap": "w020",
+      "bbox": [
+        [
+          2827.494384765625,
+          5091.0341796875,
+          15266.607421875
+        ],
+        [
+          3725.56591796875,
+          6439.5029296875,
+          16057.7724609375
+        ]
+      ],
+      "meta_sha": "33daffd7fb041097d8c538d7dae8a40a90c61922",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        15535,
+        15791
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z15264_w100",
+      "uuid": "PHerc0800_z15264_w100",
+      "window_z": 15264,
+      "wrap": "w100",
+      "bbox": [
+        [
+          1546.820556640625,
+          3010.6904296875,
+          15264.71875
+        ],
+        [
+          5317.73486328125,
+          8356.099609375,
+          16062.8955078125
+        ]
+      ],
+      "meta_sha": "d0c02c367c0966c2ae64d8cd99e91d1053fb8c07",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        15535,
+        15791
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z15872_w020",
+      "uuid": "PHerc0800_z15872_w020",
+      "window_z": 15872,
+      "wrap": "w020",
+      "bbox": [
+        [
+          2840.196044921875,
+          5135.5478515625,
+          15877.01953125
+        ],
+        [
+          3660.065185546875,
+          6452.25634765625,
+          16669.2890625
+        ]
+      ],
+      "meta_sha": "fee7d3354403af44135d7659248521a922f3d336",
+      "role": "held_out",
+      "evaluation_core_z_half_open": [
+        16145,
+        16401
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z15872_w100",
+      "uuid": "PHerc0800_z15872_w100",
+      "window_z": 15872,
+      "wrap": "w100",
+      "bbox": [
+        [
+          1565.727294921875,
+          3019.7451171875,
+          15873.6328125
+        ],
+        [
+          5237.59521484375,
+          8525.5810546875,
+          16670.927734375
+        ]
+      ],
+      "meta_sha": "20831e2d292f3a9bbfb90ff3e0281d2dc9d9a0ce",
+      "role": "held_out",
+      "evaluation_core_z_half_open": [
+        16145,
+        16401
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z17072_w020",
+      "uuid": "PHerc0800_z17072_w020",
+      "window_z": 17072,
+      "wrap": "w020",
+      "bbox": [
+        [
+          3133.817626953125,
+          5160.384765625,
+          17077.119140625
+        ],
+        [
+          4265.423828125,
+          6359.34228515625,
+          17869.689453125
+        ]
+      ],
+      "meta_sha": "e8be781ecebd376b916c1d21f79682208cdca583",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        17345,
+        17601
+      ]
+    },
+    {
+      "path": "meshes/PHerc0800/z17072_w100",
+      "uuid": "PHerc0800_z17072_w100",
+      "window_z": 17072,
+      "wrap": "w100",
+      "bbox": [
+        [
+          1826.9012451171875,
+          2954.255615234375,
+          17072.873046875
+        ],
+        [
+          5931.8154296875,
+          7895.28076171875,
+          17871.4453125
+        ]
+      ],
+      "meta_sha": "bed3facc3057031307c4a05a872de530d0da1a2e",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        17345,
+        17601
+      ]
+    }
+  ],
+  "invariants": [
+    "Split computed only from frozen 3D geometry metadata.",
+    "No atlas eye verdict or ink output was consulted.",
+    "Both radial wraps from a held-out axial window are held out.",
+    "Only central 256-slice cores are fit/evaluated; all locked cores are axially disjoint."
+  ]
+}

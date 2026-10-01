@@ -152,6 +152,21 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 .hidden{display:none!important}
 @media(max-width:700px){.compbar{min-width:70px}thead th:nth-child(5),tbody td:nth-child(5){display:none}
   .navstatus{display:none}.navlinks a{padding:.34rem .42rem}}
+/* ---------- analytics + creature comforts ---------- */
+.analytics{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.7rem}
+.metric{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:.85rem 1rem;min-width:0}
+.metric .n{font-size:1.45rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap}
+.metric .n.compact{font-size:1.08rem}
+.metric .l{font-size:.73rem;color:var(--muted);margin-top:.25rem;line-height:1.35}
+.actionbtn,.copybtn{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:.45rem .75rem;font-size:.78rem;cursor:pointer}
+.actionbtn:hover,.copybtn:hover{border-color:var(--ember);color:var(--ink)}
+.control-meta{margin-left:auto;color:var(--dim);font-size:.78rem;font-variant-numeric:tabular-nums}
+.copybtn{margin-left:.6rem;padding:.3rem .55rem;vertical-align:middle}
+.dist-meta{color:var(--muted);font-size:.88rem;margin:.4rem 0 .8rem}
+tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
+.detail-grid code{overflow-wrap:anywhere}
+@media(max-width:700px){.control-meta{width:100%;margin-left:0}.actionbtn{flex:1}.analytics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 </style></head><body>
 
 <a class="skip" href="#main">Skip to evidence</a>
@@ -237,20 +252,37 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 
 <div class="panel"><h2>Scan-quality distribution<span class="sub">64 volumes · 5-point bins</span></h2>
   <div class="hist" role="img" aria-label="Score distribution, 5-point bins: 25–30: 1, 30–35: 1, 35–40: 3, 40–45: 6, 45–50: 6, 50–55: 8, 55–60: 11, 60–65: 9, 65–70: 12, 70–75: 5, 75–80: 2"><div class="bar"><div class="bv">1</div><div class="fill" style="height:8%"></div><div class="bl" aria-hidden="false">25</div></div><div class="bar"><div class="bv">1</div><div class="fill" style="height:8%"></div><div class="bl" aria-hidden="false">30</div></div><div class="bar"><div class="bv">3</div><div class="fill" style="height:25%"></div><div class="bl" aria-hidden="false">35</div></div><div class="bar"><div class="bv">6</div><div class="fill" style="height:50%"></div><div class="bl" aria-hidden="false">40</div></div><div class="bar"><div class="bv">6</div><div class="fill" style="height:50%"></div><div class="bl" aria-hidden="false">45</div></div><div class="bar"><div class="bv">8</div><div class="fill" style="height:67%"></div><div class="bl" aria-hidden="false">50</div></div><div class="bar"><div class="bv">11</div><div class="fill" style="height:92%"></div><div class="bl" aria-hidden="false">55</div></div><div class="bar"><div class="bv">9</div><div class="fill" style="height:75%"></div><div class="bl" aria-hidden="false">60</div></div><div class="bar"><div class="bv">12</div><div class="fill" style="height:100%"></div><div class="bl" aria-hidden="false">65</div></div><div class="bar"><div class="bv">5</div><div class="fill" style="height:42%"></div><div class="bl" aria-hidden="false">70</div></div><div class="bar"><div class="bv">2</div><div class="fill" style="height:17%"></div><div class="bl" aria-hidden="false">75</div></div></div>
+  <p class="dist-meta" id="distMeta"></p>
   <p style="color:var(--muted);font-size:.88rem">Legacy triage bands: <span class="tier S">S</span> ≥ 70 ·
   <span class="tier A">A</span> 60&ndash;70 · <span class="tier B">B</span> 45&ndash;60 ·
   <span class="tier C">C</span> &lt; 45</p>
 </div>
 
+<div class="panel analytics-panel"><h2>Scan-quality analytics<span class="sub" id="analyticsSub">Updates with the current view</span></h2>
+  <div class="analytics">
+    <div class="metric"><div class="n" id="meanScore">—</div><div class="l">mean score</div></div>
+    <div class="metric"><div class="n" id="medianScore">—</div><div class="l">median score</div></div>
+    <div class="metric"><div class="n" id="topQuartile">—</div><div class="l">top-quartile cutoff</div></div>
+    <div class="metric"><div class="n" id="uniqueScrolls">—</div><div class="l">unique scrolls</div></div>
+    <div class="metric"><div class="n compact" id="tierMix">—</div><div class="l">S / A / B / C volumes</div></div>
+    <div class="metric"><div class="n compact" id="segmentCoverage">—</div><div class="l">with segment roots</div></div>
+  </div>
+</div>
+
 <div class="panel" id="leaderboard"><h2>Scan-quality survey<span class="sub">Click a column to sort · click a row for the full breakdown</span></h2>
   <div class="controls">
-    <input id="q" type="search" placeholder="Filter by scroll id, e.g. PHerc0139…" aria-label="filter">
+    <input id="q" type="search" placeholder="Filter by scroll id…  / to focus" aria-label="filter leaderboard">
     <button class="tierbtn on" data-t="">all</button>
     <button class="tierbtn" data-t="S">S</button>
     <button class="tierbtn" data-t="A">A</button>
     <button class="tierbtn" data-t="B">B</button>
     <button class="tierbtn" data-t="C">C</button>
     <button class="tierbtn" data-t="label">🎯 label next</button>
+    <button class="tierbtn" data-t="unlabeled">0 labels</button>
+    <button class="tierbtn" data-t="segments">has segments</button>
+    <button class="actionbtn" id="reset" type="button">reset</button>
+    <button class="actionbtn" id="csv" type="button">export CSV</button>
+    <span class="control-meta" id="resultCount" aria-live="polite"></span>
   </div>
   <div style="overflow-x:auto"><table id="lb"><thead><tr>
     <th data-k="rank">#</th><th data-k="id">volume</th><th data-k="score">score</th>
@@ -375,15 +407,51 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 </div></footer>
 
 <script>
-(function(){
+(function dashboard(){
   const tb = document.querySelector("#lb tbody");
   const rows = Array.from(tb.querySelectorAll("tr.vol"));
   rows.forEach(r => { r._detail = r.nextElementSibling; });
-  let sortK = "score", asc = false, tierF = "", qF = "";
+
+  const q = document.getElementById("q");
+  const resultCount = document.getElementById("resultCount");
+  let sortK = "score", asc = false, tierF = "", qF = "", currentRows = rows.slice();
+
   function tierOf(r){ return r.dataset.tier; }
+  function scoreStats(sample){
+    const values = sample.map(r => Number(r.dataset.score)).filter(Number.isFinite).sort((a,b) => a-b);
+    if (!values.length) return null;
+    const mean = values.reduce((a,b) => a+b, 0) / values.length;
+    const mid = Math.floor(values.length / 2);
+    const median = values.length % 2 ? values[mid] : (values[mid - 1] + values[mid]) / 2;
+    const desc = values.slice().reverse();
+    const qIndex = Math.max(0, Math.ceil(desc.length * .25) - 1);
+    return { mean, median, topQ: desc[qIndex] };
+  }
+  function updateAnalytics(sample){
+    const stats = scoreStats(sample);
+    const scrolls = new Set(sample.map(r => r.querySelector(".scrollid")?.textContent.trim()).filter(Boolean));
+    const tiers = {S:0,A:0,B:0,C:0};
+    sample.forEach(r => { if (tiers[r.dataset.tier] !== undefined) tiers[r.dataset.tier]++; });
+    const segmented = sample.filter(r => Number(r.dataset.seg) > 0).length;
+    document.getElementById("analyticsSub").textContent =
+      sample.length ? `${sample.length} visible volumes · ${scrolls.size} scrolls` : "No rows match the current view";
+    document.getElementById("meanScore").textContent = stats ? stats.mean.toFixed(1) : "—";
+    document.getElementById("medianScore").textContent = stats ? stats.median.toFixed(1) : "—";
+    document.getElementById("topQuartile").textContent = stats ? `≥ ${stats.topQ.toFixed(1)}` : "—";
+    document.getElementById("uniqueScrolls").textContent = scrolls.size || "—";
+    document.getElementById("tierMix").textContent = `${tiers.S} / ${tiers.A} / ${tiers.B} / ${tiers.C}`;
+    document.getElementById("segmentCoverage").textContent = `${segmented} / ${sample.length}`;
+  }
+  function matchesFilter(r){
+    if (!tierF) return true;
+    if (tierF === "label") return r.dataset.label === "1";
+    if (tierF === "unlabeled") return Number(r.dataset.ink) === 0;
+    if (tierF === "segments") return Number(r.dataset.seg) > 0;
+    return tierOf(r) === tierF;
+  }
   function apply(){
     let vis = rows.filter(r =>
-      (!tierF || (tierF === "label" ? r.dataset.label === "1" : tierOf(r) === tierF)) &&
+      matchesFilter(r) &&
       (!qF || r.dataset.id.toLowerCase().includes(qF)));
     vis.sort((a, b) => {
       const x = parseFloat(a.dataset[sortK] ?? a.dataset.rank),
@@ -397,11 +465,27 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     vis.forEach((r, i) => {
       r.classList.remove("hidden");
       r._detail.classList.add("hidden");
+      r.setAttribute("aria-expanded", "false");
       r.querySelector(".rn").textContent = i + 1;
       frag.append(r, r._detail);
     });
-    rows.forEach(r => { if (!vis.includes(r)) { r.classList.add("hidden"); r._detail.classList.add("hidden"); } });
+    rows.forEach(r => {
+      if (!vis.includes(r)) {
+        r.classList.add("hidden");
+        r._detail.classList.add("hidden");
+        r.setAttribute("aria-expanded", "false");
+      }
+    });
     tb.append(frag);
+    currentRows = vis;
+    resultCount.textContent = `${vis.length} of ${rows.length} shown`;
+    updateAnalytics(vis);
+  }
+  function resetView(){
+    sortK = "score"; asc = false; tierF = ""; qF = ""; q.value = "";
+    document.querySelectorAll(".tierbtn").forEach(x => x.classList.toggle("on", x.dataset.t === ""));
+    document.querySelectorAll("#lb thead th .arr").forEach(e => e.remove());
+    apply();
   }
   document.querySelectorAll("#lb thead th[data-k]").forEach(th => {
     th.addEventListener("click", () => {
@@ -417,18 +501,85 @@ footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     document.querySelectorAll(".tierbtn").forEach(x => x.classList.remove("on"));
     b.classList.add("on"); tierF = b.dataset.t; apply();
   }));
-  document.getElementById("q").addEventListener("input", e => {
+  q.addEventListener("input", e => {
     qF = e.target.value.trim().toLowerCase(); apply();
   });
-  rows.forEach(r => r.addEventListener("click", () => {
-    if (r._detail) r._detail.classList.toggle("hidden");
-  }));
-  // reflect the initial sort (score, descending) in the header
-  const scoreTh = document.querySelector('#lb thead th[data-k="score"]');
-  if (scoreTh) {
-    const s0 = document.createElement("span"); s0.className = "arr";
-    s0.textContent = " ▼"; scoreTh.appendChild(s0);
+  document.getElementById("reset").addEventListener("click", resetView);
+
+  function csvCell(value){
+    const s = String(value ?? "").replace(/"/g, '""');
+    return '"' + s + '"';
   }
+  document.getElementById("csv").addEventListener("click", () => {
+    const head = ["view_rank","volume","acquisition","score","tier","signal","texture","dynamic","penalty","ink_labels","segments","label_next","root"];
+    const lines = [head.map(csvCell).join(",")];
+    currentRows.forEach((r, i) => {
+      const root = r._detail.querySelector("code")?.textContent.trim() || "";
+      const values = [
+        i + 1,
+        r.querySelector(".scrollid")?.textContent.trim() || "",
+        r.querySelector(".volsub")?.textContent.trim() || "",
+        r.dataset.score, r.dataset.tier, r.dataset.signal, r.dataset.tex,
+        r.dataset.dyn, r.dataset.pen, r.dataset.ink, r.dataset.seg,
+        r.dataset.label === "1" ? "yes" : "no", root
+      ];
+      lines.push(values.map(csvCell).join(","));
+    });
+    const blob = new Blob([lines.join("\n")], {type:"text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "scrollq-filtered.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  rows.forEach(r => {
+    r.tabIndex = 0;
+    r.setAttribute("role", "button");
+    r.setAttribute("aria-expanded", "false");
+    const toggle = () => {
+      if (!r._detail) return;
+      const opening = r._detail.classList.contains("hidden");
+      r._detail.classList.toggle("hidden");
+      r.setAttribute("aria-expanded", opening ? "true" : "false");
+    };
+    r.addEventListener("click", toggle);
+    r.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+    });
+    const rootCode = r._detail?.querySelector("code");
+    if (rootCode) {
+      const btn = document.createElement("button");
+      btn.type = "button"; btn.className = "copybtn"; btn.textContent = "copy root";
+      btn.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(rootCode.textContent.trim());
+          btn.textContent = "copied";
+          setTimeout(() => { btn.textContent = "copy root"; }, 1200);
+        } catch {
+          btn.textContent = "copy failed";
+          setTimeout(() => { btn.textContent = "copy root"; }, 1400);
+        }
+      });
+      rootCode.parentElement.appendChild(btn);
+    }
+  });
+
+  const full = scoreStats(rows);
+  if (full) {
+    document.getElementById("distMeta").textContent =
+      `Full corpus: mean ${full.mean.toFixed(1)} · median ${full.median.toFixed(1)} · top quartile ≥ ${full.topQ.toFixed(1)}.`;
+  }
+  document.addEventListener("keydown", e => {
+    const tag = document.activeElement?.tagName;
+    if (e.key === "/" && tag !== "INPUT" && tag !== "TEXTAREA") {
+      e.preventDefault(); q.focus();
+    } else if (e.key === "Escape" && (qF || tierF)) {
+      resetView(); q.blur();
+    }
+  });
+  const scoreTh = document.querySelector('#lb thead th[data-k="score"]');
+  if (scoreTh) { const s0 = document.createElement("span"); s0.className = "arr"; s0.textContent = " ▼"; scoreTh.appendChild(s0); }
   apply();
 })();
 </script>

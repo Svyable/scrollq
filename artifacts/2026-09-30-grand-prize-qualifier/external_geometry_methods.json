@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "recorded": "2026-09-30",
+  "methods": [
+    {
+      "name": "PCU certified winding constraints",
+      "repository": "Jashann/vesuvius-scrolling",
+      "repository_url": "https://github.com/Jashann/vesuvius-scrolling",
+      "pinned_commit": "4f4997adcccaa9124ab5af02605233f7e3388c69",
+      "code_license": "MIT",
+      "derived_asset_license": "CC BY-NC-SA 4.0",
+      "license_file_sha": "484cd6026a460730eeb7d27e5ec57600256d3d0f",
+      "key_source_files": [
+        {
+          "path": "pcu/umbilicus.py",
+          "sha": "65343351c3f0c7ac78cbc7ae08393af3acbed6de"
+        },
+        {
+          "path": "exp/e69_umb_band.py",
+          "sha": "1d469ce334fdbc7d75acd92b49fe5639d27c00f7"
+        }
+      ],
+      "upstream_validation": {
+        "paris4_adjacent_pairs": "99.62% certified precision at 70% coverage on 1,502 human adjacent-wrap pairs, per upstream README; operating tolerances were selected on that same set.",
+        "paris4_fit_band_8400_9400": "Upstream reports slips per wrap 20.3% -> 9.3% on 32 held-out human ladders; second seed 22.1% -> 8.8%.",
+        "paris4_fit_band_11000_12000": "Upstream reports no measurable gain: 30.6% -> 28.6%, difference CI includes zero.",
+        "ph0826": "Upstream reports 50.1% -> 36.3% disagreement with PCU's own gold ladders on 8 held-out slices, not human ground truth."
+      },
+      "campaign_policy": [
+        "Do not transfer the upstream precision number to PHerc0800/0813/1447.",
+        "Use PCU constraints only as optional fit inputs where target-local certificate coverage is adequate.",
+        "Never use PCU-derived held-out constraints as the sole geometry ground truth when the fit also consumes Lasagna/PCU information.",
+        "Keep human/CT/fiber-verified held-out cores independent.",
+        "Pin upstream commit and preserve upstream license/attribution if code or derived assets are redistributed."
+      ]
+    }
+  ]
+}
