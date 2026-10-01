@@ -115,6 +115,16 @@ For nonlocal self-intersections, ScrolIQ does not duplicate VC3D's geometry kern
 
 A passing audit is deliberately **partial Mesh IQ**, not a proof that the traced sheet is correct. With a fully clean validated self-cross census it establishes freedom from the specific non-adjacent transverse contacts tested by VC3D under the recorded parameters; it still does not establish CT support or correct sheet/winding identity.
 
+### Triangle meshes (Wavefront OBJ)
+
+`scroliq-obj` applies the same audit to a triangle mesh, such as the `*_original.obj` files published next to each segment in the open bucket:
+
+```bash
+scroliq-obj --obj /path/to/segment_original.obj --out out/segment.obj-audit.json
+```
+
+It accepts `v`, `vt` and `f` records (`v`, `v/vt`, `v/vt/vn`, `v//vn`, negative indices; polygons are fan-triangulated). With no grid, adjacency comes from shared edges, so the report covers edge-connected components, interior boundary loops (holes), edge jumps against the median edge length, and neighbouring-normal reversals. It also covers defects only a free-form mesh can have: non-manifold edges, inconsistent face winding (kept separate from real folds), and zero-area faces. When faces carry texture coordinates, it measures per-triangle UV-to-3D Jacobian singular values (UVs rescaled by one global factor) and counts folded-over UV triangles; without UVs, isometry stays `unknown`. An OBJ with no faces fails rather than passing.
+
 ## Ink IQ: leakage and falsification-evidence audit
 
 `scroliq-ink-audit` validates an experiment manifest before ink output is treated as evidence:
