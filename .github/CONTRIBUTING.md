@@ -38,9 +38,18 @@ scrollq-score --volumes volumes.txt --samples 4 --workers 4 --out-dir out/
 # rebuild the leaderboard site
 scrollq-leaderboard --in out/volumes.json --out docs/index.html
 
+# join scores with discovered ink-label roots ("label next" flags)
+scrollq-coverage --s3-roots discover_zarr.roots.jsonl --volumes out/volumes.json --out out/coverage.json
+
 # unified health verdict for one volume
 scrollq-health --root community-uploads/forrest/volcomp/PHerc0009B/volumes/....zarr
+
+# Grand Prize target frontier (exact prize-eligible volumes only)
+scrollq-grand-prize --volumes artifacts/2026-09-30-scrollq/volumes.json --out out/grand-prize-targets.json
 ```
+
+Write scratch output to `out/` (untracked). Files in `artifacts/` are dated
+evidence; add a new dated directory rather than editing an old one.
 
 ## Tests
 
@@ -63,7 +72,12 @@ must be backed by something a reviewer can re-run:
   empty chunks.
 - Score changes: report the resampling-stability numbers (Spearman ρ,
   mean |Δ|, top-10 overlap) before and after, using
-  `artifacts/`-style deterministic rotation. The current bar: ρ ≥ 0.85.
+  deterministic rotation (`scrollq-score --rotate N`, then compare the two
+  `volumes.json` files as in `artifacts/2026-09-30-scrollq/`). The current
+  bar: ρ ≥ 0.85.
+- Grand Prize comparisons use the exact prize-listed volume ID only. A
+  different scan of the same scroll is never substituted, and unverifiable
+  evidence is excluded rather than assumed.
 - Do not claim ScrollQ predicts readability. It is a triage signal; the
   weights are published so people can audit them, not worship the ranking.
 
@@ -72,7 +86,9 @@ must be backed by something a reviewer can re-run:
 1. Branch from `main`: `git checkout -b <what>-<why>`.
 2. Keep PRs small and evidence-backed. One finding or feature per PR.
 3. Update docs (README / September page) if behavior changes.
-4. CI runs the test suite; green is required.
+4. CI (Python 3.11 and 3.12) builds the wheel, runs the test suite, and
+   smoke-tests `--help` on every console script; green is required. New
+   commands must be declared in `pyproject.toml` and answer `--help`.
 
 ## Reporting a data finding
 
