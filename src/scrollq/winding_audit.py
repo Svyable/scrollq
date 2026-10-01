@@ -17,6 +17,8 @@ from pathlib import Path
 from statistics import median
 from typing import Any, Iterable
 
+from . import winding_geometry
+
 SCHEMA_VERSION = 1
 POINTCOLLECTIONS_VERSION = "1"
 OPEN_PROBLEM_URL = "https://scrollprize.org/open_problems/winding_annotations"
@@ -583,8 +585,14 @@ def audit_dataset(
     z_range: tuple[float, float] | None = None,
     z_bins: int = 12,
     volume_root: str | None = None,
+    umbilicus: Path | None = None,
+    ray_order_options: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Audit conventional spiral winding inputs under one dataset root."""
+    """Audit conventional spiral winding inputs under one dataset root.
+
+    ``umbilicus`` defaults to ``<dataset>/umbilicus.json`` when that file
+    exists; when available, the report gains an umbilicus ray-order section.
+    """
     dataset = Path(dataset)
     required = set(required_roles)
     unknown_required = required - set(ROLE_FILES)
@@ -611,6 +619,27 @@ def audit_dataset(
                 f"required winding input is missing: {ROLE_FILES[role]}",
             )
 
+    ray_order = _ray_order_section(
+        dataset, documents, umbilicus, ray_order_options or {}
+    )
+    if ray_order.get("status") == "invalid-umbilicus":
+        _finding(
+            findings,
+            "error",
+            "WINDING_UMBILICUS_INVALID",
+            "umbilicus",
+            ray_order["reason"],
+        )
+    elif ray_order.get("inversion_candidates"):
+        _finding(
+            findings,
+            "warning",
+            "WINDING_RAY_ORDER_CANDIDATES",
+            "ray_order",
+            f"{ray_order['inversion_candidates']} of {ray_order['comparable_pairs']} "
+            "comparable annotation pairs are out of radial order around the "
+            "umbilicus; review the ranked queue",
+        )
     errors = [item for item in findings if item["severity"] == "error"]
     warnings = [item for item in findings if item["severity"] == "warning"]
     if errors:
@@ -643,13 +672,63 @@ def audit_dataset(
         "axial_coverage": summarize_axial_coverage(
             documents, z_range=z_range, bins=z_bins
         ),
+        "ray_order": ray_order,
         "findings": findings,
         "limitation": (
             "This audit checks PointCollections structure, role semantics, numeric sanity, "
-            "and file provenance only. It does not establish CT support, patch attachment, "
-            "graph consistency, or held-out spiral-fit accuracy."
+            "file provenance, and (with an umbilicus) radial-order review candidates. It "
+            "does not establish CT support, patch attachment, graph consistency, or "
+            "held-out spiral-fit accuracy."
         ),
     }
+
+
+def _ray_order_section(
+    dataset: Path,
+    documents: dict[str, dict[str, Any]],
+    umbilicus: Path | None,
+    options: dict[str, Any],
+) -> dict[str, Any]:
+    explicit = umbilicus is not None
+    path = Path(umbilicus) if explicit else dataset / "umbilicus.json"
+    if not path.is_file():
+        if explicit:
+            return {
+                "diagnostic": winding_geometry.DIAGNOSTIC,
+                "status": "invalid-umbilicus",
+                "reason": f"umbilicus file not found: {path}",
+            }
+        return {
+            "diagnostic": winding_geometry.DIAGNOSTIC,
+            "status": "not-evaluated",
+            "reason": "no umbilicus.json in the dataset and none supplied",
+        }
+    try:
+        axis = winding_geometry.load_umbilicus(path)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+        return {
+            "diagnostic": winding_geometry.DIAGNOSTIC,
+            "status": "invalid-umbilicus",
+            "reason": f"could not use umbilicus {path}: {exc}",
+        }
+
+    parsed: dict[str, Any] = {}
+    inputs: dict[str, str | None] = {}
+    for role in ("absolute", "relative"):
+        report = documents[role]
+        if report.get("status") in {"missing", "fail"}:
+            # Failed documents are already blocking; do not reason about them.
+            inputs[role] = None
+            continue
+        raw = (dataset / ROLE_FILES[role]).read_bytes()
+        digest = hashlib.sha256(raw).hexdigest()
+        if digest != report.get("sha256"):
+            raise RuntimeError(f"{ROLE_FILES[role]} changed during the audit")
+        parsed[role] = json.loads(raw)
+        inputs[role] = digest
+    section = winding_geometry.check_ray_order(parsed, axis, **options)
+    section["inputs_sha256"] = inputs
+    return section
 
 
 def _parse_z_range(value: str) -> tuple[float, float]:
@@ -696,6 +775,37 @@ def main() -> None:
         default=12,
         help="number of equal-width axial coverage bins inside --z-range (default: 12)",
     )
+    ap.add_argument(
+        "--umbilicus",
+        help=(
+            "umbilicus.json (control_points x/y/z) for the ray-order check; "
+            "defaults to <dataset>/umbilicus.json when present"
+        ),
+    )
+    ap.add_argument(
+        "--ray-sector-degrees",
+        type=float,
+        default=winding_geometry.DEFAULT_SECTOR_DEGREES,
+        help="max angular separation around the umbilicus for a comparable pair",
+    )
+    ap.add_argument(
+        "--ray-z-tolerance",
+        type=float,
+        default=winding_geometry.DEFAULT_Z_TOLERANCE,
+        help="max |dz| in L0 voxels for a comparable pair",
+    )
+    ap.add_argument(
+        "--ray-min-winding-gap",
+        type=int,
+        default=winding_geometry.DEFAULT_MIN_WINDING_GAP,
+        help="min winding difference for a comparable pair (>= 2)",
+    )
+    ap.add_argument(
+        "--ray-radial-margin",
+        type=float,
+        default=winding_geometry.DEFAULT_RADIAL_MARGIN,
+        help="inversions smaller than this many voxels are ignored",
+    )
     ap.add_argument("--out", help="optional JSON report path")
     ap.add_argument(
         "--format",
@@ -706,12 +816,25 @@ def main() -> None:
 
     if args.z_bins < 1:
         ap.error("--z-bins must be >= 1")
+    if not 0 < args.ray_sector_degrees < 180:
+        ap.error("--ray-sector-degrees must be in (0, 180)")
+    if args.ray_min_winding_gap < 2:
+        ap.error("--ray-min-winding-gap must be >= 2")
+    if not args.ray_z_tolerance >= 0 or not args.ray_radial_margin >= 0:
+        ap.error("--ray-z-tolerance and --ray-radial-margin must be >= 0")
     report = audit_dataset(
         Path(args.dataset),
         required_roles=args.require_role,
         z_range=args.z_range,
         z_bins=args.z_bins,
         volume_root=args.volume_root,
+        umbilicus=Path(args.umbilicus) if args.umbilicus else None,
+        ray_order_options={
+            "sector_degrees": args.ray_sector_degrees,
+            "z_tolerance": args.ray_z_tolerance,
+            "min_winding_gap": args.ray_min_winding_gap,
+            "radial_margin": args.ray_radial_margin,
+        },
     )
     if args.out:
         out = Path(args.out)
@@ -751,6 +874,22 @@ def main() -> None:
                 f"{fit_window['nonempty_bins']}/{fit_window['bins']} nonempty; "
                 f"empty={fit_window['empty_bins']}"
             )
+        ray = report["ray_order"]
+        if ray.get("comparable_pairs") is not None:
+            print(
+                f"umbilicus ray order: {ray['status']} "
+                f"inversions={ray['inversion_candidates']}/{ray['comparable_pairs']} "
+                "comparable pairs"
+            )
+            for item in ray["review_queue"][:5]:
+                print(
+                    f"  review {item['role']} collection={item['collection_id']} "
+                    f"point={item['point_id']} wind_a={item['wind_a']} "
+                    f"xyz={[round(v, 1) for v in item['xyz']]} "
+                    f"inversions={item['inversion_pairs']}/{item['comparable_pairs']}"
+                )
+        else:
+            print(f"umbilicus ray order: {ray['status']} ({ray.get('reason', '')})")
         for role in ROLE_FILES:
             doc = report["documents"][role]
             digest = doc.get("sha256", "")
