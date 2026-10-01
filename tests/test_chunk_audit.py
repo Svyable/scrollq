@@ -1,6 +1,8 @@
 import json
 import urllib.parse
 
+import pytest
+
 from scrollq import chunk_audit as ca
 
 BUCKET = "https://bucket.test"
@@ -10,11 +12,14 @@ NS = "http://s3.amazonaws.com/doc/2006-03-01/"
 class FakeS3:
     """ListObjectsV2 + GET with the response shape the real bucket returns."""
 
-    def __init__(self, objects):
+    def __init__(self, objects, unavailable=()):
         self.objects = dict(objects)  # key -> bytes (metadata) or int (size)
         self.list_calls = 0
+        self.unavailable = tuple(unavailable)  # URL substrings that error
 
     def fetch(self, url):
+        if any(sub in url for sub in self.unavailable):
+            raise OSError(f"{url}: simulated outage")
         if "/?" in url:
             return self._list(dict(urllib.parse.parse_qsl(url.split("/?")[1])))
         key = url[len(BUCKET) + 1:]
@@ -112,7 +117,7 @@ def test_clean_volume_passes_and_corruption_is_counted_exactly_in_full_mode():
     assert lv["size_histogram"] == {"512": 62, "4096": 1, "32768": 1}
 
 
-def test_real_defect_signature_size_mix_is_flagged():
+def test_observed_size_mix_signature_is_flagged():
     # PHerc0343P 8.64um L0: declared 128^3 (2 MiB); stored mostly 2 MiB with
     # 256^3 and 512^3 objects mixed in
     objs = volume(chunk=128, grid=(2, 2, 2), corrupt={
@@ -141,7 +146,7 @@ def test_missing_metadata_and_compressed_levels_are_reported():
 
 
 def test_sampling_reaches_beyond_the_first_page_where_head_only_misses():
-    # defect confined to the last z-slab; a head-only listing cannot see it
+    # mismatch confined to the last z-slab; a head-only listing cannot see it
     objs = volume(grid=(8, 4, 4),
                   corrupt={(0, 7, y, x): 4096 for y in range(4)
                            for x in range(4)})
@@ -188,3 +193,89 @@ def test_summarize_and_cli_exit_codes(tmp_path, monkeypatch):
     assert rep["summary"]["volumes_with_mismatch"] == ["S:V"]
     rc, _ = run({})  # nothing readable must not look like success
     assert rc == 1
+
+
+# -- absent is not unavailable --------------------------------------------------
+def audit_with(objs, unavailable=(), **kw):
+    s3 = FakeS3(objs, unavailable)
+    return ca.audit_volume(s3.fetch, BUCKET, "S/volumes/V.zarr/", **kw)
+
+
+def test_unavailable_zattrs_is_unknown_not_missing():
+    rep = audit_with(volume(), unavailable=[".zattrs"], full=True)
+    assert rep["error"].startswith(".zattrs unavailable:")
+    assert "not found" not in rep["error"] and rep["levels"] == []
+    assert ca.audit_volume(FakeS3({}).fetch, BUCKET, "S/volumes/V.zarr/"
+                           )["error"] == ".zattrs not found"
+
+
+def test_unavailable_zarray_leaves_level_unverified():
+    rep = audit_with(volume(levels=2), unavailable=["/1/.zarray"], full=True)
+    lv0, lv1 = rep["levels"]
+    assert lv0["status"] == "ok"
+    assert lv1["status"] == "unverified" and "unavailable" in lv1["detail"]
+
+
+def test_listing_outage_is_unverified_not_ok_and_not_a_mismatch():
+    rep = audit_with(volume(), unavailable=["list-type"], full=True)
+    lv = rep["levels"][0]
+    assert lv["status"] == "unverified" and "unavailable" in lv["detail"]
+    assert "n_mismatch" not in lv
+
+
+def test_malformed_zarray_is_recorded_not_fatal():
+    objs = volume(levels=2)
+    objs["S/volumes/V.zarr/1/.zarray"] = b"{not json"
+    rep = audit_with(objs, full=True)
+    assert rep["levels"][0]["status"] == "ok"
+    assert rep["levels"][1]["status"] == "unverified"
+    assert "unusable .zarray" in rep["levels"][1]["detail"]
+    objs["S/volumes/V.zarr/1/.zarray"] = json.dumps({"shape": [8]}).encode()
+    assert audit_with(objs, full=True)["levels"][1]["status"] == "unverified"
+
+
+def test_default_fetch_distinguishes_404_from_failure(monkeypatch):
+    import requests
+
+    class R:
+        def __init__(self, code, content=b""):
+            self.status_code, self.content = code, content
+
+    script = {"ok": [R(200, b"x")], "gone": [R(404)],
+              "flaky": [R(503), R(503), R(503)], "boom": [RuntimeError("x")] * 3,
+              "forbidden": [R(403)] * 3}
+
+    class S:
+        def get(self, url, timeout):
+            item = script[url.rsplit("/", 1)[-1]].pop(0)
+            if isinstance(item, Exception):
+                raise item
+            return item
+
+    monkeypatch.setattr(requests, "Session", S)
+    fetch = ca.default_fetch()
+    assert fetch("https://h/ok") == b"x"
+    assert fetch("https://h/gone") is None
+    for name in ("flaky", "boom", "forbidden"):
+        with pytest.raises(OSError):
+            fetch(f"https://h/{name}")
+
+
+def test_cli_contains_a_failing_volume_and_exits_nonzero(tmp_path, monkeypatch):
+    index = {"samples": {"S": {"volumes": {"V": {
+        "properties": {"pixel_size_um": 8.64},
+        "data": [{"type": "ome-zarr", "origins": [{
+            "path": "S/volumes/V.zarr/",
+            "access_roots": [{"url": ca.BUCKET_S3}]}]}]}}}}}
+    idx = tmp_path / "index.json"
+    idx.write_text(json.dumps(index))
+    s3 = FakeS3(volume(), unavailable=["list-type"])
+    monkeypatch.setattr(ca, "default_fetch", lambda: s3.fetch)
+    out = tmp_path / "o.json"
+    rc = ca.main(["--index", str(idx), "--bucket-url", BUCKET, "--full",
+                  "--workers", "1", "--out", str(out)])
+    rep = json.loads(out.read_text())
+    assert rc == 1
+    assert rep["summary"]["levels_by_status"] == {"unverified": 1}
+    assert rep["summary"]["volumes_unavailable"] == ["S:V"]
+    assert rep["summary"]["volumes_with_mismatch"] == []

@@ -87,7 +87,7 @@ python -m pytest tests/ -q
 6. **A clean audit that checked nothing is a vacuous audit.** The first draft
    of the bucket chunk audit parsed S3 listings with a regex, matched zero
    objects, and reported "0 mismatches over 390 levels". It was caught only
-   because it missed a defect measured by hand. Every checker needs a positive
+   because it missed a mismatch measured by hand. Every checker needs a positive
    control, must report `unverified` (not `ok`) when it inspected nothing, and
    must parse structured formats with a real parser.
 7. **Pre-register, then log every deviation.** `docs/protocol-pairs-protocol.md`

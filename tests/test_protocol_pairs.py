@@ -336,7 +336,7 @@ def test_footprint_that_cannot_hold_a_cube_is_reported_not_crashed():
 def test_chunk_with_contradictory_size_rejects_regions_not_the_pair():
     pr = make_pair(fine_soft=0.05, coarse_soft=0.9)
     # a corner chunk, so only some candidate cubes touch it; it is stored 8x
-    # too large, as in the real PHerc0343P defect
+    # too large, as observed in PHerc0343P
     key = "vol.zarr/1/0/0/0"
     assert key in pr.moving.store.data
     pr.moving.store.data[key] += b"\x01" * (7 * 16**3)

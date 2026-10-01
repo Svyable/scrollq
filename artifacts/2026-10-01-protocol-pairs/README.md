@@ -110,7 +110,7 @@ rule or the decision rule.
 | | Change | Why |
 |---|---|---|
 | D1 | Draw region centers from the part of the fixed volume the rescan's footprint can contain; reject out-of-volume cubes before reading. | Run 1 accepted only 5 / 9 / 7 / 3 regions: the 1.129 µm rescans cover only ~4–5 % of their fixed volumes' field of view and rejected cubes were read before being rejected. |
-| D2 | A chunk whose stored size contradicts the array metadata rejects that region instead of aborting the pair. | A real bucket defect in PHerc0343P 8.64 µm level 0 (see `../2026-10-01-bucket-chunk-audit/`). 6 candidate regions were rejected for this reason. |
+| D2 | A chunk whose stored size contradicts the array metadata rejects that region instead of aborting the pair. | An observed declared-vs-stored size mismatch in PHerc0343P 8.64 µm level 0 (see `../2026-10-01-bucket-chunk-audit/`). 6 candidate regions were rejected for this reason. |
 | D3 | `--candidate-factor 40` (default stays 8). | After run 2, PHerc0343P and PHercMANBp had 9 and 6 regions because ~95 % of random cubes fall outside the scroll mask; the cap, not the data, excluded them. |
 | D4 | Added aligned / rotated lattice arms. | The half-step null cannot detect aligned-vs-rotated interpolation asymmetry. |
 
@@ -130,8 +130,9 @@ accordingly: the first two pairs already pointed the same way.
 - **The 7.91 µm DLS vs 2.4 µm ESRF pairs were not run**, including the PHercParis4
   pair the Open Problems page illustrates: their fixed scans live on
   `data.aws.ash2txt.org`, which this environment's egress policy refuses
-  (`run failed` in `protocol-pairs.json`). They count automatically when
-  `scroliq-pairs` runs where that host is reachable.
+  (`run failed` in `protocol-pairs.json`). Their outcome is **unknown**, not
+  absent and not negative; they count automatically when `scroliq-pairs` runs
+  where that host is reachable.
 - **Confounded protocols.** Pairs differ in energy and propagation distance as
   well as voxel size; a discordant result cannot be attributed to one factor.
   A 59 keV and a 78 keV scan have different attenuation contrast, which these

@@ -12,8 +12,8 @@ Format follows villa's `.github/ISSUE_TEMPLATE/issue.md`.
 
 **In one sentence:** In the open-data bucket, `PHerc0343P` volume
 `20250521134555` (8.64 µm) level `0` stores 555 of its 8,543 chunk objects
-(6.5 %) at 8× or 64× the size its `.zarray` declares, so a reader that honours
-the metadata cannot decode those chunks.
+(6.5 %) at 8× or 64× the size its `.zarray` declares, so our strict reader
+rejects those chunks (other readers were not tested).
 
 **I was trying to:** Read the registered 8.64 µm ↔ 2.215 µm pair for
 `PHerc0343P` from `s3://vesuvius-challenge-open-data` with a strict Zarr v2
@@ -83,7 +83,7 @@ affected. See `chunk-audit.json` and `prize-volumes-full.json`.
   their byte length contradicts the metadata. We did **not** test zarr-python,
   tensorstore, or VC3D, so we cannot say how other readers behave or whether
   VC3D has been silently mis-reading this region.
-- The sampled audit can miss sparse defects elsewhere; "no mismatch" outside
+- The sampled audit can miss sparse mismatches elsewhere; "no mismatch" outside
   this volume means none was seen in ~8 listing pages per level (full pass only
   for the prize-eligible volumes).
 - Possible cause (a guess, not verified): part of this level was written with

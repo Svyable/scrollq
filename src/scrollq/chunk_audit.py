@@ -11,7 +11,15 @@ Fail-closed rules:
 * a level where **no chunk object was checked** is ``unverified``, never
   ``ok`` (an audit that inspected nothing proves nothing);
 * compressed/filtered arrays are ``not_applicable`` (sizes legitimately vary);
-* the CLI exits non-zero on any mismatch or unverified level.
+* the CLI exits non-zero on any mismatch or unverified level;
+* **absent is not unavailable.** ``fetch`` returns ``None`` only for an HTTP
+  404 and raises ``OSError`` for anything else (network failure, 5xx, 403).
+  An unavailable object leaves its volume or level ``unverified`` with an
+  ``unavailable:`` detail; it is never read as "missing" or as "corrupt".
+
+A ``mismatch`` is an *observation* that stored object sizes contradict the
+declared chunk shape. It does not establish a cause or how any particular
+reader behaves.
 """
 
 from __future__ import annotations
@@ -125,9 +133,21 @@ def collect_entries(fetch, bucket_url, prefix, grid_z, *, full=False,
     return sorted(seen.items()), pages
 
 
+def _get(fetch, url: str):
+    """``(bytes | None, detail | None)``: absent -> (None, None); unavailable
+    -> (None, 'unavailable: ...')."""
+    try:
+        return fetch(url), None
+    except OSError as exc:
+        return None, f"unavailable: {exc}"
+
+
 def audit_volume(fetch, bucket_url, path, *, full=False, seed=0) -> dict:
     out: dict = {"path": path, "levels": []}
-    raw = fetch(f"{bucket_url}/{path}.zattrs")
+    raw, unavailable = _get(fetch, f"{bucket_url}/{path}.zattrs")
+    if unavailable:
+        out["error"] = f".zattrs {unavailable}"
+        return out
     if raw is None:
         out["error"] = ".zattrs not found"
         return out
@@ -138,22 +158,32 @@ def audit_volume(fetch, bucket_url, path, *, full=False, seed=0) -> dict:
         return out
     for ds in datasets:
         level = ds["path"]
-        za_raw = fetch(f"{bucket_url}/{path}{level}/.zarray")
-        if za_raw is None:
-            out["levels"].append({"level": level, "status": "unverified",
-                                  "detail": ".zarray not found"})
+        za_raw, unavailable = _get(fetch, f"{bucket_url}/{path}{level}/.zarray")
+        if unavailable or za_raw is None:
+            out["levels"].append({
+                "level": level, "status": "unverified",
+                "detail": (f".zarray {unavailable}" if unavailable
+                           else ".zarray not found")})
             continue
-        za = json.loads(za_raw)
-        grid_z = -(-za["shape"][0] // za["chunks"][0])
+        try:
+            za = json.loads(za_raw)
+            grid_z = -(-za["shape"][0] // za["chunks"][0])
+            za_chunks, za_dtype = za["chunks"], za["dtype"]
+        except (KeyError, IndexError, ValueError, TypeError,
+                ZeroDivisionError) as exc:
+            out["levels"].append({"level": level, "status": "unverified",
+                                  "detail": f"unusable .zarray: {exc}"})
+            continue
         try:
             entries, pages = collect_entries(
                 fetch, bucket_url, f"{path}{level}/", grid_z, full=full,
                 seed=_seed_for(seed, path, level))
         except (OSError, ValueError) as exc:
-            out["levels"].append({"level": level, "status": "unverified",
-                                  "detail": f"listing failed: {exc}"})
+            out["levels"].append({
+                "level": level, "status": "unverified",
+                "detail": f"listing unavailable or unparsable: {exc}"})
             continue
-        res = classify_level(za["chunks"], za["dtype"], za.get("compressor"),
+        res = classify_level(za_chunks, za_dtype, za.get("compressor"),
                              za.get("filters"), entries)
         res.update(level=level, pages_listed=pages,
                    mode="full" if full else "sampled")
@@ -180,20 +210,24 @@ def bucket_volumes(index: dict, only: set[str] | None = None,
 
 
 def default_fetch():
+    """HTTP fetch with the audit's contract: ``None`` only for a 404."""
     import requests
     sess = requests.Session()
 
     def fetch(url):
+        last: str | None = None
         for _ in range(3):
             try:
                 r = sess.get(url, timeout=60)
-            except Exception:
+            except Exception as exc:  # network error: retry, then unavailable
+                last = f"{type(exc).__name__}: {exc}"
                 continue
             if r.status_code == 200:
                 return r.content
             if r.status_code == 404:
                 return None
-        return None
+            last = f"HTTP {r.status_code}"
+        raise OSError(f"{url}: {last}")
     return fetch
 
 
@@ -207,6 +241,11 @@ def summarize(volumes: list[dict]) -> dict:
             if any(l["status"] == "mismatch" for l in v["levels"])),
         "volumes_with_errors": sorted(
             f"{v['sample']}:{v['volume']}" for v in volumes if v.get("error")),
+        "volumes_unavailable": sorted(
+            f"{v['sample']}:{v['volume']}" for v in volumes
+            if "unavailable" in str(v.get("error", ""))
+            or any("unavailable" in str(l.get("detail", ""))
+                   for l in v["levels"])),
     }
 
 
@@ -234,8 +273,12 @@ def main(argv=None) -> int:
 
     def work(t):
         s, vid, path, px = t
-        r = audit_volume(fetch, args.bucket_url, path, full=args.full,
-                         seed=args.seed)
+        try:
+            r = audit_volume(fetch, args.bucket_url, path, full=args.full,
+                             seed=args.seed)
+        except Exception as exc:  # recorded as unknown, never dropped
+            r = {"path": path, "levels": [],
+                 "error": f"audit failed: {type(exc).__name__}: {exc}"}
         r.update(sample=s, volume=vid, pixel_size_um=px)
         return r
 

@@ -350,7 +350,7 @@ def run_pair(pr: PairRun, *, seed: int, n_regions: int = N_REGIONS,
             cubes = metrics_at(c)
         except UnsupportedZarr:
             # Deviation D2: a chunk whose stored size contradicts the array
-            # metadata (a bucket defect) makes this region unreadable.
+            # metadata (an observed bucket mismatch) makes this region unreadable.
             rejections["inconsistent_chunk"] += 1
             continue
         if any(v[1] < 1.0 for v in cubes.values()):

@@ -25,7 +25,7 @@ The existing ScrolIQ score remains useful, but it means one narrow thing: sample
 | Spiral fitting | Spiral IQ | Planned | Held-out constraint residuals, sensitivity, under-constrained regions |
 | Label quality | Label IQ | Partial: label/segment coverage and `label_next` triage | Normal-direction label offset, snapping candidates, active-learning queue |
 | Ink generalization and false positives | Ink IQ | Partial: exact-volume experiment manifest, train/evaluation spatial-overlap gate, checkpoint/seed provenance, held-out/run declarations, falsification-control coverage via `scroliq-ink-audit` | Attach measured offset/perturbation results, independent-checkpoint agreement, cross-scroll generalization |
-| Data scale / reproducibility | Data Integrity | Partial: cloud reads, decode provenance, companion zarr-pyramid-audit; strict OME-Zarr v2 reader for the open bucket; declared-vs-stored chunk-size audit (one defect found, in a non-prize volume) | Coordinate/provenance contract across all downstream artifacts |
+| Data scale / reproducibility | Data Integrity | Partial: cloud reads, decode provenance, companion zarr-pyramid-audit; strict OME-Zarr v2 reader for the open bucket; declared-vs-stored chunk-size audit (one mismatch observed, in a non-prize volume) | Coordinate/provenance contract across all downstream artifacts |
 
 ## Diagnostic passport
 

@@ -448,7 +448,7 @@ raises instead of decoding anything it does not understand and counts absent
 
 `scroliq-chunk-audit` checks, without downloading chunks, that every stored
 chunk object has the size its `.zarray` declares. Over the whole bucket (65
-volumes, 390 levels, 942,696 sampled objects) it found **one defect**: PHerc0343P
+volumes, 390 levels, 942,696 sampled objects) it observed **one declared-vs-stored mismatch**: PHerc0343P
 8.64 µm level 0 stores 555 of 8,543 chunk objects (6.5 %) at 8× or 64× the declared
 size. An exhaustive pass over all 23 prize-eligible volumes (4,228,772 objects)
 found none. Details, limits and a maintainer-ready (unfiled) issue draft are in
