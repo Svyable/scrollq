@@ -312,6 +312,29 @@ PHerc0813, and PHerc1447**. The larger frontier is a useful warning: this
 external geometry proxy creates real trade-offs and should drive focused
 held-out geometry tests, not an opaque weighted winner score.
 
+### Derived manifests and First Letters
+
+The built-in manifest above was copied by hand. `scroliq-manifest` derives the
+same structure from two pinned machine-readable sources, the Challenge's own
+`prizeEligibility.json` (villa `56d7c3a`) and the open bucket's `metadata.min.json`,
+so voxel size, energy, released predictions, public segments and prohibited
+higher-resolution scans are no longer hand-maintained:
+
+```bash
+scroliq-manifest --eligibility artifacts/2026-10-01-prize-targets/prizeEligibility.json \
+  --index artifacts/2026-10-01-prize-targets/metadata.min.json.gz \
+  --prize grand-prize-2027 --as-of 2026-10-01 --out out/gp-manifest.json --compare-builtin
+```
+
+Result (`artifacts/2026-10-01-prize-targets/`): **the hand-copied Grand Prize
+manifest matches the official sources on all 13 targets** (now a regression
+test). The same machinery qualifies the **22 First Letters volumes** ($50,000
+per scroll). It requires only the released surface prediction there (the
+official workflow starts from a segment grown on it) rather than surface plus
+lasagna, and it flags PHerc0846A, which has a 2.403 µm same-scroll scan in the
+bucket that no earlier tool in this repo surfaced. Scores carry about ±5 points
+of noise, so frontier labels are triage, not rankings.
+
 ## 2027 Grand Prize provenance gate
 
 `scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. One manifest pins the exact eligible CT volume and zarr-pyramid-audit run, then links each surface → numbered tifxyz mesh → render → checkpoint → training datasets/regions → stochastic seeds → public training/inference experiment runs.
@@ -327,6 +350,23 @@ scroliq-provenance \
 The gate fails closed on wrong-volume lineage, training/prediction overlap, non-public or incorrectly licensed training data, prohibited higher-resolution same-scroll training sources, missing stochastic seeds or experiment runs, broken mesh/render column traceability, package SHA mismatches, missing 1 cm scale-bar declarations, and incomplete banner coverage. It also records a canonical graph SHA-256 and emits a complete provenance chain for every submitted render.
 
 See [the provenance-manifest specification](docs/grand-prize-provenance.md) and [example manifest](examples/grand-prize-provenance.example.json).
+
+## Open-bucket data access and integrity
+
+The scorer reads the dl.ash2txt.org volcomp (Zarr v3, sharded) store. The
+Challenge's own streaming path, and what VC3D uses, is the open S3 bucket's
+OME-Zarr **v2** layout: uncompressed `uint8`, 128³ chunks, one object per chunk.
+`src/scrollq/omezarr.py` reads that layout with only `numpy` and `requests`; it
+raises instead of decoding anything it does not understand and counts absent
+(masked) chunks separately from decoded ones.
+
+`scroliq-chunk-audit` checks, without downloading chunks, that every stored
+chunk object has the size its `.zarray` declares. Over the whole bucket (65
+volumes, 390 levels, 942,696 sampled objects) it found **one defect**: PHerc0343P
+8.64 µm level 0 stores 555 of 8,543 chunk objects (6.5 %) at 8× or 64× the declared
+size. An exhaustive pass over all 23 prize-eligible volumes (4,228,772 objects)
+found none. Details, limits and a maintainer-ready (unfiled) issue draft are in
+[`artifacts/2026-10-01-bucket-chunk-audit/`](artifacts/2026-10-01-bucket-chunk-audit/).
 
 ## Evaluation path
 

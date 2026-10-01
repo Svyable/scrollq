@@ -27,6 +27,15 @@ integrity and scan quality into TRAIN / CAUTION / DO NOT TRAIN.
   - `score.py` — scoring core: `score_volume(base_url, root)`, weights
   - `health.py` — unified health report (imports `zpa.*` from the companion)
   - `cli.py` — `scrollq-score`; `leaderboard.py`, `coverage.py`
+  - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
+    OME-Zarr **v2** volumes (the scorer itself reads volcomp v3 from
+    dl.ash2txt.org); `registration.py` — `transform.json` direction/axis-order
+    inference from landmark residuals
+  - `protocol_pairs.py` — `scroliq-pairs`: pre-registered test of whether scan
+    metrics recover the documented protocol ordering on registered rescans
+  - `prize_manifest.py` — `scroliq-manifest`: Grand Prize / First Letters
+    manifests derived from pinned official eligibility + bucket index
+  - `chunk_audit.py` — `scroliq-chunk-audit`: declared-vs-stored chunk sizes
 - `tests/` — pytest suite; keep it green
 - `artifacts/` — dated campaign outputs (volumes.json, reports); the evidence
   behind every published number
@@ -39,6 +48,9 @@ integrity and scan quality into TRAIN / CAUTION / DO NOT TRAIN.
 .venv/bin/scrollq-score --volumes volumes.txt --samples 4 --workers 4 --out-dir out/
 .venv/bin/scrollq-health --root <dl volume root>
 python -m pytest tests/ -q
+.venv/bin/scroliq-pairs --list --out out/discovery.json          # registered rescan pairs
+.venv/bin/scroliq-manifest --help                                # derive prize manifests
+.venv/bin/scroliq-chunk-audit --index <metadata.min.json[.gz]> --out out/audit.json
 ```
 
 ## Hard-won lessons (do not re-learn)
@@ -65,6 +77,27 @@ python -m pytest tests/ -q
    and do not reproduce — they were replaced 2026-09-30.
 5. **Weights are a judgment call, published with every score.** Changing them
    is fine; hiding them is not. Update the September page when they change.
+
+6. **A clean audit that checked nothing is a vacuous audit.** The first draft
+   of the bucket chunk audit parsed S3 listings with a regex, matched zero
+   objects, and reported "0 mismatches over 390 levels". It was caught only
+   because it missed a defect measured by hand. Every checker needs a positive
+   control, must report `unverified` (not `ok`) when it inspected nothing, and
+   must parse structured formats with a real parser.
+7. **Pre-register, then log every deviation.** `docs/protocol-pairs-protocol.md`
+   froze hypothesis, constants and decision rule before any real metric was
+   read; the verdict is computed by `decide()`. A control that cannot detect
+   its own artifact (the half-step null missed aligned-vs-rotated lattice
+   interpolation) is added as a *logged post-hoc arm*, never by rewriting the
+   rule. Keep earlier runs next to later ones.
+8. **The open bucket is Zarr v2, uncompressed uint8, 128^3 chunks; the dl.ash2txt
+   volcomp stores are Zarr v3 sharded.** Do not assume one reader for both.
+   Some registered scans live on `data.aws.ash2txt.org`, not the bucket; a
+   pair whose fixed scan is unreachable is reported `run failed`, never dropped.
+9. **Derive facts, don't copy them.** Voxel size, energy, released
+   predictions, segment counts and prohibited higher-resolution scans come from
+   the pinned eligibility list + bucket index (`scroliq-manifest`); the
+   hand-copied Grand Prize manifest is regression-tested against them.
 
 ## Working rules
 
