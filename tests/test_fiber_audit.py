@@ -89,3 +89,151 @@ def test_csv_input_is_hashed_and_cli_exit_codes(tmp_path, capsys):
         main([str(bad)])
     assert fail.value.code == 2
     assert json.loads(capsys.readouterr().out)["status"] == "fail"
+
+
+
+def _vc3d_config():
+    return {
+        "step_voxels": 1.0,
+        "cone_angle_degrees": 30.0,
+        "cone_angle_step_degrees": 5.0,
+        "cone_grid_size": 3,
+        "beam_width": 4,
+        "beam_prune_distance_voxels": 2.0,
+        "beam_lookahead_steps": 2,
+        "smoothness_weight": 1.0,
+        "smoothness_normal_weight": 1.0,
+        "smoothness_tangent_weight": 1.0,
+        "smoothness_free_angle_degrees": 10.0,
+        "cumulative_smoothness_steps": 2,
+        "cumulative_smoothness_tangent_weight": 1.0,
+        "initial_free_angle_degrees": 10.0,
+        "max_step_factor": 2.0,
+        "meeting_accept_max_error_ratio": 0.5,
+        "endpoint_accept_threshold_base_voxels": 2.0,
+    }
+
+
+def _vc3d_span(*, mode="trace", tags=None):
+    trace = mode == "trace"
+    out = {
+        "optimizer": "native_fiber_trace3d",
+        "metadata_version": 3,
+        "tracer_version": 2,
+        "interp_goal": "global",
+        "interp_mode": mode,
+        "metric": None if mode == "cspline" else 3.2,
+        "msg": mode,
+        "normal_manifest": "normal.lasagna.json",
+        "fiber_manifest": "fiber.lasagna.json",
+        "trace_to_base_scale": 1.0,
+        "meeting_error_base_voxels": 0.4 if trace else None,
+        "meeting_error_ratio": 0.2 if trace else None,
+        "meeting_source": "bidirectional" if trace else "",
+        "failure_code": "",
+        "failure_detail": "",
+        "lasagna_failure_code": "" if trace else "trace_not_selected",
+        "lasagna_failure_detail": "",
+        "config": _vc3d_config(),
+    }
+    if tags is not None:
+        out["tags"] = tags
+    return out
+
+
+def _write_vc3d(tmp_path, *, version=4, mode="trace", line_points=None):
+    if line_points is None:
+        line_points = [[i, 0, 0] for i in range(6)]
+    if version == 1:
+        obj = {
+            "type": "vc3d_fiber",
+            "version": 1,
+            "line_points": line_points,
+            "control_points": [[0, 0, 0], [5, 0, 0]],
+        }
+    else:
+        obj = {
+            "type": "vc3d_fiber",
+            "version": version,
+            "optimization_mode": "native_fiber_trace3d",
+            "generation": 2,
+            "line_points": line_points,
+            "control_points": [
+                {
+                    "position": [0, 0, 0],
+                    "segment_to_next": _vc3d_span(
+                        mode=mode, tags=["gap"] if version == 4 else None
+                    ),
+                },
+                {"position": [5, 0, 0]},
+            ],
+        }
+    path = tmp_path / "fiber.json"
+    path.write_text(json.dumps(obj))
+    return path
+
+
+def test_native_vc3d_v4_is_audited_and_metadata_summarized(tmp_path):
+    from scrollq.fiber_audit import audit_vc3d_json
+
+    path = _write_vc3d(tmp_path, version=4)
+    out = audit_vc3d_json(path)
+    assert out["status"] == "pass"
+    assert out["input_format"] == "vc3d_fiber_json"
+    assert out["vc3d_fiber"]["version"] == 4
+    assert out["vc3d_fiber"]["native_trace_segments"] == 1
+    assert out["vc3d_fiber"]["fallback_segments"] == 0
+    assert out["vc3d_fiber"]["tagged_segments"] == [
+        {"segment": 0, "tags": ["gap"]}
+    ]
+    assert out["input"]["sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_native_vc3d_fallback_is_observed_not_called_a_geometry_defect(tmp_path):
+    from scrollq.fiber_audit import audit_vc3d_json
+
+    out = audit_vc3d_json(_write_vc3d(tmp_path, version=3, mode="lasagna"))
+    assert out["status"] == "pass"
+    assert out["findings"] == []
+    assert out["vc3d_fiber"]["fallback_segments"] == 1
+    assert out["vc3d_fiber"]["fallback_fraction"] == pytest.approx(1.0)
+    assert out["vc3d_fiber"]["failure_codes"][0]["lasagna_failure_code"] == "trace_not_selected"
+
+
+def test_native_vc3d_geometry_findings_and_cli_gate(tmp_path):
+    from scrollq.fiber_audit import audit_vc3d_json
+
+    pts = [[0, 0, 0], [1, 0, 0], [2, 0, 0], [8, 0, 0], [8, 1, 0]]
+    path = _write_vc3d(tmp_path, version=4, line_points=pts)
+    out = audit_vc3d_json(path)
+    assert out["status"] == "caution"
+    assert {f["kind"] for f in out["findings"]} == {"gap", "sharp_turn"}
+
+    with pytest.raises(SystemExit) as advisory:
+        main([str(path)])
+    assert advisory.value.code == 0
+    with pytest.raises(SystemExit) as gated:
+        main([str(path), "--fail-on-findings"])
+    assert gated.value.code == 2
+
+
+def test_native_vc3d_schema_mismatch_fails_closed(tmp_path):
+    from scrollq.fiber_audit import audit_vc3d_json
+
+    path = _write_vc3d(tmp_path, version=4)
+    obj = json.loads(path.read_text())
+    del obj["control_points"][0]["segment_to_next"]["config"]["beam_width"]
+    path.write_text(json.dumps(obj))
+    out = audit_vc3d_json(path)
+    assert out["status"] == "fail"
+    assert out["counts"]["parse_errors"] == 1
+    assert "config" in out["errors"][0]["error"]
+
+
+def test_native_vc3d_v1_remains_supported(tmp_path):
+    from scrollq.fiber_audit import audit_vc3d_json
+
+    out = audit_vc3d_json(_write_vc3d(tmp_path, version=1))
+    assert out["status"] == "pass"
+    assert out["vc3d_fiber"]["version"] == 1
+    assert out["vc3d_fiber"]["optimization_mode"] == "lasagna"
