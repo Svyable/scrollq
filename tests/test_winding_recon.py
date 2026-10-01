@@ -55,3 +55,47 @@ def test_chain_stats_measure_spacing_and_turns(tmp_path):
     assert stats["net_turns_per_chain"]["max"] == 0.25
     assert stats["steps_over_half_turn"] == 0
     assert abs(stats["consecutive_spacing_voxels"]["median"] - 2 * 100 * math.sin(math.pi / 80)) < 1e-2
+
+
+spec2 = importlib.util.spec_from_file_location("winding_patch_index", ROOT / "bin" / "winding_patch_index.py")
+pidx = importlib.util.module_from_spec(spec2)
+spec2.loader.exec_module(pidx)
+
+
+def test_patch_entries_and_bbox_parsing():
+    html = '<a href="../">..</a><a href="p1/">p1/</a><a href="p2/">p2/</a><a href="x.txt">x</a><a href="p1/">p1/</a>'
+    assert pidx.patch_entries(html) == ["p1/", "p2/"]
+    assert pidx.parse_bbox({"bbox": [[10, 0, 5], [0, 20, 1]]}) == [[0, 0, 1], [10, 20, 5]]
+    assert pidx.parse_bbox({"bbox": [[0, 0], [1, 1]]}) is None
+    assert pidx.parse_bbox({"bbox": [[0, 0, float("nan")], [1, 1, 1]]}) is None
+    assert pidx.parse_bbox([]) is None
+
+
+def test_fetch_index_records_errors_and_missing_bbox():
+    def fake(url):
+        if "bad/" in url:
+            raise OSError("boom")
+        if "nobox/" in url:
+            return {"format": "tifxyz"}
+        return {"bbox": [[0, 0, 0], [1, 1, 1]]}
+
+    index = pidx.fetch_index("https://h/x", ["ok/", "bad/", "nobox/"], workers=2, fetch=fake)
+    assert list(index["bbox"]) == ["ok/"]
+    assert index["no_bbox"] == ["nobox/"]
+    assert "boom" in index["errors"]["bad/"]
+
+
+def test_reach_links_frames_through_a_shared_patch_and_counts_cycles():
+    rows = [
+        {"role": "relative", "frame": "relative:1", "xyz": [5, 5, 5]},
+        {"role": "relative", "frame": "relative:2", "xyz": [6, 5, 5]},
+        {"role": "same_winding", "frame": "same_winding:9", "xyz": [7, 5, 5]},
+        {"role": "absolute", "frame": "absolute", "xyz": [500, 500, 500]},
+    ]
+    bboxes = {"a/": [[0, 0, 0], [10, 10, 10]]}
+    r = pidx.reach(rows, bboxes, margin=0)
+    assert r["points_inside_a_bbox"] == 3
+    assert r["by_role"]["absolute"]["inside_a_bbox"] == 0
+    g = r["frame_graph"]
+    assert g["frames_linked"] == 3 and g["edges"] == 3 and g["components"] == 1 and g["independent_cycles"] == 1
+    assert pidx.reach(rows, {}, margin=0)["points_inside_a_bbox"] == 0

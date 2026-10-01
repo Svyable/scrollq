@@ -8,6 +8,7 @@ on:
   pull_request:
     paths:
       - bin/winding_recon.py
+      - bin/winding_patch_index.py
       - .github/workflows/winding-recon.yml
 
 permissions:
@@ -16,7 +17,7 @@ permissions:
 jobs:
   recon:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -41,3 +42,14 @@ jobs:
           ls -l input verified_patches.html || true
       - name: Recon
         run: python bin/winding_recon.py input --patch-listing verified_patches.html
+      - name: Patch bbox index and attachment reach (step 2)
+        run: |
+          python bin/winding_patch_index.py input verified_patches.html \
+            https://dl.ash2txt.org/datasets/spiral_datasets/PHercParis4/verified_patches \
+            patch-index.json --margin 8 --workers 64
+      - name: Keep the index for step 3 (Actions artifact, not committed)
+        uses: actions/upload-artifact@v4
+        with:
+          name: paris4-verified-patch-index
+          path: patch-index.json
+          retention-days: 30
