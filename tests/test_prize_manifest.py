@@ -5,8 +5,7 @@ from pathlib import Path
 import pytest
 
 from scrollq import prize_manifest as pm
-from scrollq.grand_prize import (DEFAULT_MANIFEST, FIRST_LETTERS_MANIFEST,
-                                 qualify)
+from scrollq.grand_prize import DEFAULT_MANIFEST, FIRST_LETTERS_MANIFEST, qualify
 from scrollq.bucket import load_json_maybe_gz
 
 ART = Path(__file__).resolve().parents[1] / "artifacts"

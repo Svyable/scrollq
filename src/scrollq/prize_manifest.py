@@ -165,7 +165,11 @@ def compare_targets(reference: dict, derived: dict) -> list[str]:
                         ("lasagna_prediction", "all_lasagna_predictions")):
             if r.get(k) and r[k] not in d.get(pool, []):
                 out.append(f"{scroll}: {k} {r[k]!r} not among {d.get(pool)}")
-        rh, dh = _higher_res_ids(r), _higher_res_ids(d)
+        # The same set of known higher-resolution scans must be recorded,
+        # whether a manifest files them as prohibited (Grand Prize) or as
+        # informational (First Letters, whose rules do not prohibit them).
+        rh = _higher_res_ids(r)
+        dh = _higher_res_ids(d)
         if rh != dh:
             out.append(f"{scroll}: higher-resolution exclusions "
                        f"{sorted(rh)} != {sorted(dh)}")
