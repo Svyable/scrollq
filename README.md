@@ -59,10 +59,14 @@ The passport rejects a spatial artifact whose volume root does not exactly match
 ```bash
 scroliq-winding \
   --dataset /path/to/spiral-dataset \
+  --z-range 10500,11500 \
+  --z-bins 10 \
   --out out/winding-audit.json
 ```
 
-It checks `abs_winding.json`, `relative_windings.json`, and `same_windings.json` against the PointCollections v1 shape used by VC3D and the spiral fitter. The report records exact SHA-256 provenance, collection and point counts, coordinate sanity, role-consistent `wind_a` semantics, winding spans, and machine-readable findings. Missing roles are reported as partial evidence rather than silently treated as failure; `--require-role` can make a role mandatory for a particular experiment.
+It checks `abs_winding.json`, `relative_windings.json`, and `same_windings.json` against the PointCollections v1 shape used by VC3D and the spiral fitter. The report records exact SHA-256 provenance, collection and point counts, XYZ coordinate sanity, role-consistent `wind_a` semantics, winding spans, and machine-readable findings. Missing roles are reported as partial evidence rather than silently treated as failure; `--require-role` can make a role mandatory for a particular experiment.
+
+When a fit/evaluation z-window is supplied, ScrolIQ also reports **annotation-center axial coverage**: one median-z center per collection, the largest gap between collection centers, and empty equal-width z bands. Counting collections rather than raw points prevents a densely sampled line from looking like broad coverage. Empty bins are prioritization cues for where another verified constraint may have leverage; they do **not** make the audit fail or prove that a nonempty bin is geometrically constrained.
 
 This is intentionally a **constraint-input audit, not a geometry verdict**. It does not yet establish CT support, patch attachment, relative-winding graph consistency, loop holonomy, or held-out spiral-fit accuracy. Those are the next Winding IQ / Spiral IQ layers.
 
