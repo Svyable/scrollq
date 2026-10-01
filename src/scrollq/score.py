@@ -19,6 +19,13 @@ from zpa import volcomp as vc
 from .metrics import chunk_metrics
 
 
+# Bump this whenever score components, weights, caps, or aggregation change.
+# Frozen artifacts predate this explicit identifier; new results carry it so
+# later analyses can name the exact policy instead of inferring it from a
+# repository date.
+SCORE_POLICY_VERSION = "scan-health-v1"
+
+
 def _spread(n: int, k: int) -> list[int]:
     if n <= 0 or k <= 0:
         return []
@@ -183,7 +190,11 @@ def score_volume(base_url: str, root: str, samples: int = 4,
     ``order`` and ``part`` select the candidate order (see ``_candidates``).
     The defaults reproduce every published campaign exactly.
     """
-    result: dict = {"root": root, "ok": False}
+    result: dict = {
+        "root": root,
+        "ok": False,
+        "score_policy_version": SCORE_POLICY_VERSION,
+    }
     if samples < 1:
         result["error"] = "samples must be >= 1"
         return result

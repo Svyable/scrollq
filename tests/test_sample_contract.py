@@ -54,6 +54,7 @@ def test_score_volume_honors_sample_budget(monkeypatch, budget):
     monkeypatch.setattr(score_mod, "chunk_metrics", lambda vox: metrics.copy())
 
     result = score_mod.score_volume("https://example.test", "root", samples=budget)
+    assert result["score_policy_version"] == "scan-health-v1"
     assert result["metrics"]["chunks_decoded"] == min(budget, 16)
     assert result["sampling"]["complete"] == (budget <= 16)
 
@@ -65,6 +66,7 @@ def test_score_volume_rejects_nonpositive_sample_budget(budget):
     result = score_mod.score_volume("https://example.test", "root", samples=budget)
     assert result["ok"] is False
     assert result["error"] == "samples must be >= 1"
+    assert result["score_policy_version"] == "scan-health-v1"
 
 
 @pytest.mark.parametrize("status", [206, 404, 503])
