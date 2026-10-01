@@ -34,7 +34,7 @@ OPEN_PROBLEMS: tuple[dict[str, str], ...] = (
         "id": "mesh-connectivity",
         "stage": "unwrapping",
         "challenge": "Detect holes, mergers, sheet switches, and other tracing failures in explicit meshes.",
-        "scroliq": "planned",
+        "scroliq": "partial",
     },
     {
         "id": "fiber-connectivity",
@@ -64,7 +64,7 @@ OPEN_PROBLEMS: tuple[dict[str, str], ...] = (
         "id": "ink-reliability",
         "stage": "ink-recovery",
         "challenge": "Separate weak signal, surface-placement, label, model, and cross-scroll generalization failures.",
-        "scroliq": "planned",
+        "scroliq": "partial",
     },
     {
         "id": "data-scale",
@@ -123,7 +123,7 @@ def _scan_stage(
         "components": components,
         "sampling": sampling,
         "limitation": (
-            "The legacy ScrollQ score is sparse whole-volume triage. Spatial "
+            "The legacy ScrolIQ score is sparse whole-volume triage. Spatial "
             "diagnostics, when supplied, remain sampled observations rather than "
             "a claim that every voxel has been characterized."
         ),
@@ -259,6 +259,140 @@ def _winding_stage(
     return result
 
 
+
+def _mesh_stage(
+    volume_root: str,
+    audit: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if audit is None:
+        return {
+            "status": "unknown",
+            "open_problem": "mesh-connectivity",
+            "reason": "no volume-bound TIFXYZ mesh audit was supplied",
+        }
+    if audit.get("diagnostic") != "tifxyz-mesh-audit":
+        return {
+            "status": "excluded",
+            "open_problem": "mesh-connectivity",
+            "reason": "artifact is not a ScrolIQ tifxyz-mesh-audit",
+        }
+
+    audit_root = audit.get("volume_root")
+    if not isinstance(audit_root, str) or not audit_root:
+        return {
+            "status": "excluded",
+            "open_problem": "mesh-connectivity",
+            "reason": "mesh audit has no exact volume_root binding; rerun scroliq-mesh with --volume-root",
+        }
+    if audit_root != volume_root:
+        return {
+            "status": "excluded",
+            "open_problem": "mesh-connectivity",
+            "reason": "mesh audit names a different volume root",
+        }
+
+    audit_status = audit.get("status")
+    if audit_status not in {"pass", "partial", "fail"}:
+        return {
+            "status": "excluded",
+            "open_problem": "mesh-connectivity",
+            "reason": f"unsupported mesh audit status: {audit_status!r}",
+        }
+
+    result = {
+        "status": "blocked" if audit_status == "fail" else "partial",
+        "open_problem": "mesh-connectivity",
+        "audit_status": audit_status,
+        "tifxyz_path": audit.get("tifxyz_path"),
+        "grid": dict(audit.get("grid") or {}),
+        "bbox": dict(audit.get("bbox") or {}),
+        "spacing": dict(audit.get("spacing") or {}),
+        "quads": dict(audit.get("quads") or {}),
+        "self_intersection": dict(audit.get("self_intersection") or {}),
+        "findings": list(audit.get("findings") or []),
+        "error_count": int(audit.get("error_count") or 0),
+        "warning_count": int(audit.get("warning_count") or 0),
+        "limitation": (
+            (
+                "A passing mesh audit establishes TIFXYZ structure, validity/topology, "
+                "metadata, local spacing, normal continuity, flattening-distortion checks, "
+                "and a validated VC3D transverse self-intersection census under its recorded "
+                "parameters. It does not establish CT support or correct winding identity."
+            )
+            if (audit.get("self_intersection") or {}).get("status") == "pass"
+            else (
+                "A passing mesh audit establishes TIFXYZ structure, validity/topology, "
+                "metadata, local spacing, normal continuity, and flattening-distortion checks only. "
+                "It does not establish CT support, correct winding identity, or freedom from "
+                "nonlocal self-intersections."
+            )
+        ),
+    }
+    if audit_status == "fail":
+        result["reason"] = "TIFXYZ mesh failed structural or geometry audit checks"
+    return result
+
+
+def _ink_stage(
+    volume_root: str,
+    audit: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if audit is None:
+        return {
+            "status": "unknown",
+            "open_problem": "ink-reliability",
+            "reason": "no volume-bound ink evidence audit was supplied",
+        }
+    if audit.get("diagnostic") != "ink-evidence-audit":
+        return {
+            "status": "excluded",
+            "open_problem": "ink-reliability",
+            "reason": "artifact is not a ScrolIQ ink-evidence-audit",
+        }
+
+    audit_root = audit.get("volume_root")
+    if not isinstance(audit_root, str) or not audit_root:
+        return {
+            "status": "excluded",
+            "open_problem": "ink-reliability",
+            "reason": "ink audit has no exact volume_root binding; rerun scroliq-ink-audit with --volume-root",
+        }
+    if audit_root != volume_root:
+        return {
+            "status": "excluded",
+            "open_problem": "ink-reliability",
+            "reason": "ink audit names a different volume root",
+        }
+
+    audit_status = audit.get("status")
+    if audit_status not in {"pass", "partial", "fail"}:
+        return {
+            "status": "excluded",
+            "open_problem": "ink-reliability",
+            "reason": f"unsupported ink audit status: {audit_status!r}",
+        }
+
+    result = {
+        "status": "blocked" if audit_status == "fail" else "partial",
+        "open_problem": "ink-reliability",
+        "audit_status": audit_status,
+        "model": dict(audit.get("model") or {}),
+        "leakage": dict(audit.get("leakage") or {}),
+        "controls": dict(audit.get("controls") or {}),
+        "runs": dict(audit.get("runs") or {}),
+        "error_count": int(audit.get("error_count") or 0),
+        "warning_count": int(audit.get("warning_count") or 0),
+        "limitation": (
+            "A passing ink evidence audit establishes declared train/evaluation separation, "
+            "checkpoint/seed provenance, and falsification-control coverage only. It does not "
+            "establish that a prediction is ink or that the evidence generalizes across scrolls."
+        ),
+    }
+    if audit_status == "fail":
+        result["reason"] = "ink evidence failed leakage or provenance validation"
+    return result
+
+
 def _unknown_stage(open_problem: str, reason: str) -> dict[str, str]:
     return {"status": "unknown", "open_problem": open_problem, "reason": reason}
 
@@ -268,6 +402,8 @@ def build_passport(
     coverage: dict[str, Any] | None = None,
     scan_map: dict[str, Any] | None = None,
     winding_audit: dict[str, Any] | None = None,
+    mesh_audit: dict[str, Any] | None = None,
+    ink_audit: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build one evidence-preserving diagnostic passport from current artifacts."""
     root = str(volume.get("root", ""))
@@ -278,9 +414,7 @@ def build_passport(
             "surface-topology",
             "no surface-prediction or surface-support diagnostic was supplied",
         ),
-        "mesh": _unknown_stage(
-            "mesh-connectivity", "no tifxyz or mesh diagnostic was supplied"
-        ),
+        "mesh": _mesh_stage(root, mesh_audit),
         "fibers": _unknown_stage(
             "fiber-connectivity", "no fiber tracing evidence was supplied"
         ),
@@ -289,10 +423,7 @@ def build_passport(
             "spiral-fitting", "no spiral fit or constraint evaluation was supplied"
         ),
         "labels": _label_stage(coverage),
-        "ink": _unknown_stage(
-            "ink-reliability",
-            "no held-out ink inference, leakage audit, or stability evidence was supplied",
-        ),
+        "ink": _ink_stage(root, ink_audit),
     }
 
     actions: list[dict[str, str]] = []
@@ -377,24 +508,90 @@ def build_passport(
             }
         )
 
-    actions.extend(
-        [
+    mesh_status = stages["mesh"]["status"]
+    if mesh_status in {"unknown", "excluded"}:
+        actions.append(
             {
                 "priority": "next-evidence",
-                "action": "run spatial surface-support/topology diagnostics on released predictions or tifxyz",
-                "open_problem": "surface-topology",
-            },
-            {
-                "priority": "next-evidence",
-                "action": "validate mesh connectivity and sheet-switch risk before interpreting flattened renders",
+                "action": "run scroliq-mesh with the exact --volume-root before trusting TIFXYZ geometry",
                 "open_problem": "mesh-connectivity",
-            },
+            }
+        )
+    elif mesh_status == "blocked":
+        actions.append(
+            {
+                "priority": "high",
+                "action": "repair TIFXYZ structural or geometry audit errors before flattening/render interpretation",
+                "open_problem": "mesh-connectivity",
+            }
+        )
+    elif stages["mesh"].get("audit_status") == "partial":
+        actions.append(
+            {
+                "priority": "high",
+                "action": "review Mesh IQ findings before using this surface downstream",
+                "open_problem": "mesh-connectivity",
+            }
+        )
+    else:
+        selfcross_status = (
+            stages["mesh"].get("self_intersection") or {}
+        ).get("status")
+        if selfcross_status == "pass":
+            action = "add CT-support and sheet-identity evidence to the mesh"
+        else:
+            action = (
+                "add CT-support and sheet-identity evidence, and run VC3D "
+                "vc_tifxyz_selfcross for nonlocal transverse-intersection evidence"
+            )
+        actions.append(
             {
                 "priority": "next-evidence",
-                "action": "require held-out, non-overlapping validation before treating ink output as evidence",
+                "action": action,
+                "open_problem": "mesh-connectivity",
+            }
+        )
+
+    ink_status = stages["ink"]["status"]
+    if ink_status in {"unknown", "excluded"}:
+        actions.append(
+            {
+                "priority": "next-evidence",
+                "action": "run scroliq-ink-audit with the exact --volume-root before treating ink output as evidence",
                 "open_problem": "ink-reliability",
-            },
-        ]
+            }
+        )
+    elif ink_status == "blocked":
+        actions.append(
+            {
+                "priority": "high",
+                "action": "resolve train/evaluation leakage or ink-evidence provenance errors",
+                "open_problem": "ink-reliability",
+            }
+        )
+    elif stages["ink"].get("audit_status") == "partial":
+        actions.append(
+            {
+                "priority": "high",
+                "action": "complete missing held-out or falsification controls before interpreting ink output",
+                "open_problem": "ink-reliability",
+            }
+        )
+    else:
+        actions.append(
+            {
+                "priority": "next-evidence",
+                "action": "attach measured perturbation stability and cross-scroll validation to the ink evidence",
+                "open_problem": "ink-reliability",
+            }
+        )
+
+    actions.append(
+        {
+            "priority": "next-evidence",
+            "action": "run spatial surface-support/topology diagnostics on released predictions or tifxyz",
+            "open_problem": "surface-topology",
+        }
     )
 
     return {
@@ -428,15 +625,17 @@ def main() -> None:
     ap = argparse.ArgumentParser(
         description="Build a Challenge-aligned ScrolIQ diagnostic passport"
     )
-    ap.add_argument("--volumes", required=True, help="ScrollQ volumes.json")
+    ap.add_argument("--volumes", required=True, help="ScrolIQ volumes.json")
     ap.add_argument("--root", required=True, help="exact volume root or unique substring")
-    ap.add_argument("--coverage", default=None, help="optional ScrollQ coverage.json")
+    ap.add_argument("--coverage", default=None, help="optional ScrolIQ coverage.json")
     ap.add_argument("--scan-map", default=None, help="optional ScrolIQ spatial scan map")
     ap.add_argument(
         "--winding-audit",
         default=None,
         help="optional volume-bound scroliq-winding JSON artifact",
     )
+    ap.add_argument("--mesh-audit", default=None, help="optional volume-bound scroliq-mesh JSON artifact")
+    ap.add_argument("--ink-audit", default=None, help="optional volume-bound scroliq-ink-audit JSON artifact")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -458,11 +657,23 @@ def main() -> None:
         if args.winding_audit
         else None
     )
+    mesh_audit = (
+        json.loads(Path(args.mesh_audit).read_text(encoding="utf-8"))
+        if args.mesh_audit
+        else None
+    )
+    ink_audit = (
+        json.loads(Path(args.ink_audit).read_text(encoding="utf-8"))
+        if args.ink_audit
+        else None
+    )
     passport = build_passport(
         volume,
         coverage=coverage,
         scan_map=scan_map,
         winding_audit=winding_audit,
+        mesh_audit=mesh_audit,
+        ink_audit=ink_audit,
     )
 
     out = Path(args.out)

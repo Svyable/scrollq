@@ -16,8 +16,9 @@ from pathlib import Path
 from typing import Any
 
 from .grand_prize import DEFAULT_MANIFEST
+from .recto_coverage import audit_recto_coverage
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 3
 RULES_URL = "https://scrollprize.org/prizes"
 CC_BY_NC_4 = {"CC-BY-NC-4.0", "CC BY-NC 4.0"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -281,6 +282,137 @@ def _check_region_exclusion(
     return proof
 
 
+def _check_holdout_exclusion(
+    *,
+    validation_id: str,
+    region_id: str,
+    model: dict[str, Any],
+    region_sets: dict[str, dict[str, Any]],
+    datasets: dict[str, dict[str, Any]],
+    errors: list[dict[str, str]],
+) -> dict[str, Any]:
+    """Prove held-out validation regions do not intersect same-volume training."""
+
+    proof: dict[str, Any] = {
+        "validation_id": validation_id,
+        "region_set_id": region_id,
+        "training_region_set_ids": [],
+        "checked_pairs": 0,
+        "overlaps": [],
+    }
+    holdout = region_sets.get(region_id)
+    if holdout is None:
+        _error(
+            errors,
+            "GP_MISSING_REGION_SET",
+            f"held_out_validations[{validation_id}].region_set_id",
+            f"unknown region set {region_id!r}",
+        )
+        return proof
+    if holdout.get("role") != "validation":
+        _error(
+            errors,
+            "GP_REGION_ROLE",
+            f"region_sets[{region_id}].role",
+            "held-out region set must have role='validation'",
+        )
+    coord = holdout.get("coordinate_space")
+    if coord != "level0-voxel-index":
+        _error(
+            errors,
+            "GP_REGION_COORDINATES",
+            f"region_sets[{region_id}].coordinate_space",
+            "held-out checking currently requires level0-voxel-index coordinates",
+        )
+
+    holdout_boxes = []
+    for i, box in enumerate(_as_list(holdout.get("boxes"))):
+        parsed = _validate_box(
+            box, f"region_sets[{region_id}].boxes[{i}]", errors
+        )
+        if parsed:
+            holdout_boxes.append(parsed)
+    if not holdout_boxes:
+        _error(
+            errors,
+            "GP_EMPTY_VALIDATION_REGION",
+            f"region_sets[{region_id}].boxes",
+            "at least one held-out validation box is required",
+        )
+
+    training_ids: list[str] = []
+    for dataset_id in _as_list(model.get("training_dataset_ids")):
+        dataset = datasets.get(dataset_id)
+        if dataset is None:
+            continue
+        training_id = dataset.get("training_region_set_id")
+        if training_id:
+            training_ids.append(str(training_id))
+    proof["training_region_set_ids"] = training_ids
+
+    for training_id in training_ids:
+        train = region_sets.get(training_id)
+        if train is None:
+            continue
+        if train.get("role") != "training":
+            _error(
+                errors,
+                "GP_REGION_ROLE",
+                f"region_sets[{training_id}].role",
+                "training dataset region set must have role='training'",
+            )
+        if train.get("volume_id") != holdout.get("volume_id"):
+            continue
+        if train.get("coordinate_space") != coord:
+            _error(
+                errors,
+                "GP_REGION_COORDINATES",
+                f"region_sets[{training_id}].coordinate_space",
+                "same-volume training/validation regions must share a coordinate space",
+            )
+            continue
+
+        train_boxes = []
+        for i, box in enumerate(_as_list(train.get("boxes"))):
+            parsed = _validate_box(
+                box, f"region_sets[{training_id}].boxes[{i}]", errors
+            )
+            if parsed:
+                train_boxes.append(parsed)
+        if not train_boxes:
+            _error(
+                errors,
+                "GP_EMPTY_TRAINING_REGION",
+                f"region_sets[{training_id}].boxes",
+                "same-volume training region set must contain boxes",
+            )
+            continue
+
+        for ti, tbox in enumerate(train_boxes):
+            for vi, vbox in enumerate(holdout_boxes):
+                proof["checked_pairs"] += 1
+                if _boxes_overlap(tbox, vbox):
+                    proof["overlaps"].append(
+                        {
+                            "training_region_set_id": training_id,
+                            "training_box": ti,
+                            "validation_box": vi,
+                        }
+                    )
+
+    if proof["overlaps"]:
+        _error(
+            errors,
+            "GP_TRAIN_HOLDOUT_OVERLAP",
+            f"held_out_validations[{validation_id}]",
+            (
+                "training/held-out validation region overlap detected "
+                f"({len(proof['overlaps'])} pair(s))"
+            ),
+        )
+    return proof
+
+
 def _verify_local_file(
     record: dict[str, Any],
     path: str,
@@ -332,6 +464,7 @@ def validate_manifest(
     errors: list[dict[str, str]] = []
     warnings: list[dict[str, str]] = []
     chains: list[dict[str, Any]] = []
+    held_out_proofs: list[dict[str, Any]] = []
 
     if manifest.get("schema_version") != SCHEMA_VERSION:
         _error(
@@ -529,6 +662,11 @@ def validate_manifest(
     surfaces = _index(manifest.get("surfaces"), "surfaces", errors)
     meshes = _index(manifest.get("meshes"), "meshes", errors)
     renders = _index(manifest.get("renders"), "renders", errors)
+    held_out_validations = _index(
+        manifest.get("held_out_validations"),
+        "held_out_validations",
+        errors,
+    )
 
     for name, records in (
         ("datasets", datasets),
@@ -537,6 +675,7 @@ def validate_manifest(
         ("surfaces", surfaces),
         ("meshes", meshes),
         ("renders", renders),
+        ("held_out_validations", held_out_validations),
     ):
         if not records:
             _error(
@@ -695,6 +834,130 @@ def validate_manifest(
                     "GP_RUN_NOT_PUBLIC",
                 )
 
+
+    held_out_by_model: dict[str, list[str]] = {}
+    for validation_id, validation in held_out_validations.items():
+        p = f"held_out_validations[{validation_id}]"
+        model_id = validation.get("model_id")
+        if model_id not in models:
+            _error(
+                errors,
+                "GP_HELD_OUT_MODEL",
+                f"{p}.model_id",
+                f"unknown model {model_id!r}",
+            )
+        else:
+            held_out_by_model.setdefault(str(model_id), []).append(validation_id)
+
+        _check_public_url(
+            validation.get("public_input_url"),
+            f"{p}.public_input_url",
+            errors,
+            "GP_HELD_OUT_INPUT_PUBLIC",
+        )
+        _check_public_url(
+            validation.get("ground_truth_url"),
+            f"{p}.ground_truth_url",
+            errors,
+            "GP_HELD_OUT_GROUND_TRUTH_PUBLIC",
+        )
+        _check_public_url(
+            validation.get("public_url"),
+            f"{p}.public_url",
+            errors,
+            "GP_HELD_OUT_RESULTS_PUBLIC",
+        )
+
+        protocol = validation.get("protocol")
+        if protocol not in {"held-out", "k-fold"}:
+            _error(
+                errors,
+                "GP_HELD_OUT_PROTOCOL",
+                f"{p}.protocol",
+                "protocol must be 'held-out' or 'k-fold'",
+            )
+        elif protocol == "k-fold":
+            fold_count = validation.get("fold_count")
+            if not isinstance(fold_count, int) or fold_count < 2:
+                _error(
+                    errors,
+                    "GP_HELD_OUT_PROTOCOL",
+                    f"{p}.fold_count",
+                    "k-fold validation requires integer fold_count >= 2",
+                )
+
+        metrics = validation.get("metrics")
+        if (
+            not isinstance(metrics, dict)
+            or not metrics
+            or any(
+                isinstance(value, bool) or not isinstance(value, (int, float))
+                for value in metrics.values()
+            )
+        ):
+            _error(
+                errors,
+                "GP_HELD_OUT_METRICS",
+                f"{p}.metrics",
+                "non-empty numeric held-out metric results are required",
+            )
+
+        run = validation.get("experiment_run")
+        if not isinstance(run, dict) or run.get("public") is not True:
+            _error(
+                errors,
+                "GP_HELD_OUT_RUN",
+                f"{p}.experiment_run",
+                "public held-out evaluation run is required",
+            )
+        else:
+            _check_public_url(
+                run.get("url"),
+                f"{p}.experiment_run.url",
+                errors,
+                "GP_HELD_OUT_RUN",
+            )
+
+        if validation.get("code_commit") != code.get("commit"):
+            _error(
+                errors,
+                "GP_HELD_OUT_COMMIT",
+                f"{p}.code_commit",
+                "held-out validation must pin the submission code commit",
+            )
+
+        _check_sha(validation, p, errors)
+        _verify_local_file(validation, p, root_dir, errors)
+
+        region_id = validation.get("region_set_id")
+        if not isinstance(region_id, str) or not region_id:
+            _error(
+                errors,
+                "GP_HELD_OUT_REGION",
+                f"{p}.region_set_id",
+                "held-out validation region set is required",
+            )
+        elif model_id in models:
+            held_out_proofs.append(
+                _check_holdout_exclusion(
+                    validation_id=validation_id,
+                    region_id=region_id,
+                    model=models[str(model_id)],
+                    region_sets=regions,
+                    datasets=datasets,
+                    errors=errors,
+                )
+            )
+
+    for model_id in models:
+        if not held_out_by_model.get(model_id):
+            _error(
+                errors,
+                "GP_HELD_OUT_VALIDATION",
+                f"models[{model_id}]",
+                "every trained model requires public held-out validation evidence",
+            )
+
     for surface_id, surface in surfaces.items():
         p = f"surfaces[{surface_id}]"
         if surface.get("ct_volume_id") != "ct:eligible":
@@ -784,6 +1047,59 @@ def validate_manifest(
                 )
         _check_sha(mesh, p, errors)
         _verify_local_file(mesh, p, root_dir, errors)
+
+    recto_coverage = manifest.get("recto_coverage")
+    recto_coverage_proof: dict[str, Any] | None = None
+    if not isinstance(recto_coverage, dict):
+        _error(
+            errors,
+            "GP_RECTO_COVERAGE",
+            "recto_coverage",
+            "Grand Prize recto coverage manifest is required",
+        )
+    else:
+        expected_root = ct.get("uri") if isinstance(ct, dict) else None
+        recto_coverage_proof = audit_recto_coverage(
+            recto_coverage,
+            expected_volume_root=expected_root if isinstance(expected_root, str) else None,
+        )
+        if recto_coverage_proof.get("status") != "pass":
+            for message in _as_list(recto_coverage_proof.get("errors")):
+                _error(
+                    errors,
+                    "GP_RECTO_COVERAGE",
+                    "recto_coverage",
+                    str(message),
+                )
+
+        generated_by = recto_coverage.get("generated_by")
+        if (
+            not isinstance(generated_by, dict)
+            or generated_by.get("code_commit") != code.get("commit")
+        ):
+            _error(
+                errors,
+                "GP_RECTO_COMMIT",
+                "recto_coverage.generated_by.code_commit",
+                "recto coverage must pin the same code commit as the submission",
+            )
+
+        coverage_mesh_ids = set(
+            str(v) for v in _as_list(recto_coverage_proof.get("mesh_ids"))
+        )
+        package_mesh_ids = set(meshes)
+        if coverage_mesh_ids != package_mesh_ids:
+            missing = sorted(package_mesh_ids - coverage_mesh_ids)
+            extra = sorted(coverage_mesh_ids - package_mesh_ids)
+            _error(
+                errors,
+                "GP_RECTO_MESH_SET",
+                "recto_coverage.components",
+                (
+                    "recto coverage mesh IDs must exactly match submitted meshes; "
+                    f"missing={missing}, extra={extra}"
+                ),
+            )
 
     render_columns: dict[int, str] = {}
     for render_id, render in renders.items():
@@ -1014,6 +1330,8 @@ def validate_manifest(
         "errors": errors,
         "warnings": warnings,
         "render_chains": chains,
+        "held_out_validation_proofs": held_out_proofs,
+        "recto_coverage_proof": recto_coverage_proof,
     }
 
 

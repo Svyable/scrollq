@@ -6,7 +6,7 @@ from scrollq.provenance import validate_manifest
 
 def _manifest():
     return {
-        "schema_version": 1,
+        "schema_version": 3,
         "rules": {
             "url": "https://scrollprize.org/prizes",
             "as_of": "2026-09-30",
@@ -57,6 +57,18 @@ def _manifest():
                     {
                         "start": [100, 100, 100],
                         "stop": [110, 110, 110],
+                    }
+                ],
+            },
+            {
+                "id": "regions:held-out",
+                "role": "validation",
+                "volume_id": "public-validation-volume",
+                "coordinate_space": "level0-voxel-index",
+                "boxes": [
+                    {
+                        "start": [200, 200, 200],
+                        "stop": [210, 210, 210],
                     }
                 ],
             },
@@ -138,6 +150,64 @@ def _manifest():
                 },
             }
         ],
+        "held_out_validations": [
+            {
+                "id": "validation:ink-v1",
+                "model_id": "model:ink-v1",
+                "protocol": "held-out",
+                "region_set_id": "regions:held-out",
+                "public_input_url": (
+                    "https://example.org/validation/input-volume"
+                ),
+                "ground_truth_url": (
+                    "https://example.org/validation/ground-truth"
+                ),
+                "public_url": (
+                    "https://example.org/validation/results/ink-v1"
+                ),
+                "path": "held_out_validation.json",
+                "sha256": "2" * 64,
+                "metrics": {
+                    "precision": 0.91,
+                    "recall": 0.87,
+                },
+                "experiment_run": {
+                    "url": (
+                        "https://wandb.ai/example/project/runs/held-out"
+                    ),
+                    "public": True,
+                },
+                "code_commit": "a" * 40,
+            }
+        ],
+        "recto_coverage": {
+            "schema_version": 1,
+            "volume_root": (
+                "s3://vesuvius/PHerc0813/volumes/"
+                "20250821151723.zarr"
+            ),
+            "generated_by": {
+                "command": "python -m pipeline.measure_recto",
+                "code_commit": "a" * 40,
+            },
+            "reference": {
+                "surface_area": 100.0,
+                "area_unit": "mm^2",
+                "method": "Frozen reference recto inventory",
+                "artifact_url": "https://example.org/recto/reference.json",
+                "sha256": "3" * 64,
+            },
+            "components": [
+                {
+                    "id": "main-sheet",
+                    "kind": "main-sheet",
+                    "area": 100.0,
+                    "unrolled": True,
+                    "excluded": False,
+                    "mesh_ids": ["mesh:column-01"],
+                }
+            ],
+        },
         "banner": {
             "path": "banner.tif",
             "sha256": "1" * 64,
@@ -164,6 +234,9 @@ def test_valid_manifest_builds_a_complete_render_chain():
     assert chain["training_seed"] == 1234
     assert chain["inference_seed"] == 5678
     assert chain["region_exclusion"]["overlaps"] == []
+    assert report["held_out_validation_proofs"][0]["overlaps"] == []
+    assert report["recto_coverage_proof"]["status"] == "pass"
+    assert report["recto_coverage_proof"]["mesh_ids"] == ["mesh:column-01"]
 
 
 def test_wrong_same_scroll_volume_fails_closed():
@@ -264,6 +337,7 @@ def test_package_file_hashes_are_verified(tmp_path):
         "column_01.tifxyz": b"mesh",
         "column_01.tif": b"render",
         "banner.tif": b"banner",
+        "held_out_validation.json": b"held-out",
     }
     for name, payload in payloads.items():
         (tmp_path / name).write_bytes(payload)
@@ -276,6 +350,9 @@ def test_package_file_hashes_are_verified(tmp_path):
     ).hexdigest()
     manifest["banner"]["sha256"] = hashlib.sha256(
         payloads["banner.tif"]
+    ).hexdigest()
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        payloads["held_out_validation.json"]
     ).hexdigest()
 
     report = validate_manifest(manifest, root_dir=tmp_path)
@@ -295,3 +372,108 @@ def test_pseudo_label_producer_checkpoint_must_use_cc_by_nc():
     report = validate_manifest(manifest)
 
     assert "GP_CHECKPOINT_LICENSE" in _codes(report)
+
+
+
+def test_each_model_requires_held_out_validation():
+    manifest = _manifest()
+    manifest["held_out_validations"] = []
+
+    report = validate_manifest(manifest)
+
+    assert "GP_HELD_OUT_VALIDATION" in _codes(report)
+
+
+def test_training_holdout_overlap_is_detected():
+    manifest = _manifest()
+    train = manifest["region_sets"][0]
+    train["volume_id"] = "public-validation-volume"
+    train["boxes"] = [
+        {
+            "start": [205, 205, 205],
+            "stop": [220, 220, 220],
+        }
+    ]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_TRAIN_HOLDOUT_OVERLAP" in _codes(report)
+    proof = report["held_out_validation_proofs"][0]
+    assert proof["checked_pairs"] == 1
+    assert len(proof["overlaps"]) == 1
+
+
+def test_held_out_validation_requires_public_ground_truth_metrics_and_run():
+    manifest = _manifest()
+    validation = manifest["held_out_validations"][0]
+    validation["ground_truth_url"] = "private://ground-truth"
+    validation["metrics"] = {}
+    validation["experiment_run"]["public"] = False
+
+    report = validate_manifest(manifest)
+
+    assert {
+        "GP_HELD_OUT_GROUND_TRUTH_PUBLIC",
+        "GP_HELD_OUT_METRICS",
+        "GP_HELD_OUT_RUN",
+    } <= _codes(report)
+
+
+def test_k_fold_validation_requires_fold_count():
+    manifest = _manifest()
+    validation = manifest["held_out_validations"][0]
+    validation["protocol"] = "k-fold"
+
+    report = validate_manifest(manifest)
+
+    assert "GP_HELD_OUT_PROTOCOL" in _codes(report)
+
+
+
+def test_recto_coverage_is_required():
+    manifest = _manifest()
+    del manifest["recto_coverage"]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_RECTO_COVERAGE" in _codes(report)
+
+
+def test_recto_coverage_must_bind_exact_package_mesh_set():
+    manifest = _manifest()
+    manifest["recto_coverage"]["components"][0]["mesh_ids"] = [
+        "mesh:not-in-package"
+    ]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_RECTO_MESH_SET" in _codes(report)
+
+
+def test_recto_coverage_must_pin_submission_commit():
+    manifest = _manifest()
+    manifest["recto_coverage"]["generated_by"]["code_commit"] = "b" * 40
+
+    report = validate_manifest(manifest)
+
+    assert "GP_RECTO_COMMIT" in _codes(report)
+
+
+def test_recto_coverage_failure_propagates_into_provenance_gate():
+    manifest = _manifest()
+    manifest["recto_coverage"]["components"] = [
+        {
+            "id": "outer-only",
+            "kind": "disconnected-outer-patch",
+            "area": 100.0,
+            "unrolled": False,
+            "excluded": True,
+            "mesh_ids": [],
+            "exclusion_reason": "invalid full exclusion",
+        }
+    ]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_RECTO_COVERAGE" in _codes(report)
+    assert "GP_RECTO_MESH_SET" in _codes(report)

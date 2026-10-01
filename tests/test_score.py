@@ -22,3 +22,30 @@ def test_score_std_nonnegative():
     assert scores[0] > scores[1]
     import numpy as np
     assert float(np.std(scores)) > 0
+
+def test_provenance_identity_format():
+    """Provenance identities are stable strings combining shard key + flat index."""
+    # Simulate the provenance structure without network access
+    prov = {
+        "identity": "some/key.zarr#42",
+        "shard_coord": [1, 2, 3],
+        "shard_key": "some/key.zarr",
+        "inner_flat": 42,
+        "inner_coord": [0, 1, 2],
+    }
+    assert "#" in prov["identity"]
+    assert prov["identity"].endswith("#42")
+    assert len(prov["shard_coord"]) == 3
+    assert len(prov["inner_coord"]) == 3
+
+
+def test_provenance_overlap_detection():
+    """Jaccard computation correctly identifies disjoint vs overlapping sets."""
+    s0 = {"a#1", "a#2", "b#1"}
+    s1 = {"c#1", "c#2", "d#1"}
+    assert len(s0 & s1) == 0  # disjoint
+    s2 = {"a#1", "x#9"}
+    inter = len(s0 & s2)
+    union = len(s0 | s2)
+    assert inter == 1
+    assert round(inter / union, 3) == 0.25

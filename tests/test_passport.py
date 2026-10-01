@@ -207,3 +207,123 @@ def test_failed_bound_winding_audit_blocks_winding_stage():
         and action["priority"] == "high"
         for action in passport["next_actions"]
     )
+
+
+
+def _mesh_audit(volume_root, *, status="pass", selfcross=False):
+    result = {
+        "diagnostic": "tifxyz-mesh-audit",
+        "volume_root": volume_root,
+        "status": status,
+        "tifxyz_path": "/tmp/surface",
+        "grid": {
+            "valid_vertices": 25,
+            "enclosed_invalid_components": 0,
+            "valid_vertex_components": {"components": 1},
+        },
+        "bbox": {"contains_observed_vertices": True},
+        "spacing": {"columns": {"within_tolerance": True}, "rows": {"within_tolerance": True}},
+        "quads": {"valid_quads": 16, "normal_reversal_pairs": 0},
+        "findings": [],
+        "error_count": 0 if status != "fail" else 1,
+        "warning_count": 0,
+    }
+    if selfcross:
+        result["self_intersection"] = {
+            "status": "pass",
+            "tool": "vc_tifxyz_selfcross",
+            "clean_of_transverse_self_intersection": True,
+            "transverse_contacts": 0,
+        }
+    return result
+
+
+def _ink_audit(volume_root, *, status="pass", controls_complete=True):
+    return {
+        "diagnostic": "ink-evidence-audit",
+        "volume_root": volume_root,
+        "status": status,
+        "model": {"checkpoint": "fold-0.ckpt", "checkpoint_sha256": "a" * 64},
+        "leakage": {"status": "pass" if status != "fail" else "fail", "spatial_overlap_count": 0},
+        "controls": {"complete": controls_complete},
+        "runs": {"declared": 1, "missing_evaluation_region_ids": []},
+        "error_count": 0 if status != "fail" else 1,
+        "warning_count": 0,
+    }
+
+
+def test_passport_accepts_bound_mesh_and_ink_audits_without_overclaiming():
+    volume = _volume()
+    passport = build_passport(
+        volume,
+        mesh_audit=_mesh_audit(volume["root"]),
+        ink_audit=_ink_audit(volume["root"]),
+    )
+
+    mesh = passport["stages"]["mesh"]
+    ink = passport["stages"]["ink"]
+    assert mesh["status"] == "partial"
+    assert mesh["audit_status"] == "pass"
+    assert "does not establish CT support" in mesh["limitation"]
+    assert ink["status"] == "partial"
+    assert ink["audit_status"] == "pass"
+    assert "does not establish that a prediction is ink" in ink["limitation"]
+
+
+def test_passport_carries_clean_vc3d_selfcross_without_reasking_for_it():
+    volume = _volume()
+    passport = build_passport(
+        volume,
+        mesh_audit=_mesh_audit(volume["root"], selfcross=True),
+    )
+
+    mesh = passport["stages"]["mesh"]
+    assert mesh["self_intersection"]["status"] == "pass"
+    assert "validated VC3D transverse self-intersection census" in mesh["limitation"]
+    mesh_actions = [
+        item["action"]
+        for item in passport["next_actions"]
+        if item["open_problem"] == "mesh-connectivity"
+    ]
+    assert mesh_actions
+    assert all("selfcross" not in action.lower() for action in mesh_actions)
+
+
+def test_passport_rejects_cross_volume_mesh_and_ink_evidence():
+    volume = _volume()
+    passport = build_passport(
+        volume,
+        mesh_audit=_mesh_audit("different-volume"),
+        ink_audit=_ink_audit("different-volume"),
+    )
+
+    assert passport["stages"]["mesh"]["status"] == "excluded"
+    assert passport["stages"]["ink"]["status"] == "excluded"
+    assert "different volume root" in passport["stages"]["mesh"]["reason"]
+    assert "different volume root" in passport["stages"]["ink"]["reason"]
+
+
+def test_failed_mesh_and_ink_audits_block_their_stages():
+    volume = _volume()
+    passport = build_passport(
+        volume,
+        mesh_audit=_mesh_audit(volume["root"], status="fail"),
+        ink_audit=_ink_audit(volume["root"], status="fail"),
+    )
+
+    assert passport["stages"]["mesh"]["status"] == "blocked"
+    assert passport["stages"]["ink"]["status"] == "blocked"
+    assert any(
+        action["open_problem"] == "mesh-connectivity" and action["priority"] == "high"
+        for action in passport["next_actions"]
+    )
+    assert any(
+        action["open_problem"] == "ink-reliability" and action["priority"] == "high"
+        for action in passport["next_actions"]
+    )
+
+
+def test_alignment_manifest_marks_mesh_and_ink_partial():
+    state = {item["id"]: item["scroliq"] for item in alignment_manifest()["open_problems"]}
+    assert state["mesh-connectivity"] == "partial"
+    assert state["ink-reliability"] == "partial"

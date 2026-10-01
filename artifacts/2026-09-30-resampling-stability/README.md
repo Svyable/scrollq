@@ -84,3 +84,28 @@ significant runtime cost.
 # n=4 (the retired campaign's noise measurement; ~4 min)
 .venv/bin/python bin/stability.py artifacts/2026-09-30-resampling-stability/stability.json
 ```
+
+## Provenance: "disjoint" resamples are not disjoint (2026-09-30)
+
+`stability-n24-dense-prov.json` adds per-chunk provenance (`sample_provenance`
+with stable `shard_key#inner_flat` identities) and per-volume decoded-identity
+overlap between the two runs. Results:
+
+- **2/64** volumes had zero chunk overlap (truly disjoint samples).
+- Mean Jaccard = 0.63 — on average, 63% of chunks were re-read.
+- 5 volumes had Jaccard = 1.0 (identical chunk sets despite rotated candidate order).
+
+The sampling loop scans all candidates until N chunks decode; on sparse
+volumes both rotations re-read the same present shards. **Disjoint candidate
+order does not imply disjoint chunks read.** The published ρ = 0.79 is
+therefore inflated by re-reading — true disjoint-sample stability is lower,
+and we do not claim otherwise. This is why `score_volume()` records provenance
+and `bin/stability.py` reports identity overlap: so no future claim of
+disjointness rests on candidate order alone.
+
+## Reproduce
+
+```bash
+# n=24 provenance stability check (~12 min)
+.venv/bin/python bin/stability.py artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json 24 13 5
+```

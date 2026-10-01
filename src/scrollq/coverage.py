@@ -1,4 +1,4 @@
-"""Join ScrollQ scores with S3 label/segment coverage per scroll.
+"""Join ScrolIQ scores with S3 label/segment coverage per scroll.
 
 Reads the S3 bucket's discovered Zarr roots and counts, per scroll,
 ink-detection roots and surface-volume (segment) roots. Output is a
