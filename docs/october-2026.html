@@ -113,11 +113,12 @@ as it is done rather than held for month end.</p>
 <div class="panel"><h2>Goals</h2>
 <div class="goals">
 <div class="goal" id="o1"><h3><span class="id">O1</span>Measure how often Mesh IQ flags are real defects</h3>
-<div class="chips"><span class="chip crit">real data</span><span class="chip crit">failure cases of existing methods</span><span class="chip state">planned</span></div>
+<div class="chips"><span class="chip crit">real data</span><span class="chip crit">failure cases of existing methods</span><span class="chip state">pre-registered · sample drawn</span></div>
 <p><b>Why.</b> A flag list is only actionable if reviewers can trust it. September found failure candidates on real segments; October must say how many of them are true.</p>
 <p><b>Starting point.</b> 77 of 307 segments flagged with three or more defect kinds; one broken PHerc1447 segment confirmed (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-corpus-mesh-audit">corpus-mesh-audit</a>).</p>
 <p><b>Deliverable.</b> A stratified sample of the flagged segments, reviewed in VC3D and labelled <i>defect / not a defect / unclear</i> by someone who did not see the finding kind, plus a same-size sample of unflagged segments as the negative control. Publish precision and the false-negative rate with intervals.</p>
-<p><b>Done when.</b> Per-segment verdicts, the review protocol and the precision and false-negative rate with 95% intervals are committed, and the flag list on Pages shows measured precision for each finding kind.</p></div>
+<p><b>Done when.</b> Per-segment verdicts, the review protocol and the precision and false-negative rate with 95% intervals are committed, and the flag list on Pages shows measured precision for each finding kind.</p>
+<p><b>Progress.</b> Protocol frozen in <a href="mesh-review-protocol.md"><code>mesh-review-protocol.md</code></a>. Blinded sample of 54 segments (30 flagged, 4 debug controls, 20 clean) drawn in <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-mesh-review-sample"><code>2026-10-01-mesh-review-sample/</code></a>. Awaiting VC3D review; no precision exists yet.</p></div>
 <div class="goal" id="o2"><h3><span class="id">O2</span>Winding IQ: patch attachment and cross-collection consistency</h3>
 <div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: winding annotations</span><span class="chip state">planned</span></div>
 <p><b>Why.</b> Within-collection ray order is clean on PHercParis4. The next errors to catch are chains of relative-winding links that disagree when they meet through shared patches. That is what the spiral fitter's own debugging tool does after a fit; ScrolIQ should do it before one.</p>
@@ -137,11 +138,12 @@ as it is done rather than held for month end.</p>
 <p><b>Deliverable.</b> A hash-pinned audit of every public PHercParis4 fiber, then a CT-conditioned orientation and support check with a positive control: a fiber deliberately shifted off the sheet must be flagged.</p>
 <p><b>Done when.</b> The full-corpus artifact is committed, and the CT check catches its positive control without flagging the unshifted fibers it was calibrated on.</p></div>
 <div class="goal" id="o5"><h3><span class="id">O5</span>Scan-health score: pass the stability gate, or retire the ranking</h3>
-<div class="chips"><span class="chip crit">insightful, actionable</span><span class="chip crit">honest negative results</span><span class="chip state">planned</span></div>
+<div class="chips"><span class="chip crit">insightful, actionable</span><span class="chip crit">honest negative results</span><span class="chip state">pre-registered</span></div>
 <p><b>Why.</b> The published ranking failed our own stability gate. A ranking that reorders on resampling should not be read as an order.</p>
 <p><b>Starting point.</b> Truly-disjoint resample: Spearman ρ = 0.63, mean |Δ| = 7.95, top-10 overlap 4 / 10, against a gate of ρ ≥ 0.85 (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-truly-disjoint">truly-disjoint</a>).</p>
 <p><b>Deliverable.</b> Pre-register a sampling design (more chunks, stratified by depth and radius) and its decision rule before any new data is read. Run it truly disjoint. If the gate passes, publish it; if not, replace the rank column on the leaderboard with uncertainty bands.</p>
-<p><b>Done when.</b> The decision rule is applied as written and the leaderboard reflects the result either way.</p></div>
+<p><b>Done when.</b> The decision rule is applied as written and the leaderboard reflects the result either way.</p>
+<p><b>Progress.</b> Protocol frozen in <a href="stability-v2-protocol.md"><code>stability-v2-protocol.md</code></a>. Published data shows the 0.63 is mostly a sampling-design problem: per-volume run differences are 1.7× wider than chance (SD 10.1 vs 5.82), run 2 sits 5.5 points higher, and the default order's first 12 candidates share one x plane (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-stability-v2-prereg"><code>2026-10-01-stability-v2-prereg/</code></a>). Version 2 uses a balanced, interleaved order. The run starts once this pre-registration is on <code>main</code>.</p></div>
 <div class="goal" id="o6"><h3><span class="id">O6</span>Get the review queues into reviewers' hands</h3>
 <div class="chips"><span class="chip crit">gets used</span><span class="chip crit">released early</span><span class="chip crit">standard formats</span><span class="chip state">planned</span><span class="chip gate">needs maintainer approval</span></div>
 <p><b>Why.</b> The prize favours tools that get used. Every ScrolIQ queue (mesh flags, ray-order candidates, fiber gaps) already carries VC3D coordinates but lives in JSON.</p>

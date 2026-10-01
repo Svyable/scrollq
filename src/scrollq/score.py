@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from collections.abc import Collection
 
+import hashlib
+
 import numpy as np
 
 from zpa.httpstore import open_store
@@ -25,6 +27,90 @@ def _spread(n: int, k: int) -> list[int]:
     if n <= k:
         return list(range(n))
     return sorted({round(i * (n - 1) / (k - 1)) for i in range(k)})
+
+
+CANDIDATE_ORDERS = ("grid", "balanced")
+
+
+def _radical_inverse(n: int, base: int) -> float:
+    inv, f = 0.0, 1.0 / base
+    while n:
+        inv += f * (n % base)
+        n //= base
+        f /= base
+    return inv
+
+
+def _balanced_lattice(dims: tuple[int, int, int]) -> list[tuple[int, int, int]]:
+    """Every lattice point, ordered so that each prefix fills the volume.
+
+    Halton points (bases 2, 3, 5) are mapped, in sequence, to the nearest
+    lattice point not yet used (ties broken by lattice order). The first
+    points land in the interior and spread through x, y and z; the boundary
+    planes, which are mostly masked background in a scroll scan, come late.
+    Deterministic, no randomness.
+    """
+    remaining = [(i, j, k) for i in range(dims[0]) for j in range(dims[1]) for k in range(dims[2])]
+    order = []
+    n = 1
+    while remaining:
+        target = [_radical_inverse(n, b) * (d - 1) for b, d in zip((2, 3, 5), dims)]
+        best = min(range(len(remaining)), key=lambda t: (
+            sum((remaining[t][a] - target[a]) ** 2 for a in range(3)), remaining[t]))
+        order.append(remaining.pop(best))
+        n += 1
+    return order
+
+
+def _candidates(shard_grid, spread: int, rotate: int = 0,
+                order: str = "grid",
+                part: tuple[int, int] | None = None) -> list[tuple[int, int, int]]:
+    """Shard candidates in the order sampling consumes them.
+
+    ``grid`` (default, used by every published campaign) is x-major, so the
+    first spread**2 candidates share one x plane and a small sample can be
+    drawn from a single slab. ``balanced`` orders the same lattice so
+    every prefix fills the volume (see ``_balanced_lattice``). ``part=(k, i)`` keeps every k-th
+    candidate starting at i, after ordering and rotation: parts with the
+    same k are shard-disjoint, so their chunks are disjoint by construction.
+    """
+    if order not in CANDIDATE_ORDERS:
+        raise ValueError(f"order must be one of {CANDIDATE_ORDERS}")
+    axes = [_spread(g, spread) for g in shard_grid]
+    dims = (len(axes[0]), len(axes[1]), len(axes[2]))
+    if order == "balanced":
+        lattice = _balanced_lattice(dims)
+    else:
+        lattice = [(i, j, k) for i in range(dims[0]) for j in range(dims[1]) for k in range(dims[2])]
+    cands = [(axes[0][i], axes[1][j], axes[2][k]) for i, j, k in lattice]
+    if rotate:
+        rotate %= max(1, len(cands))
+        cands = cands[rotate:] + cands[:rotate]
+    if part is not None:
+        k, i = part
+        if k < 1 or not 0 <= i < k:
+            raise ValueError("part must be (k, i) with k >= 1 and 0 <= i < k")
+        cands = _split(cands, k)[i]
+    return cands
+
+
+def _split(cands: list[tuple[int, int, int]], k: int) -> list[list[tuple[int, int, int]]]:
+    """Split an ordered candidate list into k shard-disjoint, interleaved parts.
+
+    Taking every k-th element is not neutral for a Halton-ordered list:
+    consecutive Halton points alternate between halves of x, so position
+    parity would put each part in one half of the volume. Instead each
+    consecutive block of k candidates is dealt one per part, with the
+    assignment permuted by a fixed hash of the block's coordinates.
+    """
+    parts: list[list[tuple[int, int, int]]] = [[] for _ in range(k)]
+    for start in range(0, len(cands), k):
+        block = cands[start:start + k]
+        digest = hashlib.sha256(repr(block).encode()).digest()
+        shift = int.from_bytes(digest[:4], "big") % k
+        for offset, cand in enumerate(block):
+            parts[(offset + shift) % k].append(cand)
+    return parts
 
 
 def _read_shard_index(
@@ -77,7 +163,9 @@ def score_from_metrics(m: dict) -> float:
 
 def score_volume(base_url: str, root: str, samples: int = 4,
                  rotate: int = 0, spread: int = 3,
-                 exclude: Collection[str] | None = None) -> dict:
+                 exclude: Collection[str] | None = None,
+                 order: str = "grid",
+                 part: tuple[int, int] | None = None) -> dict:
     """Score one volcomp scroll volume. Returns a result dict.
 
     ``rotate`` cyclically shifts the shard-candidate order, giving a
@@ -91,6 +179,9 @@ def score_volume(base_url: str, root: str, samples: int = 4,
     previous run's identities forces a chunk-disjoint resample; the run
     may then decode fewer than ``samples`` chunks, which ``sampling``
     reports. ``None`` (the default) leaves sampling unchanged.
+
+    ``order`` and ``part`` select the candidate order (see ``_candidates``).
+    The defaults reproduce every published campaign exactly.
     """
     result: dict = {"root": root, "ok": False}
     if samples < 1:
@@ -128,13 +219,14 @@ def score_volume(base_url: str, root: str, samples: int = 4,
     # Spread shard candidates per-dimension (flat-index spread degenerates
     # to an edge line on non-cubic grids). Skip shards that are nearly
     # all mask so the score reflects the scroll body, not the background.
-    cands = [(x, y, z)
-             for x in _spread(shard_grid[0], spread)
-             for y in _spread(shard_grid[1], spread)
-             for z in _spread(shard_grid[2], spread)]
+    try:
+        cands = _candidates(shard_grid, spread, rotate, order, part)
+    except ValueError as exc:
+        result["error"] = str(exc)
+        return result
     if rotate:
-        rotate %= max(1, len(cands))
-        cands = cands[rotate:] + cands[:rotate]
+        # Record rotate normalised over the full lattice, as before.
+        rotate %= max(1, len(_candidates(shard_grid, spread)))
     for sc in cands:
         if len(chunk_results) >= samples:
             break
@@ -243,6 +335,10 @@ def score_volume(base_url: str, root: str, samples: int = 4,
     }
     if exclude is not None:
         sampling["excluded_chunks"] = excluded_chunks
+    if order != "grid":
+        sampling["order"] = order
+    if part is not None:
+        sampling["part"] = list(part)
     result["sampling"] = sampling
     # Provenance: stable identity per decoded chunk. Enables verifying
     # that two runs actually sampled disjoint chunks (not just disjoint

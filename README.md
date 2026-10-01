@@ -327,6 +327,8 @@ Missing shards and transport/read failures are tracked separately, and partial s
 
 The `spread` parameter controls the per-dimension shard-candidate count (`spread³` candidates; default 3 → 27). A denser spread (e.g., 5 → 125) finds more present shards on sparse volumes — PHerc0813 goes from 2 to 12 decoded chunks — but costs more candidate probes. Denser is not automatically better: our diagnostic showed that when different shards are actually read, heterogeneous volumes produce noisier scores, so choose the spread that matches how much of the volume you need to cover.
 
+**Candidate order matters as much as spread.** Sampling takes shard candidates in order until it has enough chunks, and the default order (used by every published campaign, and kept so those scores reproduce) is x-major: the first `spread²` candidates share one x plane. A 24-chunk sample can therefore describe one or two slabs of a scroll. `score_volume(..., order="balanced")` orders the same lattice so every prefix spreads through the volume, and `part=(2, 0)` / `part=(2, 1)` split it into two interleaved, shard-disjoint halves whose chunks are disjoint by construction. Both options are recorded in `sampling` when used. The pre-registered October stability test ([`docs/stability-v2-protocol.md`](docs/stability-v2-protocol.md)) uses them; its motivating numbers, computed from published data only, are in [`artifacts/2026-10-01-stability-v2-prereg/`](artifacts/2026-10-01-stability-v2-prereg/).
+
 ## The data-quality suite
 
 ScrolIQ is the prioritization half of a two-part data-quality suite:
