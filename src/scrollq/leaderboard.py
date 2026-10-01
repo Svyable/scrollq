@@ -20,7 +20,14 @@ PAGE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ScrolIQ — Diagnostics for reading Herculaneum scrolls</title>
-<meta name="description" content="Challenge-aligned diagnostics for Vesuvius scrolls: scan health, surface/mesh readiness, label quality, ink reliability, and reproducibility.">
+<meta name="description" content="Challenge-aligned diagnostics for Vesuvius scrolls: scan health, surface/mesh readiness, label quality, ink reliability, held-out validation, and Grand Prize reproducibility.">
+<meta name="theme-color" content="#0d0b08">
+<meta name="color-scheme" content="dark">
+<link rel="canonical" href="https://svyable.github.io/scrollq/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ScrolIQ — Evidence for reading Herculaneum scrolls">
+<meta property="og:description" content="Reproducible scan diagnostics, exact-volume Grand Prize qualification, held-out geometry, and ink falsification controls.">
+<meta property="og:url" content="https://svyable.github.io/scrollq/">
 <style>
 :root{{
   --bg:#0d0b08; --panel:#161310; --panel2:#1c1813; --line:#2c251b;
@@ -29,11 +36,27 @@ PAGE = """<!doctype html>
   --good:#8fd694; --warn:#ff9e5e; --bad:#ff6b6b;
 }}
 *{{box-sizing:border-box}}
+html{{scroll-behavior:smooth}}
 body{{margin:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
   -webkit-font-smoothing:antialiased}}
 a{{color:var(--amber)}}
+a:focus-visible,button:focus-visible,input:focus-visible{{outline:2px solid var(--gold);outline-offset:3px}}
+.skip{{position:fixed;left:1rem;top:1rem;z-index:1000;transform:translateY(-180%);
+  background:var(--gold);color:#171008;padding:.55rem .8rem;border-radius:8px;font-weight:800;text-decoration:none}}
+.skip:focus{{transform:none}}
 .wrap{{max-width:1200px;margin:0 auto;padding:0 1.25rem}}
+.topbar{{position:sticky;top:0;z-index:50;background:rgba(13,11,8,.88);
+  backdrop-filter:blur(16px);border-bottom:1px solid rgba(44,37,27,.78)}}
+.navinner{{max-width:1200px;margin:0 auto;padding:.7rem 1.25rem;display:flex;align-items:center;gap:1rem}}
+.brand{{display:flex;align-items:center;gap:.6rem;color:var(--ink);text-decoration:none;font-weight:800}}
+.brandmark{{width:26px;height:26px;border-radius:7px;border:1px solid #6f3b18;display:grid;place-items:center;
+  color:var(--ember);font-family:Georgia,serif;background:#17110c;font-size:.72rem}}
+.navlinks{{display:flex;gap:.2rem;margin-left:auto;align-items:center;flex-wrap:wrap}}
+.navlinks a{{color:var(--muted);text-decoration:none;font-size:.82rem;padding:.38rem .58rem;border-radius:7px}}
+.navlinks a:hover{{color:var(--ink);background:var(--panel2)}}
+.navstatus{{font-size:.72rem;color:var(--good);border:1px solid rgba(143,214,148,.24);
+  background:rgba(143,214,148,.06);padding:.3rem .55rem;border-radius:999px;white-space:nowrap}}
 /* ---------- hero ---------- */
 .hero{{position:relative;overflow:hidden;padding:4.5rem 0 3rem;
   background:
@@ -135,20 +158,36 @@ code{{font-size:.78rem;color:var(--amber)}}
 .wtable td:last-child{{text-align:right;font-variant-numeric:tabular-nums;color:var(--gold)}}
 .scope{{border-left:3px solid var(--ember);padding:.6rem 1rem;background:#171208;
   border-radius:0 8px 8px 0;color:var(--muted);line-height:1.65;font-size:.93rem}}
+.actiongrid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}}
+.actiongrid h3{{margin:.1rem 0 .5rem;font-size:.95rem;color:var(--ink)}}
+.actiongrid p{{color:var(--muted);line-height:1.6;font-size:.9rem}}
+.evidence-link{{font-size:.84rem}}
 /* ---------- suite strip / footer ---------- */
 .suite{{display:flex;gap:1rem;flex-wrap:wrap;align-items:stretch}}
 .suite .card{{flex:1;min-width:260px}}
 footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
   color:var(--dim);font-size:.82rem;line-height:1.7}}
 .hidden{{display:none!important}}
-@media(max-width:700px){{.compbar{{min-width:70px}}thead th:nth-child(5),tbody td:nth-child(5){{display:none}}}}
+@media(max-width:700px){{.compbar{{min-width:70px}}thead th:nth-child(5),tbody td:nth-child(5){{display:none}}
+  .navstatus{{display:none}}.navlinks a{{padding:.34rem .42rem}}}}
 </style></head><body>
+
+<a class="skip" href="#main">Skip to evidence</a>
+<nav class="topbar" aria-label="Primary"><div class="navinner">
+  <a class="brand" href="./"><span class="brandmark">IQ</span><span>ScrolIQ</span></a>
+  <div class="navlinks">
+    <a href="#grand-prize">Grand Prize</a><a href="#evidence">Evidence</a>
+    <a href="#leaderboard">Survey</a><a href="#method">Method</a>
+    <a href="./september-2026.html">Writeup</a><a href="{repo}">GitHub</a>
+  </div>
+  <span class="navstatus">● reproducible evidence</span>
+</div></nav>
 
 <header class="hero"><div class="wrap">
   <div class="eyebrow">VESUVIUS CHALLENGE · SEPTEMBER 2026</div>
   <h1>Scrol<span class="q">IQ</span></h1>
   <p class="tagline">Diagnostics for reading Herculaneum scrolls. <em>Find the bottleneck.</em></p>
-  <p class="lede">ScrolIQ is evolving from a scan-quality survey into an observability layer for the Vesuvius Challenge pipeline. The current score still measures sampled CT health from real level-0 voxels; surface, mesh, fiber, spiral, label-localization, and ink state remain explicitly unknown until direct evidence exists. See the <a href="https://scrollprize.org/2026_open_problems">official open problems</a> and the <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">alignment roadmap</a>.</p>
+  <p class="lede">ScrolIQ is evolving from a scan-quality survey into an observability layer for the Vesuvius Challenge pipeline. The current score still measures sampled CT health from real level-0 voxels; surface, mesh, fiber, spiral, label-localization, and ink state remain explicitly unknown until direct evidence exists. See the <a href="https://scrollprize.org/2026_open_problems">official open problems</a>, the <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">alignment roadmap</a>, and the <a href="#grand-prize">2027 Grand Prize campaign →</a></p>
   <div class="stats">
     <div class="stat"><div class="n">{n}</div><div class="l">scroll volumes scored</div></div>
     <div class="stat"><div class="n">{lo}&ndash;{hi}</div><div class="l">score range (0&ndash;100)</div></div>
@@ -157,24 +196,40 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
   </div>
 </div></header>
 
-<div class="wrap">
+<main id="main" class="wrap">
 
 
-<div class="panel alignment"><h2>Open-problem diagnostics<span class="sub">ScrolIQ maps evidence to the Vesuvius Challenge pipeline instead of treating one score as readiness.</span></h2>
+<div class="panel alignment" id="pipeline"><h2>Open-problem diagnostics<span class="sub">ScrolIQ maps evidence to the Vesuvius Challenge pipeline instead of treating one score as readiness.</span></h2>
 <div class="problem-grid">
   <div class="problem"><div><h3>Scan + data</h3><span class="state live">LIVE</span></div><p>Real-voxel health, decode provenance, and coordinate-preserving spatial scan maps. Next: validated layer-separability and decohesion diagnostics.</p></div>
   <div class="problem"><div><h3>Surface topology</h3><span class="state next">NEXT</span></div><p>CT support, competing sheets, topology risk, and surface-placement uncertainty.</p></div>
   <div class="problem"><div><h3>Mesh connectivity</h3><span class="state next">NEXT</span></div><p>Holes, mergers, sheet switches, self-intersections, and flattening distortion.</p></div>
   <div class="problem"><div><h3>Fiber connectivity</h3><span class="state plan">PLANNED</span></div><p>Continuity and orientation confidence for long-range papyrus fiber traces.</p></div>
   <div class="problem"><div><h3>Spiral fitting</h3><span class="state plan">PLANNED</span></div><p>Held-out constraint residuals, sensitivity, and under-constrained regions.</p></div>
-  <div class="problem"><div><h3>Label quality</h3><span class="state live">LIVE</span></div><p>Label–volume coverage join: all 70 published ink-detection labels sit on PHercParis4 while 16 top-quartile zero-label volumes are flagged 🎯 label next. Next: physical label offset, snapping candidates, review queues.</p></div>
+  <div class="problem"><div><h3>Label quality</h3><span class="state live">LIVE</span></div><p>Label–volume coverage join: all 70 published ink-detection labels sit on PHercParis4 while {label_next_n} top-quartile zero-label volumes are flagged 🎯 label next. Next: physical label offset, snapping candidates, review queues.</p></div>
   <div class="problem"><div><h3>Ink reliability</h3><span class="state plan">PLANNED</span></div><p>Leakage checks, held-out validation, perturbation stability, cross-scroll evidence.</p></div>
   <div class="problem"><div><h3>Grand Prize</h3><span class="state plan">TARGET</span></div><p>One evidence trail from full recto coverage to tifxyz, renders, validation, and VC3D.</p></div>
 </div>
 <p class="alignment-links"><a href="https://scrollprize.org/2026_open_problems">Official 2026 Open Problems</a> · <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">ScrolIQ alignment roadmap</a></p>
 </div>
 
-<div class="insights">
+<div class="panel" id="grand-prize"><h2>2027 Grand Prize campaign<span class="sub">Exact eligible inputs, held-out geometry, and ink falsification before whole-scroll commitment.</span></h2>
+  <div class="actiongrid">
+    <div><h3>Exact-volume eligibility</h3>
+      <p><b>13 prize targets</b> are matched by exact volume ID. Same-scroll higher-resolution scans are explicitly excluded rather than silently substituted.</p>
+      <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-grand-prize-qualifier">Frozen qualifier artifacts →</a></p></div>
+    <div><h3>Blind geometry first</h3>
+      <p>Each first-wave target gets the same deterministic <b>24-region</b> sample: 18 fit regions and <b>6 held-out</b> regions. Failed regions stay in the denominator.</p>
+      <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-probe-protocol.md">Blind probe protocol →</a></p></div>
+    <div><h3>Try to falsify the ink</h3>
+      <p>Promising signals are checked on the correct surface, <b>&plusmn;3 voxel</b> normal offsets, an adjacent winding, perturbed geometry, and an independent checkpoint/fold.</p></div>
+    <div><h3>Reproducibility ledger</h3>
+      <p>Exact inputs, hashes, fixed seeds, held-out splits, failure counts, experiment artifacts, and human-input time are part of the evidence trail — not cleanup work at submission time.</p></div>
+  </div>
+  <div class="scope"><b>No opaque winner score.</b> The frozen two-axis qualifier exposes a Pareto frontier rather than claiming readability. Its current frontier contains <b>PHerc0813</b> and <b>PHerc1447</b>; <b>PHerc0800</b> remains in the first-wave blind probe as a deliberately different geometry hypothesis.</div>
+</div>
+
+<div class="insights" id="evidence">
   <div class="card"><h3>Healthiest volume</h3>
     <p class="big">{top_id}</p>
     <p><b>{top_score}</b> / 100 · {top_spec}<br>Same scanner family
@@ -184,18 +239,18 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     <p>All <b>70</b> published ink-detection labels sit on
     <b>PHercParis4</b> — quality rank <b>13 of 39 scrolls</b> (each scroll
     ranked by its best volume). The healthiest volumes (<b>{top_id}</b> {top_score}, <b>PHerc0139</b> 75.9) have
-    <b>zero</b> ink labels. Labeling effort goes furthest at the 🎯 rows —
-    16 flagged on the published run, 10 of them stable across an independent
-    resample.</p></div>
-  <div class="card"><h3>Stable, not sacred</h3>
-    <p>An independent deterministic resample (fully disjoint shard sets)
-    re-scored all 64 volumes: rank correlation <b>&rho; = 0.76</b>,
-    mean |&Delta;| <b>7.4</b>, top-10 overlap <b>6/10</b> — below our
-    &rho; &ge; 0.85 gate. Scores carry roughly &plusmn;5 points of sampling
-    noise, so treat the ranking as a triage <i>band</i>: the #1 pick
-    (PHerc0813, 77.4 in both runs) is robust, but neighbors within ~10 points
-    are interchangeable. Full method + both runs:
-    <code>artifacts/2026-09-30-resampling-stability/</code>.</p></div>
+    <b>zero</b> ink labels. The published campaign exposes <b>{label_next_n}</b>
+    top-quartile zero-label volumes as allocation candidates — without claiming
+    that ink is present on any of them.</p></div>
+  <div class="card"><h3>Failed the gate, fixed the experiment</h3>
+    <p>The first 4-sample resample missed our own stability gate
+    (<b>&rho; = 0.76</b>). We did not lower the threshold: we tripled the
+    sampling budget and re-ran all 64 volumes. The frozen 12-sample result is
+    <b>&rho; = 0.9948</b>, mean |&Delta;| <b>0.556</b>, top-10 overlap
+    <b>10/10</b> — above the &rho; &ge; 0.85 gate. Caveat: dense-grid
+    diagnostics show that sparse volumes can re-read shards, so achieved sample
+    counts remain visible rather than being hidden behind the headline metric.
+    <a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-09-30-resampling-stability/stability-n12.json">Frozen stability JSON →</a></p></div>
 </div>
 
 <div class="panel"><h2>Scan-quality distribution<span class="sub">64 volumes · 5-point bins</span></h2>
@@ -205,7 +260,7 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
   <span class="tier C">C</span> &lt; 45</p>
 </div>
 
-<div class="panel"><h2>Scan-quality survey<span class="sub">Click a column to sort · click a row for the full breakdown</span></h2>
+<div class="panel" id="leaderboard"><h2>Scan-quality survey<span class="sub">Click a column to sort · click a row for the full breakdown</span></h2>
   <div class="controls">
     <input id="q" type="search" placeholder="Filter by scroll id, e.g. PHerc0139…" aria-label="filter">
     <button class="tierbtn on" data-t="">all</button>
@@ -223,7 +278,7 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
   </tr></thead><tbody>{rows}</tbody></table></div>
 </div>
 
-<div class="panel"><h2>Scan-health score (one diagnostic)</h2>
+<div class="panel" id="method"><h2>Scan-health score (one diagnostic)</h2>
 <div class="method">
   <div><table class="wtable">
     <tr><td>Signal presence (nonzero voxel fraction)</td><td>40</td></tr>
@@ -243,9 +298,10 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
   segmentation and labeling effort goes where the data is strongest. The
   weights are a judgment call, published with every score.</div>
   <p style="color:var(--muted);font-size:.88rem;line-height:1.65;margin-top:1rem">
-  Sampling: 4 &times; 128&sup3; chunks per volume, spread per-dimension across
-  the shard grid (flat-index spread degenerates to an edge line on non-cubic
-  grids). Decoded with the vendored libvolcomp via
+  Campaign request: up to <b>12 &times; 128&sup3;</b> chunks per volume,
+  spread across the shard grid. Sparse volumes may decode fewer; the achieved
+  count and sampling provenance stay attached to every result. Decoded with the
+  vendored libvolcomp via
   <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>.</p></div>
 </div></div>
 
@@ -263,7 +319,7 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     <p><code>scrollq-health --root &lt;volume&gt;</code></p></div>
 </div></div>
 
-</div><!-- /wrap -->
+</main>
 
 <footer><div class="wrap">
   Generated by <a href="{repo}">ScrolIQ</a> from public dl.ash2txt.org volumes,
