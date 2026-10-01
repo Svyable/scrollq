@@ -40,34 +40,60 @@ jobs:
           sha256sum input/*.json
 
       - name: Run winding audit with umbilicus ray order
-        env:
-          SOURCE_SHA: ${{ github.sha }}
         run: |
           set -euxo pipefail
           out="artifacts/2026-10-01-paris4-winding-ray-order"
           mkdir -p "$out"
           # Exit status 1 means a structural failure; keep the report either way.
           scroliq-winding --dataset input --out "$out/PHercParis4.winding-audit.json" \
-            | tee "$out/summary.txt" || true
+            > "$out/summary.txt" || true
           test -s "$out/PHercParis4.winding-audit.json"
+
+      - name: Run injection control on the same annotations
+        run: |
+          set -euxo pipefail
+          out="artifacts/2026-10-01-paris4-winding-ray-order"
+          python bin/ray_order_control.py input "$out/injection-control.json" \
+            --injections 200 --shifts 2,3,5 --seed 0 | tee "$out/injection-control.txt"
+
+      - name: Write artifact README
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euxo pipefail
+          out="artifacts/2026-10-01-paris4-winding-ray-order"
           {
             echo "# PHercParis4 winding ray-order audit"
             echo
             echo "Source commit: \`$SOURCE_SHA\`"
             echo "Inputs: https://dl.ash2txt.org/datasets/spiral_datasets/PHercParis4/"
+            echo "(SHA-256 of every input is recorded in both JSON reports.)"
+            echo
+            echo "## Reproduce"
             echo
             echo '```bash'
-            echo 'scroliq-winding --dataset <spiral-input PHercParis4 root> --out PHercParis4.winding-audit.json'
+            echo 'scroliq-winding --dataset <PHercParis4 spiral-input root> --out PHercParis4.winding-audit.json'
+            echo 'python bin/ray_order_control.py <PHercParis4 spiral-input root> injection-control.json --injections 200 --shifts 2,3,5 --seed 0'
             echo '```'
             echo
+            echo "## Audit (first lines of summary.txt)"
+            echo
             echo '```'
-            cat "$out/summary.txt"
+            sed -n '1,9p' "$out/summary.txt"
             echo '```'
             echo
-            echo "Inversions are review candidates, not errors: folding can legitimately"
-            echo "break ray order. Treat the review queue as a list of annotations to open"
-            echo "in VC3D, and record which were confirmed mis-numbered before citing any"
-            echo "precision figure."
+            echo "## Injection control"
+            echo
+            echo "One real annotated point at a time is mis-numbered by ±shift and the"
+            echo "check is rerun on otherwise unmodified data."
+            echo
+            echo '```'
+            cat "$out/injection-control.txt"
+            echo '```'
+            echo
+            echo "A ±2 error is undetectable by construction (the minimum compared"
+            echo "winding gap is 2). Inversions are review candidates, not errors:"
+            echo "folding can legitimately break ray order."
           } > "$out/README.md"
 
       - name: Commit audit artifacts
@@ -79,5 +105,9 @@ jobs:
           if git diff --cached --quiet; then
             exit 0
           fi
-          git commit -m "Add PHercParis4 winding ray-order audit artifacts"
-          git push origin HEAD:scroliq-paris4-ray-order
+          git commit -m "Add PHercParis4 winding ray-order audit and injection control artifacts"
+          # Never push artifacts straight to main; a dispatch there lands on
+          # the dedicated campaign branch instead.
+          branch="${{ github.ref_name }}"
+          if [ "$branch" = main ]; then branch=scroliq-paris4-ray-order; fi
+          git push origin "HEAD:$branch"

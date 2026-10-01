@@ -177,8 +177,15 @@ def check_ray_order(
     min_radius: float = DEFAULT_MIN_RADIUS,
     max_candidates: int = DEFAULT_MAX_CANDIDATES,
     max_review_points: int = DEFAULT_MAX_REVIEW_POINTS,
+    include_point_comparisons: bool = False,
 ) -> dict[str, Any]:
-    """Check umbilicus ray order for parsed ``absolute``/``relative`` documents."""
+    """Check umbilicus ray order for parsed ``absolute``/``relative`` documents.
+
+    ``include_point_comparisons`` adds ``point_comparisons``: for every
+    evaluated point with at least one comparable pair, its comparable-pair
+    count keyed ``frame|collection_id|point_id``. A point with no comparable
+    pair cannot be flagged at all, so this is the check's per-point reach.
+    """
     if not 0 < sector_degrees < 180:
         raise ValueError("sector_degrees must be in (0, 180)")
     if not z_tolerance >= 0:
@@ -223,6 +230,7 @@ def check_ray_order(
     candidates: list[dict[str, Any]] = []
     involvement: dict[tuple[str, str, str], int] = {}
     comparisons: dict[tuple[str, str, str], int] = {}
+    reach: dict[tuple[str, str, str], int] = {}
     frame_rows = []
     total_pairs = 0
     total_inversions = 0
@@ -264,6 +272,8 @@ def check_ray_order(
         inverted_counts = np.bincount(
             inner[inverted], minlength=len(rows)
         ) + np.bincount(outer[inverted], minlength=len(rows))
+        for idx in np.nonzero(compared_counts)[0]:
+            reach[_point_key(rows[idx])] = int(compared_counts[idx])
         for idx in np.nonzero(inverted_counts)[0]:
             key = _point_key(rows[idx])
             involvement[key] = int(inverted_counts[idx])
@@ -321,7 +331,7 @@ def check_ray_order(
     else:
         status = "consistent"
 
-    return {
+    report = {
         "diagnostic": DIAGNOSTIC,
         "status": status,
         "umbilicus": {
@@ -343,6 +353,7 @@ def check_ray_order(
             "evaluated": len(usable),
             "skipped_near_axis": near_axis,
             "extrapolated_umbilicus": extrapolated,
+            "with_comparable_pairs": len(reach),
         },
         "frames": frame_rows,
         "comparable_pairs": total_pairs,
@@ -355,6 +366,11 @@ def check_ray_order(
         "coordinate_order": "xyz (VC3D PointCollections p)",
         "limitation": LIMITATION,
     }
+    if include_point_comparisons:
+        report["point_comparisons"] = {
+            "|".join(key): count for key, count in sorted(reach.items())
+        }
+    return report
 
 
 def _point_key(row: dict[str, Any]) -> tuple[str, str, str]:
