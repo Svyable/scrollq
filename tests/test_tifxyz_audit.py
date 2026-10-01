@@ -55,6 +55,69 @@ def _write_tifxyz(
     return root
 
 
+def _write_selfcross_report(
+    tmp_path,
+    surface,
+    *,
+    transverse=0,
+    dropped=0,
+    declared_surface=None,
+    wrong_grid=False,
+):
+    contacts = [
+        {
+            "quad1": [0, 0],
+            "quad2": [3, 3],
+            "tri1": 0,
+            "tri2": 1,
+            "penetration_vx": 0.25,
+            "angle_deg": 45.0,
+            "site": [1.0, 2.0, 10.0],
+        }
+        for _ in range(transverse)
+    ]
+    report = {
+        "tool": "vc_tifxyz_selfcross",
+        "report_only": True,
+        "surface": str(surface.resolve()) if declared_surface is None else str(declared_surface),
+        "clean_of_transverse_self_intersection": transverse == 0,
+        "parameters": {
+            "exclude": 1,
+            "maxedge": 60.0,
+            "cell": 40.0,
+            "touch_tolerance": 1e-5,
+            "diagonals": [0, 1],
+        },
+        "grid_rows": 6 if wrong_grid else 5,
+        "grid_cols": 5,
+        "census": [
+            {
+                "diagonal": 0,
+                "triangles": 32,
+                "quads_dropped_for_edge_length": dropped,
+                "pairs_tested": 100,
+                "transverse": transverse,
+                "coplanar": 2,
+                "grazing": 1,
+                "transverse_contacts": contacts,
+            },
+            {
+                "diagonal": 1,
+                "triangles": 32,
+                "quads_dropped_for_edge_length": 0,
+                "pairs_tested": 100,
+                "transverse": 0,
+                "coplanar": 0,
+                "grazing": 0,
+                "transverse_contacts": [],
+            },
+        ],
+    }
+    path = tmp_path / "selfcross.json"
+    path.write_text(json.dumps(report), encoding="utf-8")
+    return path
+
+
 def test_planar_tifxyz_passes_structure_spacing_and_distortion_checks(tmp_path):
     result = audit_tifxyz(_write_tifxyz(tmp_path), volume_root="volume-A")
 
@@ -84,6 +147,63 @@ def test_area_preserving_anisotropy_is_detected_as_non_isometric(tmp_path):
     assert np.isclose(result["quads"]["isometry"]["anisotropy"]["median"], 6.25)
     assert result["status"] == "partial"
     assert any(item["kind"] == "isometry-distortion" for item in result["findings"])
+
+
+def test_clean_official_selfcross_report_closes_nonlocal_intersection_gap(tmp_path):
+    surface = _write_tifxyz(tmp_path)
+    report = _write_selfcross_report(tmp_path, surface)
+
+    result = audit_tifxyz(surface, selfcross_report=report)
+
+    assert result["status"] == "pass"
+    assert result["self_intersection"]["status"] == "pass"
+    assert result["self_intersection"]["clean_of_transverse_self_intersection"] is True
+    assert result["self_intersection"]["transverse_contacts"] == 0
+    assert result["self_intersection"]["coplanar_contacts"] == 2
+    assert len(result["self_intersection"]["report_sha256"]) == 64
+    assert "validated upstream VC3D" in result["limitation"]
+
+
+def test_official_selfcross_transverse_contact_blocks_mesh(tmp_path):
+    surface = _write_tifxyz(tmp_path)
+    report = _write_selfcross_report(tmp_path, surface, transverse=1)
+
+    result = audit_tifxyz(surface, selfcross_report=report)
+
+    assert result["status"] == "fail"
+    assert result["self_intersection"]["status"] == "fail"
+    assert result["self_intersection"]["transverse_contacts"] == 1
+    assert any(item["kind"] == "self-intersection" for item in result["findings"])
+    assert any("non-adjacent transverse" in message for message in result["errors"])
+
+
+def test_selfcross_report_must_bind_exact_surface_path_and_grid(tmp_path):
+    surface = _write_tifxyz(tmp_path)
+    report = _write_selfcross_report(
+        tmp_path,
+        surface,
+        declared_surface=tmp_path / "different-surface",
+        wrong_grid=True,
+    )
+
+    result = audit_tifxyz(surface, selfcross_report=report)
+
+    assert result["status"] == "fail"
+    assert result["self_intersection"]["surface_path_matches"] is False
+    assert any("different TIFXYZ surface path" in message for message in result["errors"])
+    assert any("grid shape" in message for message in result["errors"])
+
+
+def test_selfcross_dropped_long_edge_quads_remain_partial_evidence(tmp_path):
+    surface = _write_tifxyz(tmp_path)
+    report = _write_selfcross_report(tmp_path, surface, dropped=2)
+
+    result = audit_tifxyz(surface, selfcross_report=report)
+
+    assert result["status"] == "partial"
+    assert result["self_intersection"]["status"] == "partial"
+    assert result["self_intersection"]["quads_dropped_for_edge_length"] == 2
+    assert any("clean verdict does not cover" in message for message in result["warnings"])
 
 
 def test_enclosed_hole_and_stale_bbox_are_review_findings(tmp_path):
