@@ -48,6 +48,34 @@ list before the first N are taken.
 - The n=4 campaign's sample-sensitive findings (PHerc1447's 67.3 → 53.2
   swing) were noise, not signal — which is exactly why we re-measured.
 
+## Diagnostic: dense-grid heterogeneity check (not the published score)
+
+`stability-dense12.json`: same 12 samples but from a 5×5×5=125 candidate
+grid instead of 3×3×3=27. Result: ρ = 0.67, mean |Δ| = 7.7 — does NOT
+clear the gate. Individual volumes swung up to 44 points between runs
+(PHerc0211: 32.8 → 77.0).
+
+This revealed two things:
+
+1. **The 3×3×3 ρ=0.99 is inflated by shard re-reading.** The sampling
+   loop scans all 27 candidates until 12 chunks are decoded. On sparse
+   volumes (e.g., PHerc0813: 26/27 candidates absent), both rotations
+   end up decoding the SAME 1–2 present shards — 0813 scored 77.4 in
+   both runs because it read the same shard twice, not because the
+   volume is uniform. The "disjoint candidate order" does not guarantee
+   disjoint shards read.
+2. **Volumes are genuinely heterogeneous.** When the dense grid forces
+   different shards to be read, scores move a lot. A 12-chunk mean is
+   a noisy estimate of a heterogeneous volume's quality.
+
+The published 3×3×3 campaign stands as the stable, reproducible ranking,
+but its thin-volume scores (fewer than ~6 chunks decoded) should be read
+as "this shard looks good" rather than "this volume is uniformly good."
+Per-volume `sampling.decoded` records the real chunk count. A future
+campaign should sample enough shards to cover heterogeneous volumes —
+the dense-grid diagnostic suggests 24–48 chunks may be needed, at
+significant runtime cost.
+
 ## Reproduce
 
 ```bash

@@ -19,6 +19,8 @@ def main() -> None:
                     help="text file with one volume root per line")
     ap.add_argument("--samples", type=int, default=4,
                     help="chunks decoded per volume")
+    ap.add_argument("--spread", type=int, default=3,
+                    help="per-dimension shard-candidate count (spread^3 candidates)")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--out-dir", required=True)
     args = ap.parse_args()
@@ -29,7 +31,8 @@ def main() -> None:
 
     def work(root: str):
         print(f"scoring {root}", flush=True)
-        return score_volume(args.base, root, samples=args.samples)
+        return score_volume(args.base, root, samples=args.samples,
+                            spread=args.spread)
 
     results = []
     with ThreadPoolExecutor(max_workers=args.workers) as ex:

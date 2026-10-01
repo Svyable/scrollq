@@ -78,6 +78,16 @@ def test_cli_overrides_samples_and_rotation():
     assert mod.ROTATE_B == 13
 
 
+def test_cli_overrides_spread():
+    mod = _load(argv=("stability.py", "out.json", "12", "13", "5"))
+    assert mod.SPREAD == 5
+
+
+def test_default_spread_is_3():
+    mod = _load()
+    assert mod.SPREAD == 3
+
+
 def test_main_records_provenance(tmp_path):
     # main() must record which samples/rotations produced the numbers,
     # so a reader can tell a weak resample from a strong one.

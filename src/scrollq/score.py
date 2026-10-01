@@ -26,11 +26,14 @@ def _spread(n: int, k: int) -> list[int]:
 
 
 def score_volume(base_url: str, root: str, samples: int = 4,
-                 rotate: int = 0) -> dict:
+                 rotate: int = 0, spread: int = 3) -> dict:
     """Score one volcomp scroll volume. Returns a result dict.
 
     ``rotate`` cyclically shifts the shard-candidate order, giving a
-    different deterministic sample for stability checks.
+    different deterministic sample for stability checks. ``spread`` is the
+    per-dimension candidate count (spread^3 candidates); 3 gives 27,
+    5 gives 125. Denser spreads find more present shards on sparse
+    volumes, at the cost of more candidate probes.
     """
     result: dict = {"root": root, "ok": False}
     if samples < 1:
@@ -65,9 +68,9 @@ def score_volume(base_url: str, root: str, samples: int = 4,
     # to an edge line on non-cubic grids). Skip shards that are nearly
     # all mask so the score reflects the scroll body, not the background.
     cands = [(x, y, z)
-             for x in _spread(shard_grid[0], 3)
-             for y in _spread(shard_grid[1], 3)
-             for z in _spread(shard_grid[2], 3)]
+             for x in _spread(shard_grid[0], spread)
+             for y in _spread(shard_grid[1], spread)
+             for z in _spread(shard_grid[2], spread)]
     if rotate:
         rotate %= max(1, len(cands))
         cands = cands[rotate:] + cands[:rotate]
@@ -144,6 +147,7 @@ def score_volume(base_url: str, root: str, samples: int = 4,
         "decoded": len(chunk_results),
         "complete": len(chunk_results) == samples,
         "rotate": rotate,
+        "spread": spread,
         "shard_candidates": len(cands),
         "missing_shards": missing_shards,
         "shard_read_failures": shard_read_failures,

@@ -21,6 +21,7 @@ from scrollq.score import score_volume
 BASE = "https://dl.ash2txt.org"
 SAMPLES = int(sys.argv[2]) if len(sys.argv) > 2 else 4
 ROTATE_B = int(sys.argv[3]) if len(sys.argv) > 3 else 13
+SPREAD = int(sys.argv[4]) if len(sys.argv) > 4 else 3
 WORKERS = 8
 
 
@@ -32,7 +33,8 @@ def load_volumes(path="volumes.txt"):
 def run(roots, rotate):
     def one(root):
         try:
-            return score_volume(BASE, root, samples=SAMPLES, rotate=rotate)
+            return score_volume(BASE, root, samples=SAMPLES, rotate=rotate,
+                                spread=SPREAD)
         except Exception as exc:  # noqa: BLE001 - keep the campaign alive
             return {"root": root, "ok": False, "error": str(exc)}
 
@@ -67,6 +69,7 @@ def main():
     out = {
         "n_volumes": len(common),
         "samples": SAMPLES,
+        "spread": SPREAD,
         "rotate_a": 0,
         "rotate_b": rotate_b,
         "spearman_rho": round(rho, 4),

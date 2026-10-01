@@ -136,6 +136,7 @@ def test_score_volume_reports_sampling_completeness(monkeypatch, status):
         "decoded": 2 if status == 206 else 0,
         "complete": False,
         "rotate": 0,
+        "spread": 3,
         "shard_candidates": 1,
         "missing_shards": int(status == 404),
         "shard_read_failures": int(status == 503),
