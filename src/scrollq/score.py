@@ -90,6 +90,9 @@ def score_volume(base_url: str, root: str, samples: int = 4,
     chunk_results = []
     missing_shards = 0
     shard_read_failures = 0
+    shard_index_invalid = 0
+    chunk_read_failures = 0
+    chunk_decode_failures = 0
     sess = store._session()
     # Spread shard candidates per-dimension (flat-index spread degenerates
     # to an edge line on non-cubic grids). Skip shards that are nearly
@@ -125,6 +128,9 @@ def score_volume(base_url: str, root: str, samples: int = 4,
             continue
         entries = vc.parse_index(raw_index, n_inner, info.index_codecs)
         if not entries:
+            # parse_index returns None on a structurally invalid index.
+            # That is not "masked background": count it, don't drop it.
+            shard_index_invalid += 1
             continue
         present_frac = (sum(1 for o, _ in entries if o != vc.MISSING)
                         / n_inner)
@@ -151,13 +157,22 @@ def score_volume(base_url: str, root: str, samples: int = 4,
             try:
                 blob = store.get_range(skey, off, ln)
             except Exception:
+                chunk_read_failures += 1
                 continue
             raw = vc.decode_chunk(blob)
             if raw is None:
+                chunk_decode_failures += 1
                 continue
-            vox = np.frombuffer(raw, dtype=np.uint8).reshape(
-                (info.inner_chunks[0], info.inner_chunks[1],
-                 info.inner_chunks[2]))
+            try:
+                vox = np.frombuffer(raw, dtype=np.uint8).reshape(
+                    (info.inner_chunks[0], info.inner_chunks[1],
+                     info.inner_chunks[2]))
+            except ValueError:
+                # The decoder always yields 128^3 bytes; any other inner
+                # chunk shape cannot be interpreted. Same handling as
+                # scan_map: a decode failure, not a crash.
+                chunk_decode_failures += 1
+                continue
             # edge crop (same logic as the zpa probe)
             gic = tuple(sc[d] * (info.outer_chunks[d] //
                                  info.inner_chunks[d]) + ic[d]
@@ -178,12 +193,18 @@ def score_volume(base_url: str, root: str, samples: int = 4,
         "shard_candidates": len(cands),
         "missing_shards": missing_shards,
         "shard_read_failures": shard_read_failures,
+        "shard_index_invalid": shard_index_invalid,
+        "chunk_read_failures": chunk_read_failures,
+        "chunk_decode_failures": chunk_decode_failures,
     }
     result["sampling"] = sampling
     if not chunk_results:
         result["error"] = (f"no chunks decoded "
                            f"({missing_shards} shards absent, "
-                           f"{shard_read_failures} shard read failures)")
+                           f"{shard_read_failures} shard read failures, "
+                           f"{shard_index_invalid} shard index invalid, "
+                           f"{chunk_read_failures} chunk read failures, "
+                           f"{chunk_decode_failures} chunk decode failures)")
         return result
 
     agg: dict[str, float] = {}
