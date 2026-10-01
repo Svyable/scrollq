@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "rules": {
     "url": "https://scrollprize.org/prizes",
     "as_of": "2026-09-30"
@@ -33,7 +33,18 @@
       "volume_id": "PUBLIC-TRAINING-VOLUME",
       "coordinate_space": "level0-voxel-index",
       "boxes": [
-        {"start": [0, 0, 0], "stop": [100, 100, 100]}
+        {
+          "start": [
+            0,
+            0,
+            0
+          ],
+          "stop": [
+            100,
+            100,
+            100
+          ]
+        }
       ]
     },
     {
@@ -42,7 +53,18 @@
       "volume_id": "20250821151723",
       "coordinate_space": "level0-voxel-index",
       "boxes": [
-        {"start": [1000, 2000, 3000], "stop": [1200, 2400, 3600]}
+        {
+          "start": [
+            1000,
+            2000,
+            3000
+          ],
+          "stop": [
+            1200,
+            2400,
+            3600
+          ]
+        }
       ]
     }
   ],
@@ -67,7 +89,9 @@
       "checkpoint_url": "https://example.org/checkpoints/ink-v1.ckpt",
       "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
       "checkpoint_license": "MIT",
-      "training_dataset_ids": ["dataset:ink-v1"],
+      "training_dataset_ids": [
+        "dataset:ink-v1"
+      ],
       "stochastic": {
         "training": true,
         "inference": true
@@ -122,7 +146,37 @@
   "banner": {
     "path": "banner.tif",
     "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
-    "render_ids": ["render:column-01"],
+    "render_ids": [
+      "render:column-01"
+    ],
     "column_numbers_overlaid": true
+  },
+  "ink_validation": {
+    "tool": "scroliq-ink-validate",
+    "path": "validation/ink-validation.json",
+    "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+    "model_id": "model:ink-v1",
+    "model_checkpoint_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "split_id": "public-kfold-fold-3",
+    "held_out": true,
+    "training_overlap": "none",
+    "known_ground_truth": true,
+    "ground_truth_source_url": "https://scrollprize.org/public-held-out-ground-truth",
+    "model_window_voxels_zyx": [
+      17,
+      256,
+      256
+    ],
+    "control_names": [
+      "normal-plus-3",
+      "normal-minus-3",
+      "adjacent-winding"
+    ],
+    "evaluated_arrays_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+    "metrics": {
+      "balanced_accuracy": 0.9,
+      "false_positive_rate": 0.05,
+      "both_classes_present": true
+    }
   }
 }
