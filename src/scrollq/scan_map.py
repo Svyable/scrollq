@@ -1,6 +1,6 @@
 """Deterministic spatial scan diagnostics for Vesuvius volcomp volumes.
 
-Unlike the legacy ScrollQ volume score, this module preserves where each
+Unlike the legacy ScrolIQ volume score, this module preserves where each
 measurement came from. Missing shards, sparse/background shards, read failures,
 and decoded chunks all remain visible in the output so local scan condition is
 not collapsed into one number.
