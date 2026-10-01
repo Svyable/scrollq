@@ -20,13 +20,29 @@ Prize readiness.
 Companion: [zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit)
 ("don't train on lies" — corruption detection). `scrollq-health` unifies
 integrity and scan quality into TRAIN / CAUTION / DO NOT TRAIN.
+`scrollq-grand-prize` applies the scores to the 13 Grand Prize volumes as a
+weight-free Pareto frontier (triage, not a readability claim).
 
 ## Layout
 
-- `src/scrollq/` — the package
-  - `score.py` — scoring core: `score_volume(base_url, root)`, weights
+- `src/scrollq/` — the package; each module with a `main()` is a console
+  script declared in `pyproject.toml`
+  - `score.py` — scoring core: `score_volume(base_url, root, samples, rotate,
+    spread, exclude)`, weights, shard sampling → `scrollq-score` (via `cli.py`)
+  - `metrics.py` — per-chunk metrics from a decoded uint8 chunk
   - `health.py` — unified health report (imports `zpa.*` from the companion)
-  - `cli.py` — `scrollq-score`; `leaderboard.py`, `coverage.py`
+    → `scrollq-health`
+  - `leaderboard.py` → `scrollq-leaderboard` (renders `docs/index.html`)
+  - `coverage.py` → `scrollq-coverage` (join scores with ink-label roots)
+  - `grand_prize.py` → `scrollq-grand-prize`: dated target manifest
+    (`DEFAULT_MANIFEST`, `as_of`), Pareto frontier, optional surface-support
+    import
+  - evidence layers, each its own `scroliq-*` script: `passport.py`,
+    `scan_map.py`, `provenance.py`, `recto_coverage.py`, `tifxyz_audit.py`
+    (`scroliq-mesh`), `ink_audit.py`, `ink_validation.py`, `winding_audit.py`;
+    `geometry_probe.py` → `scrollq-geometry-probe`
+  - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
+    JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
     OME-Zarr **v2** volumes (the scorer itself reads volcomp v3 from
     dl.ash2txt.org); `registration.py` — `transform.json` direction/axis-order
@@ -34,27 +50,51 @@ integrity and scan quality into TRAIN / CAUTION / DO NOT TRAIN.
   - `protocol_pairs.py` — `scroliq-pairs`: pre-registered test of whether scan
     metrics recover the documented protocol ordering on registered rescans
   - `prize_manifest.py` — `scroliq-manifest`: Grand Prize / First Letters
-    manifests derived from pinned official eligibility + bucket index
+    manifests derived from pinned official eligibility + bucket index; checks
+    the built-in manifests for drift
   - `chunk_audit.py` — `scroliq-chunk-audit`: declared-vs-stored chunk sizes
 - `tests/` — pytest suite; keep it green. `test_surface_independence.py` guards the
   import graph: the October surfaces (bucket helpers, OME-Zarr reader +
   registration, chunk audit, prize manifests, protocol pairs) must stay
   independently revertable
-- `artifacts/` — dated campaign outputs (volumes.json, reports); the evidence
-  behind every published number
-- `docs/` — GitHub Pages: leaderboard + September writeup
+- `artifacts/` — dated campaign outputs, the evidence behind every published
+  number. The published campaign is `2026-09-30-scrollq-n24-dense/` (stability:
+  `2026-09-30-resampling-stability/`, Grand Prize:
+  `2026-09-30-grand-prize-qualifier-n24-dense/`); the 4- and 12-sample
+  directories are superseded but kept frozen
+- `docs/` — GitHub Pages: leaderboard (`index.html`), September writeup,
+  Grand Prize protocol/provenance specs, `ink-validation.md`
 - `volumes.txt` — 64 dl.ash2txt.org volcomp volume roots
+- `requirements-ci.txt` — pins the companion to an immutable commit, plus
+  `pytest` and `build`
 
 ## Commands
 
+Use `.venv/bin/<tool>` or an activated venv. Setup:
+`pip install -r requirements-ci.txt && pip install -e .`
+
 ```bash
-.venv/bin/scrollq-score --volumes volumes.txt --samples 4 --workers 4 --out-dir out/
-.venv/bin/scrollq-health --root <dl volume root>
+scrollq-score --volumes volumes.txt --samples 24 --spread 5 --workers 8 [--rotate N] --out-dir out/
+scrollq-leaderboard --in out/volumes.json [--coverage out/coverage.json] --out out/index.html
+scrollq-coverage --s3-roots <roots.jsonl> --volumes out/volumes.json --out out/coverage.json
+scrollq-health --root <dl volume root>
+scrollq-grand-prize --volumes artifacts/2026-09-30-scrollq-n24-dense/volumes.json \
+  [--surface-support artifacts/2026-09-30-grand-prize-qualifier/surface_support_external.json] \
+  --out out/grand-prize-targets.json
 python -m pytest tests/ -q
-.venv/bin/scroliq-pairs --list --out out/discovery.json          # registered rescan pairs
-.venv/bin/scroliq-manifest --help                                # derive prize manifests
-.venv/bin/scroliq-chunk-audit --index <metadata.min.json[.gz]> --out out/audit.json
+scroliq-pairs --list --out out/discovery.json          # registered rescan pairs
+scroliq-manifest --help                                # derive prize manifests
+scroliq-chunk-audit --index <metadata.min.json[.gz]> --out out/audit.json
 ```
+
+`scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests
+do not. Write scratch output to `out/` (untracked) or a temp dir, never over
+files in `artifacts/`.
+
+CI (`.github/workflows/ci.yml`, Python 3.11 + 3.12) builds the sdist and wheel,
+installs the *wheel*, runs `pip check`, the tests, then `--help` on every
+console script. A new entry point must therefore be declared in
+`pyproject.toml` and answer `--help` without network access or required args.
 
 ## Hard-won lessons (do not re-learn)
 
@@ -83,37 +123,59 @@ python -m pytest tests/ -q
    per-chunk provenance (`sample_provenance` with stable
    `shard_key#inner_flat` identities) and `bin/stability.py` reports the
    actual decoded-identity overlap per volume.
-   Earlier published numbers (ρ = 0.876, |Δ| = 3.07, 8/10) had no artifact
-   and do not reproduce — they were replaced 2026-09-30.
+   Earlier published numbers (ρ = 0.876, |Δ| = 3.07, 8/10) *recompute exactly*
+   from `artifacts/2026-09-30-scrollq/volumes.json` vs `volumes_rot9.json`
+   (re-checked 2026-10-01), but those files predate the `sampling` provenance
+   field: how the second sample was produced and how disjoint it was are
+   unrecorded. They were replaced 2026-09-30 as unverifiable, not as
+   irreproducible. Don't cite them as a stability measurement.
+   A second deterministic sample is `scrollq-score --rotate N`; commit the
+   full output, including its `sampling` provenance.
 5. **Weights are a judgment call, published with every score.** Changing them
    is fine; hiding them is not. Update the September page when they change.
+6. **Sampling provenance travels with the score.** Every result carries
+   `sampling` (requested/decoded/complete, missing vs. failed shards). A
+   partial sample must stay marked incomplete — never present it as a full one.
+7. **Grand Prize matching is exact-volume, fail-closed.** Match only the
+   prize-listed volume ID. Never substitute another scan of the same scroll
+   (PHerc1203's 2.403 µm scan is *not* its eligible 9.362 µm volume). Missing
+   quality is never put on the frontier, and surface-support evidence is
+   rejected unless its CT URL contains the exact volume ID. The frontier is
+   deliberately weight-free — do not add a blended "best scroll" score.
+8. **Dated data is frozen data.** The Grand Prize manifest and artifacts are
+   as-of 2026-09-30. Updating them means a new `as_of`, a new dated artifact
+   directory, and updated README/docs numbers — not an in-place edit of the
+   old artifacts.
 
-6. **A clean audit that checked nothing is a vacuous audit.** The first draft
+9. **A clean audit that checked nothing is a vacuous audit.** The first draft
    of the bucket chunk audit parsed S3 listings with a regex, matched zero
    objects, and reported "0 mismatches over 390 levels". It was caught only
    because it missed a mismatch measured by hand. Every checker needs a positive
    control, must report `unverified` (not `ok`) when it inspected nothing, and
    must parse structured formats with a real parser.
-7. **Pre-register, then log every deviation.** `docs/protocol-pairs-protocol.md`
+10. **Pre-register, then log every deviation.** `docs/protocol-pairs-protocol.md`
    froze hypothesis, constants and decision rule before any real metric was
    read; the verdict is computed by `decide()`. A control that cannot detect
    its own artifact (the half-step null missed aligned-vs-rotated lattice
    interpolation) is added as a *logged post-hoc arm*, never by rewriting the
    rule. Keep earlier runs next to later ones.
-8. **The open bucket is Zarr v2, uncompressed uint8, 128^3 chunks; the dl.ash2txt
+11. **The open bucket is Zarr v2, uncompressed uint8, 128^3 chunks; the dl.ash2txt
    volcomp stores are Zarr v3 sharded.** Do not assume one reader for both.
    Some registered scans live on `data.aws.ash2txt.org`, not the bucket; a
    pair whose fixed scan is unreachable is reported `run failed`, never dropped.
-9. **Derive facts, don't copy them.** Voxel size, energy, released
+12. **Derive facts, don't copy them.** Voxel size, energy, released
    predictions, segment counts and prohibited higher-resolution scans come from
    the pinned eligibility list + bucket index (`scroliq-manifest`); the
-   hand-copied Grand Prize manifest is regression-tested against them.
+   hand-copied Grand Prize and First Letters manifests are checked against them
+   (`--compare-builtin`, regression-tested on the pinned snapshots).
 
 ## Working rules
 
 - Branch from `main`; never force-push to `main`.
 - New scoring behavior needs a deterministic test in `tests/`.
 - Every number in docs/PRs must trace to a command + artifact in this repo.
+  Published numbers are repeated in `README.md`, `docs/`, and
+  `artifacts/*/README.md` — change them together or not at all.
 - Do not claim readability prediction. The 0–100 score is scan-health triage only.
 - Do not infer surface, mesh, spiral, fiber, label-localization, or ink state from the scan score; missing evidence stays `unknown`.
 - Opening PRs/issues upstream or publishing to PyPI needs the maintainer's
@@ -125,3 +187,5 @@ python -m pytest tests/ -q
   (PyPI publication is intentionally deprioritized — never assume the
   companion is installable from PyPI).
 - Do not commit environments, caches, egg-info or build archives.
+- PRs follow `.github/pull_request_template.md`: What / Evidence / Stability
+  check / Grand Prize + frozen data / Docs.

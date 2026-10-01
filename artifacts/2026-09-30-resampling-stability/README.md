@@ -2,8 +2,13 @@
 
 Reproducible measurement of how much ScrolIQ scan-health scores move when
 the sampled shards change. Replaces the earlier published numbers
-(ρ = 0.876, mean |Δ| = 3.07, top-10 8/10), which had no artifact behind
-them and do not reproduce — they are retired, not defended.
+(ρ = 0.876, mean |Δ| = 3.07, top-10 8/10). Those numbers **do recompute
+exactly** from the committed 4-sample files (`../2026-09-30-scrollq/volumes.json`
+vs `volumes_rot9.json`: ρ = 0.8760, mean |Δ| = 3.073, top-10 8/10; re-checked
+2026-10-01), but the files predate the `sampling` provenance field, so how the
+second sample was produced and how disjoint it was from the first are
+unrecorded. They are retired as **unverifiable**, not as irreproducible, and
+are not defended as a stability measurement.
 
 ## Current status (read this first)
 

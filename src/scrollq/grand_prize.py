@@ -1,4 +1,4 @@
-"""2027 Grand Prize target qualification for ScrolIQ.
+"""Prize target qualification for ScrolIQ (2027 Grand Prize, First Letters).
 
 This module combines ScrolIQ's existing scan-quality signal with current,
 explicitly versioned public bootstrap metadata. It intentionally does not
@@ -8,8 +8,9 @@ a Pareto frontier over two directly inspectable axes:
 1. ScrolIQ scan-quality score for the exact prize-eligible volume.
 2. Existing public segment count for that scroll.
 
-Released surface and lasagna predictions are treated as bootstrap requirements,
-not weighted advantages when all candidates share them.
+Each manifest names its required bootstrap assets (released surface and/or
+lasagna predictions). They gate eligibility for the frontier; they are not
+weighted advantages.
 
 The result is campaign triage, not a readability or ink-presence prediction.
 """
@@ -21,9 +22,13 @@ import json
 from pathlib import Path
 
 
+DEFAULT_REQUIRED_ASSETS = ("surface_prediction", "lasagna_prediction")
+
 DEFAULT_MANIFEST = {
     "as_of": "2026-09-30",
+    "prize": "2027 Grand Prize",
     "prize_url": "https://scrollprize.org/prizes",
+    "required_assets": list(DEFAULT_REQUIRED_ASSETS),
     "targets": [
         {
             "scroll": "PHerc0125",
@@ -170,6 +175,81 @@ DEFAULT_MANIFEST = {
 }
 
 
+def _first_letters_targets() -> list[dict]:
+    """The 22 First Letters volumes, as listed on the prize page 2026-09-30.
+
+    Scrolls shared with the Grand Prize reuse that metadata. The ten
+    First-Letters-only scrolls were read from their data-browser pages on the
+    same date; only PHerc0343 lists a lasagna prediction among them.
+    """
+    shared = {t["scroll"]: dict(t) for t in DEFAULT_MANIFEST["targets"]}
+    order = [
+        "PHerc0125", "PHerc0175A", "PHerc0175B", "PHerc0191", "PHerc0211",
+        "PHerc0257", "PHerc0268", "PHerc0306B", "PHerc0343", "PHerc0358",
+        "PHerc0483A", "PHerc0483B", "PHerc0490A", "PHerc0490B", "PHerc0800",
+        "PHerc0813", "PHerc0826", "PHerc0846A", "PHerc0846B", "PHerc1203",
+        "PHerc1218", "PHerc1545",
+    ]
+    only = {
+        "PHerc0175A": ("20250521115057", 8.64, 116, None),
+        "PHerc0175B": ("20250521125822", 8.64, 116, None),
+        "PHerc0306B": ("20250521133212", 8.64, 116, None),
+        "PHerc0343": ("20250521140437", 8.64, 116, "20260419180421"),
+        "PHerc0483A": ("20250521140913", 8.64, 116, None),
+        "PHerc0483B": ("20251124083638", 8.64, 116, None),
+        "PHerc0490A": ("20250521151210", 8.64, 116, None),
+        "PHerc0490B": ("20250521151215", 8.64, 116, None),
+        "PHerc0846A": ("20250728152254", 9.362, 113, None),
+        "PHerc0846B": ("20250804142305", 9.362, 113, None),
+    }
+    exact_scan_reason = (
+        "The First Letters prize lists scan {eligible} for {scroll}. ScrollQ "
+        "compares only that exact scan; the other same-scroll scan is not "
+        "substituted into the comparison."
+    )
+    targets = []
+    for scroll in order:
+        if scroll in shared:
+            t = shared[scroll]
+        else:
+            vid, voxel, kev, lasagna = only[scroll]
+            t = {
+                "scroll": scroll,
+                "volume_id": vid,
+                "voxel_size_um": voxel,
+                "energy_kev": kev,
+                "segments": 0,
+                "surface_prediction": "20260413222639",
+                "lasagna_prediction": lasagna,
+                "source_url": f"https://scrollprize.org/data_browser/{scroll}",
+            }
+        if scroll == "PHerc0846A":
+            t["excluded_same_scroll_higher_res"] = [
+                {"volume_id": "20260319102732", "voxel_size_um": 2.403}
+            ]
+        t["excluded_same_scroll_higher_res"] = [
+            {**ex, "reason": exact_scan_reason.format(
+                eligible=t["volume_id"], scroll=scroll)}
+            for ex in t.get("excluded_same_scroll_higher_res", [])
+        ]
+        targets.append(t)
+    return targets
+
+
+FIRST_LETTERS_MANIFEST = {
+    "as_of": "2026-09-30",
+    "prize": "First Letters",
+    "prize_url": "https://scrollprize.org/prizes#first-letters-prizes",
+    "required_assets": ["surface_prediction"],
+    "targets": _first_letters_targets(),
+}
+
+MANIFESTS = {
+    "grand-prize": DEFAULT_MANIFEST,
+    "first-letters": FIRST_LETTERS_MANIFEST,
+}
+
+
 def _match_volume(volumes: list[dict], scroll: str, volume_id: str) -> dict | None:
     """Match only the exact prize volume ID within the requested scroll."""
     needle = f"/{scroll}/volumes/{volume_id}"
@@ -251,11 +331,8 @@ def qualify(
     sensitivity analysis and never changes ScrolIQ's published quality score.
     """
     manifest = manifest or DEFAULT_MANIFEST
-    # Which released predictions a target needs before it can be compared.
-    # Grand Prize spiral fitting needs both; derived manifests for other
-    # prizes may require fewer (see scrollq.prize_manifest).
-    required = tuple(manifest.get(
-        "required_assets", ("surface_prediction", "lasagna_prediction")))
+    prize = manifest.get("prize") or manifest.get("prize_label") or "2027 Grand Prize"
+    required = tuple(manifest.get("required_assets", DEFAULT_REQUIRED_ASSETS))
     support_by_scroll = {
         r["scroll"]: r for r in (surface_support or {}).get("rows", [])
         if isinstance(r, dict) and r.get("scroll")
@@ -271,7 +348,7 @@ def qualify(
             "energy_kev": target["energy_kev"],
             "segments": target["segments"],
             "surface_prediction": target["surface_prediction"],
-            "lasagna_prediction": target["lasagna_prediction"],
+            "lasagna_prediction": target.get("lasagna_prediction"),
             "source_url": target["source_url"],
             "excluded_same_scroll_higher_res": target.get(
                 "excluded_same_scroll_higher_res", []
@@ -314,7 +391,7 @@ def qualify(
         r
         for r in rows
         if r["quality_score"] is not None
-        and all(r.get(a) for a in required)
+        and all(r.get(asset) for asset in required)
     ]
     frontier = _pareto(baseline_comparable, baseline_axes)
     frontier_set = set(frontier)
@@ -322,7 +399,7 @@ def qualify(
     for r in rows:
         if r["quality_score"] is None:
             r["qualification"] = "needs-quality-score"
-        elif not all(r.get(a) for a in required):
+        elif not all(r.get(asset) for asset in required):
             r["qualification"] = "missing-geometry-prior"
         elif r["scroll"] in frontier_set:
             r["qualification"] = "pareto-frontier"
@@ -335,22 +412,22 @@ def qualify(
             )
 
     result = {
-        "schema_version": 2,
+        "schema_version": 3,
+        "prize": prize,
         "manifest_as_of": manifest["as_of"],
         "prize_url": manifest.get("prize_url"),
         "method": {
             "axes": ["scrollq_quality_score", "existing_segment_count"],
+            "required_assets": list(required),
             "rule": (
                 "Primary Pareto frontier: maximize scan-quality triage score and "
-                "existing segment count. Released predictions listed in "
-                "required_assets are bootstrap requirements, not weighted "
-                "advantages when common to all targets."
+                "existing segment count among targets that have every required "
+                "bootstrap asset. Required assets gate eligibility; they are not "
+                "weighted."
             ),
-            "required_assets": list(required),
             "warning": (
                 "This is campaign triage, not a readability, ink-presence, or "
-                f"{manifest.get('prize_label', 'Grand Prize')} success "
-                "prediction."
+                f"{prize} success prediction."
             ),
         },
         "frontier": frontier,
@@ -396,14 +473,37 @@ def qualify(
     return result
 
 
+def volumes_from_stability(stability: dict, run: str) -> list[dict]:
+    """volumes.json-shaped rows from one run of a bin/stability.py report."""
+    return [
+        {"root": root, "ok": score is not None, "score": score}
+        for root, score in stability[run].items()
+    ]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description=(
-            "Qualify the fixed 2027 Grand Prize target volumes without inventing "
-            "a readability score."
+            "Qualify the fixed prize target volumes (2027 Grand Prize or First "
+            "Letters) without inventing a readability score."
         )
     )
-    ap.add_argument("--volumes", required=True, help="volumes.json from scrollq-score")
+    ap.add_argument(
+        "--volumes",
+        required=True,
+        help="volumes.json from scrollq-score, or a bin/stability.py JSON with --run",
+    )
+    ap.add_argument(
+        "--run",
+        choices=("run0", "run1"),
+        help="when --volumes is a stability JSON, which resample run to qualify",
+    )
+    ap.add_argument(
+        "--prize",
+        choices=sorted(MANIFESTS),
+        default="grand-prize",
+        help="which built-in prize manifest to qualify (default: grand-prize)",
+    )
     ap.add_argument(
         "--targets",
         help="optional JSON manifest overriding the versioned built-in target metadata",
@@ -419,7 +519,9 @@ def main() -> None:
     args = ap.parse_args()
 
     volumes = json.loads(Path(args.volumes).read_text(encoding="utf-8"))
-    manifest = DEFAULT_MANIFEST
+    if args.run:
+        volumes = volumes_from_stability(volumes, args.run)
+    manifest = MANIFESTS[args.prize]
     if args.targets:
         manifest = json.loads(Path(args.targets).read_text(encoding="utf-8"))
     support = None
@@ -429,7 +531,7 @@ def main() -> None:
     result = qualify(volumes, manifest, support)
     Path(args.out).write_text(json.dumps(result, indent=1) + "\n", encoding="utf-8")
     print(
-        f"qualified {len(result['targets'])} targets; "
+        f"{result['prize']}: qualified {len(result['targets'])} targets; "
         f"primary Pareto frontier: {', '.join(result['frontier']) or 'none'}"
     )
     if "surface_support_analysis" in result:

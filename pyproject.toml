@@ -10,7 +10,18 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Sven" }]
+keywords = ["vesuvius", "herculaneum", "scroll", "data-quality", "zarr", "ct"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+]
 dependencies = [
+    "numcodecs",
     "numpy",
     "Pillow",
     "requests",
@@ -18,12 +29,18 @@ dependencies = [
     "zarr-pyramid-audit @ git+https://github.com/Svyable/zarr-pyramid-audit.git",
 ]
 
+[project.urls]
+Homepage = "https://svyable.github.io/scrollq/"
+Repository = "https://github.com/Svyable/scrollq"
+Issues = "https://github.com/Svyable/scrollq/issues"
+
 [project.scripts]
 scrollq-score = "scrollq.cli:main"
 scrollq-leaderboard = "scrollq.leaderboard:main"
 scrollq-coverage = "scrollq.coverage:main"
 scrollq-health = "scrollq.health:main"
 scrollq-grand-prize = "scrollq.grand_prize:main"
+scroliq-support = "scrollq.support:main"
 scrollq-geometry-probe = "scrollq.geometry_probe:main"
 scroliq-passport = "scrollq.passport:main"
 scroliq-scan-map = "scrollq.scan_map:main"

@@ -11,9 +11,14 @@
 - [ ] Resampling stability re-run: Spearman ρ = ___, mean |Δ| = ___, top-10 overlap = ___/10
 - [ ] Bar: ρ ≥ 0.85
 
+## Grand Prize / frozen data (if touched)
+
+- [ ] Exact prize-listed volume IDs only; no same-scroll substitution
+- [ ] New `as_of` + new dated `artifacts/` directory (old artifacts untouched)
+
 ## Docs
 
-- [ ] README / September page updated if behavior changed
+- [ ] README / September page / artifact READMEs updated if behavior or numbers changed
 - [ ] `tests/` updated; `python -m pytest tests/ -q` green
 
 ## Checklist

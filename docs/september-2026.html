@@ -70,13 +70,16 @@ Live evaluator dashboard: <a href="./">svyable.github.io/scrollq</a><br>
 Challenge alignment: <a href="open-problems-alignment.md">ScrolIQ × Vesuvius Challenge open problems</a><br>
 Companion integrity gate: <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a><br>
 <span class="meta">Updated 2026-10-01: section (3) and the evidence table now describe mesh, ink-validation, and
-held-out geometry work merged on 2026-09-30; no published number changed.</span></div>
+held-out geometry work merged on 2026-09-30, and the label-coverage join is corrected (16 → 14
+<code>label_next</code> entries; see the evidence table). No scan-health score changed.<br>
+Also added: First Letters target qualification and exact-scan surface-prediction CT support;
+new numbers are in sections (3)–(4) with their artifacts.</span></div>
 
 <div class="stats">
 <div class="stat"><div class="n good">64 / 64</div><div class="l">listed volcomp scroll volumes scored<br>real L0 voxels decoded</div></div>
 <div class="stat"><div class="n">22.9</div><div class="l">mean chunks decoded / volume<br>24-sample, 5×5×5 campaign</div></div>
 <div class="stat"><div class="n warn">0.7944</div><div class="l">Spearman ρ vs resample<br>below our 0.85 gate; provenance shows<br>only 2/64 truly disjoint (mean 63% re-read)</div></div>
-<div class="stat"><div class="n">16</div><div class="l">top-quartile exact-volume entries<br>flagged “label next”</div></div>
+<div class="stat"><div class="n">14</div><div class="l">top-quartile exact-volume entries<br>flagged “label next”</div></div>
 </div>
 </div></header>
 
@@ -90,10 +93,13 @@ held-out geometry work merged on 2026-09-30; no published number changed.</span>
 24 requested L0 chunks per volume from a 5×5×5 candidate grid.</li>
 <li><b>Open-data label and segment coverage</b> joined from the companion S3 inventory. The September
 inventory found 70 ink-detection roots associated with PHercParis4; the exact-volume join leaves
-16 top-quartile campaign entries with no matched ink labels and marks them <code>label_next</code>.</li>
+14 top-quartile campaign entries with no matched ink labels and marks them <code>label_next</code>.</li>
 <li><b>All 13 then-current 2027 Grand Prize target volumes</b>, matched by exact prize-listed volume ID.
 The qualifier explicitly excludes same-scroll higher-resolution substitutes; for PHerc1203, the
 2.403 µm scan is recorded as excluded while the prize-listed 9.362 µm volume is used.</li>
+<li><b>All 22 First Letters prize scans</b>, matched by the exact scan IDs on the prize page, plus the
+released m7 surface prediction made on each of those scans (public <code>vesuvius-challenge-open-data</code>
+bucket), read at level 0 alongside the masked CT.</li>
 <li><b>PHerc1667 as a known-success control</b> for the spatial scan metrics, so target observations can
 be compared against a scroll that has already been completely virtually unwrapped and read.</li>
 </ul></div>
@@ -135,6 +141,15 @@ resampling test, per-chunk score distributions, and a public stability gate. A m
 <li><b>Exact-volume Grand Prize triage.</b> <code>scrollq-grand-prize</code> compares all 13 target
 volumes on a weight-free Pareto frontier over scan-health score and existing segment count, while
 pinning the exact eligible volume and recording prohibited same-scroll higher-resolution alternatives.</li>
+<li><b>Exact-scan First Letters triage.</b> <code>scrollq-grand-prize --prize first-letters</code>
+qualifies all 22 First Letters scans. Each prize manifest declares its own required bootstrap assets, so
+the 9 eligible scrolls without a lasagna prediction are not silently dropped. Run on both disjoint
+resample runs, it shows which frontier members are robust and which are sampling noise.</li>
+<li><b>Exact-scan surface-prediction CT support.</b> <code>scroliq-support</code> measures how much of a
+released surface prediction lies on real CT material (prediction voxel &gt; 127 where masked CT is exactly
+0 counts as phantom), on the exact eligible scan, with a bootstrap 95% interval. A prediction made on a
+different scan of the same scroll fails closed. External surveys are now imported by a script pinned to
+the source commit instead of by hand.</li>
 <li><b>Evidence passports instead of synthetic readiness scores.</b> <code>scroliq-passport</code>
 organizes data, scan, label, winding, native TIFXYZ mesh, and ink-validation evidence around the
 Challenge bottlenecks and leaves unmeasured stages unknown.</li>
@@ -178,9 +193,12 @@ were truly disjoint (mean 63% chunk re-read) — ρ is inflated by re-reading</t
 <td><a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json"><code>artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json</code></a> —
 rotate 0 vs 13, 64 volumes, 24 samples, spread 5, per-volume Jaccard overlap.</td></tr>
 
-<tr><td><b>16</b> top-quartile campaign entries flagged <code>label_next</code></td>
+<tr><td><b>14</b> top-quartile campaign entries flagged <code>label_next</code> (corrected 2026-10-01 from 16; see below)</td>
 <td><a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-09-30-scrollq-n24-dense/coverage.json"><code>artifacts/2026-09-30-scrollq-n24-dense/coverage.json</code></a> —
-exact-volume label/segment join used by the published leaderboard.</td></tr>
+exact-volume label/segment join used by the published leaderboard. The first published version of this
+file was joined against an empty inventory, so every volume showed zero labels and PHercParis4 (70 ink labels)
+was wrongly flagged. It was rebuilt from the same 2026-09-30 inventory recorded in the n=4 and n=12 campaigns,
+and <code>scrollq-coverage</code> now refuses an empty inventory.</td></tr>
 
 <tr><td>Known-success control does not justify calling ordinary target metric values failures</td>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-pherc1667-scan-control"><code>artifacts/2026-09-30-pherc1667-scan-control/</code></a> —
@@ -190,6 +208,28 @@ PHerc1667 control comparison for spatial scan metrics.</td></tr>
 PHerc0813 and PHerc1447 under the two declared axes</td>
 <td><a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-09-30-grand-prize-qualifier-n24-dense/targets.json"><code>artifacts/2026-09-30-grand-prize-qualifier-n24-dense/targets.json</code></a> —
 manifest dated 2026-09-30; PHerc1203 higher-resolution substitute explicitly excluded.</td></tr>
+
+<tr><td>First Letters: only <b>PHerc0800</b> is on the quality × segments frontier in both resample
+runs (run0: PHerc0800, PHerc0813; run1: PHerc0800, PHerc1545). Across the 22 scans the runs agree at
+<b>ρ = 0.7211</b> (mean |Δ| 7.15), below our gate, so quality leaders are reported as a band</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-first-letters-qualifier-n24-dense"><code>artifacts/2026-09-30-first-letters-qualifier-n24-dense/</code></a> —
+<code>targets.json</code>, <code>targets_run0.json</code>, <code>targets_run1.json</code>,
+<code>stability.json</code> (<code>bin/subset_stability.py</code>).</td></tr>
+
+<tr><td>Native CT support reproduces an independent survey: on <b>18</b> scans with exact-scan evidence
+from both, <b>15 / 18</b> external values fall inside the native 95% interval; mean |difference|
+<b>0.043</b>, max <b>0.111</b>, ρ = 0.78. The three disagreements are listed, not dropped</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-first-letters-support"><code>artifacts/2026-09-30-first-letters-support/</code></a> —
+<code>support_native.json</code> (256 chunks × 22 scans), <code>support_external.json</code>
+(pinned commit, blob SHAs), <code>agreement.json</code>.</td></tr>
+
+<tr><td>First exact-scan support numbers for <b>PHerc0846A, PHerc1203, PHerc1218, PHerc0125</b>.
+For PHerc1203 the higher-resolution scan's survey (0.698) overstated eligible-scan support (0.454) by
+about 0.24. With support as a third axis, <b>PHerc0175B, PHerc0306B, PHerc0490A, PHerc0800</b> are on
+the frontier in both runs</td>
+<td><a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-09-30-first-letters-support/README.md"><code>artifacts/2026-09-30-first-letters-support/README.md</code></a>,
+<code>targets_with_native_support.json</code>, <code>targets_run1_with_native_support.json</code>;
+tests in <code>tests/test_support.py</code>.</td></tr>
 
 <tr><td>Combined integrity + quality verdict path proven on live data</td>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-health-verdicts"><code>artifacts/2026-09-30-health-verdicts/</code></a> —
@@ -238,7 +278,9 @@ complete, low-distortion, legible, reproducible unrolling?</i></div></div>
 <p><b>The 0–100 ScrolIQ score is scan-health triage only.</b> It is not readability, surface quality,
 ink quality, or Grand Prize readiness. It does not infer text from CT texture. A high score does not
 mean a scroll will read; a low score does not prove it will not. The score weights are visible in
-<code>src/scrollq/score.py</code>, and the September stability gate is published as failed.</p>
+<code>src/scrollq/score.py</code>, and the September stability gate is published as failed.
+Surface-prediction CT support is likewise a geometry-prior sanity check: it says how much of a released
+prediction sits on scanned material, not whether that surface carries ink or text.</p>
 <p>This distinction is part of the contribution: every later ScrolIQ layer is designed to keep
 <code>measured</code>, <code>partial</code>, and <code>unknown</code> states separate instead of converting
 missing evidence into confidence.</p></div>

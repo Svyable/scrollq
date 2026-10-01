@@ -8,29 +8,47 @@
     "data": {
       "status": "measured",
       "open_problem": "data-scale",
-      "sampling": {},
+      "sampling": {
+        "requested": 24,
+        "decoded": 24,
+        "complete": true,
+        "rotate": 0,
+        "spread": 5,
+        "shard_candidates": 125,
+        "missing_shards": 45,
+        "shard_read_failures": 0
+      },
       "evidence": "Real level-0 chunks are decoded through the volcomp path and read provenance is retained with the score."
     },
     "scan": {
       "status": "measured",
       "open_problem": "scan-diagnostics",
-      "quality_score": 77.4,
+      "quality_score": 76.2,
       "metrics": {
-        "nonzero_frac": 1.0,
-        "grad_energy": 9.1367,
-        "dyn_range": 146.0,
-        "sat_frac": 0.0001,
+        "nonzero_frac": 0.9272,
+        "grad_energy": 8.559,
+        "dyn_range": 150.0,
+        "sat_frac": 0.0003,
         "dead_slices": 0,
-        "chunks_decoded": 2
+        "chunks_decoded": 24
       },
       "components": {
         "signal_40": 40.0,
-        "texture_30": 22.8,
-        "dynamic_20": 14.6,
-        "pen_sat": 0.0,
+        "texture_30": 21.4,
+        "dynamic_20": 15.0,
+        "pen_sat": 0.2,
         "pen_dead": 0.0
       },
-      "sampling": {},
+      "sampling": {
+        "requested": 24,
+        "decoded": 24,
+        "complete": true,
+        "rotate": 0,
+        "spread": 5,
+        "shard_candidates": 125,
+        "missing_shards": 45,
+        "shard_read_failures": 0
+      },
       "limitation": "The legacy ScrolIQ score is sparse whole-volume triage. Spatial diagnostics, when supplied, remain sampled observations rather than a claim that every voxel has been characterized.",
       "spatial_map": {
         "status": "measured",
@@ -87,12 +105,17 @@
     "mesh": {
       "status": "unknown",
       "open_problem": "mesh-connectivity",
-      "reason": "no tifxyz or mesh diagnostic was supplied"
+      "reason": "no volume-bound TIFXYZ mesh audit was supplied"
     },
     "fibers": {
       "status": "unknown",
       "open_problem": "fiber-connectivity",
       "reason": "no fiber tracing evidence was supplied"
+    },
+    "winding": {
+      "status": "unknown",
+      "open_problem": "winding-annotations",
+      "reason": "no winding-annotation audit was supplied"
     },
     "spiral": {
       "status": "unknown",
@@ -110,10 +133,15 @@
     "ink": {
       "status": "unknown",
       "open_problem": "ink-reliability",
-      "reason": "no held-out ink inference, leakage audit, or stability evidence was supplied"
+      "reason": "no volume-bound ink evidence audit was supplied"
     }
   },
   "next_actions": [
+    {
+      "priority": "next-evidence",
+      "action": "run scroliq-winding with the exact --volume-root before using winding annotations as fit evidence",
+      "open_problem": "winding-annotations"
+    },
     {
       "priority": "high",
       "action": "treat this volume as a candidate for new labels, then measure label localization quality",
@@ -121,19 +149,19 @@
     },
     {
       "priority": "next-evidence",
-      "action": "run spatial surface-support/topology diagnostics on released predictions or tifxyz",
-      "open_problem": "surface-topology"
-    },
-    {
-      "priority": "next-evidence",
-      "action": "validate mesh connectivity and sheet-switch risk before interpreting flattened renders",
+      "action": "run scroliq-mesh with the exact --volume-root before trusting TIFXYZ geometry",
       "open_problem": "mesh-connectivity"
     },
     {
       "priority": "next-evidence",
-      "action": "require held-out, non-overlapping validation before treating ink output as evidence",
+      "action": "run scroliq-ink-audit with the exact --volume-root before treating ink output as evidence",
       "open_problem": "ink-reliability"
+    },
+    {
+      "priority": "next-evidence",
+      "action": "run spatial surface-support/topology diagnostics on released predictions or tifxyz",
+      "open_problem": "surface-topology"
     }
   ],
-  "interpretation": "The existing quality score describes sampled CT health only. Unknown surface, mesh, spiral, label-localization, fiber, or ink state remains unknown."
+  "interpretation": "The existing quality score describes sampled CT health only. Unknown surface, mesh, winding geometry, spiral, label-localization, fiber, or ink state remains unknown."
 }

@@ -24,6 +24,10 @@ from .bucket import load_json_maybe_gz
 
 SCHEMA_VERSION = 1
 
+# derived prize id -> key in ``scrollq.grand_prize.MANIFESTS``
+BUILTIN_KEY = {"grand-prize-2027": "grand-prize",
+               "first-letters-2027": "first-letters"}
+
 PRIZES = {
     "grand-prize-2027": {
         "label": "2027 Grand Prize",
@@ -110,7 +114,7 @@ def derive_manifest(prize_id: str, eligibility: dict, index: dict, *,
         targets.append(t)
     return {
         "schema_version": SCHEMA_VERSION,
-        "prize_id": prize_id, "prize_label": cfg["label"],
+        "prize_id": prize_id, "prize": cfg["label"], "prize_label": cfg["label"],
         "as_of": as_of, "prize_url": "https://scrollprize.org/prizes",
         "required_assets": list(cfg["required_assets"]),
         "provenance": {
@@ -124,6 +128,16 @@ def derive_manifest(prize_id: str, eligibility: dict, index: dict, *,
 
 
 _COMPARED = ("volume_id", "voxel_size_um", "energy_kev", "segments")
+# Built-in manifests record same-scroll higher-resolution scans as
+# ``excluded_same_scroll_higher_res``; derived First Letters manifests use
+# ``same_scroll_higher_res_scans`` (no prohibition is stated for that prize).
+_HIGHER_RES_KEYS = ("excluded_same_scroll_higher_res",
+                    "same_scroll_higher_res_scans")
+
+
+def _higher_res_ids(target: dict) -> set[str]:
+    return {h["volume_id"] for key in _HIGHER_RES_KEYS
+            for h in target.get(key, [])}
 
 
 def compare_targets(reference: dict, derived: dict) -> list[str]:
@@ -151,10 +165,7 @@ def compare_targets(reference: dict, derived: dict) -> list[str]:
                         ("lasagna_prediction", "all_lasagna_predictions")):
             if r.get(k) and r[k] not in d.get(pool, []):
                 out.append(f"{scroll}: {k} {r[k]!r} not among {d.get(pool)}")
-        rh = {h["volume_id"] for h in r.get("excluded_same_scroll_higher_res",
-                                            [])}
-        dh = {h["volume_id"] for h in d.get("excluded_same_scroll_higher_res",
-                                            [])}
+        rh, dh = _higher_res_ids(r), _higher_res_ids(d)
         if rh != dh:
             out.append(f"{scroll}: higher-resolution exclusions "
                        f"{sorted(rh)} != {sorted(dh)}")
@@ -179,8 +190,9 @@ def main(argv=None) -> int:
     ap.add_argument("--as-of", required=True, help="YYYY-MM-DD")
     ap.add_argument("--out", required=True)
     ap.add_argument("--compare-builtin", action="store_true",
-                    help="grand-prize-2027 only: exit 1 if the built-in "
-                         "manifest drifts from the derived one")
+                    help="exit 1 if the built-in manifest for this prize "
+                         "(scrollq.grand_prize.MANIFESTS) drifts from the "
+                         "derived one")
     args = ap.parse_args(argv)
 
     elig, elig_sha = load_json_maybe_gz(args.eligibility)
@@ -196,12 +208,9 @@ def main(argv=None) -> int:
     for p in manifest["problems"]:
         print(f"  problem: {p}", file=sys.stderr)
     if args.compare_builtin:
-        if args.prize != "grand-prize-2027":
-            print("--compare-builtin applies to grand-prize-2027 only",
-                  file=sys.stderr)
-            return 2
-        from .grand_prize import DEFAULT_MANIFEST
-        drift = compare_targets(DEFAULT_MANIFEST, manifest)
+        from .grand_prize import MANIFESTS
+        builtin = MANIFESTS[BUILTIN_KEY[args.prize]]
+        drift = compare_targets(builtin, manifest)
         for line in drift:
             print(f"  drift: {line}", file=sys.stderr)
         print("built-in manifest matches derived manifest" if not drift

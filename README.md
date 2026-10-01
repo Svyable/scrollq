@@ -144,7 +144,7 @@ The repository includes the exact outputs behind the September 30, 2026 campaign
 | Ranking is **representative**, honest about heterogeneity | Disjoint resample ([`stability-n24-dense.json`](artifacts/2026-09-30-resampling-stability/stability-n24-dense.json)): **Spearman ρ = 0.79**, mean **|Δscore| = 4.2**, top-10 overlap **7 / 10** — below our ρ ≥ 0.85 gate, because volumes are genuinely heterogeneous (swings up to 44 points between runs). We publish it because a representative ranking (mean 22.9 chunks decoded/volume) with honest uncertainty beats the earlier 3×3×3 ranking whose ρ = 0.99 we proved was inflated by shard re-reading. |
 | Acquisition dropout scan found no verified dead slices in the campaign | **0 hits across 64 volumes** |
 | Label coverage was highly concentrated in the open-data snapshot | **70 / 70** discovered ink-detection roots were on PHercParis4; the top quality-ranked scrolls had none |
-| High-quality, unlabeled targets were made actionable | **16** top-quartile volumes were flagged **“label next”** |
+| High-quality, unlabeled targets were made actionable | **14** top-quartile volumes were flagged **“label next”** |
 
 The point is not that one heuristic ranking is final. The point is that **data quality and label coverage can be measured together**, turning an implicit resource-allocation decision into an inspectable one.
 
@@ -363,13 +363,14 @@ PHerc0813, and PHerc1447**. The larger frontier is a useful warning: this
 external geometry proxy creates real trade-offs and should drive focused
 held-out geometry tests, not an opaque weighted winner score.
 
-### Derived manifests and First Letters
+### Derived manifests (drift check)
 
-The built-in manifest above was copied by hand. `scroliq-manifest` derives the
-same structure from two pinned machine-readable sources, the Challenge's own
-`prizeEligibility.json` (villa `56d7c3a`) and the open bucket's `metadata.min.json`,
-so voxel size, energy, released predictions, public segments and prohibited
-higher-resolution scans are no longer hand-maintained:
+The built-in manifests above and below were copied by hand from the data
+browser. `scroliq-manifest` derives the same structure from two pinned
+machine-readable sources, the Challenge's own `prizeEligibility.json` (villa
+`56d7c3a`) and the open bucket's `metadata.min.json`, so voxel size, energy,
+released predictions, public segments and higher-resolution same-scroll scans can
+be checked rather than re-copied, and `--compare-builtin` reports any drift:
 
 ```bash
 scroliq-manifest --eligibility artifacts/2026-10-01-prize-targets/prizeEligibility.json \
@@ -378,13 +379,9 @@ scroliq-manifest --eligibility artifacts/2026-10-01-prize-targets/prizeEligibili
 ```
 
 Result (`artifacts/2026-10-01-prize-targets/`): **the hand-copied Grand Prize
-manifest matches the official sources on all 13 targets** (now a regression
-test). The same machinery qualifies the **22 First Letters volumes** ($50,000
-per scroll). It requires only the released surface prediction there (the
-official workflow starts from a segment grown on it) rather than surface plus
-lasagna, and it flags PHerc0846A, which has a 2.403 µm same-scroll scan in the
-bucket that no earlier tool in this repo surfaced. Scores carry about ±5 points
-of noise, so frontier labels are triage, not rankings.
+manifest matches the official sources on all 13 targets** (a regression test).
+The same check covers the First Letters manifest below. Scores carry about ±5
+points of noise, so frontier labels are triage, not rankings.
 
 ## 2027 Grand Prize recto-coverage ledger
 
@@ -416,6 +413,61 @@ scroliq-provenance \
 The gate fails closed on wrong-volume lineage, a failing/mismatched recto ledger, coverage mesh IDs that differ from the submitted mesh set, training/prediction overlap, non-public or incorrectly licensed training data, prohibited higher-resolution same-scroll training sources, missing stochastic seeds or experiment runs, missing public held-out validation, same-volume training/validation overlap, broken mesh/render column traceability, package SHA mismatches, missing 1 cm scale-bar declarations, and incomplete banner coverage. It also records a canonical graph SHA-256, emits a complete provenance chain for every submitted render, and records held-out exclusion proofs. It deliberately does not set a performance threshold or claim papyrological legibility.
 
 See [the provenance-manifest specification](docs/grand-prize-provenance.md) and [example manifest](examples/grand-prize-provenance.example.json).
+
+## First Letters target qualification
+
+The same qualifier covers the 22 First Letters scans with `--prize
+first-letters`. Each prize manifest declares its own required bootstrap
+assets: First Letters requires only a surface prediction on the exact
+eligible scan (all 22 have one). Lasagna predictions are recorded but not
+required, because only 13 of the 22 have one.
+
+```bash
+scrollq-grand-prize --prize first-letters \
+  --volumes artifacts/2026-09-30-scrollq-n24-dense/volumes.json \
+  --out out/first-letters-targets.json
+
+# the same qualification on each disjoint-resample run
+scrollq-grand-prize --prize first-letters \
+  --volumes artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json \
+  --run run1 --out out/first-letters-targets-run1.json
+```
+
+On the published n24-dense scores the frontier is **PHerc0800, PHerc0813**;
+on the disjoint resample it is **PHerc0800, PHerc1545**. Only PHerc0800 is
+on the frontier in both runs, and it is there because of its six existing
+segments, not its scan quality. Among these 22 scans the two runs agree only
+at Spearman ρ ≈ 0.72, so the quality leader is a band (PHerc0813, PHerc1203,
+PHerc0358, PHerc1545, PHerc0846B), not a single scroll. Evidence:
+`artifacts/2026-09-30-first-letters-qualifier-n24-dense/`.
+
+### Exact-scan surface-prediction CT support
+
+`scroliq-support` measures how much of a released surface prediction lies on
+real CT material, on the exact eligible scan, with a bootstrap 95% interval.
+A *phantom* is a prediction voxel above 127 where the masked CT is exactly 0;
+support is 1 − phantoms / positives (the external `ct_support` definition).
+Prediction and CT must share one voxel grid, so a prediction made on another
+scan of the same scroll fails closed.
+
+```bash
+scroliq-support --prize first-letters --samples 256 \
+  --out artifacts/2026-09-30-first-letters-support/support_native.json
+python bin/import_ct_support.py first-letters \
+  artifacts/2026-09-30-first-letters-support/support_external.json
+```
+
+`bin/import_ct_support.py` replaces the hand-normalized import with one pinned
+to an external commit; it reproduces the earlier Grand Prize import exactly
+on all 12 shared scrolls. On the 18 scrolls where both sources are exact-scan
+evidence, 15 external values fall inside the native 95% interval (mean
+|difference| 0.043, max 0.111). The native run also gives the first
+exact-scan numbers for PHerc0846A, PHerc1203, PHerc1218 and PHerc0125;
+for PHerc1203 the higher-resolution scan's survey (0.698) overstated
+eligible-scan support (0.454) by about 0.24. Adding support as a third axis,
+**PHerc0175B, PHerc0306B, PHerc0490A and PHerc0800** are on the frontier in
+both resample runs. Evidence: `artifacts/2026-09-30-first-letters-support/`. This is a geometry-prior
+sanity metric, not ink or readability evidence.
 
 ## Do the scan metrics recover the documented protocol ordering?
 

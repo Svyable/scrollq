@@ -37,6 +37,16 @@ scrollq-grand-prize --volumes artifacts/2026-09-30-scrollq-n24-dense/volumes.jso
 
 ## Findings
 
+**Two independently built First Letters manifests agree.** The built-in
+`FIRST_LETTERS_MANIFEST` (hand-built from the data browser) matches the
+manifest derived here on all 22 targets (volume id, voxel size, energy,
+segments, released predictions, same-scroll higher-resolution scans;
+`scroliq-manifest --prize first-letters-2027 --compare-builtin` exits 0), and
+the qualification computed from the derived manifest is identical to
+`../2026-09-30-first-letters-qualifier-n24-dense/targets.json` on every
+target (volume, score, segments, qualification) and in its frontier
+(PHerc0800, PHerc0813).
+
 **Grand Prize manifest: no drift.** All 13 hand-copied targets agree with the
 derived manifest on volume id, voxel size, energy, public segment count, the
 released surface and lasagna prediction ids, and the prohibited
@@ -58,8 +68,9 @@ test (`test_builtin_grand_prize_manifest_matches_pinned_official_sources`).
   PHerc1203 (also a Grand Prize target, where it is a stated prohibition) and
   **PHerc0846A** (2.403 µm, `20260319102732`). The prizes page as pinned does
   not state a prohibition for First Letters; confirm with the organizers before
-  using data derived from that scan. No tool in this repository flagged PHerc0846A
-  before this derivation.
+  using data derived from that scan. The built-in First Letters manifest
+  (`scrollq.grand_prize.FIRST_LETTERS_MANIFEST`) also records it, and the
+  derivation here confirms it from the bucket index.
 
 **How to read the First Letters table.** The scan-health score is a narrow
 triage signal with roughly ±5 points of sampling noise

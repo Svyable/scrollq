@@ -5,7 +5,8 @@ from pathlib import Path
 import pytest
 
 from scrollq import prize_manifest as pm
-from scrollq.grand_prize import DEFAULT_MANIFEST, qualify
+from scrollq.grand_prize import (DEFAULT_MANIFEST, FIRST_LETTERS_MANIFEST,
+                                 qualify)
 from scrollq.bucket import load_json_maybe_gz
 
 ART = Path(__file__).resolve().parents[1] / "artifacts"
@@ -177,6 +178,53 @@ def test_cli_roundtrip(tmp_path, capsys):
     assert rc == 0
     m = json.loads(out.read_text())
     assert m["provenance"]["eligibility_sha256"] and len(m["targets"]) == 2
+    # synthetic sources cannot match the real built-in manifest: drift -> exit 1
     assert pm.main(["--eligibility", str(e), "--index", str(i), "--prize",
                     "first-letters-2027", "--as-of", "2026-10-01", "--out",
-                    str(out), "--compare-builtin"]) == 2
+                    str(out), "--compare-builtin"]) == 1
+    err = capsys.readouterr().err
+    assert "drift finding(s)" in err
+
+
+def test_builtin_first_letters_manifest_matches_pinned_official_sources():
+    """The hand-built First Letters manifest agrees with the pinned sources.
+
+    Two independently produced manifests (built by hand from the data browser,
+    and derived from the eligibility list + bucket index) agree on all 22
+    targets: volume id, voxel size, energy, segments, released predictions and
+    the same-scroll higher-resolution scans.
+    """
+    assert SNAP.exists() and INDEX.exists(), "pinned snapshots must be committed"
+    elig, esha = load_json_maybe_gz(str(SNAP / "prizeEligibility.json"))
+    index, isha = load_json_maybe_gz(str(INDEX))
+    derived = pm.derive_manifest("first-letters-2027", elig, index,
+                                 as_of="2026-10-01", eligibility_source="snap",
+                                 eligibility_sha256=esha, index_sha256=isha)
+    assert derived["problems"] == [] and len(derived["targets"]) == 22
+    assert pm.compare_targets(FIRST_LETTERS_MANIFEST, derived) == []
+
+
+def test_derived_manifest_feeds_the_canonical_qualifier_with_its_prize_name():
+    m = pm.derive_manifest("first-letters-2027", _elig(), _index(), **KW)
+    assert m["prize"] == "2027 First Letters"
+    volumes = [{"root": "x/PHerc0001/volumes/20250101000000-masked.zarr",
+                "ok": True, "score": 50.0}]
+    out = qualify(volumes, m)
+    assert out["prize"] == "2027 First Letters"
+    assert out["method"]["required_assets"] == ["surface_prediction"]
+    assert "2027 First Letters success prediction" in out["method"]["warning"]
+
+
+def test_compare_targets_sees_higher_res_scans_under_either_key():
+    ref = {"targets": [{"scroll": "S", "volume_id": "1", "voxel_size_um": 9.0,
+                        "energy_kev": 1, "segments": 0,
+                        "excluded_same_scroll_higher_res": [
+                            {"volume_id": "9"}]}]}
+    der = {"targets": [{"scroll": "S", "volume_id": "1", "voxel_size_um": 9.0,
+                        "energy_kev": 1, "segments": 0,
+                        "same_scroll_higher_res_scans": [{"volume_id": "9"}],
+                        "all_surface_predictions": [],
+                        "all_lasagna_predictions": []}]}
+    assert pm.compare_targets(ref, der) == []
+    der["targets"][0]["same_scroll_higher_res_scans"] = []
+    assert any("higher-resolution" in d for d in pm.compare_targets(ref, der))
