@@ -142,10 +142,11 @@ A quality score should not quietly look authoritative when the requested data co
 
 ```json
 {
-  "requested": 4,
-  "decoded": 4,
+  "requested": 12,
+  "decoded": 12,
   "complete": true,
   "rotate": 0,
+  "spread": 3,
   "shard_candidates": 27,
   "missing_shards": 0,
   "shard_read_failures": 0
@@ -153,6 +154,8 @@ A quality score should not quietly look authoritative when the requested data co
 ```
 
 Missing shards and transport/read failures are tracked separately, and partial sampling is explicitly marked incomplete.
+
+The `spread` parameter controls the per-dimension shard-candidate count (`spread³` candidates; default 3 → 27). A denser spread (e.g., 5 → 125) finds more present shards on sparse volumes — PHerc0813 goes from 2 to 12 decoded chunks — but costs more candidate probes. Denser is not automatically better: our diagnostic showed that when different shards are actually read, heterogeneous volumes produce noisier scores, so choose the spread that matches how much of the volume you need to cover.
 
 ## The data-quality suite
 
