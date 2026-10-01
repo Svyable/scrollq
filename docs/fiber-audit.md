@@ -52,7 +52,16 @@ The line geometry is then audited for:
 
 - **gaps**: a step longer than `--gap-factor` times that line's median
   non-zero step;
-- **sharp turns**: a direction change larger than `--turn-degrees`.
+- **sharp turns**: a direction change larger than `--turn-degrees`;
+- **control-line offsets**: persisted control points farther than
+  `--control-line-factor` (default 4) times the rendered line's median non-zero
+  step from their nearest `line_points` sample;
+- **control-order inversions**: consecutive control points whose nearest rendered
+  line indices move backward.
+
+The control-line threshold is relative to each fiber's own rendered sampling
+step, not an absolute voxel cutoff. These are review findings because close
+self-approaches can make nearest-point assignment ambiguous.
 
 The output separately summarizes native-trace spans, fallback spans,
 interpolation modes/goals, meeting-error ratios, persisted failure codes, and
