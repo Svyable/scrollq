@@ -40,7 +40,7 @@ OPEN_PROBLEMS: tuple[dict[str, str], ...] = (
         "id": "fiber-connectivity",
         "stage": "unwrapping",
         "challenge": "Trace fewer fibers correctly with reliable long-range connectivity.",
-        "scroliq": "planned",
+        "scroliq": "partial",
     },
     {
         "id": "winding-annotations",
@@ -193,6 +193,71 @@ def _label_stage(coverage: dict[str, Any] | None) -> dict[str, Any]:
             "surface or fiber labels are physically well localized."
         ),
     }
+
+
+def _fiber_stage(
+    volume_root: str,
+    audit: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if audit is None:
+        return {
+            "status": "unknown",
+            "open_problem": "fiber-connectivity",
+            "reason": "no volume-bound fiber audit was supplied",
+        }
+    if audit.get("diagnostic") != "fiber-trace-audit":
+        return {
+            "status": "excluded",
+            "open_problem": "fiber-connectivity",
+            "reason": "artifact is not a ScrolIQ fiber-trace-audit",
+        }
+
+    audit_root = audit.get("volume_root")
+    if not isinstance(audit_root, str) or not audit_root:
+        return {
+            "status": "excluded",
+            "open_problem": "fiber-connectivity",
+            "reason": (
+                "fiber audit has no exact volume_root binding; rerun "
+                "scroliq-fiber with --volume-root"
+            ),
+        }
+    if audit_root != volume_root:
+        return {
+            "status": "excluded",
+            "open_problem": "fiber-connectivity",
+            "reason": "fiber audit names a different volume root",
+        }
+
+    audit_status = audit.get("status")
+    if audit_status not in {"pass", "caution", "fail"}:
+        return {
+            "status": "excluded",
+            "open_problem": "fiber-connectivity",
+            "reason": f"unsupported fiber audit status: {audit_status!r}",
+        }
+
+    result = {
+        "status": "blocked" if audit_status == "fail" else "partial",
+        "open_problem": "fiber-connectivity",
+        "audit_status": audit_status,
+        "input_format": audit.get("input_format"),
+        "input": dict(audit.get("input") or {}),
+        "format_reference": dict(audit.get("format_reference") or {}),
+        "counts": dict(audit.get("counts") or {}),
+        "findings": list(audit.get("findings") or []),
+        "vc3d_fiber": dict(audit.get("vc3d_fiber") or {}),
+        "parameters": dict(audit.get("parameters") or {}),
+        "limitation": (
+            "A passing Fiber IQ audit establishes persisted-format/schema provenance "
+            "and simple line-continuity checks only. It does not establish that the "
+            "trace follows one physical papyrus fiber, remains on one sheet, or is "
+            "supported by local CT orientation evidence."
+        ),
+    }
+    if audit_status == "fail":
+        result["reason"] = "fiber evidence failed parse/schema validation"
+    return result
 
 
 def _winding_stage(
@@ -427,6 +492,7 @@ def build_passport(
     scan_map: dict[str, Any] | None = None,
     winding_audit: dict[str, Any] | None = None,
     mesh_audit: dict[str, Any] | None = None,
+    fiber_audit: dict[str, Any] | None = None,
     ink_audit: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build one evidence-preserving diagnostic passport from current artifacts."""
@@ -439,9 +505,7 @@ def build_passport(
             "no surface-prediction or surface-support diagnostic was supplied",
         ),
         "mesh": _mesh_stage(root, mesh_audit),
-        "fibers": _unknown_stage(
-            "fiber-connectivity", "no fiber tracing evidence was supplied"
-        ),
+        "fibers": _fiber_stage(root, fiber_audit),
         "winding": _winding_stage(root, winding_audit),
         "spiral": _unknown_stage(
             "spiral-fitting", "no spiral fit or constraint evaluation was supplied"
@@ -474,6 +538,49 @@ def build_passport(
                 "priority": "next-evidence",
                 "action": "run scroliq-scan-map so local scan variation is coordinate-traceable",
                 "open_problem": "scan-diagnostics",
+            }
+        )
+
+    fiber_status = stages["fibers"]["status"]
+    if fiber_status in {"unknown", "excluded"}:
+        actions.append(
+            {
+                "priority": "next-evidence",
+                "action": (
+                    "run scroliq-fiber with the exact --volume-root before "
+                    "using fiber traces as unwrapping evidence"
+                ),
+                "open_problem": "fiber-connectivity",
+            }
+        )
+    elif fiber_status == "blocked":
+        actions.append(
+            {
+                "priority": "high",
+                "action": "repair fiber parse/schema errors before using the trace",
+                "open_problem": "fiber-connectivity",
+            }
+        )
+    elif stages["fibers"].get("findings"):
+        actions.append(
+            {
+                "priority": "high",
+                "action": (
+                    f"review {len(stages['fibers']['findings'])} fiber geometry "
+                    "finding(s), then rerun the audit"
+                ),
+                "open_problem": "fiber-connectivity",
+            }
+        )
+    else:
+        actions.append(
+            {
+                "priority": "next-evidence",
+                "action": (
+                    "add CT-conditioned orientation/support and cross-fiber "
+                    "connectivity evidence; continuity alone does not prove sheet identity"
+                ),
+                "open_problem": "fiber-connectivity",
             }
         )
 
@@ -688,6 +795,7 @@ def main() -> None:
         help="optional volume-bound scroliq-winding JSON artifact",
     )
     ap.add_argument("--mesh-audit", default=None, help="optional volume-bound scroliq-mesh JSON artifact")
+    ap.add_argument("--fiber-audit", default=None, help="optional volume-bound scroliq-fiber JSON artifact")
     ap.add_argument("--ink-audit", default=None, help="optional volume-bound scroliq-ink-audit JSON artifact")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
@@ -715,6 +823,11 @@ def main() -> None:
         if args.mesh_audit
         else None
     )
+    fiber_audit = (
+        json.loads(Path(args.fiber_audit).read_text(encoding="utf-8"))
+        if args.fiber_audit
+        else None
+    )
     ink_audit = (
         json.loads(Path(args.ink_audit).read_text(encoding="utf-8"))
         if args.ink_audit
@@ -726,6 +839,7 @@ def main() -> None:
         scan_map=scan_map,
         winding_audit=winding_audit,
         mesh_audit=mesh_audit,
+        fiber_audit=fiber_audit,
         ink_audit=ink_audit,
     )
 

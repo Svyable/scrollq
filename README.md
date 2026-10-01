@@ -18,12 +18,13 @@ scroliq-passport \
   --coverage artifacts/2026-09-30-scrollq/coverage.json \
   --winding-audit out/PHerc0813.winding-audit.json \
   --mesh-audit out/PHerc0813.mesh-audit.json \
+  --fiber-audit out/PHerc0813.fiber-audit.json \
   --ink-audit out/PHerc0813.ink-audit.json \
   --root PHerc0813 \
   --out out/PHerc0813.passport.json
 ```
 
-Today the passport can directly populate data-access/decode provenance, sampled scan-health evidence, label/segment coverage, volume-bound winding inputs, native TIFXYZ mesh evidence, and ink-validation provenance. Surface support, fiber connectivity, winding geometry, spiral-fit accuracy, label localization, and biological ink identity stay explicitly `unknown` or `partial` until direct diagnostics are supplied. That is the contract: **measure the limiting stage; never manufacture confidence for missing evidence.**
+Today the passport can directly populate data-access/decode provenance, sampled scan-health evidence, label/segment coverage, volume-bound winding inputs, native TIFXYZ mesh evidence, volume-bound Fiber IQ, and ink-validation provenance. Surface support, physical fiber/sheet identity, winding geometry, spiral-fit accuracy, label localization, and biological ink identity stay explicitly `unknown` or `partial` until direct diagnostics are supplied. That is the contract: **measure the limiting stage; never manufacture confidence for missing evidence.**
 
 The implementation roadmap is mapped directly to the Challenge's open problems in [`docs/open-problems-alignment.md`](docs/open-problems-alignment.md).
 
@@ -95,13 +96,13 @@ turns* (a direction change above `--turn-degrees`, default 60).
 
 ```bash
 # Native VC3D fiber
-scroliq-fiber fiber.json --out fiber-audit.json
+scroliq-fiber fiber.json --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr --out fiber-audit.json
 
 # Existing CSV interchange
 scroliq-fiber traces.csv --out traces-audit.json
 
 # Optional CI/unwrapping gate for review findings
-scroliq-fiber fiber.json --fail-on-findings --out fiber-audit.json
+scroliq-fiber fiber.json --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr --fail-on-findings --out fiber-audit.json
 ```
 
 Fallback interpolation is evidence, not automatically a defect: it is reported
@@ -113,8 +114,9 @@ errors fail closed; geometry findings remain advisory unless
 The implementation has synthetic regression coverage for v1/v3/v4,
 schema drift, provenance, fallback accounting, geometry findings and CLI
 gating. A reproducible public run over the current June 2026 VC3D training
-fiber corpus is still missing, so the passport's fiber stage remains
-`unknown` until direct volume-bound evidence is supplied.
+fiber corpus is still missing. When a report is produced with the exact
+`--volume-root`, `scroliq-passport --fiber-audit ...` can carry it as partial
+Fiber IQ evidence while still refusing to infer physical fiber or sheet identity.
 
 ## Mesh IQ: native TIFXYZ audit
 

@@ -24,13 +24,13 @@ with `--format csv` or `--format vc3d-json`.
 
 ```bash
 # Native VC3D fiber
-scroliq-fiber fiber.json --out fiber.audit.json
+scroliq-fiber fiber.json --volume-root <exact CT root> --out fiber.audit.json
 
 # Existing CSV path
 scroliq-fiber traces.csv --out traces.audit.json
 
 # Make review findings block a CI/unwrapping pipeline.
-scroliq-fiber fiber.json --fail-on-findings --out fiber.audit.json
+scroliq-fiber fiber.json --volume-root <exact CT root> --fail-on-findings --out fiber.audit.json
 ```
 
 ## What the audit validates
@@ -70,7 +70,7 @@ as evidence rather than silently converting it into a failure verdict.
 
 ## Output and exit contract
 
-Every report is versioned JSON and records the input digest. Parse/schema errors
+Every report is versioned JSON and records the input digest. Supply `--volume-root` to bind the evidence to the exact CT volume; `scroliq-passport` rejects missing or mismatched bindings. Parse/schema errors
 produce `status: "fail"` and exit 2. Geometry review findings produce
 `status: "caution"` and normally exit 0. With `--fail-on-findings`, the same
 caution report exits 2 so CI or an unwrapping pipeline can opt into a hard gate.
@@ -104,5 +104,4 @@ by local paths rather than a reproducible public fiber URL. Until a public
 corpus location is pinned, the site describes this layer as implemented and
 tested, not as real-data validated.
 
-The next Fiber IQ evidence step is a public corpus run followed by CT-conditioned
-orientation/support diagnostics and cross-fiber connectivity checks.
+Volume-bound reports can now be attached with `scroliq-passport --fiber-audit fiber.audit.json`; the passport records them as partial evidence, never as proof of fiber/sheet identity. The next Fiber IQ evidence step is a public corpus run followed by CT-conditioned orientation/support diagnostics and cross-fiber connectivity checks.

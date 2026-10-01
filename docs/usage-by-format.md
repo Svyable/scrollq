@@ -64,10 +64,10 @@ published mesh in the open bucket.
 
 ```bash
 scroliq-winding --dataset <dir with abs_winding.json etc.> --umbilicus <umbilicus file> --out out/winding.json
-scroliq-fiber fiber.json --out out/fiber.json\nscroliq-fiber fiber.json --fail-on-findings --out out/fiber.gated.json\n# CSV remains supported:\nscroliq-fiber traces.csv --out out/fibers.csv-audit.json
+scroliq-fiber fiber.json --volume-root <exact CT root> --out out/fiber.json\nscroliq-fiber fiber.json --volume-root <exact CT root> --fail-on-findings --out out/fiber.gated.json\n# CSV remains supported:\nscroliq-fiber traces.csv --out out/fibers.csv-audit.json
 ```
 
-Native VC3D JSON preserves interpolation mode, tracer acceptance diagnostics, fallback/failure codes, v4 span tags, and exact-file SHA-256. See `docs/fiber-audit.md`.\n\n## Ink\n
+Native VC3D JSON preserves interpolation mode, tracer acceptance diagnostics, fallback/failure codes, v4 span tags, and exact-file SHA-256. Bind it with the exact `--volume-root` before attaching it to a passport; cross-volume or unbound Fiber IQ is excluded. See `docs/fiber-audit.md`.\n\n## Ink\n
 ```bash
 scroliq-ink-validate --prediction pred.tif --labels labels.tif --validation-mask mask.tif \
   --split-id my-split --held-out --training-overlap none \
@@ -83,8 +83,8 @@ See `docs/ink-validation.md` for what each control falsifies.
 ```bash
 scroliq-passport --volumes artifacts/2026-09-30-scrollq-n24-dense/volumes.json \
   --root <volume id> --scan-map out/PHerc0813.scan-map.json \
-  --mesh-audit out/segment.mesh.json --winding-audit out/winding.json \
-  --out out/passport.json
+  --mesh-audit out/segment.mesh.json --fiber-audit out/fiber.json \
+  --winding-audit out/winding.json --out out/passport.json
 ```
 
 `docs/walkthrough-pherc0813.md` follows one Grand Prize target through every

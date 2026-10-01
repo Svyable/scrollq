@@ -20,6 +20,8 @@ MARKERS = (
     'scroliq-fiber',
     'vc3d_fiber',
     '--fail-on-findings',
+    '--volume-root',
+    'cross-volume evidence',
     'scroliq-ink-audit',
     'Evidence contracts',
     'Data scale',

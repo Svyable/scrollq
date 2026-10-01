@@ -131,13 +131,14 @@ def audit_rows(rows, gap_factor: float = 4.0, turn_degrees: float = 60.0) -> dic
     }
 
 
-def audit_csv(path, **kwargs) -> dict:
+def audit_csv(path, *, volume_root: str | None = None, **kwargs) -> dict:
     """Audit a CSV file and record its SHA-256 for provenance."""
     path = Path(path)
     with path.open(newline="", encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))
     out = audit_rows(rows, **kwargs)
     out["input_format"] = "csv"
+    out["volume_root"] = volume_root
     out["input"] = {
         "path": str(path),
         "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
@@ -280,6 +281,7 @@ def _segment_summary(raw: Any, index: int, version: int) -> dict[str, Any]:
 def audit_vc3d_json(
     path: str | Path,
     *,
+    volume_root: str | None = None,
     gap_factor: float = 4.0,
     turn_degrees: float = 60.0,
 ) -> dict:
@@ -298,6 +300,7 @@ def audit_vc3d_json(
             "schema_version": SCHEMA_VERSION,
             "status": "fail",
             "input_format": "vc3d_fiber_json",
+            "volume_root": volume_root,
             "input": provenance,
             "counts": {"rows": 0, "valid_traces": 0, "parse_errors": 1,
                        "gaps": 0, "sharp_turns": 0},
@@ -387,6 +390,7 @@ def audit_vc3d_json(
         out["errors"].extend(errors)
         out["counts"]["parse_errors"] += len(errors)
     out["input_format"] = "vc3d_fiber_json"
+    out["volume_root"] = volume_root
     out["input"] = provenance
     out["format_reference"] = {
         "repository": "ScrollPrize/villa",
@@ -465,14 +469,15 @@ def main(argv=None) -> None:
         "--format", choices=("auto", "csv", "vc3d-json"), default="auto",
         help="input format; auto uses .json for VC3D JSON and CSV otherwise",
     )
+    ap.add_argument("--volume-root", default=None, help="exact CT volume root this fiber belongs to")
     ap.add_argument("--gap-factor", type=float, default=4.0)
     ap.add_argument("--turn-degrees", type=float, default=60.0)
     ap.add_argument("--fail-on-findings", action="store_true")
     ap.add_argument("--out")
     a = ap.parse_args(argv)
     result = audit_path(
-        a.input, input_format=a.format, gap_factor=a.gap_factor,
-        turn_degrees=a.turn_degrees,
+        a.input, input_format=a.format, volume_root=a.volume_root,
+        gap_factor=a.gap_factor, turn_degrees=a.turn_degrees,
     )
     text = json.dumps(result, indent=2)
     if a.out:
