@@ -177,8 +177,9 @@ def test_native_vc3d_v4_is_audited_and_metadata_summarized(tmp_path):
     from scrollq.fiber_audit import audit_vc3d_json
 
     path = _write_vc3d(tmp_path, version=4)
-    out = audit_vc3d_json(path)
+    out = audit_vc3d_json(path, volume_root="volume-A")
     assert out["status"] == "pass"
+    assert out["volume_root"] == "volume-A"
     assert out["input_format"] == "vc3d_fiber_json"
     assert out["vc3d_fiber"]["version"] == 4
     assert out["format_reference"]["commit"] == "56d7c3aeea4bbccf5f56b195ce2a44ea2cf601dd"
