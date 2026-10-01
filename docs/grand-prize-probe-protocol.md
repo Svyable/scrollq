@@ -82,7 +82,7 @@ The six held-out regions must never become spiral-fit inputs. They exist only
 to test whether the fitted surface predicts independently verified geometry.
 
 After the split is frozen, certify spatial separation with
-`scroliq-geometry-probe --minimum-fit-holdout-gap-voxels <N>`, where `N` is
+`scrollq-geometry-probe --minimum-fit-holdout-gap-voxels <N>`, where `N` is
 predeclared from the largest spatial influence radius of any fit input or
 derived supervision used by the experiment. The certificate measures the
 Euclidean gap between fit and held-out candidate axis-aligned XYZ boxes in
