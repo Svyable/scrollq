@@ -21,6 +21,9 @@ def main() -> None:
                     help="chunks decoded per volume")
     ap.add_argument("--spread", type=int, default=3,
                     help="per-dimension shard-candidate count (spread^3 candidates)")
+    ap.add_argument("--rotate", type=int, default=0,
+                    help="shift the shard-candidate order for a different "
+                         "deterministic sample (resampling-stability checks)")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--out-dir", required=True)
     args = ap.parse_args()
@@ -33,7 +36,7 @@ def main() -> None:
         print(f"scoring {root}", flush=True)
         try:
             return score_volume(args.base, root, samples=args.samples,
-                                spread=args.spread)
+                                spread=args.spread, rotate=args.rotate)
         except Exception as exc:
             # Containment, not suppression: the failure is recorded in
             # volumes.json so one bad volume cannot discard a whole
