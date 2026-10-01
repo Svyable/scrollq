@@ -308,14 +308,24 @@ def _mesh_stage(
         "bbox": dict(audit.get("bbox") or {}),
         "spacing": dict(audit.get("spacing") or {}),
         "quads": dict(audit.get("quads") or {}),
+        "self_intersection": dict(audit.get("self_intersection") or {}),
         "findings": list(audit.get("findings") or []),
         "error_count": int(audit.get("error_count") or 0),
         "warning_count": int(audit.get("warning_count") or 0),
         "limitation": (
-            "A passing mesh audit establishes TIFXYZ structure, validity/topology, "
-            "metadata, local spacing, normal continuity, and flattening-distortion checks only. "
-            "It does not establish CT support, correct winding identity, or freedom from "
-            "nonlocal self-intersections."
+            (
+                "A passing mesh audit establishes TIFXYZ structure, validity/topology, "
+                "metadata, local spacing, normal continuity, flattening-distortion checks, "
+                "and a validated VC3D transverse self-intersection census under its recorded "
+                "parameters. It does not establish CT support or correct winding identity."
+            )
+            if (audit.get("self_intersection") or {}).get("status") == "pass"
+            else (
+                "A passing mesh audit establishes TIFXYZ structure, validity/topology, "
+                "metadata, local spacing, normal continuity, and flattening-distortion checks only. "
+                "It does not establish CT support, correct winding identity, or freedom from "
+                "nonlocal self-intersections."
+            )
         ),
     }
     if audit_status == "fail":
@@ -524,10 +534,20 @@ def build_passport(
             }
         )
     else:
+        selfcross_status = (
+            stages["mesh"].get("self_intersection") or {}
+        ).get("status")
+        if selfcross_status == "pass":
+            action = "add CT-support and sheet-identity evidence to the mesh"
+        else:
+            action = (
+                "add CT-support and sheet-identity evidence, and run VC3D "
+                "vc_tifxyz_selfcross for nonlocal transverse-intersection evidence"
+            )
         actions.append(
             {
                 "priority": "next-evidence",
-                "action": "add CT-support, sheet-identity, and nonlocal self-intersection evidence to the mesh",
+                "action": action,
                 "open_problem": "mesh-connectivity",
             }
         )
