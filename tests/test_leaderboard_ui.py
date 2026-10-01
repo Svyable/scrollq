@@ -15,6 +15,11 @@ MARKERS = (
     'e.key === "Escape"',
     'label-coverage candidates',
     'Label-coverage candidate:',
+    'Winding annotations',
+    'scroliq-mesh',
+    'scroliq-ink-audit',
+    'Evidence contracts',
+    'Data scale',
 )
 
 
