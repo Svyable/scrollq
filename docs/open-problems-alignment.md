@@ -44,7 +44,9 @@ A passport does **not** infer unmeasured stages from the scan-quality score. Tod
 - `scan`: measured, based on sampled level-0 voxels;
 - `labels`: partial when coverage data is supplied;
 - `winding`: partial when a structurally valid winding audit is explicitly bound to the exact selected volume; unbound/mismatched artifacts are excluded;
-- `mesh`: partial when a volume-bound native TIFXYZ audit is supplied;\n- `ink`: partial when a volume-bound leakage/provenance/control audit is supplied;\n- `surface`, `fibers`, `spiral`: `unknown` until direct evidence is supplied.
+- `mesh`: partial when a volume-bound native TIFXYZ audit is supplied;
+- `ink`: partial when a volume-bound leakage/provenance/control audit is supplied;
+- `surface`, `fibers`, `spiral`: `unknown` until direct evidence is supplied.
 
 That asymmetry is intentional. It makes missing evidence visible instead of disguising it as confidence.
 
