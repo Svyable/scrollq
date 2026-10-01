@@ -186,7 +186,7 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
   <div class="eyebrow">VESUVIUS CHALLENGE · SEPTEMBER 2026</div>
   <h1>Scrol<span class="q">IQ</span></h1>
   <p class="tagline">Diagnostics for reading Herculaneum scrolls. <em>Find the bottleneck.</em></p>
-  <p class="lede">ScrolIQ is evolving from a scan-quality survey into an observability layer for the Vesuvius Challenge pipeline. The current score still measures sampled CT health from real level-0 voxels; surface, mesh, fiber, spiral, label-localization, and ink state remain explicitly unknown until direct evidence exists. See the <a href="https://scrollprize.org/2026_open_problems">official open problems</a>, the <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">alignment roadmap</a>, and the <a href="#grand-prize">2027 Grand Prize campaign →</a></p>
+  <p class="lede">ScrolIQ is evolving from a scan-quality survey into an observability layer for the Vesuvius Challenge pipeline. The current score still measures sampled CT health from real level-0 voxels, and downstream state is never inferred from that score. Volume-bound passports can now attach spatial scan evidence, winding-input audits, native TIFXYZ Mesh IQ, and ink leakage/provenance audits; CT surface support, fiber connectivity, spiral-fit accuracy, label localization, and biological ink identity remain unknown until direct evidence exists. See the <a href="https://scrollprize.org/2026_open_problems">official open problems</a>, the <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">alignment roadmap</a>, and the <a href="#grand-prize">2027 Grand Prize campaign →</a></p>
   <div class="stats">
     <div class="stat"><div class="n">64</div><div class="l">scroll volumes scored</div></div>
     <div class="stat"><div class="n">13.5&ndash;78.3</div><div class="l">score range (0&ndash;100)</div></div>
@@ -200,16 +200,28 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
 
 <div class="panel alignment" id="pipeline"><h2>Open-problem diagnostics<span class="sub">ScrolIQ maps evidence to the Vesuvius Challenge pipeline instead of treating one score as readiness.</span></h2>
 <div class="problem-grid">
-  <div class="problem"><div><h3>Scan + data</h3><span class="state live">LIVE</span></div><p>Real-voxel health, decode provenance, and coordinate-preserving spatial scan maps. Next: validated layer-separability and decohesion diagnostics.</p></div>
+  <div class="problem"><div><h3>Scan diagnostics</h3><span class="state live">LIVE</span></div><p>Real-voxel health and coordinate-preserving spatial scan maps. Next: validated layer-separability and decohesion diagnostics.</p></div>
   <div class="problem"><div><h3>Surface topology</h3><span class="state next">NEXT</span></div><p>CT support, competing sheets, topology risk, and surface-placement uncertainty.</p></div>
-  <div class="problem"><div><h3>Mesh connectivity</h3><span class="state next">NEXT</span></div><p>Holes, mergers, sheet switches, self-intersections, and flattening distortion.</p></div>
+  <div class="problem"><div><h3>Mesh connectivity</h3><span class="state live">LIVE</span></div><p><code>scroliq-mesh</code> audits native TIFXYZ validity, connected components, enclosed gaps, bbox/scale consistency, edge jumps, severe normal reversals, and flattening distortion. Next: CT support, sheet identity, and nonlocal self-intersections.</p></div>
   <div class="problem"><div><h3>Fiber connectivity</h3><span class="state plan">PLANNED</span></div><p>Continuity and orientation confidence for long-range papyrus fiber traces.</p></div>
+  <div class="problem"><div><h3>Winding annotations</h3><span class="state live">LIVE</span></div><p><code>scroliq-winding</code> validates PointCollections structure, exact-file provenance, volume binding, winding semantics, and axial annotation coverage. Next: patch attachment, graph consistency, and holonomy.</p></div>
   <div class="problem"><div><h3>Spiral fitting</h3><span class="state plan">PLANNED</span></div><p>Held-out constraint residuals, sensitivity, and under-constrained regions.</p></div>
   <div class="problem"><div><h3>Label quality</h3><span class="state live">LIVE</span></div><p>Label–volume coverage join: all 70 published ink-detection labels sit on PHercParis4 while 16 top-quartile volumes have zero published ink labels and are flagged as <b>label-coverage candidates</b> for review. This is a coverage gap, not evidence of ink or surface readiness. Next: physical label offset, snapping candidates, review queues.</p></div>
-  <div class="problem"><div><h3>Ink reliability</h3><span class="state plan">PLANNED</span></div><p>Leakage checks, held-out validation, perturbation stability, cross-scroll evidence.</p></div>
-  <div class="problem"><div><h3>Grand Prize</h3><span class="state plan">TARGET</span></div><p>One evidence trail from full recto coverage to tifxyz, renders, validation, and VC3D.</p></div>
+  <div class="problem"><div><h3>Ink reliability</h3><span class="state live">LIVE</span></div><p><code>scroliq-ink-audit</code> fails closed on declared train/evaluation overlap and audits checkpoint, seed, held-out-run, and falsification-control provenance. It is an evidence audit, not an ink verdict. Next: attach measured perturbation and cross-scroll results.</p></div>
+  <div class="problem"><div><h3>Data scale</h3><span class="state live">LIVE</span></div><p>Cloud-native partial reads, decode provenance, exact coordinate bindings, file hashes, and machine-readable artifacts keep evidence inspectable across stages.</p></div>
+  <div class="problem"><div><h3>Grand Prize</h3><span class="state plan">TARGET</span></div><p>One evidence trail from full recto coverage to TIFXYZ, renders, validation, and VC3D.</p></div>
 </div>
 <p class="alignment-links"><a href="https://scrollprize.org/2026_open_problems">Official 2026 Open Problems</a> · <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">ScrolIQ alignment roadmap</a></p>
+</div>
+
+<div class="panel" id="contracts"><h2>Evidence contracts<span class="sub">What a passing diagnostic proves — and what it deliberately leaves unknown.</span></h2>
+  <div class="actiongrid">
+    <div><h3>Mesh IQ</h3><p><b>Proves:</b> native TIFXYZ structure/provenance and selected grid-local geometry checks. <b>Does not prove:</b> CT support, correct sheet identity, or global self-intersection freedom.</p></div>
+    <div><h3>Winding IQ</h3><p><b>Proves:</b> volume-bound PointCollections input integrity and descriptive axial coverage. <b>Does not prove:</b> patch attachment, consistent cycles, or spiral-fit accuracy.</p></div>
+    <div><h3>Ink IQ</h3><p><b>Proves:</b> declared spatial separation, checkpoint/seed provenance, and falsification-control coverage. <b>Does not prove:</b> that a prediction is ink.</p></div>
+    <div><h3>Passport</h3><p>Cross-volume artifacts are excluded and failed audits block their stage. A passing component remains partial until the next direct evidence layer exists.</p></div>
+  </div>
+  <p class="alignment-links"><a href="https://github.com/Svyable/scrollq#mesh-iq-native-tifxyz-audit">Mesh IQ usage</a> · <a href="https://github.com/Svyable/scrollq#winding-annotation-audit">Winding IQ usage</a> · <a href="https://github.com/Svyable/scrollq#ink-iq-leakage-and-falsification-evidence-audit">Ink IQ usage</a></p>
 </div>
 
 <div class="panel" id="grand-prize"><h2>2027 Grand Prize campaign<span class="sub">Exact eligible inputs, held-out geometry, and ink falsification before whole-scroll commitment.</span></h2>
