@@ -589,3 +589,18 @@ def test_local_ink_report_mismatch_fails_closed(tmp_path):
     result = validate_manifest(manifest, root_dir=tmp_path)
 
     assert "GP_INK_EVIDENCE_MISMATCH" in _codes(result)
+
+
+def test_published_example_manifest_validates_under_current_schema():
+    """examples/grand-prize-provenance.example.json is what the docs point
+    people at; it must pass the current schema, not a retired one."""
+    import json
+    from pathlib import Path
+
+    from scrollq.provenance import SCHEMA_VERSION, validate_manifest
+
+    path = (Path(__file__).resolve().parents[1] / "examples"
+            / "grand-prize-provenance.example.json")
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    assert manifest["schema_version"] == SCHEMA_VERSION
+    assert validate_manifest(manifest)["errors"] == []
