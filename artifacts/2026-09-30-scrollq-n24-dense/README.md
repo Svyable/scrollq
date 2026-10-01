@@ -1,4 +1,4 @@
-# ScrollQ campaign — 2026-09-30 (n=24, dense 5×5×5 grid)
+# ScrolIQ campaign — 2026-09-30 (n=24, dense 5×5×5 grid)
 
 The published September 2026 leaderboard. Supersedes
 `artifacts/2026-09-30-scrollq-n12/` (12 samples, 3×3×3 grid) and

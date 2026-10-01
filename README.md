@@ -6,7 +6,7 @@ ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](h
 
 **[Live scan-quality survey](https://svyable.github.io/scrollq/)** · **[Open-problems alignment](docs/open-problems-alignment.md)** · **[September 2026 Progress Prize write-up](https://svyable.github.io/scrollq/september-2026.html)** · **[Reproducible campaign artifacts](artifacts/2026-09-30-scrollq/)**
 
-> The existing 0–100 ScrollQ score is a **scan-health triage signal, not a readability or Grand Prize readiness score**. ScrolIQ treats unmeasured downstream stages as unknown rather than inferring them from CT quality.
+> The existing 0–100 ScrolIQ score is a **scan-health triage signal, not a readability or Grand Prize readiness score**. ScrolIQ treats unmeasured downstream stages as unknown rather than inferring them from CT quality.
 
 ## Diagnostic passport
 
@@ -118,7 +118,7 @@ The command fails closed when the mask is empty or single-class, inputs are malf
 
 The Vesuvius pipeline has an allocation problem as well as an algorithm problem. Expert segmentation time, labeling effort, and GPU budgets are limited, while scan quality varies substantially across volumes.
 
-ScrollQ makes that hidden variable visible.
+ScrolIQ makes that hidden variable visible.
 
 Instead of treating every volume as equally promising, it answers three practical questions:
 
@@ -142,9 +142,9 @@ The repository includes the exact outputs behind the September 30, 2026 campaign
 
 The point is not that one heuristic ranking is final. The point is that **data quality and label coverage can be measured together**, turning an implicit resource-allocation decision into an inspectable one.
 
-## How ScrollQ works
+## How ScrolIQ works
 
-For each volume, ScrollQ samples up to four **128³** chunks from the full-resolution level and decodes them through the real volcomp decoder provided by [zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit), which vendors MIT-licensed `libvolcomp`.
+For each volume, ScrolIQ samples up to four **128³** chunks from the full-resolution level and decodes them through the real volcomp decoder provided by [zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit), which vendors MIT-licensed `libvolcomp`.
 
 Sampling is deterministic and spread across the three-dimensional shard grid. Masked background is skipped rather than misclassified as bad data, and every result records whether the requested sampling budget was actually achieved.
 
@@ -201,7 +201,7 @@ The calibration and weights are deliberately visible in [`src/scrollq/score.py`]
 
 ## Sampling provenance is part of the result
 
-A quality score should not quietly look authoritative when the requested data could not be read. ScrollQ therefore emits sampling provenance alongside every score:
+A quality score should not quietly look authoritative when the requested data could not be read. ScrolIQ therefore emits sampling provenance alongside every score:
 
 ```json
 {
@@ -225,10 +225,10 @@ The `spread` parameter controls the per-dimension shard-candidate count (`spread
 
 ## The data-quality suite
 
-ScrollQ is the prioritization half of a two-part data-quality suite:
+ScrolIQ is the prioritization half of a two-part data-quality suite:
 
 - **[zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit)** — integrity: *don’t train on lies*
-- **ScrollQ** — quality prioritization: *train on the best first*
+- **ScrolIQ** — quality prioritization: *train on the best first*
 
 `scrollq-health` combines both into one volume-level report:
 
@@ -289,7 +289,7 @@ python -m pytest tests/ -q
 
 ## Label-coverage analysis
 
-ScrollQ can join quality scores with discovered ink-detection and surface-volume roots from the open-data audit:
+ScrolIQ can join quality scores with discovered ink-detection and surface-volume roots from the open-data audit:
 
 ```bash
 scrollq-coverage \
@@ -310,7 +310,7 @@ Volumes in the top quality quartile with no discovered ink labels are flagged **
 
 `scrollq-grand-prize` narrows the 13 current Grand Prize volumes without
 pretending that scan quality predicts readability. It joins the exact
-prize-eligible volume IDs to ScrollQ scores and compares candidates on a
+prize-eligible volume IDs to ScrolIQ scores and compares candidates on a
 **Pareto frontier** over two auditable axes: scan-quality score and the number
 of existing public segments. Released surface and lasagna predictions are
 treated as bootstrap requirements rather than arbitrary weighted bonuses.
@@ -328,14 +328,14 @@ higher-resolution 2.403 µm scan is recorded as excluded rather than silently
 substituted for the eligible 9.362 µm volume.
 
 With the September 30 campaign scores and current public segment counts, the
-weight-free frontier contains **PHerc0813** (highest ScrollQ quality among the
+weight-free frontier contains **PHerc0813** (highest ScrolIQ quality among the
 13) and **PHerc1447** (15 existing segments). PHerc0800 remains useful as a
 geometry testbed because it has six segments, but it is dominated by PHerc1447
 on both current qualifier axes. This is campaign triage only, not an
 ink-presence or Grand Prize success prediction.
 
 An optional sensitivity pass can add externally measured **surface-prediction
-CT support** without changing the primary ScrollQ score or frontier:
+CT support** without changing the primary ScrolIQ score or frontier:
 
 ```bash
 scrollq-grand-prize \

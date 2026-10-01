@@ -1,6 +1,6 @@
 # 2027 Grand Prize target qualifier — 2026-09-30
 
-Frozen output from the first ScrollQ Grand Prize qualification pass.
+Frozen output from the first ScrolIQ Grand Prize qualification pass.
 
 Primary reproduction:
 
@@ -10,7 +10,7 @@ scrollq-grand-prize \
   --out /tmp/grand-prize-targets.json
 ```
 
-Primary method: a weight-free Pareto frontier over the existing ScrollQ
+Primary method: a weight-free Pareto frontier over the existing ScrolIQ
 scan-quality score and current public segment count. Surface and lasagna
 predictions are required bootstrap assets. This is campaign triage, not a
 readability or ink prediction.

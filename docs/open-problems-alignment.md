@@ -10,7 +10,7 @@ The central rule is simple:
 
 > Diagnose the limiting stage with explicit evidence. Do not collapse unknown downstream state into one synthetic readiness score.
 
-The existing ScrollQ score remains useful, but it means one narrow thing: sampled CT health. It is not a surface, mesh, ink, or Grand Prize readiness score.
+The existing ScrolIQ score remains useful, but it means one narrow thing: sampled CT health. It is not a surface, mesh, ink, or Grand Prize readiness score.
 
 ## Alignment map
 

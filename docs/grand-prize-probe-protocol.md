@@ -41,7 +41,7 @@ For each target:
    where available.
 2. Run zarr-pyramid-audit against the CT, surface prediction, and lasagna
    inputs.
-3. Run ScrollQ against the exact eligible CT volume.
+3. Run ScrolIQ against the exact eligible CT volume.
 4. Record the surface-prediction and lasagna model IDs and pyramid levels.
 5. Fail closed on high-severity storage/integrity findings.
 

@@ -123,7 +123,7 @@ def _scan_stage(
         "components": components,
         "sampling": sampling,
         "limitation": (
-            "The legacy ScrollQ score is sparse whole-volume triage. Spatial "
+            "The legacy ScrolIQ score is sparse whole-volume triage. Spatial "
             "diagnostics, when supplied, remain sampled observations rather than "
             "a claim that every voxel has been characterized."
         ),
@@ -625,9 +625,9 @@ def main() -> None:
     ap = argparse.ArgumentParser(
         description="Build a Challenge-aligned ScrolIQ diagnostic passport"
     )
-    ap.add_argument("--volumes", required=True, help="ScrollQ volumes.json")
+    ap.add_argument("--volumes", required=True, help="ScrolIQ volumes.json")
     ap.add_argument("--root", required=True, help="exact volume root or unique substring")
-    ap.add_argument("--coverage", default=None, help="optional ScrollQ coverage.json")
+    ap.add_argument("--coverage", default=None, help="optional ScrolIQ coverage.json")
     ap.add_argument("--scan-map", default=None, help="optional ScrolIQ spatial scan map")
     ap.add_argument(
         "--winding-audit",

@@ -681,7 +681,7 @@ def main() -> None:
     ap.add_argument(
         "--volume-root",
         help=(
-            "optional exact ScrollQ/CT volume root binding; required when this "
+            "optional exact ScrolIQ/CT volume root binding; required when this "
             "artifact will be attached to a ScrolIQ passport"
         ),
     )

@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>September 2026 submission — ScrollQ / ScrolIQ</title>
-<meta name="description" content="ScrollQ / ScrolIQ: reproducible scan-health triage and diagnostic provenance for Vesuvius scroll data. Measure the bottleneck before spending scarce annotation and GPU time.">
+<title>September 2026 submission — ScrolIQ</title>
+<meta name="description" content="ScrolIQ: reproducible scan-health triage and diagnostic provenance for Vesuvius scroll data. Measure the bottleneck before spending scarce annotation and GPU time.">
 <style>
 :root{--bg:#0d0b08;--panel:#161310;--panel2:#1c1813;--line:#2c251b;
 --ink:#ece3d2;--muted:#a89880;--dim:#6f6350;
@@ -60,7 +60,7 @@ footer a{color:var(--muted)}
 
 <header class="hero"><div class="wrap">
 <div class="eyebrow">VESUVIUS CHALLENGE · SEPTEMBER 2026 PROGRESS PRIZE</div>
-<h1>ScrollQ / ScrolIQ</h1>
+<h1>ScrolIQ</h1>
 <p class="tagline">Reproducible scan-health triage and diagnostic provenance. <em>Measure the bottleneck first.</em></p>
 <p class="byline">Submission by <b><a href="https://github.com/Svyable">Sven</a></b> (+ Muse, AI assistant)</p>
 
@@ -81,7 +81,7 @@ Companion integrity gate: <a href="https://github.com/Svyable/zarr-pyramid-audit
 <div class="wrap" style="margin-top:2.5rem">
 
 <div class="panel"><h2><span class="q">(1)</span> Which scroll data did you work on?</h2>
-<p>ScrollQ was run on the public scroll-volume corpus rather than a hand-picked showcase:</p>
+<p>ScrolIQ was run on the public scroll-volume corpus rather than a hand-picked showcase:</p>
 <ul>
 <li><b>64 / 64 listed volcomp CT volumes</b> in <code>volumes.txt</code>, decoded from the public
 <code>dl.ash2txt.org</code> store with the real volcomp decoder. The frozen September campaign uses
@@ -98,7 +98,7 @@ be compared against a scroll that has already been completely virtually unwrappe
 
 <div class="panel"><h2><span class="q">(2)</span> How does it increase the probability of reading the scrolls?</h2>
 <p>The scarce resources in virtual unwrapping are expert attention, annotation time, and compute.
-ScrollQ makes the scan-quality part of that allocation decision measurable instead of implicit.
+ScrolIQ makes the scan-quality part of that allocation decision measurable instead of implicit.
 It does not claim to know which scroll contains the easiest text; it tells the team what the CT
 data actually supports before expensive downstream work begins.</p>
 <ul>
@@ -199,7 +199,7 @@ and the tested CLIs in <code>src/scrollq/</code>.</td></tr>
 </tbody></table></div>
 
 <div class="panel"><h2>2027 Grand Prize bridge</h2>
-<p>ScrollQ / ScrolIQ is not an unrolling or ink-detection submission by itself. Its role is to make
+<p>ScrolIQ is not an unrolling or ink-detection submission by itself. Its role is to make
 the path to a qualifying full-scroll submission harder to fool: choose exact eligible data, preserve
 spatial evidence, expose missing constraints, bind artifacts to the correct CT root, and make provenance
 fail closed before a result is packaged.</p>
@@ -216,7 +216,7 @@ each candidate scroll: <i>what specific, evidenced bottleneck prevents the next 
 complete, low-distortion, legible, reproducible unrolling?</i></div></div>
 
 <div class="panel"><h2>Honest scope</h2>
-<p><b>The 0–100 ScrollQ score is scan-health triage only.</b> It is not readability, surface quality,
+<p><b>The 0–100 ScrolIQ score is scan-health triage only.</b> It is not readability, surface quality,
 ink quality, or Grand Prize readiness. It does not infer text from CT texture. A high score does not
 mean a scroll will read; a low score does not prove it will not. The score weights are visible in
 <code>src/scrollq/score.py</code>, and the September stability gate is published as failed.</p>
@@ -232,7 +232,7 @@ the Vesuvius open data.</p>
 <p><a href="https://github.com/Svyable/zarr-pyramid-audit">repo</a> ·
 <a href="https://svyable.github.io/zarr-pyramid-audit/">dashboard</a></p></div>
 
-<div class="card"><h3>ScrollQ</h3>
+<div class="card"><h3>ScrolIQ</h3>
 <p><b>Train on the best evidence first.</b> Real-voxel scan-health triage, explicit sampling provenance,
 coverage joins, stability tests, and the live evaluator leaderboard.</p>
 <p><a href="./">leaderboard</a> ·

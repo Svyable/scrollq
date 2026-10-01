@@ -1,4 +1,4 @@
-# AGENTS.md — ScrollQ
+# AGENTS.md — ScrolIQ
 
 Instructions for AI coding agents working in this repo. Humans: the
 contributing guide lives at `.github/CONTRIBUTING.md`.
