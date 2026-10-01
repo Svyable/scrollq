@@ -1,0 +1,802 @@
+{
+  "schema_version": 1,
+  "created": "2026-09-30",
+  "scroll": "PHerc0813",
+  "prize_volume_id": "20250821151723",
+  "source_candidate_pool": "artifacts/2026-09-30-grand-prize-qualifier/geometry_candidate_pool.json",
+  "split": {
+    "status": "frozen",
+    "method": "Sort the 12 locked axial windows by bbox-derived z center; partition into three equal-count bands of four; in each band hold out the window whose z center is nearest that band's mean (ties to lower z). Both w020 and w100 at that window share the held-out role. Use only the central 256 z-slice core of every candidate as a fit/evaluation unit.",
+    "uses_quality_or_ink": false,
+    "core_depth_slices": 256,
+    "fit_windows": [
+      4704,
+      5296,
+      7104,
+      7696,
+      8288,
+      11904,
+      12496,
+      13088,
+      14896
+    ],
+    "held_out_windows": [
+      6496,
+      11296,
+      14304
+    ],
+    "fit_candidates": 18,
+    "held_out_candidates": 6,
+    "bands": [
+      {
+        "band": 1,
+        "windows": [
+          {
+            "window_z": 4704,
+            "z_center": 5103.442626953125
+          },
+          {
+            "window_z": 5296,
+            "z_center": 5696.110595703125
+          },
+          {
+            "window_z": 6496,
+            "z_center": 6896.60546875
+          },
+          {
+            "window_z": 7104,
+            "z_center": 7504.1436767578125
+          }
+        ],
+        "mean_z_center": 6300.075592041016,
+        "held_out_window_z": 6496
+      },
+      {
+        "band": 2,
+        "windows": [
+          {
+            "window_z": 7696,
+            "z_center": 8095.0914306640625
+          },
+          {
+            "window_z": 8288,
+            "z_center": 8687.12939453125
+          },
+          {
+            "window_z": 11296,
+            "z_center": 11696.609375
+          },
+          {
+            "window_z": 11904,
+            "z_center": 12304.776123046875
+          }
+        ],
+        "mean_z_center": 10195.901580810547,
+        "held_out_window_z": 11296
+      },
+      {
+        "band": 3,
+        "windows": [
+          {
+            "window_z": 12496,
+            "z_center": 12895.650634765625
+          },
+          {
+            "window_z": 13088,
+            "z_center": 13487.02099609375
+          },
+          {
+            "window_z": 14304,
+            "z_center": 14704.61865234375
+          },
+          {
+            "window_z": 14896,
+            "z_center": 15296.064453125
+          }
+        ],
+        "mean_z_center": 14095.838684082031,
+        "held_out_window_z": 14304
+      }
+    ],
+    "window_roles": [
+      {
+        "window_z": 4704,
+        "z_center": 5103.442626953125,
+        "role": "fit",
+        "core_z_half_open": [
+          4975,
+          5231
+        ]
+      },
+      {
+        "window_z": 5296,
+        "z_center": 5696.110595703125,
+        "role": "fit",
+        "core_z_half_open": [
+          5568,
+          5824
+        ]
+      },
+      {
+        "window_z": 6496,
+        "z_center": 6896.60546875,
+        "role": "held_out",
+        "core_z_half_open": [
+          6769,
+          7025
+        ]
+      },
+      {
+        "window_z": 7104,
+        "z_center": 7504.1436767578125,
+        "role": "fit",
+        "core_z_half_open": [
+          7376,
+          7632
+        ]
+      },
+      {
+        "window_z": 7696,
+        "z_center": 8095.0914306640625,
+        "role": "fit",
+        "core_z_half_open": [
+          7967,
+          8223
+        ]
+      },
+      {
+        "window_z": 8288,
+        "z_center": 8687.12939453125,
+        "role": "fit",
+        "core_z_half_open": [
+          8559,
+          8815
+        ]
+      },
+      {
+        "window_z": 11296,
+        "z_center": 11696.609375,
+        "role": "held_out",
+        "core_z_half_open": [
+          11569,
+          11825
+        ]
+      },
+      {
+        "window_z": 11904,
+        "z_center": 12304.776123046875,
+        "role": "fit",
+        "core_z_half_open": [
+          12177,
+          12433
+        ]
+      },
+      {
+        "window_z": 12496,
+        "z_center": 12895.650634765625,
+        "role": "fit",
+        "core_z_half_open": [
+          12768,
+          13024
+        ]
+      },
+      {
+        "window_z": 13088,
+        "z_center": 13487.02099609375,
+        "role": "fit",
+        "core_z_half_open": [
+          13359,
+          13615
+        ]
+      },
+      {
+        "window_z": 14304,
+        "z_center": 14704.61865234375,
+        "role": "held_out",
+        "core_z_half_open": [
+          14577,
+          14833
+        ]
+      },
+      {
+        "window_z": 14896,
+        "z_center": 15296.064453125,
+        "role": "fit",
+        "core_z_half_open": [
+          15168,
+          15424
+        ]
+      }
+    ],
+    "core_overlap_check": "pass",
+    "minimum_axial_gap_between_any_locked_cores_slices": 335,
+    "minimum_gap_pair_window_z": [
+      7104,
+      7696
+    ]
+  },
+  "candidates": [
+    {
+      "path": "meshes/PHerc0813/z4704_w020",
+      "uuid": "PHerc0813_z4704_w020",
+      "window_z": 4704,
+      "wrap": "w020",
+      "bbox": [
+        [
+          4428.4228515625,
+          4462.91357421875,
+          4706.10888671875
+        ],
+        [
+          5238.85107421875,
+          5472.234375,
+          5499.8330078125
+        ]
+      ],
+      "meta_sha": "4abd1a8424c4a5049cc1976e5eefb76fb8583d23",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        4975,
+        5231
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z4704_w100",
+      "uuid": "PHerc0813_z4704_w100",
+      "window_z": 4704,
+      "wrap": "w100",
+      "bbox": [
+        [
+          2164.69384765625,
+          2958.60302734375,
+          4705.1455078125
+        ],
+        [
+          6720.6171875,
+          6950.126953125,
+          5502.68310546875
+        ]
+      ],
+      "meta_sha": "1c1bdea276b5fe529cbee426094898c604a16211",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        4975,
+        5231
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z5296_w020",
+      "uuid": "PHerc0813_z5296_w020",
+      "window_z": 5296,
+      "wrap": "w020",
+      "bbox": [
+        [
+          4564.75439453125,
+          4972.302734375,
+          5300.6279296875
+        ],
+        [
+          5471.08837890625,
+          5876.02099609375,
+          6092.00732421875
+        ]
+      ],
+      "meta_sha": "cd2ccd67a45a7f37638ba1841daf72f1ca4bc1b1",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        5568,
+        5824
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z5296_w100",
+      "uuid": "PHerc0813_z5296_w100",
+      "window_z": 5296,
+      "wrap": "w100",
+      "bbox": [
+        [
+          2385.310791015625,
+          3477.607666015625,
+          5297.0078125
+        ],
+        [
+          6787.28759765625,
+          7011.69873046875,
+          6094.79931640625
+        ]
+      ],
+      "meta_sha": "696e355b2e7521cff41975a4f0efe5ae349c7939",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        5568,
+        5824
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z6496_w020",
+      "uuid": "PHerc0813_z6496_w020",
+      "window_z": 6496,
+      "wrap": "w020",
+      "bbox": [
+        [
+          3977.994140625,
+          4974.2158203125,
+          6499.92919921875
+        ],
+        [
+          5660.40673828125,
+          5962.10205078125,
+          7294.43115234375
+        ]
+      ],
+      "meta_sha": "8ccf14097e900305f6326df649227b523534ff43",
+      "role": "held_out",
+      "evaluation_core_z_half_open": [
+        6769,
+        7025
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z6496_w100",
+      "uuid": "PHerc0813_z6496_w100",
+      "window_z": 6496,
+      "wrap": "w100",
+      "bbox": [
+        [
+          1791.8221435546875,
+          3412.1513671875,
+          6497.3291015625
+        ],
+        [
+          6901.44482421875,
+          7087.1904296875,
+          7294.732421875
+        ]
+      ],
+      "meta_sha": "401f5a8b007a8aded0493dad6d36e4066766bd76",
+      "role": "held_out",
+      "evaluation_core_z_half_open": [
+        6769,
+        7025
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z7104_w020",
+      "uuid": "PHerc0813_z7104_w020",
+      "window_z": 7104,
+      "wrap": "w020",
+      "bbox": [
+        [
+          4436.34814453125,
+          4351.79638671875,
+          7107.35302734375
+        ],
+        [
+          5849.19970703125,
+          5788.154296875,
+          7900.0224609375
+        ]
+      ],
+      "meta_sha": "f445ca5da14f0f6360ce1c40939e74350e60760e",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        7376,
+        7632
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z7104_w100",
+      "uuid": "PHerc0813_z7104_w100",
+      "window_z": 7104,
+      "wrap": "w100",
+      "bbox": [
+        [
+          2688.491943359375,
+          3050.853759765625,
+          7105.6962890625
+        ],
+        [
+          7138.24560546875,
+          6810.29443359375,
+          7903.5029296875
+        ]
+      ],
+      "meta_sha": "d34bd501b48ef7a6edd831d51ecada707e0b01be",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        7376,
+        7632
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z7696_w020",
+      "uuid": "PHerc0813_z7696_w020",
+      "window_z": 7696,
+      "wrap": "w020",
+      "bbox": [
+        [
+          4901.97705078125,
+          3723.532958984375,
+          7698.603515625
+        ],
+        [
+          5835.140625,
+          5297.6689453125,
+          8490.6279296875
+        ]
+      ],
+      "meta_sha": "30989ba91eaf2859427ef98a542d91c8327c1610",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        7967,
+        8223
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z7696_w100",
+      "uuid": "PHerc0813_z7696_w100",
+      "window_z": 7696,
+      "wrap": "w100",
+      "bbox": [
+        [
+          3136.02685546875,
+          2321.256103515625,
+          7697.06298828125
+        ],
+        [
+          7053.52001953125,
+          6560.482421875,
+          8494.0712890625
+        ]
+      ],
+      "meta_sha": "fa6af5b1f3008b9c223b259aff292efb5d368c4a",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        7967,
+        8223
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z8288_w020",
+      "uuid": "PHerc0813_z8288_w020",
+      "window_z": 8288,
+      "wrap": "w020",
+      "bbox": [
+        [
+          5205.0498046875,
+          3269.26123046875,
+          8291.212890625
+        ],
+        [
+          5881.0234375,
+          4814.162109375,
+          9083.2294921875
+        ]
+      ],
+      "meta_sha": "949e6a6c8b5ebbabd11b1dfab38b18e7468df83e",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        8559,
+        8815
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z8288_w100",
+      "uuid": "PHerc0813_z8288_w100",
+      "window_z": 8288,
+      "wrap": "w100",
+      "bbox": [
+        [
+          3572.241455078125,
+          1892.4385986328125,
+          8288.6484375
+        ],
+        [
+          7181.1923828125,
+          6257.09521484375,
+          9085.4267578125
+        ]
+      ],
+      "meta_sha": "9720ddd91cd134f4baed38d7bdfcb99f5b70db41",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        8559,
+        8815
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z11296_w020",
+      "uuid": "PHerc0813_z11296_w020",
+      "window_z": 11296,
+      "wrap": "w020",
+      "bbox": [
+        [
+          3084.5947265625,
+          3041.5595703125,
+          11300.7607421875
+        ],
+        [
+          3820.182373046875,
+          4050.357666015625,
+          12093.4609375
+        ]
+      ],
+      "meta_sha": "0985de853f6c1cc85ac99b2259688b9b8da4b336",
+      "role": "held_out",
+      "evaluation_core_z_half_open": [
+        11569,
+        11825
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z11296_w100",
+      "uuid": "PHerc0813_z11296_w100",
+      "window_z": 11296,
+      "wrap": "w100",
+      "bbox": [
+        [
+          1640.5889892578125,
+          1484.6904296875,
+          11296.8798828125
+        ],
+        [
+          5767.76171875,
+          5783.78662109375,
+          12095.3359375
+        ]
+      ],
+      "meta_sha": "f12b43080810c42d9c3b64828b35fed824b9e061",
+      "role": "held_out",
+      "evaluation_core_z_half_open": [
+        11569,
+        11825
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z11904_w020",
+      "uuid": "PHerc0813_z11904_w020",
+      "window_z": 11904,
+      "wrap": "w020",
+      "bbox": [
+        [
+          3017.490234375,
+          3082.721923828125,
+          11908.1337890625
+        ],
+        [
+          3744.90576171875,
+          4165.818359375,
+          12701.830078125
+        ]
+      ],
+      "meta_sha": "540c509c2d4f59f45c1ea7e578d6719eff242b10",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        12177,
+        12433
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z11904_w100",
+      "uuid": "PHerc0813_z11904_w100",
+      "window_z": 11904,
+      "wrap": "w100",
+      "bbox": [
+        [
+          1598.99365234375,
+          1303.8641357421875,
+          11906.044921875
+        ],
+        [
+          5280.81298828125,
+          5895.01953125,
+          12703.095703125
+        ]
+      ],
+      "meta_sha": "f0de80dd14a5f39a21c4e9c3c11e08ae91b4bcfb",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        12177,
+        12433
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z12496_w020",
+      "uuid": "PHerc0813_z12496_w020",
+      "window_z": 12496,
+      "wrap": "w020",
+      "bbox": [
+        [
+          2955.15869140625,
+          3240.837158203125,
+          12498.8681640625
+        ],
+        [
+          3696.7646484375,
+          4205.828125,
+          13292.8642578125
+        ]
+      ],
+      "meta_sha": "13d4c2922a275c29f8747e5aa05359738fd4ca29",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        12768,
+        13024
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z12496_w100",
+      "uuid": "PHerc0813_z12496_w100",
+      "window_z": 12496,
+      "wrap": "w100",
+      "bbox": [
+        [
+          1476.5206298828125,
+          1436.1173095703125,
+          12496.6669921875
+        ],
+        [
+          5285.12646484375,
+          5930.662109375,
+          13294.203125
+        ]
+      ],
+      "meta_sha": "31c13d32c5e195f4da2bb69fd3fd02ed2cc5ca95",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        12768,
+        13024
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z13088_w020",
+      "uuid": "PHerc0813_z13088_w020",
+      "window_z": 13088,
+      "wrap": "w020",
+      "bbox": [
+        [
+          2893.135009765625,
+          3297.07275390625,
+          13090.5869140625
+        ],
+        [
+          3647.57373046875,
+          4314.06591796875,
+          13880.689453125
+        ]
+      ],
+      "meta_sha": "896350676cdbaa06738a4e7465e326443dc83990",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        13359,
+        13615
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z13088_w100",
+      "uuid": "PHerc0813_z13088_w100",
+      "window_z": 13088,
+      "wrap": "w100",
+      "bbox": [
+        [
+          1380.1407470703125,
+          1553.1724853515625,
+          13089.8837890625
+        ],
+        [
+          5176.14599609375,
+          5681.654296875,
+          13886.923828125
+        ]
+      ],
+      "meta_sha": "fec04cb48054b892a23256b4b841b7218c524df8",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        13359,
+        13615
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z14304_w020",
+      "uuid": "PHerc0813_z14304_w020",
+      "window_z": 14304,
+      "wrap": "w020",
+      "bbox": [
+        [
+          2217.036376953125,
+          3070.141845703125,
+          14307.466796875
+        ],
+        [
+          3327.86865234375,
+          4222.42333984375,
+          15102.794921875
+        ]
+      ],
+      "meta_sha": "8e22eb2f95a3edba8a6be5207319f763cd3f3a1d",
+      "role": "held_out",
+      "evaluation_core_z_half_open": [
+        14577,
+        14833
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z14304_w100",
+      "uuid": "PHerc0813_z14304_w100",
+      "window_z": 14304,
+      "wrap": "w100",
+      "bbox": [
+        [
+          924.2401733398438,
+          1592.2847900390625,
+          14304.8310546875
+        ],
+        [
+          4890.9716796875,
+          5508.58935546875,
+          15103.3818359375
+        ]
+      ],
+      "meta_sha": "3d67de773083577261406631e55d863f89865811",
+      "role": "held_out",
+      "evaluation_core_z_half_open": [
+        14577,
+        14833
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z14896_w020",
+      "uuid": "PHerc0813_z14896_w020",
+      "window_z": 14896,
+      "wrap": "w020",
+      "bbox": [
+        [
+          1971.930908203125,
+          2903.344482421875,
+          14897.798828125
+        ],
+        [
+          3250.14501953125,
+          3729.027099609375,
+          15694.7158203125
+        ]
+      ],
+      "meta_sha": "e9ebb082f018cf5e831502689ae404cba1d2fc04",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        15168,
+        15424
+      ]
+    },
+    {
+      "path": "meshes/PHerc0813/z14896_w100",
+      "uuid": "PHerc0813_z14896_w100",
+      "window_z": 14896,
+      "wrap": "w100",
+      "bbox": [
+        [
+          583.1719360351562,
+          1628.0831298828125,
+          14896.67578125
+        ],
+        [
+          4711.11376953125,
+          5109.40966796875,
+          15695.0673828125
+        ]
+      ],
+      "meta_sha": "73c410fb97419b645fa1f8aa3b82ecdb8016d826",
+      "role": "fit",
+      "evaluation_core_z_half_open": [
+        15168,
+        15424
+      ]
+    }
+  ],
+  "invariants": [
+    "Split computed only from frozen 3D geometry metadata.",
+    "No atlas eye verdict or ink output was consulted.",
+    "Both radial wraps from a held-out axial window are held out.",
+    "Only central 256-slice cores are fit/evaluated; all locked cores are axially disjoint."
+  ]
+}
