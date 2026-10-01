@@ -395,6 +395,61 @@ The gate fails closed on wrong-volume lineage, a failing/mismatched recto ledger
 
 See [the provenance-manifest specification](docs/grand-prize-provenance.md) and [example manifest](examples/grand-prize-provenance.example.json).
 
+## First Letters target qualification
+
+The same qualifier covers the 22 First Letters scans with `--prize
+first-letters`. Each prize manifest declares its own required bootstrap
+assets: First Letters requires only a surface prediction on the exact
+eligible scan (all 22 have one). Lasagna predictions are recorded but not
+required, because only 13 of the 22 have one.
+
+```bash
+scrollq-grand-prize --prize first-letters \
+  --volumes artifacts/2026-09-30-scrollq-n24-dense/volumes.json \
+  --out out/first-letters-targets.json
+
+# the same qualification on each disjoint-resample run
+scrollq-grand-prize --prize first-letters \
+  --volumes artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json \
+  --run run1 --out out/first-letters-targets-run1.json
+```
+
+On the published n24-dense scores the frontier is **PHerc0800, PHerc0813**;
+on the disjoint resample it is **PHerc0800, PHerc1545**. Only PHerc0800 is
+on the frontier in both runs, and it is there because of its six existing
+segments, not its scan quality. Among these 22 scans the two runs agree only
+at Spearman ρ ≈ 0.72, so the quality leader is a band (PHerc0813, PHerc1203,
+PHerc0358, PHerc1545, PHerc0846B), not a single scroll. Evidence:
+`artifacts/2026-09-30-first-letters-qualifier-n24-dense/`.
+
+### Exact-scan surface-prediction CT support
+
+`scroliq-support` measures how much of a released surface prediction lies on
+real CT material, on the exact eligible scan, with a bootstrap 95% interval.
+A *phantom* is a prediction voxel above 127 where the masked CT is exactly 0;
+support is 1 − phantoms / positives (the external `ct_support` definition).
+Prediction and CT must share one voxel grid, so a prediction made on another
+scan of the same scroll fails closed.
+
+```bash
+scroliq-support --prize first-letters --samples 256 \
+  --out artifacts/2026-09-30-first-letters-support/support_native.json
+python bin/import_ct_support.py first-letters \
+  artifacts/2026-09-30-first-letters-support/support_external.json
+```
+
+`bin/import_ct_support.py` replaces the hand-normalized import with one pinned
+to an external commit; it reproduces the earlier Grand Prize import exactly
+on all 12 shared scrolls. On the 18 scrolls where both sources are exact-scan
+evidence, 15 external values fall inside the native 95% interval (mean
+|difference| 0.043, max 0.111). The native run also gives the first
+exact-scan numbers for PHerc0846A, PHerc1203, PHerc1218 and PHerc0125;
+for PHerc1203 the higher-resolution scan's survey (0.698) overstated
+eligible-scan support (0.454) by about 0.24. Adding support as a third axis,
+**PHerc0175B, PHerc0306B, PHerc0490A and PHerc0800** are on the frontier in
+both resample runs. Evidence: `artifacts/2026-09-30-first-letters-support/`. This is a geometry-prior
+sanity metric, not ink or readability evidence.
+
 ## Evaluation path
 
 A fast way to inspect the project end to end:

@@ -1,4 +1,4 @@
-from scrollq.grand_prize import DEFAULT_MANIFEST, qualify
+from scrollq.grand_prize import DEFAULT_MANIFEST, FIRST_LETTERS_MANIFEST, qualify
 
 
 def _volume(scroll, volume_id, score, ok=True):
@@ -174,3 +174,135 @@ def test_surface_support_is_separate_and_fails_closed_on_wrong_volume():
         rows["PHerc1203"]["surface_support_exclusion_reason"]
     )
     assert "PHerc1203" in sensitivity["excluded_targets"]
+
+
+# Official First Letters scan IDs, scrollprize.org/prizes, 2026-09-30.
+FIRST_LETTERS_SCANS = {
+    "PHerc0125": "20250821151825",
+    "PHerc0175A": "20250521115057",
+    "PHerc0175B": "20250521125822",
+    "PHerc0191": "20250821151635",
+    "PHerc0211": "20250821151803",
+    "PHerc0257": "20250821151750",
+    "PHerc0268": "20251110183117",
+    "PHerc0306B": "20250521133212",
+    "PHerc0343": "20250521140437",
+    "PHerc0358": "20250821151737",
+    "PHerc0483A": "20250521140913",
+    "PHerc0483B": "20251124083638",
+    "PHerc0490A": "20250521151210",
+    "PHerc0490B": "20250521151215",
+    "PHerc0800": "20250521135224",
+    "PHerc0813": "20250821151723",
+    "PHerc0826": "20250821151701",
+    "PHerc0846A": "20250728152254",
+    "PHerc0846B": "20250804142305",
+    "PHerc1203": "20250820131727",
+    "PHerc1218": "20250521120456",
+    "PHerc1545": "20250821151648",
+}
+
+FIRST_LETTERS_SCORES = {
+    "PHerc0125": 58.5, "PHerc0175A": 59.7, "PHerc0175B": 59.0,
+    "PHerc0191": 43.5, "PHerc0211": 48.1, "PHerc0257": 63.9,
+    "PHerc0268": 38.3, "PHerc0306B": 53.5, "PHerc0343": 53.3,
+    "PHerc0358": 53.4, "PHerc0483A": 48.5, "PHerc0483B": 58.1,
+    "PHerc0490A": 53.0, "PHerc0490B": 50.9, "PHerc0800": 42.6,
+    "PHerc0813": 77.4, "PHerc0826": 28.2, "PHerc0846A": 71.5,
+    "PHerc0846B": 67.1, "PHerc1203": 53.2, "PHerc1218": 45.1,
+    "PHerc1545": 30.8,
+}
+
+
+def test_first_letters_manifest_matches_official_scan_list():
+    targets = FIRST_LETTERS_MANIFEST["targets"]
+    assert {t["scroll"]: t["volume_id"] for t in targets} == FIRST_LETTERS_SCANS
+    assert FIRST_LETTERS_MANIFEST["required_assets"] == ["surface_prediction"]
+    assert all(t["surface_prediction"] for t in targets)
+    assert sum(bool(t["lasagna_prediction"]) for t in targets) == 13
+    shared = {t["scroll"] for t in DEFAULT_MANIFEST["targets"]}
+    assert len({t["scroll"] for t in targets} - shared) == 10
+
+
+def test_first_letters_frontier_does_not_require_lasagna():
+    volumes = [
+        _volume(s, v, FIRST_LETTERS_SCORES[s])
+        for s, v in FIRST_LETTERS_SCANS.items()
+    ]
+    result = qualify(volumes, FIRST_LETTERS_MANIFEST)
+
+    assert result["prize"] == "First Letters"
+    assert result["frontier"] == ["PHerc0800", "PHerc0813"]
+    assert "First Letters" in result["method"]["warning"]
+    rows = {r["scroll"]: r for r in result["targets"]}
+    assert rows["PHerc0846A"]["lasagna_prediction"] is None
+    assert rows["PHerc0846A"]["qualification"] == "dominated-on-current-evidence"
+    assert rows["PHerc0846A"]["dominated_by"] == ["PHerc0813"]
+    assert not any(
+        r["qualification"] == "missing-geometry-prior" for r in rows.values()
+    )
+
+
+def test_first_letters_exact_scan_excludes_higher_res_0846a():
+    volumes = [
+        _volume("PHerc0846A", "20260319102732", 99.9),
+        _volume("PHerc0846A", "20250728152254", 71.5),
+    ]
+    result = qualify(volumes, FIRST_LETTERS_MANIFEST)
+    row = next(r for r in result["targets"] if r["scroll"] == "PHerc0846A")
+
+    assert row["quality_score"] == 71.5
+    excluded = row["excluded_same_scroll_higher_res"]
+    assert excluded[0]["volume_id"] == "20260319102732"
+    assert "First Letters" in excluded[0]["reason"]
+
+
+def test_first_letters_manifest_does_not_mutate_grand_prize_reasons():
+    gp = next(t for t in DEFAULT_MANIFEST["targets"] if t["scroll"] == "PHerc1203")
+    fl = next(
+        t for t in FIRST_LETTERS_MANIFEST["targets"] if t["scroll"] == "PHerc1203"
+    )
+    assert "Grand Prize" in gp["excluded_same_scroll_higher_res"][0]["reason"]
+    assert "First Letters" in fl["excluded_same_scroll_higher_res"][0]["reason"]
+
+
+def test_required_assets_gate_frontier():
+    target = {
+        "scroll": "PHercTEST",
+        "volume_id": "v1",
+        "voxel_size_um": 9.0,
+        "energy_kev": 100,
+        "segments": 1,
+        "surface_prediction": "surface",
+        "lasagna_prediction": None,
+        "source_url": "https://example.test",
+    }
+    volumes = [_volume("PHercTEST", "v1", 50.0)]
+
+    strict = qualify(volumes, {"as_of": "x", "targets": [dict(target)]})
+    assert strict["frontier"] == []
+    assert strict["targets"][0]["qualification"] == "missing-geometry-prior"
+
+    relaxed = qualify(
+        volumes,
+        {
+            "as_of": "x",
+            "required_assets": ["surface_prediction"],
+            "targets": [dict(target)],
+        },
+    )
+    assert relaxed["frontier"] == ["PHercTEST"]
+
+
+def test_stability_run_converts_to_volume_rows():
+    from scrollq.grand_prize import volumes_from_stability
+
+    stability = {
+        "run0": {"x/PHerc0813/volumes/20250821151723-a.zarr": 76.2},
+        "run1": {"x/PHerc0813/volumes/20250821151723-a.zarr": None},
+    }
+    assert volumes_from_stability(stability, "run0") == [
+        {"root": "x/PHerc0813/volumes/20250821151723-a.zarr", "ok": True,
+         "score": 76.2}
+    ]
+    assert volumes_from_stability(stability, "run1")[0]["ok"] is False
