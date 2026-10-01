@@ -163,6 +163,244 @@ def _nonnegative_int(value: Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool) and value >= 0
 
 
+def _same_declared_root(left: str, right: str) -> bool:
+    return left.rstrip("/") == right.rstrip("/")
+
+
+def _surface_preflight_evidence(
+    report_path: str | Path | None,
+    surface_root: Path,
+    *,
+    volume_root: str | None,
+    shape: tuple[int, int],
+    scale: tuple[float, float],
+    meta_sha256: str,
+    valid_vertex_count: int,
+) -> tuple[dict[str, Any], list[str], list[str], list[dict[str, str]]]:
+    """Validate a Villa vesuvius.surface_preflight schema-v2 report.
+
+    The upstream preflight owns CT bounds/signal-support semantics. ScrolIQ
+    only verifies that the supplied report is structurally complete and tied
+    to the surface/volume currently being audited.
+    """
+    if report_path is None:
+        return (
+            {
+                "status": "unknown",
+                "tool": "vesuvius.surface_preflight",
+                "reason": "no upstream vesuvius.surface_preflight report supplied",
+            },
+            [],
+            [],
+            [],
+        )
+
+    path = Path(report_path)
+    errors: list[str] = []
+    warnings: list[str] = []
+    findings: list[dict[str, str]] = []
+    evidence: dict[str, Any] = {
+        "status": "fail",
+        "tool": "vesuvius.surface_preflight",
+        "report_path": str(path),
+    }
+    if not path.is_file():
+        errors.append(f"surface preflight report does not exist: {path}")
+        return evidence, errors, warnings, findings
+
+    evidence["report_sha256"] = _sha256(path)
+    evidence["report_bytes"] = path.stat().st_size
+    try:
+        report = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        errors.append(f"surface preflight report could not be parsed: {exc}")
+        return evidence, errors, warnings, findings
+    if not isinstance(report, dict):
+        errors.append("surface preflight report must contain a JSON object")
+        return evidence, errors, warnings, findings
+
+    schema_version = report.get("schema_version")
+    evidence["schema_version"] = schema_version
+    if schema_version != 2:
+        errors.append(
+            f"surface preflight schema_version must be 2, got {schema_version!r}"
+        )
+
+    surface = report.get("surface")
+    if not isinstance(surface, dict):
+        surface = {}
+        errors.append("surface preflight report surface must be an object")
+    declared_surface = surface.get("path")
+    path_match = False
+    if isinstance(declared_surface, str) and declared_surface:
+        try:
+            path_match = (
+                Path(declared_surface).expanduser().resolve()
+                == surface_root.expanduser().resolve()
+            )
+        except OSError:
+            path_match = False
+    else:
+        errors.append("surface preflight report must name its input surface")
+    evidence["declared_surface"] = declared_surface
+    evidence["surface_path_matches"] = path_match
+    if isinstance(declared_surface, str) and declared_surface and not path_match:
+        errors.append("surface preflight report names a different TIFXYZ surface path")
+
+    report_meta_sha = surface.get("meta_sha256")
+    evidence["meta_sha256"] = report_meta_sha
+    if report_meta_sha != meta_sha256:
+        errors.append("surface preflight meta.json SHA-256 does not match the audited surface")
+
+    report_shape = surface.get("stored_shape_yx")
+    evidence["stored_shape_yx"] = report_shape
+    if report_shape != [int(shape[0]), int(shape[1])]:
+        errors.append("surface preflight stored grid shape does not match the audited surface")
+
+    report_scale = surface.get("scale_xy")
+    scale_matches = False
+    if isinstance(report_scale, list) and len(report_scale) >= 2:
+        try:
+            scale_matches = all(
+                math.isclose(
+                    float(report_scale[i]),
+                    float(scale[i]),
+                    rel_tol=1e-9,
+                    abs_tol=1e-12,
+                )
+                for i in range(2)
+            )
+        except (TypeError, ValueError):
+            scale_matches = False
+    evidence["scale_xy"] = report_scale
+    if not scale_matches:
+        errors.append("surface preflight scale_xy does not match the audited surface")
+
+    report_valid_vertices = surface.get("valid_vertex_count")
+    evidence["valid_vertex_count"] = report_valid_vertices
+    if report_valid_vertices != valid_vertex_count:
+        errors.append(
+            "surface preflight valid_vertex_count does not match the audited surface"
+        )
+
+    volume = report.get("volume")
+    if volume_root is None:
+        errors.append(
+            "surface preflight evidence requires scroliq-mesh --volume-root "
+            "to bind the exact CT input"
+        )
+    if not isinstance(volume, dict):
+        volume = {}
+        errors.append("surface preflight report must include a CT volume")
+    declared_volume = volume.get("path")
+    evidence["declared_volume"] = declared_volume
+    volume_match = (
+        isinstance(declared_volume, str)
+        and isinstance(volume_root, str)
+        and _same_declared_root(declared_volume, volume_root)
+    )
+    evidence["volume_root_matches"] = volume_match
+    if isinstance(volume_root, str) and not volume_match:
+        errors.append("surface preflight report names a different CT volume root")
+
+    gates = report.get("gates")
+    gate_map: dict[str, dict[str, Any]] = {}
+    if not isinstance(gates, list) or not gates:
+        errors.append("surface preflight gates must be a non-empty list")
+        gates = []
+    for gate in gates:
+        if not isinstance(gate, dict) or not isinstance(gate.get("name"), str):
+            errors.append("surface preflight gates must be named objects")
+            continue
+        name = gate["name"]
+        if name in gate_map:
+            errors.append(f"surface preflight gate {name!r} is duplicated")
+            continue
+        if gate.get("required") is not True or not isinstance(gate.get("passed"), bool):
+            errors.append(
+                f"surface preflight gate {name!r} must declare required=true and boolean passed"
+            )
+        gate_map[name] = gate
+
+    required_names = {
+        "tifxyz_required_files",
+        "tifxyz_metadata",
+        "tifxyz_coordinate_shapes",
+        "volume_is_3d",
+        "valid_surface_vertices",
+        "valid_surface_quads",
+        "finite_selected_coordinates",
+        "coordinates_within_volume",
+        "tifxyz_scale_consistency",
+        "sampled_volume_signal_support",
+    }
+    missing_gates = sorted(required_names - set(gate_map))
+    if missing_gates:
+        errors.append(
+            "surface preflight report is missing required gate(s): "
+            + ", ".join(missing_gates)
+        )
+
+    failed_gates = sorted(
+        name
+        for name, gate in gate_map.items()
+        if gate.get("required") is True and gate.get("passed") is not True
+    )
+    declared_status = report.get("status")
+    computed_pass = bool(gate_map) and not failed_gates
+    if declared_status not in {"PASS", "FAIL"}:
+        errors.append("surface preflight status must be PASS or FAIL")
+    elif (declared_status == "PASS") != computed_pass:
+        errors.append("surface preflight status contradicts its required gates")
+
+    summary = report.get("summary")
+    if isinstance(summary, dict):
+        required_count = sum(g.get("required") is True for g in gate_map.values())
+        passed_count = sum(
+            g.get("required") is True and g.get("passed") is True
+            for g in gate_map.values()
+        )
+        if summary.get("required_gate_count") != required_count:
+            errors.append("surface preflight required_gate_count contradicts its gates")
+        if summary.get("passed_required_gates") != passed_count:
+            errors.append("surface preflight passed_required_gates contradicts its gates")
+    else:
+        errors.append("surface preflight report summary must be an object")
+
+    support = volume.get("sampled_signal_support")
+    if isinstance(support, dict):
+        evidence["sampled_signal_support"] = {
+            key: support.get(key)
+            for key in ("sample_count", "supported_count", "support_fraction")
+        }
+    evidence["resolved_array_key"] = volume.get("resolved_array_key")
+    evidence["failed_gates"] = failed_gates
+    evidence["required_gate_count"] = len(gate_map)
+
+    if failed_gates or declared_status == "FAIL":
+        errors.append(
+            "vesuvius.surface_preflight failed required gate(s): "
+            + (", ".join(failed_gates) if failed_gates else "unknown")
+        )
+        findings.append(
+            {
+                "kind": "surface-preflight",
+                "severity": "block",
+                "message": (
+                    "official Villa surface preflight failed: "
+                    + (", ".join(failed_gates) if failed_gates else "report status FAIL")
+                ),
+            }
+        )
+
+    evidence["binding"] = (
+        "report path + current meta.json SHA-256 + grid shape + valid-vertex "
+        "count + exact declared CT root; upstream schema v2 does not hash x/y/z.tif"
+    )
+    evidence["status"] = "fail" if errors else "pass"
+    return evidence, errors, warnings, findings
+
+
 def _selfcross_evidence(
     report_path: str | Path | None,
     surface_root: Path,
@@ -509,6 +747,7 @@ def audit_tifxyz(
     isometry_p95_threshold: float = 2.0,
     normal_flip_angle_deg: float = 120.0,
     selfcross_report: str | Path | None = None,
+    surface_preflight_report: str | Path | None = None,
 ) -> dict[str, Any]:
     root = Path(path)
     errors: list[str] = []
@@ -725,6 +964,21 @@ def audit_tifxyz(
             ),
         })
 
+    ct_preflight, preflight_errors, preflight_warnings, preflight_findings = (
+        _surface_preflight_evidence(
+            surface_preflight_report,
+            root,
+            volume_root=volume_root,
+            shape=z.shape,
+            scale=scale,
+            meta_sha256=provenance["meta.json"]["sha256"],
+            valid_vertex_count=valid_count,
+        )
+    )
+    errors.extend(preflight_errors)
+    warnings.extend(preflight_warnings)
+    findings.extend(preflight_findings)
+
     self_intersection, selfcross_errors, selfcross_warnings, selfcross_findings = (
         _selfcross_evidence(selfcross_report, root, z.shape)
     )
@@ -759,6 +1013,7 @@ def audit_tifxyz(
         "spacing": spacing,
         "edges": edges,
         "quads": quads,
+        "ct_preflight": ct_preflight,
         "self_intersection": self_intersection,
         "error_count": len(errors),
         "warning_count": len(warnings),
@@ -766,15 +1021,27 @@ def audit_tifxyz(
         "warnings": warnings,
         "findings": findings,
         "limitation": (
-            (
-                "This is a mesh-format and mesh-geometry audit with a validated upstream "
-                "VC3D transverse self-intersection census under its recorded parameters. "
-                "It does not establish CT support, correct winding identity, or readable ink."
+            "This audit combines local TIFXYZ geometry"
+            + (
+                ", a validated upstream Villa surface preflight against the declared CT volume"
+                if ct_preflight.get("status") == "pass"
+                else ""
             )
-            if self_intersection.get("status") == "pass"
-            else (
-                "This is a mesh-format and mesh-geometry audit. It does not establish CT support, "
-                "correct winding identity, absence of nonlocal self-intersections, or readable ink."
+            + (
+                ", and a validated upstream VC3D transverse self-intersection census"
+                if self_intersection.get("status") == "pass"
+                else ""
+            )
+            + ". It does not establish correct winding identity or readable ink."
+            + (
+                " CT support remains unverified."
+                if ct_preflight.get("status") != "pass"
+                else ""
+            )
+            + (
+                " Freedom from nonlocal transverse self-intersections remains unverified."
+                if self_intersection.get("status") != "pass"
+                else ""
             )
         ),
     }
@@ -794,6 +1061,14 @@ def main() -> None:
         default=None,
         help="optional report.json produced by VC3D vc_tifxyz_selfcross for this exact surface",
     )
+    ap.add_argument(
+        "--surface-preflight-report",
+        default=None,
+        help=(
+            "optional JSON produced by vesuvius.surface_preflight for this exact "
+            "surface and --volume-root"
+        ),
+    )
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -806,6 +1081,7 @@ def main() -> None:
         isometry_p95_threshold=args.isometry_p95_threshold,
         normal_flip_angle_deg=args.normal_flip_angle,
         selfcross_report=args.selfcross_report,
+        surface_preflight_report=args.surface_preflight_report,
     )
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)

@@ -1,3 +1,4 @@
+import hashlib
 import json
 
 import numpy as np
@@ -53,6 +54,94 @@ def _write_tifxyz(
         mask[4:6, 4:6] = 0
         Image.fromarray(mask).save(root / "mask.tif")
     return root
+
+
+def _sha256(path):
+    digest = hashlib.sha256()
+    digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+def _write_surface_preflight_report(
+    tmp_path,
+    surface,
+    *,
+    volume_root="volume-A",
+    declared_surface=None,
+    declared_volume=None,
+    meta_sha256=None,
+    fail_gate=None,
+    omit_gate=None,
+    schema_version=2,
+):
+    gate_names = [
+        "tifxyz_required_files",
+        "tifxyz_metadata",
+        "tifxyz_coordinate_shapes",
+        "volume_is_3d",
+        "valid_surface_vertices",
+        "valid_surface_quads",
+        "finite_selected_coordinates",
+        "coordinates_within_volume",
+        "tifxyz_scale_consistency",
+        "sampled_volume_signal_support",
+    ]
+    gates = []
+    for name in gate_names:
+        if name == omit_gate:
+            continue
+        gates.append(
+            {
+                "name": name,
+                "required": True,
+                "passed": name != fail_gate,
+                "observed": {},
+                "threshold": None,
+                "message": "fixture",
+            }
+        )
+    passed_count = sum(gate["passed"] for gate in gates)
+    report = {
+        "schema_version": schema_version,
+        "status": "PASS" if fail_gate is None else "FAIL",
+        "surface": {
+            "path": (
+                str(surface.resolve())
+                if declared_surface is None
+                else str(declared_surface)
+            ),
+            "scale_xy": [0.5, 0.5],
+            "meta_sha256": (
+                _sha256(surface / "meta.json")
+                if meta_sha256 is None
+                else meta_sha256
+            ),
+            "stored_shape_yx": [5, 5],
+            "valid_vertex_count": 25,
+        },
+        "volume": {
+            "path": volume_root if declared_volume is None else declared_volume,
+            "resolved_array_key": "0",
+            "shape_zyx": [32, 32, 32],
+            "sampled_signal_support": {
+                "sample_count": 25,
+                "supported_count": 25,
+                "support_fraction": 1.0,
+            },
+        },
+        "configuration": {
+            "minimum_support_fraction": 0.95,
+            "support_threshold": 0.0,
+        },
+        "gates": gates,
+        "summary": {
+            "passed_required_gates": passed_count,
+            "required_gate_count": len(gates),
+        },
+    }
+    path = tmp_path / "surface-preflight.json"
+    path.write_text(json.dumps(report), encoding="utf-8")
+    return path
 
 
 def _write_selfcross_report(
@@ -147,6 +236,84 @@ def test_area_preserving_anisotropy_is_detected_as_non_isometric(tmp_path):
     assert np.isclose(result["quads"]["isometry"]["anisotropy"]["median"], 6.25)
     assert result["status"] == "partial"
     assert any(item["kind"] == "isometry-distortion" for item in result["findings"])
+
+
+def test_clean_official_surface_preflight_binds_ct_support(tmp_path):
+    surface = _write_tifxyz(tmp_path)
+    report = _write_surface_preflight_report(tmp_path, surface)
+
+    result = audit_tifxyz(
+        surface,
+        volume_root="volume-A",
+        surface_preflight_report=report,
+    )
+
+    assert result["status"] == "pass"
+    assert result["ct_preflight"]["status"] == "pass"
+    assert result["ct_preflight"]["volume_root_matches"] is True
+    assert result["ct_preflight"]["sampled_signal_support"]["support_fraction"] == 1.0
+    assert len(result["ct_preflight"]["report_sha256"]) == 64
+    assert "validated upstream Villa surface preflight" in result["limitation"]
+
+
+def test_surface_preflight_fails_closed_on_surface_or_volume_mismatch(tmp_path):
+    surface = _write_tifxyz(tmp_path)
+    report = _write_surface_preflight_report(
+        tmp_path,
+        surface,
+        declared_surface=tmp_path / "other-surface",
+        declared_volume="volume-B",
+        meta_sha256="0" * 64,
+    )
+
+    result = audit_tifxyz(
+        surface,
+        volume_root="volume-A",
+        surface_preflight_report=report,
+    )
+
+    assert result["status"] == "fail"
+    assert result["ct_preflight"]["status"] == "fail"
+    assert result["ct_preflight"]["surface_path_matches"] is False
+    assert result["ct_preflight"]["volume_root_matches"] is False
+    assert any("meta.json SHA-256" in message for message in result["errors"])
+    assert any("different CT volume root" in message for message in result["errors"])
+
+
+def test_surface_preflight_requires_ct_gates_and_volume_binding(tmp_path):
+    surface = _write_tifxyz(tmp_path)
+    report = _write_surface_preflight_report(
+        tmp_path,
+        surface,
+        omit_gate="sampled_volume_signal_support",
+    )
+
+    result = audit_tifxyz(surface, surface_preflight_report=report)
+
+    assert result["status"] == "fail"
+    assert result["ct_preflight"]["status"] == "fail"
+    assert any("--volume-root" in message for message in result["errors"])
+    assert any("sampled_volume_signal_support" in message for message in result["errors"])
+
+
+def test_failed_official_surface_preflight_blocks_mesh(tmp_path):
+    surface = _write_tifxyz(tmp_path)
+    report = _write_surface_preflight_report(
+        tmp_path,
+        surface,
+        fail_gate="sampled_volume_signal_support",
+    )
+
+    result = audit_tifxyz(
+        surface,
+        volume_root="volume-A",
+        surface_preflight_report=report,
+    )
+
+    assert result["status"] == "fail"
+    assert result["ct_preflight"]["status"] == "fail"
+    assert result["ct_preflight"]["failed_gates"] == ["sampled_volume_signal_support"]
+    assert any(item["kind"] == "surface-preflight" for item in result["findings"])
 
 
 def test_clean_official_selfcross_report_closes_nonlocal_intersection_gap(tmp_path):

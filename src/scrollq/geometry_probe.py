@@ -9,12 +9,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 from typing import Iterable
 
 
-def candidate_z_center(candidate: dict) -> float:
-    """Return the midpoint of the candidate bbox along volume z."""
+def candidate_bbox(candidate: dict) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
+    """Return a finite ordered XYZ bounding box for one candidate."""
     bbox = candidate.get("bbox")
     if (
         not isinstance(bbox, list)
@@ -22,7 +23,33 @@ def candidate_z_center(candidate: dict) -> float:
         or not all(isinstance(p, list) and len(p) == 3 for p in bbox)
     ):
         raise ValueError(f"candidate lacks a valid 3D bbox: {candidate.get('path')}")
-    return (float(bbox[0][2]) + float(bbox[1][2])) / 2.0
+    try:
+        lo = tuple(float(v) for v in bbox[0])
+        hi = tuple(float(v) for v in bbox[1])
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"candidate lacks a numeric 3D bbox: {candidate.get('path')}") from exc
+    if not all(math.isfinite(v) for v in (*lo, *hi)):
+        raise ValueError(f"candidate bbox is not finite: {candidate.get('path')}")
+    if any(a > b for a, b in zip(lo, hi)):
+        raise ValueError(f"candidate bbox minima exceed maxima: {candidate.get('path')}")
+    return lo, hi
+
+
+def candidate_z_center(candidate: dict) -> float:
+    """Return the midpoint of the candidate bbox along volume z."""
+    lo, hi = candidate_bbox(candidate)
+    return (lo[2] + hi[2]) / 2.0
+
+
+def aabb_distance_voxels(first: dict, second: dict) -> float:
+    """Conservative lower bound on candidate separation in base-voxel XYZ space."""
+    a0, a1 = candidate_bbox(first)
+    b0, b1 = candidate_bbox(second)
+    gaps = [
+        max(a0[axis] - b1[axis], b0[axis] - a1[axis], 0.0)
+        for axis in range(3)
+    ]
+    return math.sqrt(sum(gap * gap for gap in gaps))
 
 
 def split_axial_windows(
@@ -30,6 +57,7 @@ def split_axial_windows(
     *,
     bands: int = 3,
     core_depth: int = 256,
+    minimum_fit_holdout_gap_voxels: float | None = None,
 ) -> dict:
     """Split paired axial windows without using quality or ink evidence.
 
@@ -44,6 +72,12 @@ def split_axial_windows(
         raise ValueError("bands must be >= 1")
     if core_depth < 1 or core_depth % 2:
         raise ValueError("core_depth must be a positive even integer")
+    if minimum_fit_holdout_gap_voxels is not None:
+        if (
+            not math.isfinite(minimum_fit_holdout_gap_voxels)
+            or minimum_fit_holdout_gap_voxels < 0
+        ):
+            raise ValueError("minimum_fit_holdout_gap_voxels must be finite and >= 0")
 
     grouped: dict[int, list[float]] = {}
     counts: dict[int, int] = {}
@@ -125,15 +159,76 @@ def split_axial_windows(
     candidate_roles = []
     for row in rows:
         w = role_by_window[int(row["window_z"])]
+        lo, hi = candidate_bbox(row)
         candidate_roles.append(
             {
                 "path": row.get("path"),
                 "window_z": int(row["window_z"]),
                 "wrap": row.get("wrap"),
                 "role": w["role"],
+                "bbox_xyz": [list(lo), list(hi)],
                 "evaluation_core_z_half_open": w["core_z_half_open"],
             }
         )
+
+    fit_rows = [
+        (row, role)
+        for row, role in zip(rows, candidate_roles)
+        if role["role"] == "fit"
+    ]
+    held_rows = [
+        (row, role)
+        for row, role in zip(rows, candidate_roles)
+        if role["role"] == "held_out"
+    ]
+    spatial_pair_count = 0
+    zero_distance_pairs = 0
+    minimum_spatial_gap = None
+    minimum_spatial_pair = None
+    for fit_row, fit_role in fit_rows:
+        for held_row, held_role in held_rows:
+            distance = aabb_distance_voxels(fit_row, held_row)
+            spatial_pair_count += 1
+            if distance == 0:
+                zero_distance_pairs += 1
+            if minimum_spatial_gap is None or distance < minimum_spatial_gap:
+                minimum_spatial_gap = distance
+                minimum_spatial_pair = {
+                    "fit": {
+                        "path": fit_role["path"],
+                        "window_z": fit_role["window_z"],
+                        "wrap": fit_role["wrap"],
+                    },
+                    "held_out": {
+                        "path": held_role["path"],
+                        "window_z": held_role["window_z"],
+                        "wrap": held_role["wrap"],
+                    },
+                }
+
+    if spatial_pair_count == 0:
+        separation_status = "unavailable"
+    elif minimum_fit_holdout_gap_voxels is None:
+        separation_status = "measured"
+    elif minimum_spatial_gap is not None and minimum_spatial_gap >= minimum_fit_holdout_gap_voxels:
+        separation_status = "pass"
+    else:
+        separation_status = "fail"
+
+    spatial_separation = {
+        "method": (
+            "Euclidean distance between axis-aligned XYZ candidate bounding boxes "
+            "in base-resolution voxel space. This is a conservative lower bound: "
+            "a positive box gap proves at least that much surface separation; "
+            "overlapping boxes do not prove the surfaces touch."
+        ),
+        "fit_heldout_pair_count": spatial_pair_count,
+        "minimum_aabb_distance_voxels": minimum_spatial_gap,
+        "minimum_pair": minimum_spatial_pair,
+        "aabb_overlap_or_touch_pair_count": zero_distance_pairs,
+        "required_minimum_gap_voxels": minimum_fit_holdout_gap_voxels,
+        "status": separation_status,
+    }
 
     return {
         "method": (
@@ -159,6 +254,7 @@ def split_axial_windows(
         "core_overlap_check": "pass",
         "minimum_axial_gap_between_any_locked_cores_slices": minimum_gap,
         "minimum_gap_pair_window_z": minimum_pair,
+        "fit_holdout_spatial_separation": spatial_separation,
     }
 
 
@@ -170,6 +266,15 @@ def main() -> None:
     ap.add_argument("--scroll", required=True)
     ap.add_argument("--bands", type=int, default=3)
     ap.add_argument("--core-depth", type=int, default=256)
+    ap.add_argument(
+        "--minimum-fit-holdout-gap-voxels",
+        type=float,
+        default=None,
+        help=(
+            "optional predeclared exclusion halo; report fails when the conservative "
+            "fit/held-out bbox gap is smaller"
+        ),
+    )
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -185,15 +290,23 @@ def main() -> None:
         "scroll": args.scroll,
         "prize_volume_id": target.get("prize_volume_id"),
         "split": split_axial_windows(
-            candidates, bands=args.bands, core_depth=args.core_depth
+            candidates,
+            bands=args.bands,
+            core_depth=args.core_depth,
+            minimum_fit_holdout_gap_voxels=args.minimum_fit_holdout_gap_voxels,
         ),
     }
     Path(args.out).write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    separation = result["split"]["fit_holdout_spatial_separation"]
     print(
         f"{args.scroll}: {result['split']['fit_candidates']} fit / "
         f"{result['split']['held_out_candidates']} held out; "
-        f"held windows {result['split']['held_out_windows']}"
+        f"held windows {result['split']['held_out_windows']}; "
+        f"bbox separation {separation['status']} "
+        f"(min={separation['minimum_aabb_distance_voxels']})"
     )
+    if separation["status"] == "fail":
+        raise SystemExit(2)
 
 
 if __name__ == "__main__":
