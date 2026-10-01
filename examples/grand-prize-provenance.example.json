@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "rules": {
     "url": "https://scrollprize.org/prizes",
     "as_of": "2026-09-30"
@@ -33,7 +33,18 @@
       "volume_id": "PUBLIC-TRAINING-VOLUME",
       "coordinate_space": "level0-voxel-index",
       "boxes": [
-        {"start": [0, 0, 0], "stop": [100, 100, 100]}
+        {
+          "start": [
+            0,
+            0,
+            0
+          ],
+          "stop": [
+            100,
+            100,
+            100
+          ]
+        }
       ]
     },
     {
@@ -42,7 +53,38 @@
       "volume_id": "20250821151723",
       "coordinate_space": "level0-voxel-index",
       "boxes": [
-        {"start": [1000, 2000, 3000], "stop": [1200, 2400, 3600]}
+        {
+          "start": [
+            1000,
+            2000,
+            3000
+          ],
+          "stop": [
+            1200,
+            2400,
+            3600
+          ]
+        }
+      ]
+    },
+    {
+      "id": "regions:held-out",
+      "role": "validation",
+      "volume_id": "PUBLIC-VALIDATION-VOLUME",
+      "coordinate_space": "level0-voxel-index",
+      "boxes": [
+        {
+          "start": [
+            500,
+            500,
+            500
+          ],
+          "stop": [
+            700,
+            700,
+            700
+          ]
+        }
       ]
     }
   ],
@@ -67,7 +109,9 @@
       "checkpoint_url": "https://example.org/checkpoints/ink-v1.ckpt",
       "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
       "checkpoint_license": "MIT",
-      "training_dataset_ids": ["dataset:ink-v1"],
+      "training_dataset_ids": [
+        "dataset:ink-v1"
+      ],
       "stochastic": {
         "training": true,
         "inference": true
@@ -122,7 +166,31 @@
   "banner": {
     "path": "banner.tif",
     "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
-    "render_ids": ["render:column-01"],
+    "render_ids": [
+      "render:column-01"
+    ],
     "column_numbers_overlaid": true
-  }
+  },
+  "held_out_validations": [
+    {
+      "id": "validation:ink-v1",
+      "model_id": "model:ink-v1",
+      "protocol": "held-out",
+      "region_set_id": "regions:held-out",
+      "public_input_url": "https://example.org/validation/input-volume",
+      "ground_truth_url": "https://example.org/validation/ground-truth",
+      "public_url": "https://example.org/validation/results/ink-v1",
+      "path": "validation/held-out-ink-v1.json",
+      "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "metrics": {
+        "precision": 0.91,
+        "recall": 0.87
+      },
+      "experiment_run": {
+        "url": "https://wandb.ai/OWNER/PROJECT/runs/HELDOUT",
+        "public": true
+      },
+      "code_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ]
 }
