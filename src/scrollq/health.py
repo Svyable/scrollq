@@ -22,8 +22,9 @@ from zpa.audit_pyramid import audit_one
 from .score import score_volume
 
 
-def health_report(base_url: str, root: str) -> dict:
-    report: dict = {"root": root, "base_url": base_url}
+def health_report(base_url: str, root: str, samples: int = 12) -> dict:
+    report: dict = {"root": root, "base_url": base_url,
+                   "quality_samples": samples}
 
     # --- integrity: header-only, never reads array data ---
     store = open_store(base_url)
@@ -47,8 +48,8 @@ def health_report(base_url: str, root: str) -> dict:
                     "detail": f["detail"][:160]} for f in med],
     }
 
-    # --- quality: sampled voxel decode ---
-    q = score_volume(base_url, root)
+    # --- quality: sampled voxel decode (12 samples: the campaign standard) ---
+    q = score_volume(base_url, root, samples=samples)
     report["quality"] = q
 
     # --- combined verdict ---
@@ -78,10 +79,12 @@ def main() -> None:
     ap.add_argument("--root", required=True,
                     help="volume root, e.g. community-uploads/forrest/volcomp/PHerc0009B/volumes/....zarr")
     ap.add_argument("--base", default="https://dl.ash2txt.org")
+    ap.add_argument("--samples", type=int, default=12,
+                    help="quality samples per volume (campaign standard: 12)")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
-    rep = health_report(args.base, args.root)
+    rep = health_report(args.base, args.root, samples=args.samples)
     text = json.dumps(rep, indent=1)
     if args.out:
         with open(args.out, "w", encoding="utf-8") as fh:
