@@ -179,6 +179,8 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 .actionbtn,.copybtn{{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:.45rem .75rem;font-size:.78rem;cursor:pointer}}
 .actionbtn:hover,.copybtn:hover{{border-color:var(--ember);color:var(--ink)}}
 .control-meta{{margin-left:auto;color:var(--dim);font-size:.78rem;font-variant-numeric:tabular-nums}}
+.candidate-note{{margin:-.2rem 0 1rem;color:var(--muted);font-size:.82rem;line-height:1.55}}
+.candidate-note b{{color:var(--ink)}}
 .copybtn{{margin-left:.6rem;padding:.3rem .55rem;vertical-align:middle}}
 .dist-meta{{color:var(--muted);font-size:.88rem;margin:.4rem 0 .8rem}}
 tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
@@ -207,7 +209,7 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
     <div class="stat"><div class="n">{n}</div><div class="l">scroll volumes scored</div></div>
     <div class="stat"><div class="n">{lo}&ndash;{hi}</div><div class="l">score range (0&ndash;100)</div></div>
     <div class="stat"><div class="n">0</div><div class="l">dead slices found under the strict detector</div></div>
-    <div class="stat"><div class="n">{label_next_n} 🎯</div><div class="l">top-quartile volumes with zero ink labels — label next</div></div>
+    <div class="stat"><div class="n">{label_next_n}</div><div class="l">label-coverage candidates<br>top-quartile scan health · 0 published ink labels</div></div>
   </div>
 </div></header>
 
@@ -221,7 +223,7 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
   <div class="problem"><div><h3>Mesh connectivity</h3><span class="state next">NEXT</span></div><p>Holes, mergers, sheet switches, self-intersections, and flattening distortion.</p></div>
   <div class="problem"><div><h3>Fiber connectivity</h3><span class="state plan">PLANNED</span></div><p>Continuity and orientation confidence for long-range papyrus fiber traces.</p></div>
   <div class="problem"><div><h3>Spiral fitting</h3><span class="state plan">PLANNED</span></div><p>Held-out constraint residuals, sensitivity, and under-constrained regions.</p></div>
-  <div class="problem"><div><h3>Label quality</h3><span class="state live">LIVE</span></div><p>Label–volume coverage join: all 70 published ink-detection labels sit on PHercParis4 while {label_next_n} top-quartile zero-label volumes are flagged 🎯 label next. Next: physical label offset, snapping candidates, review queues.</p></div>
+  <div class="problem"><div><h3>Label quality</h3><span class="state live">LIVE</span></div><p>Label–volume coverage join: all 70 published ink-detection labels sit on PHercParis4 while {label_next_n} top-quartile volumes have zero published ink labels and are flagged as <b>label-coverage candidates</b> for review. This is a coverage gap, not evidence of ink or surface readiness. Next: physical label offset, snapping candidates, review queues.</p></div>
   <div class="problem"><div><h3>Ink reliability</h3><span class="state plan">PLANNED</span></div><p>Leakage checks, held-out validation, perturbation stability, cross-scroll evidence.</p></div>
   <div class="problem"><div><h3>Grand Prize</h3><span class="state plan">TARGET</span></div><p>One evidence trail from full recto coverage to tifxyz, renders, validation, and VC3D.</p></div>
 </div>
@@ -255,8 +257,9 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
     <b>PHercParis4</b> — quality rank <b>13 of 39 scrolls</b> (each scroll
     ranked by its best volume). The healthiest volumes (<b>{top_id}</b> {top_score}, <b>PHerc0139</b> 75.9) have
     <b>zero</b> ink labels. The published campaign exposes <b>{label_next_n}</b>
-    top-quartile zero-label volumes as allocation candidates — without claiming
-    that ink is present on any of them.</p></div>
+    top-quartile zero-label volumes as <b>label-coverage candidates</b> for review.
+    This is a prioritization signal only: it does not claim that ink is present
+    or that surface geometry is ready for annotation.</p></div>
   <div class="card"><h3>Failed the gate, fixed the experiment</h3>
     <p>The first 4-sample resample missed our own stability gate
     (<b>&rho; = 0.76</b>). We did not lower the threshold: we tripled the
@@ -295,13 +298,14 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
     <button class="tierbtn" data-t="A">A</button>
     <button class="tierbtn" data-t="B">B</button>
     <button class="tierbtn" data-t="C">C</button>
-    <button class="tierbtn" data-t="label">🎯 label next</button>
+    <button class="tierbtn" data-t="label">label-coverage candidates</button>
     <button class="tierbtn" data-t="unlabeled">0 labels</button>
     <button class="tierbtn" data-t="segments">has segments</button>
     <button class="actionbtn" id="reset" type="button">reset</button>
     <button class="actionbtn" id="csv" type="button">export CSV</button>
     <span class="control-meta" id="resultCount" aria-live="polite"></span>
   </div>
+  <p class="candidate-note"><b>Label-coverage candidate:</b> a volume in the top quartile of this scan-health survey with zero published ink-detection labels. It is a review-priority flag, not evidence that ink is present or that a usable surface is available.</p>
   <div style="overflow-x:auto"><table id="lb"><thead><tr>
     <th data-k="rank">#</th><th data-k="id">volume</th><th data-k="score">score</th>
     <th data-k="tier">tier</th><th>components</th>
@@ -466,7 +470,7 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
     return '"' + s + '"';
   }}
   document.getElementById("csv").addEventListener("click", () => {{
-    const head = ["view_rank","volume","acquisition","score","tier","signal","texture","dynamic","penalty","ink_labels","segments","label_next","root"];
+    const head = ["view_rank","volume","acquisition","score","tier","signal","texture","dynamic","penalty","ink_labels","segments","label_coverage_candidate","root"];
     const lines = [head.map(csvCell).join(",")];
     currentRows.forEach((r, i) => {{
       const root = r._detail.querySelector("code")?.textContent.trim() || "";
@@ -614,7 +618,8 @@ def main() -> None:
         ink = cc.get("ink_labels", 0)
         seg = cc.get("segments", 0)
         is_label = bool(cc.get("label_next"))
-        flag = '<span class="flag">🎯 label next</span>' if is_label else ""
+        flag = ('<span class="flag" title="Top-quartile scan health with zero published ink-detection labels">'
+                'label-coverage candidate</span>') if is_label else ""
         dead = m.get("dead_slices", 0)
         pen = c.get("pen_sat", 0) + c.get("pen_dead", 0)
         s40, t30, d20 = c["signal_40"], c["texture_30"], c["dynamic_20"]
@@ -640,8 +645,9 @@ def main() -> None:
         if seg:
             bits.append(f"{seg} segment roots in open data")
         if is_label:
-            bits.append("🎯 top-quartile quality with zero ink labels — "
-                        "label next")
+            bits.append("label-coverage candidate — top-quartile scan health with zero "
+                        "published ink-detection labels; prioritization flag only, "
+                        "not evidence of ink or surface readiness")
         why = " · ".join(html.escape(b) for b in bits)
         rows.append(
             f'<tr class="vol" data-rank="{i}" data-id="{html.escape(scroll.lower())} {html.escape(fname.lower())}"'
