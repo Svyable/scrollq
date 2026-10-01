@@ -92,7 +92,11 @@ meeting-error ratios, failure codes, and v4 span tags.
 
 The rendered line geometry is independently checked for *gaps* (a step longer
 than `--gap-factor`, default 4, times that trace's median step) and *sharp
-turns* (a direction change above `--turn-degrees`, default 60).
+turns* (a direction change above `--turn-degrees`, default 60). Native JSON
+also checks whether persisted control points stay near the rendered line and
+progress through it in the same order. The distance test is normalized by that
+fiber's own median rendered step (`--control-line-factor`, default 4), avoiding
+an absolute voxel-scale assumption.
 
 ```bash
 # Native VC3D fiber
