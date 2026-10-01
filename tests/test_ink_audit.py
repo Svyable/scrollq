@@ -81,3 +81,24 @@ def test_exact_volume_binding_fails_closed():
 
     assert result["status"] == "fail"
     assert any("does not match" in message for message in result["errors"])
+
+
+
+def test_manifest_must_evaluate_the_bound_volume():
+    manifest = _manifest()
+    manifest["evaluation_regions"][0]["volume_root"] = "volume-B"
+
+    result = audit_ink_manifest(manifest)
+
+    assert result["status"] == "fail"
+    assert any("no evaluation region is bound" in message for message in result["errors"])
+
+
+def test_malformed_run_checkpoint_hash_stays_visible():
+    manifest = _manifest()
+    manifest["runs"][0]["checkpoint_sha256"] = "not-a-hash"
+
+    result = audit_ink_manifest(manifest)
+
+    assert result["status"] == "partial"
+    assert any("valid checkpoint_sha256" in message for message in result["warnings"])
