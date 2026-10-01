@@ -18,6 +18,7 @@ The existing ScrollQ score remains useful, but it means one narrow thing: sample
 |---|---|---|---|
 | Local scan degradation / compressed regions | Scan diagnostics | Implemented: deterministic coordinate-preserving spatial sampling, real-voxel metrics, explicit missing/masked/read-failure states | Validate on real scrolls; add local layer-separability/decohesion proxies |
 | Surface topology | Surface IQ | Planned | CT support, competing-surface ambiguity, topology-risk map |
+| Full recto submission coverage | Grand Prize coverage | Partial: declared reference-area accounting with strict main/attached/detached-patch coverage and the <10% disconnected-outer-patch exception via `scroliq-recto-coverage` | Independently validate that the frozen reference inventory itself contains the complete recto surface; bind every ledger mesh ID to audited package meshes |
 | Mesh connectivity | Mesh IQ | Partial: native TIFXYZ structure/provenance, mask-aware connected components and enclosed gaps, bbox/scale consistency, local edge jumps, severe normal reversals, quad-area distortion via `scroliq-mesh` | CT support, sheet identity, nonlocal self-intersections, merger/sheet-switch localization |
 | Fiber connectivity | Fiber IQ | Planned | Continuity/orientation confidence and trace-break candidates |
 | Winding annotations | Winding IQ | Partial: PointCollections v1 role/schema/numeric/provenance audit plus collection-center axial coverage via `scroliq-winding` | Patch attachment, graph/holonomy consistency, held-out constraint residuals, annotation-leverage map |
@@ -99,6 +100,6 @@ The end state is not a standalone dashboard. A ScrolIQ diagnostic should point t
 
 ## Grand Prize readiness
 
-The final passport should be able to answer, with evidence, what prevents a candidate scroll from satisfying the 2027 Grand Prize requirements: complete recto coverage; valid per-column tifxyz meshes; low-distortion 2D parameterization; programmatic flattened renders; visible/legible ink across columns; no training/prediction leakage; reproducible training and inference provenance; held-out validation; documented human-input time; and VC3D-compatible outputs.
+The final passport should be able to answer, with evidence, what prevents a candidate scroll from satisfying the 2027 Grand Prize requirements. `scroliq-recto-coverage` now checks declared full-recto accounting, including detached patches and the strict <10% disconnected-outer-patch exception, while explicitly leaving independent reference-inventory completeness as upstream evidence. The remaining evidence chain includes valid per-column tifxyz meshes; low-distortion 2D parameterization; programmatic flattened renders; visible/legible ink across columns; no training/prediction leakage; reproducible training and inference provenance; held-out validation; documented human-input time; and VC3D-compatible outputs.
 
 ScrolIQ should not decide whether a scroll is "good." It should expose the bottleneck that prevents the next verified step.
