@@ -5,16 +5,6 @@ import pytest
 import scrollq.scan_map as scan_map
 
 
-class _Response:
-    def __init__(self, status_code=206, content=b"index"):
-        self.status_code = status_code
-        self.content = content
-
-    def raise_for_status(self):
-        if self.status_code >= 400:
-            raise RuntimeError(f"http {self.status_code}")
-
-
 def _info(shape=(4, 4, 4), outer=(2, 2, 2), inner=(1, 1, 1)):
     return SimpleNamespace(
         shape=shape,
@@ -25,22 +15,29 @@ def _info(shape=(4, 4, 4), outer=(2, 2, 2), inner=(1, 1, 1)):
     )
 
 
-def _patch_common(monkeypatch, *, info=None, status_by_shard=None, entries=None):
+def _patch_common(
+    monkeypatch, *, info=None, status_by_shard=None, entries=None,
+    suffix_calls=None,
+):
     info = info or _info()
     status_by_shard = status_by_shard or {}
     entries = entries or [(0, 1)] * 8
-
-    class Session:
-        def get(self, url, *args, **kwargs):
-            shard = url.rsplit("/", 1)[-1]
-            return _Response(status_by_shard.get(shard, 206))
 
     class Store:
         def get_json(self, path):
             return {}
 
-        def _session(self):
-            return Session()
+        def get_suffix(self, path, length):
+            if suffix_calls is not None:
+                suffix_calls.append((path, length))
+            status = status_by_shard.get(path, 206)
+            if status != 206:
+                raise RuntimeError(f"http {status}")
+            return b"index"
+
+        def head(self, path):
+            status = status_by_shard.get(path, 206)
+            return SimpleNamespace(exists=status != 404, status=status)
 
         def get_range(self, path, start, length):
             return b"blob"
@@ -75,6 +72,18 @@ def _patch_common(monkeypatch, *, info=None, status_by_shard=None, entries=None)
         },
     )
     return info
+
+
+def test_scan_map_uses_public_suffix_store_api(monkeypatch):
+    suffix_calls = []
+    _patch_common(monkeypatch, suffix_calls=suffix_calls)
+
+    report = scan_map.scan_volume_map(
+        "https://example.test", "root", grid=1, chunks_per_shard=1
+    )
+
+    assert report["ok"] is True
+    assert suffix_calls == [("shard-0-0-0", 4)]
 
 
 def test_scan_map_preserves_spatial_coordinates_without_readiness_score(monkeypatch):

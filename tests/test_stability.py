@@ -94,7 +94,7 @@ def test_main_records_provenance(tmp_path):
     mod = _load(argv=("stability.py", str(tmp_path / "o.json"), "12"))
     captured = {}
 
-    def fake_run(roots, rotate):
+    def fake_run(roots, rotate, exclude=None):
         captured[rotate] = True
         return [{"root": f"v{i}", "ok": True, "score": float(i)}
                 for i in range(12)]
@@ -108,3 +108,58 @@ def test_main_records_provenance(tmp_path):
     assert out["spearman_rho"] == 1.0
     assert out["top10_overlap"] == 10
     assert out["gate_pass"] is True
+
+
+def _scored(root, score, identities, complete=True):
+    return {"root": root, "ok": True, "score": score,
+            "sampling": {"complete": complete},
+            "sample_provenance": [{"identity": i} for i in identities]}
+
+
+def test_cli_disjoint_flag():
+    assert _load(argv=("stability.py", "o.json", "24", "13", "5",
+                       "disjoint")).DISJOINT is True
+    assert _load(argv=("stability.py", "o.json", "24", "13", "5")).DISJOINT \
+        is False
+
+
+def test_disjoint_main_excludes_run_a_identities(tmp_path):
+    mod = _load(argv=("stability.py", str(tmp_path / "o.json"), "2", "13",
+                      "5", "disjoint"))
+    seen = {}
+
+    def fake_run(roots, rotate, exclude=None):
+        seen[rotate] = exclude
+        return [_scored(f"v{i}", float(i), [f"v{i}-r{rotate}"])
+                for i in range(3)]
+
+    mod.run = fake_run
+    mod.load_volumes = lambda: ["v0", "v1", "v2"]
+    out = mod.main()
+    assert seen[0] is None
+    assert seen[13] == {f"v{i}": {f"v{i}-r0"} for i in range(3)}
+    assert out["forced_disjoint"] is True
+    assert out["provenance"]["n_truly_disjoint"] == 3
+
+
+def test_disjoint_complete_drops_rereads_and_short_runs():
+    mod = _load()
+    r0 = [_scored("a", 10.0, ["a1"]), _scored("b", 20.0, ["b1"]),
+          _scored("c", 30.0, ["c1"]), _scored("d", 40.0, ["d1"])]
+    r1 = [_scored("a", 11.0, ["a2"]),               # disjoint, complete
+          _scored("b", 21.0, ["b1"]),               # re-read: excluded
+          _scored("c", 31.0, ["c2"], complete=False),  # short: excluded
+          _scored("d", 41.0, ["d2"])]               # disjoint, complete
+    out = mod.compare(r0, r1)
+    assert out["n_volumes"] == 4
+    honest = out["disjoint_complete"]
+    assert honest["n_volumes"] == 2
+    assert honest["spearman_rho"] == 1.0
+    assert honest["mean_abs_diff"] == 1.0
+
+
+def test_disjoint_complete_with_too_few_volumes_is_not_a_pass():
+    mod = _load()
+    out = mod.compare([_scored("a", 1.0, ["a1"])], [_scored("a", 1.0, ["a1"])])
+    assert out["disjoint_complete"]["spearman_rho"] is None
+    assert out["disjoint_complete"]["gate_pass"] is False

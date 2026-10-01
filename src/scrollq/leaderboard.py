@@ -1,4 +1,4 @@
-"""Build the ScrollQ leaderboard site from volumes.json.
+"""Build the ScrolIQ leaderboard site from volumes.json.
 
 Generates a single self-contained HTML page: hero stats, score-distribution
 histogram, sortable/filterable leaderboard with expandable rows, methodology,

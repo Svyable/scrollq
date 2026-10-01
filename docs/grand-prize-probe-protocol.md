@@ -41,7 +41,7 @@ For each target:
    where available.
 2. Run zarr-pyramid-audit against the CT, surface prediction, and lasagna
    inputs.
-3. Run ScrollQ against the exact eligible CT volume.
+3. Run ScrolIQ against the exact eligible CT volume.
 4. Record the surface-prediction and lasagna model IDs and pyramid levels.
 5. Fail closed on high-severity storage/integrity findings.
 
@@ -81,7 +81,21 @@ Before any global fit, deterministically assign the 24 regions:
 The six held-out regions must never become spiral-fit inputs. They exist only
 to test whether the fitted surface predicts independently verified geometry.
 
-Store the split in a checked-in JSON manifest.
+After the split is frozen, certify spatial separation with
+`scrollq-geometry-probe --minimum-fit-holdout-gap-voxels <N>`, where `N` is
+predeclared from the largest spatial influence radius of any fit input or
+derived supervision used by the experiment. The certificate measures the
+Euclidean gap between fit and held-out candidate axis-aligned XYZ boxes in
+base-resolution voxel space. A positive box gap is conservative evidence: if
+the boxes are at least `N` voxels apart, the contained surfaces are at least
+that far apart. A zero box gap is only ambiguous — it does not prove the
+surfaces touch — and must be resolved with an exact surface-distance check
+before the held-out region can be called independent.
+
+The gap threshold is an exclusion rule, not a split optimizer: changing it
+must never reshuffle which regions are held out after results have been seen.
+
+Store the split and its separation certificate in a checked-in JSON manifest.
 
 ## Stage C.5 — optional certified winding constraints
 

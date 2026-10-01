@@ -159,6 +159,465 @@ def _mask(path: Path, shape: tuple[int, int]) -> tuple[np.ndarray | None, dict[s
     }
 
 
+def _nonnegative_int(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def _same_declared_root(left: str, right: str) -> bool:
+    return left.rstrip("/") == right.rstrip("/")
+
+
+def _surface_preflight_evidence(
+    report_path: str | Path | None,
+    surface_root: Path,
+    *,
+    volume_root: str | None,
+    shape: tuple[int, int],
+    scale: tuple[float, float],
+    meta_sha256: str,
+    valid_vertex_count: int,
+) -> tuple[dict[str, Any], list[str], list[str], list[dict[str, str]]]:
+    """Validate a Villa vesuvius.surface_preflight schema-v2 report.
+
+    The upstream preflight owns CT bounds/signal-support semantics. ScrolIQ
+    only verifies that the supplied report is structurally complete and tied
+    to the surface/volume currently being audited.
+    """
+    if report_path is None:
+        return (
+            {
+                "status": "unknown",
+                "tool": "vesuvius.surface_preflight",
+                "reason": "no upstream vesuvius.surface_preflight report supplied",
+            },
+            [],
+            [],
+            [],
+        )
+
+    path = Path(report_path)
+    errors: list[str] = []
+    warnings: list[str] = []
+    findings: list[dict[str, str]] = []
+    evidence: dict[str, Any] = {
+        "status": "fail",
+        "tool": "vesuvius.surface_preflight",
+        "report_path": str(path),
+    }
+    if not path.is_file():
+        errors.append(f"surface preflight report does not exist: {path}")
+        return evidence, errors, warnings, findings
+
+    evidence["report_sha256"] = _sha256(path)
+    evidence["report_bytes"] = path.stat().st_size
+    try:
+        report = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        errors.append(f"surface preflight report could not be parsed: {exc}")
+        return evidence, errors, warnings, findings
+    if not isinstance(report, dict):
+        errors.append("surface preflight report must contain a JSON object")
+        return evidence, errors, warnings, findings
+
+    schema_version = report.get("schema_version")
+    evidence["schema_version"] = schema_version
+    if schema_version != 2:
+        errors.append(
+            f"surface preflight schema_version must be 2, got {schema_version!r}"
+        )
+
+    surface = report.get("surface")
+    if not isinstance(surface, dict):
+        surface = {}
+        errors.append("surface preflight report surface must be an object")
+    declared_surface = surface.get("path")
+    path_match = False
+    if isinstance(declared_surface, str) and declared_surface:
+        try:
+            path_match = (
+                Path(declared_surface).expanduser().resolve()
+                == surface_root.expanduser().resolve()
+            )
+        except OSError:
+            path_match = False
+    else:
+        errors.append("surface preflight report must name its input surface")
+    evidence["declared_surface"] = declared_surface
+    evidence["surface_path_matches"] = path_match
+    if isinstance(declared_surface, str) and declared_surface and not path_match:
+        errors.append("surface preflight report names a different TIFXYZ surface path")
+
+    report_meta_sha = surface.get("meta_sha256")
+    evidence["meta_sha256"] = report_meta_sha
+    if report_meta_sha != meta_sha256:
+        errors.append("surface preflight meta.json SHA-256 does not match the audited surface")
+
+    report_shape = surface.get("stored_shape_yx")
+    evidence["stored_shape_yx"] = report_shape
+    if report_shape != [int(shape[0]), int(shape[1])]:
+        errors.append("surface preflight stored grid shape does not match the audited surface")
+
+    report_scale = surface.get("scale_xy")
+    scale_matches = False
+    if isinstance(report_scale, list) and len(report_scale) >= 2:
+        try:
+            scale_matches = all(
+                math.isclose(
+                    float(report_scale[i]),
+                    float(scale[i]),
+                    rel_tol=1e-9,
+                    abs_tol=1e-12,
+                )
+                for i in range(2)
+            )
+        except (TypeError, ValueError):
+            scale_matches = False
+    evidence["scale_xy"] = report_scale
+    if not scale_matches:
+        errors.append("surface preflight scale_xy does not match the audited surface")
+
+    report_valid_vertices = surface.get("valid_vertex_count")
+    evidence["valid_vertex_count"] = report_valid_vertices
+    if report_valid_vertices != valid_vertex_count:
+        errors.append(
+            "surface preflight valid_vertex_count does not match the audited surface"
+        )
+
+    volume = report.get("volume")
+    if volume_root is None:
+        errors.append(
+            "surface preflight evidence requires scroliq-mesh --volume-root "
+            "to bind the exact CT input"
+        )
+    if not isinstance(volume, dict):
+        volume = {}
+        errors.append("surface preflight report must include a CT volume")
+    declared_volume = volume.get("path")
+    evidence["declared_volume"] = declared_volume
+    volume_match = (
+        isinstance(declared_volume, str)
+        and isinstance(volume_root, str)
+        and _same_declared_root(declared_volume, volume_root)
+    )
+    evidence["volume_root_matches"] = volume_match
+    if isinstance(volume_root, str) and not volume_match:
+        errors.append("surface preflight report names a different CT volume root")
+
+    gates = report.get("gates")
+    gate_map: dict[str, dict[str, Any]] = {}
+    if not isinstance(gates, list) or not gates:
+        errors.append("surface preflight gates must be a non-empty list")
+        gates = []
+    for gate in gates:
+        if not isinstance(gate, dict) or not isinstance(gate.get("name"), str):
+            errors.append("surface preflight gates must be named objects")
+            continue
+        name = gate["name"]
+        if name in gate_map:
+            errors.append(f"surface preflight gate {name!r} is duplicated")
+            continue
+        if gate.get("required") is not True or not isinstance(gate.get("passed"), bool):
+            errors.append(
+                f"surface preflight gate {name!r} must declare required=true and boolean passed"
+            )
+        gate_map[name] = gate
+
+    required_names = {
+        "tifxyz_required_files",
+        "tifxyz_metadata",
+        "tifxyz_coordinate_shapes",
+        "volume_is_3d",
+        "valid_surface_vertices",
+        "valid_surface_quads",
+        "finite_selected_coordinates",
+        "coordinates_within_volume",
+        "tifxyz_scale_consistency",
+        "sampled_volume_signal_support",
+    }
+    missing_gates = sorted(required_names - set(gate_map))
+    if missing_gates:
+        errors.append(
+            "surface preflight report is missing required gate(s): "
+            + ", ".join(missing_gates)
+        )
+
+    failed_gates = sorted(
+        name
+        for name, gate in gate_map.items()
+        if gate.get("required") is True and gate.get("passed") is not True
+    )
+    declared_status = report.get("status")
+    computed_pass = bool(gate_map) and not failed_gates
+    if declared_status not in {"PASS", "FAIL"}:
+        errors.append("surface preflight status must be PASS or FAIL")
+    elif (declared_status == "PASS") != computed_pass:
+        errors.append("surface preflight status contradicts its required gates")
+
+    summary = report.get("summary")
+    if isinstance(summary, dict):
+        required_count = sum(g.get("required") is True for g in gate_map.values())
+        passed_count = sum(
+            g.get("required") is True and g.get("passed") is True
+            for g in gate_map.values()
+        )
+        if summary.get("required_gate_count") != required_count:
+            errors.append("surface preflight required_gate_count contradicts its gates")
+        if summary.get("passed_required_gates") != passed_count:
+            errors.append("surface preflight passed_required_gates contradicts its gates")
+    else:
+        errors.append("surface preflight report summary must be an object")
+
+    support = volume.get("sampled_signal_support")
+    if isinstance(support, dict):
+        evidence["sampled_signal_support"] = {
+            key: support.get(key)
+            for key in ("sample_count", "supported_count", "support_fraction")
+        }
+    evidence["resolved_array_key"] = volume.get("resolved_array_key")
+    evidence["failed_gates"] = failed_gates
+    evidence["required_gate_count"] = len(gate_map)
+
+    if failed_gates or declared_status == "FAIL":
+        errors.append(
+            "vesuvius.surface_preflight failed required gate(s): "
+            + (", ".join(failed_gates) if failed_gates else "unknown")
+        )
+        findings.append(
+            {
+                "kind": "surface-preflight",
+                "severity": "block",
+                "message": (
+                    "official Villa surface preflight failed: "
+                    + (", ".join(failed_gates) if failed_gates else "report status FAIL")
+                ),
+            }
+        )
+
+    evidence["binding"] = (
+        "report path + current meta.json SHA-256 + grid shape + valid-vertex "
+        "count + exact declared CT root; upstream schema v2 does not hash x/y/z.tif"
+    )
+    evidence["status"] = "fail" if errors else "pass"
+    return evidence, errors, warnings, findings
+
+
+def _selfcross_evidence(
+    report_path: str | Path | None,
+    surface_root: Path,
+    shape: tuple[int, int],
+) -> tuple[dict[str, Any], list[str], list[str], list[dict[str, str]]]:
+    """Validate and summarize an upstream vc_tifxyz_selfcross report.
+
+    ScrolIQ deliberately does not reimplement triangle/triangle intersection.
+    When supplied, this evidence is accepted only when the upstream report is
+    structurally self-consistent and bound to the exact local TIFXYZ path and
+    grid being audited.
+    """
+    if report_path is None:
+        return (
+            {
+                "status": "unknown",
+                "tool": "vc_tifxyz_selfcross",
+                "reason": "no upstream vc_tifxyz_selfcross report supplied",
+            },
+            [],
+            [],
+            [],
+        )
+
+    path = Path(report_path)
+    errors: list[str] = []
+    warnings: list[str] = []
+    findings: list[dict[str, str]] = []
+    evidence: dict[str, Any] = {
+        "status": "fail",
+        "tool": "vc_tifxyz_selfcross",
+        "report_path": str(path),
+    }
+
+    if not path.is_file():
+        errors.append(f"selfcross report does not exist: {path}")
+        return evidence, errors, warnings, findings
+
+    evidence["report_sha256"] = _sha256(path)
+    evidence["report_bytes"] = path.stat().st_size
+    try:
+        report = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        errors.append(f"selfcross report could not be parsed: {exc}")
+        return evidence, errors, warnings, findings
+    if not isinstance(report, dict):
+        errors.append("selfcross report must contain a JSON object")
+        return evidence, errors, warnings, findings
+
+    if report.get("tool") != "vc_tifxyz_selfcross":
+        errors.append('selfcross report tool must equal "vc_tifxyz_selfcross"')
+    if report.get("report_only") is not True:
+        errors.append("selfcross report must declare report_only=true")
+
+    declared_surface = report.get("surface")
+    path_match = False
+    if isinstance(declared_surface, str) and declared_surface:
+        try:
+            path_match = Path(declared_surface).expanduser().resolve() == surface_root.expanduser().resolve()
+        except OSError:
+            path_match = False
+    else:
+        errors.append("selfcross report must name its input surface")
+    evidence["declared_surface"] = declared_surface
+    evidence["surface_path_matches"] = path_match
+    if isinstance(declared_surface, str) and declared_surface and not path_match:
+        errors.append("selfcross report names a different TIFXYZ surface path")
+
+    rows, cols = shape
+    evidence["grid_shape_yx"] = [int(rows), int(cols)]
+    if report.get("grid_rows") != rows or report.get("grid_cols") != cols:
+        errors.append(
+            "selfcross report grid shape does not match the audited TIFXYZ grid"
+        )
+
+    params = report.get("parameters")
+    parameters: dict[str, Any] = {}
+    if not isinstance(params, dict):
+        errors.append("selfcross report parameters must be an object")
+    else:
+        parameters = {
+            key: params.get(key)
+            for key in ("exclude", "maxedge", "cell", "touch_tolerance", "diagonals")
+        }
+        diagonals = params.get("diagonals")
+        if diagonals != [0, 1]:
+            errors.append("selfcross report must census both triangulations [0, 1]")
+        if not _nonnegative_int(params.get("exclude")):
+            errors.append("selfcross exclude must be a non-negative integer")
+        maxedge = params.get("maxedge")
+        if not isinstance(maxedge, (int, float)) or isinstance(maxedge, bool) or not math.isfinite(float(maxedge)) or float(maxedge) < 0:
+            errors.append("selfcross maxedge must be a finite number >= 0")
+        for key in ("cell", "touch_tolerance"):
+            value = params.get(key)
+            if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(float(value)) or float(value) <= 0:
+                errors.append(f"selfcross {key} must be a finite positive number")
+    evidence["parameters"] = parameters
+
+    census = report.get("census")
+    per_diagonal: list[dict[str, int]] = []
+    seen_diagonals: set[int] = set()
+    transverse_total = 0
+    coplanar_total = 0
+    grazing_total = 0
+    dropped_total = 0
+    malformed_contacts = 0
+
+    if not isinstance(census, list) or len(census) != 2:
+        errors.append("selfcross census must contain exactly two diagonal reports")
+    else:
+        for item in census:
+            if not isinstance(item, dict):
+                errors.append("selfcross census entries must be objects")
+                continue
+            diagonal = item.get("diagonal")
+            if diagonal not in (0, 1) or diagonal in seen_diagonals:
+                errors.append("selfcross census diagonal IDs must be unique 0 and 1")
+                continue
+            seen_diagonals.add(int(diagonal))
+
+            counts: dict[str, int] = {}
+            for key in (
+                "triangles",
+                "quads_dropped_for_edge_length",
+                "pairs_tested",
+                "transverse",
+                "coplanar",
+                "grazing",
+            ):
+                value = item.get(key)
+                if not _nonnegative_int(value):
+                    errors.append(f"selfcross diagonal {diagonal} {key} must be a non-negative integer")
+                    value = 0
+                counts[key] = int(value)
+
+            contacts = item.get("transverse_contacts")
+            if not isinstance(contacts, list):
+                errors.append(f"selfcross diagonal {diagonal} transverse_contacts must be a list")
+                contacts = []
+            if len(contacts) != counts["transverse"]:
+                errors.append(
+                    f"selfcross diagonal {diagonal} transverse count does not match contact rows"
+                )
+
+            for contact in contacts:
+                ok = isinstance(contact, dict)
+                if ok:
+                    for key in ("quad1", "quad2"):
+                        q = contact.get(key)
+                        ok = ok and isinstance(q, list) and len(q) == 2 and all(_nonnegative_int(v) for v in q)
+                    site = contact.get("site")
+                    ok = ok and isinstance(site, list) and len(site) == 3 and all(
+                        isinstance(v, (int, float))
+                        and not isinstance(v, bool)
+                        and math.isfinite(float(v))
+                        for v in site
+                    )
+                    for key in ("penetration_vx", "angle_deg"):
+                        value = contact.get(key)
+                        ok = ok and isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(float(value))
+                if not ok:
+                    malformed_contacts += 1
+
+            transverse_total += counts["transverse"]
+            coplanar_total += counts["coplanar"]
+            grazing_total += counts["grazing"]
+            dropped_total += counts["quads_dropped_for_edge_length"]
+            per_diagonal.append({"diagonal": int(diagonal), **counts})
+
+        if seen_diagonals != {0, 1}:
+            errors.append("selfcross census must contain diagonal IDs 0 and 1")
+
+    if malformed_contacts:
+        errors.append(f"{malformed_contacts} selfcross transverse contact row(s) are malformed")
+
+    declared_clean = report.get("clean_of_transverse_self_intersection")
+    computed_clean = transverse_total == 0
+    if not isinstance(declared_clean, bool):
+        errors.append("selfcross report must declare clean_of_transverse_self_intersection")
+    elif declared_clean != computed_clean:
+        errors.append("selfcross clean verdict contradicts the transverse contact counts")
+
+    evidence.update(
+        {
+            "clean_of_transverse_self_intersection": computed_clean,
+            "transverse_contacts": transverse_total,
+            "coplanar_contacts": coplanar_total,
+            "grazing_contacts": grazing_total,
+            "quads_dropped_for_edge_length": dropped_total,
+            "census": sorted(per_diagonal, key=lambda item: item["diagonal"]),
+        }
+    )
+
+    if transverse_total:
+        errors.append(
+            f"vc_tifxyz_selfcross found {transverse_total} non-adjacent transverse contact(s)"
+        )
+        findings.append(
+            {
+                "kind": "self-intersection",
+                "severity": "block",
+                "message": (
+                    f"official VC3D census found {transverse_total} non-adjacent "
+                    "transverse triangle contact(s)"
+                ),
+            }
+        )
+    if dropped_total:
+        warnings.append(
+            f"vc_tifxyz_selfcross dropped {dropped_total} quad(s) for exceeding maxedge; "
+            "its clean verdict does not cover those quads"
+        )
+
+    evidence["status"] = "fail" if errors else ("partial" if warnings else "pass")
+    return evidence, errors, warnings, findings
+
+
 def _edge_metrics(
     xyz: np.ndarray,
     valid: np.ndarray,
@@ -210,6 +669,38 @@ def _quad_metrics(
         if ratios.size else np.asarray([])
     )
 
+    # Area alone cannot establish a low-distortion isometric parameterization:
+    # e.g. 2x stretch in one flat axis and 0.5x compression in the other
+    # preserves area exactly. Treat each valid quad as two triangles and
+    # measure the singular values of the local flat->3D Jacobian. TIFXYZ
+    # meta.scale is grid cells per voxel, so multiplying grid-edge vectors by
+    # scale converts derivatives to one-voxel flat-coordinate units.
+    if vq.any():
+        j1 = np.stack(
+            ((p01 - p00) * scale[0], (p10 - p00) * scale[1]),
+            axis=-1,
+        )[vq]
+        j2 = np.stack(
+            ((p11 - p10) * scale[0], (p11 - p01) * scale[1]),
+            axis=-1,
+        )[vq]
+        jacobians = np.concatenate([j1, j2], axis=0)
+        gram = np.einsum("...ki,...kj->...ij", jacobians, jacobians)
+        singular = np.sqrt(np.clip(np.linalg.eigvalsh(gram), 0.0, None))
+        usable = np.isfinite(singular).all(axis=1) & (singular[:, 0] > 1e-8)
+        sigma_min = singular[usable, 0]
+        sigma_max = singular[usable, 1]
+        symmetric_stretch = np.maximum(sigma_max, 1.0 / sigma_min)
+        anisotropy = sigma_max / sigma_min
+        symmetric_dirichlet = (
+            sigma_min**2 + sigma_max**2
+            + 1.0 / sigma_min**2 + 1.0 / sigma_max**2
+        )
+        degenerate_triangles = int((~usable).sum())
+    else:
+        sigma_min = sigma_max = symmetric_stretch = anisotropy = symmetric_dirichlet = np.asarray([])
+        degenerate_triangles = 0
+
     normals = c1 + c2
     norm = np.linalg.norm(normals, axis=-1)
     ok = vq & np.isfinite(norm) & (norm > 1e-8)
@@ -230,6 +721,16 @@ def _quad_metrics(
         "nominal_flat_area_voxels2": float(vq.sum() * nominal),
         "area_ratio_3d_to_flat": _summary(ratios),
         "symmetric_area_distortion": _summary(distortion),
+        "isometry": {
+            "method": "per-triangle singular values of the flat-to-3D Jacobian",
+            "triangles": int(2 * vq.sum()),
+            "degenerate_triangles": degenerate_triangles,
+            "sigma_min": _summary(sigma_min),
+            "sigma_max": _summary(sigma_max),
+            "symmetric_stretch_distortion": _summary(symmetric_stretch),
+            "anisotropy": _summary(anisotropy),
+            "symmetric_dirichlet_energy": _summary(symmetric_dirichlet),
+        },
         "normal_neighbor_dot": _summary(dots),
         "normal_flip_angle_deg": flip_angle,
         "normal_reversal_pairs": int((dots < cutoff).sum()) if dots.size else 0,
@@ -243,14 +744,22 @@ def audit_tifxyz(
     spacing_tolerance_ratio: float = 1.5,
     jump_ratio: float = 4.0,
     distortion_p95_threshold: float = 2.0,
+    isometry_p95_threshold: float = 2.0,
     normal_flip_angle_deg: float = 120.0,
+    selfcross_report: str | Path | None = None,
+    surface_preflight_report: str | Path | None = None,
 ) -> dict[str, Any]:
     root = Path(path)
     errors: list[str] = []
     warnings: list[str] = []
     findings: list[dict[str, str]] = []
 
-    if spacing_tolerance_ratio <= 1 or jump_ratio <= 1 or distortion_p95_threshold <= 1:
+    if (
+        spacing_tolerance_ratio <= 1
+        or jump_ratio <= 1
+        or distortion_p95_threshold <= 1
+        or isometry_p95_threshold <= 1
+    ):
         raise ValueError("ratio thresholds must be > 1")
     if not 90 <= normal_flip_angle_deg < 180:
         raise ValueError("normal_flip_angle_deg must be in [90, 180)")
@@ -440,6 +949,43 @@ def audit_tifxyz(
             f"{distortion_p95_threshold:g}"
         )
 
+    isometry_p95 = quads["isometry"]["symmetric_stretch_distortion"]["p95"]
+    if isometry_p95 is not None and isometry_p95 > isometry_p95_threshold:
+        warnings.append(
+            f"p95 local isometry distortion {isometry_p95:.3g} exceeds "
+            f"{isometry_p95_threshold:g}"
+        )
+        findings.append({
+            "kind": "isometry-distortion",
+            "severity": "review",
+            "message": (
+                f"p95 local symmetric stretch {isometry_p95:.3g} exceeds "
+                f"{isometry_p95_threshold:g}"
+            ),
+        })
+
+    ct_preflight, preflight_errors, preflight_warnings, preflight_findings = (
+        _surface_preflight_evidence(
+            surface_preflight_report,
+            root,
+            volume_root=volume_root,
+            shape=z.shape,
+            scale=scale,
+            meta_sha256=provenance["meta.json"]["sha256"],
+            valid_vertex_count=valid_count,
+        )
+    )
+    errors.extend(preflight_errors)
+    warnings.extend(preflight_warnings)
+    findings.extend(preflight_findings)
+
+    self_intersection, selfcross_errors, selfcross_warnings, selfcross_findings = (
+        _selfcross_evidence(selfcross_report, root, z.shape)
+    )
+    errors.extend(selfcross_errors)
+    warnings.extend(selfcross_warnings)
+    findings.extend(selfcross_findings)
+
     status = "fail" if errors else ("partial" if warnings else "pass")
     return {
         "schema_version": SCHEMA_VERSION,
@@ -467,14 +1013,36 @@ def audit_tifxyz(
         "spacing": spacing,
         "edges": edges,
         "quads": quads,
+        "ct_preflight": ct_preflight,
+        "self_intersection": self_intersection,
         "error_count": len(errors),
         "warning_count": len(warnings),
         "errors": errors,
         "warnings": warnings,
         "findings": findings,
         "limitation": (
-            "This is a mesh-format and mesh-geometry audit. It does not establish CT support, "
-            "correct winding identity, absence of nonlocal self-intersections, or readable ink."
+            "This audit combines local TIFXYZ geometry"
+            + (
+                ", a validated upstream Villa surface preflight against the declared CT volume"
+                if ct_preflight.get("status") == "pass"
+                else ""
+            )
+            + (
+                ", and a validated upstream VC3D transverse self-intersection census"
+                if self_intersection.get("status") == "pass"
+                else ""
+            )
+            + ". It does not establish correct winding identity or readable ink."
+            + (
+                " CT support remains unverified."
+                if ct_preflight.get("status") != "pass"
+                else ""
+            )
+            + (
+                " Freedom from nonlocal transverse self-intersections remains unverified."
+                if self_intersection.get("status") != "pass"
+                else ""
+            )
         ),
     }
 
@@ -486,7 +1054,21 @@ def main() -> None:
     ap.add_argument("--spacing-tolerance-ratio", type=float, default=1.5)
     ap.add_argument("--jump-ratio", type=float, default=4.0)
     ap.add_argument("--distortion-p95-threshold", type=float, default=2.0)
+    ap.add_argument("--isometry-p95-threshold", type=float, default=2.0)
     ap.add_argument("--normal-flip-angle", type=float, default=120.0)
+    ap.add_argument(
+        "--selfcross-report",
+        default=None,
+        help="optional report.json produced by VC3D vc_tifxyz_selfcross for this exact surface",
+    )
+    ap.add_argument(
+        "--surface-preflight-report",
+        default=None,
+        help=(
+            "optional JSON produced by vesuvius.surface_preflight for this exact "
+            "surface and --volume-root"
+        ),
+    )
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -496,7 +1078,10 @@ def main() -> None:
         spacing_tolerance_ratio=args.spacing_tolerance_ratio,
         jump_ratio=args.jump_ratio,
         distortion_p95_threshold=args.distortion_p95_threshold,
+        isometry_p95_threshold=args.isometry_p95_threshold,
         normal_flip_angle_deg=args.normal_flip_angle,
+        selfcross_report=args.selfcross_report,
+        surface_preflight_report=args.surface_preflight_report,
     )
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)

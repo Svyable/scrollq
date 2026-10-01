@@ -6,7 +6,7 @@ from scrollq.provenance import validate_manifest
 
 def _manifest():
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "rules": {
             "url": "https://scrollprize.org/prizes",
             "as_of": "2026-09-30",
@@ -180,6 +180,34 @@ def _manifest():
                 "code_commit": "a" * 40,
             }
         ],
+        "recto_coverage": {
+            "schema_version": 1,
+            "volume_root": (
+                "s3://vesuvius/PHerc0813/volumes/"
+                "20250821151723.zarr"
+            ),
+            "generated_by": {
+                "command": "python -m pipeline.measure_recto",
+                "code_commit": "a" * 40,
+            },
+            "reference": {
+                "surface_area": 100.0,
+                "area_unit": "mm^2",
+                "method": "Frozen reference recto inventory",
+                "artifact_url": "https://example.org/recto/reference.json",
+                "sha256": "3" * 64,
+            },
+            "components": [
+                {
+                    "id": "main-sheet",
+                    "kind": "main-sheet",
+                    "area": 100.0,
+                    "unrolled": True,
+                    "excluded": False,
+                    "mesh_ids": ["mesh:column-01"],
+                }
+            ],
+        },
         "banner": {
             "path": "banner.tif",
             "sha256": "1" * 64,
@@ -207,6 +235,8 @@ def test_valid_manifest_builds_a_complete_render_chain():
     assert chain["inference_seed"] == 5678
     assert chain["region_exclusion"]["overlaps"] == []
     assert report["held_out_validation_proofs"][0]["overlaps"] == []
+    assert report["recto_coverage_proof"]["status"] == "pass"
+    assert report["recto_coverage_proof"]["mesh_ids"] == ["mesh:column-01"]
 
 
 def test_wrong_same_scroll_volume_fails_closed():
@@ -397,3 +427,53 @@ def test_k_fold_validation_requires_fold_count():
     report = validate_manifest(manifest)
 
     assert "GP_HELD_OUT_PROTOCOL" in _codes(report)
+
+
+
+def test_recto_coverage_is_required():
+    manifest = _manifest()
+    del manifest["recto_coverage"]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_RECTO_COVERAGE" in _codes(report)
+
+
+def test_recto_coverage_must_bind_exact_package_mesh_set():
+    manifest = _manifest()
+    manifest["recto_coverage"]["components"][0]["mesh_ids"] = [
+        "mesh:not-in-package"
+    ]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_RECTO_MESH_SET" in _codes(report)
+
+
+def test_recto_coverage_must_pin_submission_commit():
+    manifest = _manifest()
+    manifest["recto_coverage"]["generated_by"]["code_commit"] = "b" * 40
+
+    report = validate_manifest(manifest)
+
+    assert "GP_RECTO_COMMIT" in _codes(report)
+
+
+def test_recto_coverage_failure_propagates_into_provenance_gate():
+    manifest = _manifest()
+    manifest["recto_coverage"]["components"] = [
+        {
+            "id": "outer-only",
+            "kind": "disconnected-outer-patch",
+            "area": 100.0,
+            "unrolled": False,
+            "excluded": True,
+            "mesh_ids": [],
+            "exclusion_reason": "invalid full exclusion",
+        }
+    ]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_RECTO_COVERAGE" in _codes(report)
+    assert "GP_RECTO_MESH_SET" in _codes(report)

@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "rules": {
     "url": "https://scrollprize.org/prizes",
     "as_of": "2026-09-30"
@@ -192,5 +192,32 @@
       },
       "code_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     }
-  ]
+  ],
+  "recto_coverage": {
+    "schema_version": 1,
+    "volume_root": "s3://vesuvius-challenge-open-data/PHerc0813/volumes/20250821151723.zarr",
+    "generated_by": {
+      "command": "python -m pipeline.measure_recto --volume PHerc0813",
+      "code_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "reference": {
+      "surface_area": 100,
+      "area_unit": "mm^2",
+      "method": "Union-area inventory from a frozen recto reference segmentation",
+      "artifact_url": "https://example.org/submission/recto-reference.json",
+      "sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+    },
+    "components": [
+      {
+        "id": "main-sheet",
+        "kind": "main-sheet",
+        "area": 100,
+        "unrolled": true,
+        "excluded": false,
+        "mesh_ids": [
+          "mesh:column-01"
+        ]
+      }
+    ]
+  }
 }
