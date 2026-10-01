@@ -75,6 +75,7 @@ def score_volume(base_url: str, root: str, samples: int = 4,
         n_shards *= g
 
     chunk_results = []
+    chunk_provenance = []  # parallel to chunk_results: where each chunk came from
     missing_shards = 0
     shard_read_failures = 0
     sess = store._session()
@@ -154,6 +155,16 @@ def score_volume(base_url: str, root: str, samples: int = 4,
                   for d in range(3)]
             vox = vox[: hi[0] - lo[0], : hi[1] - lo[1], : hi[2] - lo[2]]
             chunk_results.append(chunk_metrics(vox))
+            # Provenance: stable identity for this decoded sample. The shard
+            # key + inner flat index uniquely identifies the chunk within the
+            # volume; coordinates are recorded for human inspection.
+            chunk_provenance.append({
+                "identity": f"{skey}#{flat_i}",
+                "shard_coord": list(sc),
+                "shard_key": skey,
+                "inner_flat": flat_i,
+                "inner_coord": list(ic),
+            })
             decoded_here += 1
 
     sampling = {
@@ -167,6 +178,10 @@ def score_volume(base_url: str, root: str, samples: int = 4,
         "shard_read_failures": shard_read_failures,
     }
     result["sampling"] = sampling
+    # Provenance: stable identity per decoded chunk. Enables verifying
+    # that two runs actually sampled disjoint chunks (not just disjoint
+    # candidate order).
+    result["sample_provenance"] = chunk_provenance
     if not chunk_results:
         result["error"] = (f"no chunks decoded "
                            f"({missing_shards} shards absent, "

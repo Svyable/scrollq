@@ -56,11 +56,17 @@ python -m pytest tests/ -q
 4. **Scores are sample-dependent by design.** Resampling stability is the
    quality gate: Spearman ρ ≥ 0.85, mean |Δ| small, top-10 overlap high.
    Reproducible measurement 2026-09-30 (`artifacts/2026-09-30-resampling-stability/`,
-   `bin/stability.py`, rotate=0 vs 13 = fully disjoint shard sets):
+   `bin/stability.py`, rotate=0 vs 13 = disjoint *candidate order*):
    ρ = 0.76, mean |Δ| = 7.4, overlap 6/10 — **below the gate**. Scores carry
    ≈±5 points of sampling noise; present rankings as bands, not precise
    orders. (A rotate=1 resample gives ρ = 0.99 — it re-uses 3 of 4 shards,
    so it measures the resample, not the score. Don't cite it.)
+   **Disjoint candidate order ≠ disjoint chunks read**: the sampling loop
+   scans all candidates until N chunks decode, so on sparse volumes both
+   rotations re-read the same present shards. `score_volume()` now records
+   per-chunk provenance (`sample_provenance` with stable
+   `shard_key#inner_flat` identities) and `bin/stability.py` reports the
+   actual decoded-identity overlap per volume.
    Earlier published numbers (ρ = 0.876, |Δ| = 3.07, 8/10) had no artifact
    and do not reproduce — they were replaced 2026-09-30.
 5. **Weights are a judgment call, published with every score.** Changing them

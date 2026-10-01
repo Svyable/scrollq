@@ -2,11 +2,15 @@
 
 Scores every volume in volumes.txt twice with different deterministic
 samples (rotate=0 vs rotate=13 by default — cyclically shifted
-shard-candidate order; 13 gives fully disjoint candidate sets at 4 or 12
-samples from the 27-spread) and reports:
+shard-candidate order) and reports:
   - Spearman rank correlation between the two runs
   - mean absolute score difference
   - top-10 overlap
+  - per-volume decoded-chunk identity overlap (provenance): whether the
+    two runs actually read disjoint chunks, not just disjoint candidate
+    order. The sampling loop scans all candidates until N chunks decode,
+    so on sparse volumes both rotations can re-read the same present
+    shards — disjoint candidate ORDER does not imply disjoint chunks READ.
 
 Quality gate (AGENTS.md): rho >= 0.85, small mean |d|, high top-10 overlap.
 """
@@ -66,6 +70,29 @@ def main():
     top1 = {r for r in sorted(common, key=lambda r: s1[r], reverse=True)[:10]}
     overlap = len(top0 & top1)
 
+    # Provenance: per-volume decoded-chunk identity overlap. For each
+    # volume, compare the set of chunk identities actually decoded in
+    # run0 vs run1. Zero intersection = genuinely disjoint samples.
+    prov0 = {r["root"]: {p["identity"] for p in r.get("sample_provenance", [])}
+             for r in r0 if r.get("ok")}
+    prov1 = {r["root"]: {p["identity"] for p in r.get("sample_provenance", [])}
+             for r in r1 if r.get("ok")}
+    identity_overlaps = {}
+    for r in common:
+        i0, i1 = prov0.get(r, set()), prov1.get(r, set())
+        inter = len(i0 & i1)
+        union = len(i0 | i1)
+        identity_overlaps[r] = {
+            "intersection": inter,
+            "union": union,
+            "jaccard": round(inter / union, 3) if union else 0.0,
+            "n0": len(i0), "n1": len(i1),
+        }
+    n_disjoint = sum(1 for v in identity_overlaps.values()
+                     if v["intersection"] == 0)
+    mean_jaccard = (sum(v["jaccard"] for v in identity_overlaps.values())
+                    / len(identity_overlaps)) if identity_overlaps else 0.0
+
     out = {
         "n_volumes": len(common),
         "samples": SAMPLES,
@@ -77,6 +104,12 @@ def main():
         "top10_overlap": overlap,
         "gate": {"rho_min": 0.85},
         "gate_pass": bool(rho >= 0.85),
+        "provenance": {
+            "n_truly_disjoint": n_disjoint,
+            "n_volumes": len(identity_overlaps),
+            "mean_jaccard": round(mean_jaccard, 3),
+            "per_volume": identity_overlaps,
+        },
         "run0": {r["root"]: round(r["score"], 2) for r in r0 if r.get("ok")},
         "run1": {r["root"]: round(r["score"], 2) for r in r1 if r.get("ok")},
         "errors": [r["root"] for r in r0 if not r.get("ok")],
