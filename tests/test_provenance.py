@@ -1,12 +1,13 @@
 import copy
 import hashlib
+import json
 
 from scrollq.provenance import validate_manifest
 
 
 def _manifest():
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "rules": {
             "url": "https://scrollprize.org/prizes",
             "as_of": "2026-09-30",
@@ -101,6 +102,26 @@ def _manifest():
                 },
             }
         ],
+        "ink_validation": {
+            "tool": "scroliq-ink-validate",
+            "path": "ink-validation.json",
+            "sha256": "2" * 64,
+            "model_id": "model:ink-v1",
+            "model_checkpoint_sha256": "d" * 64,
+            "split_id": "public-fold-1",
+            "held_out": True,
+            "training_overlap": "none",
+            "known_ground_truth": True,
+            "ground_truth_source_url": "https://example.org/public-ground-truth",
+            "model_window_voxels_zyx": [17, 64, 64],
+            "control_names": ["normal+3"],
+            "evaluated_arrays_sha256": "3" * 64,
+            "metrics": {
+                "balanced_accuracy": 0.9,
+                "false_positive_rate": 0.1,
+                "both_classes_present": True,
+            },
+        },
         "surfaces": [
             {
                 "id": "surface:column-01",
@@ -144,6 +165,33 @@ def _manifest():
             "render_ids": ["render:column-01"],
             "column_numbers_overlaid": True,
         },
+    }
+
+
+def _ink_report():
+    return {
+        "schema_version": 1,
+        "tool": "scroliq-ink-validate",
+        "split": {
+            "id": "public-fold-1",
+            "held_out": True,
+            "training_overlap": "none",
+            "known_ground_truth": True,
+            "ground_truth_source_url": "https://example.org/public-ground-truth",
+        },
+        "model": {
+            "checkpoint_sha256": "d" * 64,
+            "window_voxels_zyx": [17, 64, 64],
+        },
+        "evaluation": {
+            "balanced_accuracy": 0.9,
+            "false_positive_rate": 0.1,
+            "both_classes_present": True,
+        },
+        "controls": [{"name": "normal+3", "metrics": {}}],
+        "evaluated_arrays_sha256": "3" * 64,
+        "prize_evidence_ready": True,
+        "readiness_reasons": [],
     }
 
 
@@ -264,6 +312,9 @@ def test_package_file_hashes_are_verified(tmp_path):
         "column_01.tifxyz": b"mesh",
         "column_01.tif": b"render",
         "banner.tif": b"banner",
+        "ink-validation.json": (
+            json.dumps(_ink_report(), sort_keys=True).encode("utf-8")
+        ),
     }
     for name, payload in payloads.items():
         (tmp_path / name).write_bytes(payload)
@@ -276,6 +327,9 @@ def test_package_file_hashes_are_verified(tmp_path):
     ).hexdigest()
     manifest["banner"]["sha256"] = hashlib.sha256(
         payloads["banner.tif"]
+    ).hexdigest()
+    manifest["ink_validation"]["sha256"] = hashlib.sha256(
+        payloads["ink-validation.json"]
     ).hexdigest()
 
     report = validate_manifest(manifest, root_dir=tmp_path)
@@ -295,3 +349,49 @@ def test_pseudo_label_producer_checkpoint_must_use_cc_by_nc():
     report = validate_manifest(manifest)
 
     assert "GP_CHECKPOINT_LICENSE" in _codes(report)
+
+
+def test_ink_validation_is_required():
+    manifest = _manifest()
+    del manifest["ink_validation"]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_INK_VALIDATION" in _codes(report)
+
+
+def test_ink_validation_must_be_held_out_without_overlap():
+    manifest = _manifest()
+    manifest["ink_validation"]["held_out"] = False
+    manifest["ink_validation"]["training_overlap"] = "present"
+
+    report = validate_manifest(manifest)
+
+    assert "GP_INK_VALIDATION_HELD_OUT" in _codes(report)
+    assert "GP_INK_VALIDATION_OVERLAP" in _codes(report)
+
+
+def test_local_ink_validation_report_is_cross_checked(tmp_path):
+    manifest = _manifest()
+    for name, payload in {
+        "column_01.tifxyz": b"mesh",
+        "column_01.tif": b"render",
+        "banner.tif": b"banner",
+    }.items():
+        (tmp_path / name).write_bytes(payload)
+        if name == "column_01.tifxyz":
+            manifest["meshes"][0]["sha256"] = hashlib.sha256(payload).hexdigest()
+        elif name == "column_01.tif":
+            manifest["renders"][0]["sha256"] = hashlib.sha256(payload).hexdigest()
+        else:
+            manifest["banner"]["sha256"] = hashlib.sha256(payload).hexdigest()
+
+    ink_report = _ink_report()
+    ink_report["model"]["checkpoint_sha256"] = "9" * 64
+    raw = json.dumps(ink_report, sort_keys=True).encode("utf-8")
+    (tmp_path / "ink-validation.json").write_bytes(raw)
+    manifest["ink_validation"]["sha256"] = hashlib.sha256(raw).hexdigest()
+
+    report = validate_manifest(manifest, root_dir=tmp_path)
+
+    assert "GP_INK_VALIDATION_MISMATCH" in _codes(report)
