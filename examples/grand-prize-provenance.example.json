@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "rules": {
+    "url": "https://scrollprize.org/prizes",
+    "as_of": "2026-09-30"
+  },
+  "submission": {
+    "scroll_id": "PHerc0813",
+    "eligible_volume_id": "20250821151723",
+    "human_input_hours": 2.5
+  },
+  "code": {
+    "repository": "https://github.com/OWNER/PIPELINE",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "license": "MIT",
+    "docker_image": "ghcr.io/OWNER/PIPELINE@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "ct_volume": {
+    "id": "ct:eligible",
+    "scroll_id": "PHerc0813",
+    "volume_id": "20250821151723",
+    "uri": "s3://vesuvius-challenge-open-data/PHerc0813/volumes/20250821151723.zarr",
+    "zarr_audit": {
+      "tool": "zarr-pyramid-audit",
+      "manifest_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "root": "s3://vesuvius-challenge-open-data/PHerc0813/volumes/20250821151723.zarr"
+    }
+  },
+  "region_sets": [
+    {
+      "id": "regions:train",
+      "role": "training",
+      "volume_id": "PUBLIC-TRAINING-VOLUME",
+      "coordinate_space": "level0-voxel-index",
+      "boxes": [
+        {"start": [0, 0, 0], "stop": [100, 100, 100]}
+      ]
+    },
+    {
+      "id": "regions:column-01",
+      "role": "prediction",
+      "volume_id": "20250821151723",
+      "coordinate_space": "level0-voxel-index",
+      "boxes": [
+        {"start": [1000, 2000, 3000], "stop": [1200, 2400, 3600]}
+      ]
+    }
+  ],
+  "datasets": [
+    {
+      "id": "dataset:ink-v1",
+      "public_url": "https://example.org/datasets/ink-v1",
+      "license": "CC-BY-NC-4.0",
+      "training_region_set_id": "regions:train",
+      "sources": [
+        {
+          "scroll_id": "PHerc1667",
+          "volume_id": "PUBLIC-TRAINING-VOLUME",
+          "voxel_size_um": 7.91
+        }
+      ]
+    }
+  ],
+  "models": [
+    {
+      "id": "model:ink-v1",
+      "checkpoint_url": "https://example.org/checkpoints/ink-v1.ckpt",
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "checkpoint_license": "MIT",
+      "training_dataset_ids": ["dataset:ink-v1"],
+      "stochastic": {
+        "training": true,
+        "inference": true
+      },
+      "training_seed": 1234,
+      "inference_seed": 5678,
+      "training_run": {
+        "url": "https://wandb.ai/OWNER/PROJECT/runs/TRAIN",
+        "public": true
+      },
+      "inference_run": {
+        "url": "https://wandb.ai/OWNER/PROJECT/runs/INFER",
+        "public": true
+      }
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "surface:column-01",
+      "ct_volume_id": "ct:eligible",
+      "uri": "s3://example/surfaces/column-01.zarr"
+    }
+  ],
+  "meshes": [
+    {
+      "id": "mesh:column-01",
+      "path": "column_01.tifxyz",
+      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "surface_id": "surface:column-01",
+      "ct_volume_id": "ct:eligible",
+      "flattening": "low-distortion-isometric",
+      "column": 1
+    }
+  ],
+  "renders": [
+    {
+      "id": "render:column-01",
+      "path": "column_01.tif",
+      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "mesh_id": "mesh:column-01",
+      "ct_volume_id": "ct:eligible",
+      "model_id": "model:ink-v1",
+      "prediction_region_set_id": "regions:column-01",
+      "column": 1,
+      "scale_bar_cm": 1,
+      "generated_by": {
+        "command": "python -m pipeline.render --column 1",
+        "code_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    }
+  ],
+  "banner": {
+    "path": "banner.tif",
+    "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "render_ids": ["render:column-01"],
+    "column_numbers_overlaid": true
+  }
+}
