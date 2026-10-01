@@ -306,6 +306,28 @@ PHerc0813, and PHerc1447**. The larger frontier is a useful warning: this
 external geometry proxy creates real trade-offs and should drive focused
 held-out geometry tests, not an opaque weighted winner score.
 
+## Held-out ink validation and falsification controls
+
+`scroliq-ink-validate` turns the prize's held-out-validation and false-positive-mitigation requirements into a deterministic evidence artifact. It scores a model prediction against known binary ink ground truth on an explicit validation mask, records balanced accuracy / false-positive rate / F1 / IoU, pins the checkpoint and exact evaluated arrays, and compares the correct surface against deliberately wrong physical controls such as normal offsets or an adjacent winding.
+
+```bash
+scroliq-ink-validate \
+  --prediction heldout/prediction.tif \
+  --labels heldout/inklabels.tif \
+  --validation-mask heldout/validation_mask.tif \
+  --prediction-scale uint8 \
+  --split-id public-kfold-fold-3 \
+  --held-out --training-overlap none \
+  --ground-truth-source-url https://scrollprize.org/... \
+  --model-checkpoint-sha256 <64-hex> \
+  --model-window 17x256x256 \
+  --control normal-plus-3=heldout/normal_plus_3.tif \
+  --control adjacent-winding=heldout/adjacent_winding.tif \
+  --out submission/ink-validation.json
+```
+
+The command fails closed as prize evidence unless the split is held out, training overlap is explicitly absent, the validation mask contains both classes, and at least one falsification control is evaluated. It deliberately imposes no arbitrary score cutoff; the output is evidence, not a readability claim. See [the ink-validation protocol](docs/ink-validation.md).
+
 ## 2027 Grand Prize provenance gate
 
 `scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. One manifest pins the exact eligible CT volume and zarr-pyramid-audit run, then links each surface → numbered tifxyz mesh → render → checkpoint → training datasets/regions → stochastic seeds → public training/inference experiment runs.
