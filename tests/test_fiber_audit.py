@@ -239,3 +239,81 @@ def test_native_vc3d_v1_remains_supported(tmp_path):
     assert out["status"] == "pass"
     assert out["vc3d_fiber"]["version"] == 1
     assert out["vc3d_fiber"]["optimization_mode"] == "lasagna"
+
+
+
+def test_native_control_points_align_with_rendered_line(tmp_path):
+    from scrollq.fiber_audit import audit_vc3d_json
+
+    out = audit_vc3d_json(_write_vc3d(tmp_path, version=4))
+    assert out["status"] == "pass"
+    assert out["control_line"]["status"] == "measured"
+    assert out["control_line"]["offset_candidates"] == 0
+    assert out["control_line"]["order_inversions"] == 0
+    assert out["control_line"]["nearest_index_monotonic"] is True
+
+
+def test_native_control_point_offset_is_scale_relative_review_finding(tmp_path):
+    from scrollq.fiber_audit import audit_vc3d_json
+
+    path = _write_vc3d(tmp_path, version=4)
+    obj = json.loads(path.read_text())
+    obj["control_points"][-1]["position"] = [5, 12, 0]
+    path.write_text(json.dumps(obj))
+
+    out = audit_vc3d_json(path, control_line_factor=4.0)
+    offsets = [f for f in out["findings"] if f["kind"] == "control_line_offset"]
+    assert out["status"] == "caution"
+    assert len(offsets) == 1
+    assert offsets[0]["control_point"] == 1
+    assert offsets[0]["ratio_to_median_step"] == pytest.approx(12.0)
+    assert out["control_line"]["offset_candidates"] == 1
+
+
+def test_native_control_point_order_inversion_is_review_finding(tmp_path):
+    from scrollq.fiber_audit import audit_vc3d_json
+
+    obj = {
+        "type": "vc3d_fiber",
+        "version": 4,
+        "optimization_mode": "native_fiber_trace3d",
+        "generation": 2,
+        "line_points": [[i, 0, 0] for i in range(7)],
+        "control_points": [
+            {"position": [0, 0, 0], "segment_to_next": _vc3d_span()},
+            {"position": [5, 0, 0], "segment_to_next": _vc3d_span()},
+            {"position": [2, 0, 0]},
+        ],
+    }
+    path = tmp_path / "inverted.json"
+    path.write_text(json.dumps(obj))
+
+    out = audit_vc3d_json(path)
+    inversions = [
+        f for f in out["findings"] if f["kind"] == "control_order_inversion"
+    ]
+    assert out["status"] == "caution"
+    assert len(inversions) == 1
+    assert inversions[0]["control_segment"] == 1
+    assert out["control_line"]["order_inversions"] == 1
+    assert out["control_line"]["nearest_index_monotonic"] is False
+
+
+def test_native_control_line_factor_fails_closed_when_invalid(tmp_path):
+    from scrollq.fiber_audit import audit_vc3d_json
+
+    out = audit_vc3d_json(_write_vc3d(tmp_path), control_line_factor=1.0)
+    assert out["status"] == "fail"
+    assert any(
+        e["field"] == "parameters.control_line_factor" for e in out["errors"]
+    )
+
+
+def test_csv_cli_remains_compatible_with_native_control_line_option(tmp_path):
+    good = tmp_path / "good-again.csv"
+    good.write_text(
+        "trace_id,x,y,z\n" + "".join(f"a,{i},0,0\n" for i in range(4))
+    )
+    with pytest.raises(SystemExit) as ok:
+        main([str(good), "--control-line-factor", "8"])
+    assert ok.value.code == 0

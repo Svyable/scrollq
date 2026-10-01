@@ -22,6 +22,7 @@ MARKERS = (
     '--fail-on-findings',
     '--volume-root',
     'cross-volume evidence',
+    'control-point/render consistency',
     'scroliq-ink-audit',
     'Evidence contracts',
     'Data scale',
