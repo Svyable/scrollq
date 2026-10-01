@@ -45,7 +45,7 @@ FILES = (
     "lt_20260717T092251928_000547.json",
 )
 
-# Filled after the first successful public run so subsequent campaigns fail
+# Pinned from the first successful public run. Subsequent campaigns fail
 # closed if a named upstream object changes in place.
 EXPECTED_SHA256: dict[str, str] = {
     "dj_20260717T165249423_000001.json": "47fa7a26f1ae487510350301b1f651bbb1211236c104169736b98a5fc0500beb",
@@ -98,6 +98,13 @@ def _compact(name: str, audit: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_campaign() -> dict[str, Any]:
+    if set(EXPECTED_SHA256) != set(FILES):
+        missing = sorted(set(FILES) - set(EXPECTED_SHA256))
+        extra = sorted(set(EXPECTED_SHA256) - set(FILES))
+        raise RuntimeError(
+            f"public campaign hash pins do not match FILES (missing={missing}, extra={extra})"
+        )
+
     rows: list[dict[str, Any]] = []
     download_errors = 0
     hash_mismatches = 0
