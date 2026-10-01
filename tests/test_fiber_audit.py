@@ -181,6 +181,7 @@ def test_native_vc3d_v4_is_audited_and_metadata_summarized(tmp_path):
     assert out["status"] == "pass"
     assert out["input_format"] == "vc3d_fiber_json"
     assert out["vc3d_fiber"]["version"] == 4
+    assert out["format_reference"]["commit"] == "56d7c3aeea4bbccf5f56b195ce2a44ea2cf601dd"
     assert out["vc3d_fiber"]["native_trace_segments"] == 1
     assert out["vc3d_fiber"]["fallback_segments"] == 0
     assert out["vc3d_fiber"]["tagged_segments"] == [
