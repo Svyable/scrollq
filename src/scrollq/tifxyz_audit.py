@@ -210,6 +210,38 @@ def _quad_metrics(
         if ratios.size else np.asarray([])
     )
 
+    # Area alone cannot establish a low-distortion isometric parameterization:
+    # e.g. 2x stretch in one flat axis and 0.5x compression in the other
+    # preserves area exactly. Treat each valid quad as two triangles and
+    # measure the singular values of the local flat->3D Jacobian. TIFXYZ
+    # meta.scale is grid cells per voxel, so multiplying grid-edge vectors by
+    # scale converts derivatives to one-voxel flat-coordinate units.
+    if vq.any():
+        j1 = np.stack(
+            ((p01 - p00) * scale[0], (p10 - p00) * scale[1]),
+            axis=-1,
+        )[vq]
+        j2 = np.stack(
+            ((p11 - p10) * scale[0], (p11 - p01) * scale[1]),
+            axis=-1,
+        )[vq]
+        jacobians = np.concatenate([j1, j2], axis=0)
+        gram = np.einsum("...ki,...kj->...ij", jacobians, jacobians)
+        singular = np.sqrt(np.clip(np.linalg.eigvalsh(gram), 0.0, None))
+        usable = np.isfinite(singular).all(axis=1) & (singular[:, 0] > 1e-8)
+        sigma_min = singular[usable, 0]
+        sigma_max = singular[usable, 1]
+        symmetric_stretch = np.maximum(sigma_max, 1.0 / sigma_min)
+        anisotropy = sigma_max / sigma_min
+        symmetric_dirichlet = (
+            sigma_min**2 + sigma_max**2
+            + 1.0 / sigma_min**2 + 1.0 / sigma_max**2
+        )
+        degenerate_triangles = int((~usable).sum())
+    else:
+        sigma_min = sigma_max = symmetric_stretch = anisotropy = symmetric_dirichlet = np.asarray([])
+        degenerate_triangles = 0
+
     normals = c1 + c2
     norm = np.linalg.norm(normals, axis=-1)
     ok = vq & np.isfinite(norm) & (norm > 1e-8)
@@ -230,6 +262,16 @@ def _quad_metrics(
         "nominal_flat_area_voxels2": float(vq.sum() * nominal),
         "area_ratio_3d_to_flat": _summary(ratios),
         "symmetric_area_distortion": _summary(distortion),
+        "isometry": {
+            "method": "per-triangle singular values of the flat-to-3D Jacobian",
+            "triangles": int(2 * vq.sum()),
+            "degenerate_triangles": degenerate_triangles,
+            "sigma_min": _summary(sigma_min),
+            "sigma_max": _summary(sigma_max),
+            "symmetric_stretch_distortion": _summary(symmetric_stretch),
+            "anisotropy": _summary(anisotropy),
+            "symmetric_dirichlet_energy": _summary(symmetric_dirichlet),
+        },
         "normal_neighbor_dot": _summary(dots),
         "normal_flip_angle_deg": flip_angle,
         "normal_reversal_pairs": int((dots < cutoff).sum()) if dots.size else 0,
@@ -243,6 +285,7 @@ def audit_tifxyz(
     spacing_tolerance_ratio: float = 1.5,
     jump_ratio: float = 4.0,
     distortion_p95_threshold: float = 2.0,
+    isometry_p95_threshold: float = 2.0,
     normal_flip_angle_deg: float = 120.0,
 ) -> dict[str, Any]:
     root = Path(path)
@@ -250,7 +293,12 @@ def audit_tifxyz(
     warnings: list[str] = []
     findings: list[dict[str, str]] = []
 
-    if spacing_tolerance_ratio <= 1 or jump_ratio <= 1 or distortion_p95_threshold <= 1:
+    if (
+        spacing_tolerance_ratio <= 1
+        or jump_ratio <= 1
+        or distortion_p95_threshold <= 1
+        or isometry_p95_threshold <= 1
+    ):
         raise ValueError("ratio thresholds must be > 1")
     if not 90 <= normal_flip_angle_deg < 180:
         raise ValueError("normal_flip_angle_deg must be in [90, 180)")
@@ -440,6 +488,21 @@ def audit_tifxyz(
             f"{distortion_p95_threshold:g}"
         )
 
+    isometry_p95 = quads["isometry"]["symmetric_stretch_distortion"]["p95"]
+    if isometry_p95 is not None and isometry_p95 > isometry_p95_threshold:
+        warnings.append(
+            f"p95 local isometry distortion {isometry_p95:.3g} exceeds "
+            f"{isometry_p95_threshold:g}"
+        )
+        findings.append({
+            "kind": "isometry-distortion",
+            "severity": "review",
+            "message": (
+                f"p95 local symmetric stretch {isometry_p95:.3g} exceeds "
+                f"{isometry_p95_threshold:g}"
+            ),
+        })
+
     status = "fail" if errors else ("partial" if warnings else "pass")
     return {
         "schema_version": SCHEMA_VERSION,
@@ -486,6 +549,7 @@ def main() -> None:
     ap.add_argument("--spacing-tolerance-ratio", type=float, default=1.5)
     ap.add_argument("--jump-ratio", type=float, default=4.0)
     ap.add_argument("--distortion-p95-threshold", type=float, default=2.0)
+    ap.add_argument("--isometry-p95-threshold", type=float, default=2.0)
     ap.add_argument("--normal-flip-angle", type=float, default=120.0)
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
@@ -496,6 +560,7 @@ def main() -> None:
         spacing_tolerance_ratio=args.spacing_tolerance_ratio,
         jump_ratio=args.jump_ratio,
         distortion_p95_threshold=args.distortion_p95_threshold,
+        isometry_p95_threshold=args.isometry_p95_threshold,
         normal_flip_angle_deg=args.normal_flip_angle,
     )
     out = Path(args.out)
