@@ -299,6 +299,22 @@ def _mesh_stage(
             "reason": f"unsupported mesh audit status: {audit_status!r}",
         }
 
+    ct_pass = (audit.get("ct_preflight") or {}).get("status") == "pass"
+    selfcross_pass = (audit.get("self_intersection") or {}).get("status") == "pass"
+    established = (
+        "A passing mesh audit establishes TIFXYZ structure, validity/topology, "
+        "metadata, local spacing, normal continuity, and flattening-distortion checks"
+    )
+    if ct_pass:
+        established += ", plus a validated upstream Villa CT surface preflight"
+    if selfcross_pass:
+        established += ", plus a validated upstream VC3D transverse self-intersection census"
+    gaps = ["correct winding identity"]
+    if not ct_pass:
+        gaps.insert(0, "CT support")
+    if not selfcross_pass:
+        gaps.append("freedom from nonlocal transverse self-intersections")
+
     result = {
         "status": "blocked" if audit_status == "fail" else "partial",
         "open_problem": "mesh-connectivity",
@@ -308,25 +324,12 @@ def _mesh_stage(
         "bbox": dict(audit.get("bbox") or {}),
         "spacing": dict(audit.get("spacing") or {}),
         "quads": dict(audit.get("quads") or {}),
+        "ct_preflight": dict(audit.get("ct_preflight") or {}),
         "self_intersection": dict(audit.get("self_intersection") or {}),
         "findings": list(audit.get("findings") or []),
         "error_count": int(audit.get("error_count") or 0),
         "warning_count": int(audit.get("warning_count") or 0),
-        "limitation": (
-            (
-                "A passing mesh audit establishes TIFXYZ structure, validity/topology, "
-                "metadata, local spacing, normal continuity, flattening-distortion checks, "
-                "and a validated VC3D transverse self-intersection census under its recorded "
-                "parameters. It does not establish CT support or correct winding identity."
-            )
-            if (audit.get("self_intersection") or {}).get("status") == "pass"
-            else (
-                "A passing mesh audit establishes TIFXYZ structure, validity/topology, "
-                "metadata, local spacing, normal continuity, and flattening-distortion checks only. "
-                "It does not establish CT support, correct winding identity, or freedom from "
-                "nonlocal self-intersections."
-            )
-        ),
+        "limitation": established + ". It does not establish " + ", ".join(gaps) + ".",
     }
     if audit_status == "fail":
         result["reason"] = "TIFXYZ mesh failed structural or geometry audit checks"
@@ -534,20 +537,24 @@ def build_passport(
             }
         )
     else:
+        ct_status = (stages["mesh"].get("ct_preflight") or {}).get("status")
         selfcross_status = (
             stages["mesh"].get("self_intersection") or {}
         ).get("status")
-        if selfcross_status == "pass":
-            action = "add CT-support and sheet-identity evidence to the mesh"
-        else:
-            action = (
-                "add CT-support and sheet-identity evidence, and run VC3D "
-                "vc_tifxyz_selfcross for nonlocal transverse-intersection evidence"
+        missing_evidence = []
+        if ct_status != "pass":
+            missing_evidence.append(
+                "run Villa vesuvius.surface_preflight for CT bounds/signal support"
+            )
+        missing_evidence.append("add sheet-identity evidence")
+        if selfcross_status != "pass":
+            missing_evidence.append(
+                "run VC3D vc_tifxyz_selfcross for nonlocal transverse-intersection evidence"
             )
         actions.append(
             {
                 "priority": "next-evidence",
-                "action": action,
+                "action": "; ".join(missing_evidence),
                 "open_problem": "mesh-connectivity",
             }
         )
