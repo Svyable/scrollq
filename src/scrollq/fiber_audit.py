@@ -131,12 +131,24 @@ def audit_rows(rows, gap_factor: float = 4.0, turn_degrees: float = 60.0) -> dic
     }
 
 
-def audit_csv(path, *, volume_root: str | None = None, **kwargs) -> dict:
-    """Audit a CSV file and record its SHA-256 for provenance."""
+def audit_csv(
+    path,
+    *,
+    volume_root: str | None = None,
+    gap_factor: float = 4.0,
+    turn_degrees: float = 60.0,
+    control_line_factor: float = 4.0,
+) -> dict:
+    """Audit a CSV file and record its SHA-256 for provenance.
+
+    ``control_line_factor`` is accepted for CLI/API symmetry but applies only
+    to native VC3D JSON, which carries control points.
+    """
+    del control_line_factor
     path = Path(path)
     with path.open(newline="", encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))
-    out = audit_rows(rows, **kwargs)
+    out = audit_rows(rows, gap_factor=gap_factor, turn_degrees=turn_degrees)
     out["input_format"] = "csv"
     out["volume_root"] = volume_root
     out["input"] = {
