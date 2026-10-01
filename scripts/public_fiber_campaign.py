@@ -47,7 +47,16 @@ FILES = (
 
 # Filled after the first successful public run so subsequent campaigns fail
 # closed if a named upstream object changes in place.
-EXPECTED_SHA256: dict[str, str] = {}
+EXPECTED_SHA256: dict[str, str] = {
+    "dj_20260717T165249423_000001.json": "47fa7a26f1ae487510350301b1f651bbb1211236c104169736b98a5fc0500beb",
+    "dj_20260805T025256484_000003.json": "9a53f6f57860ecffdeff1af77a09bc6c444ef7dc6f77c66db4f60fa24ef99ca7",
+    "et_20260630T175334064_000039.json": "06dbc8e2ea4ebdf60516a7b14e98b033279123706ae35bf5115a936f9f6589c4",
+    "et_20260706T162710800_000044.json": "fa5667d430ba81dc3763849218d557fdd194132742d3abb5784d73ff3811fd54",
+    "kb_20260630T183823858_000130.json": "adbb5fb85edcafd2761a40410e20bbf42ccc7dc5be346ccbe25ac6fc9cb9a6c4",
+    "kb_20260729T002251786_000203.json": "5fe40a9d014bccc9b81839447d31a72d9a0c5f1707e072e0e6d6fda98367509e",
+    "lt_20260702T055841011_000320.json": "38a81931b98de0a49979f1883acb98bfe7a5632b6901a1089f4d0ef4bb1daa21",
+    "lt_20260717T092251928_000547.json": "18a93879aff85f55aa96f1312e3a8235c8efd603a36a4de04b9c7ecf0ff45dc1",
+}
 
 
 def _download(name: str) -> bytes:
