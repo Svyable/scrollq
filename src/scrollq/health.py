@@ -16,47 +16,69 @@ import argparse
 import json
 
 from zpa.httpstore import open_store
-from zpa.zarrmeta import read_pyramid
-from zpa.audit_pyramid import audit_one
+from zpa.report import RECOMMENDED_CONSUMER_VERDICT, audit_root
 
 from .score import score_volume
 
+# Integrity states the companion contract says a consumer must not train on.
+# UNKNOWN (unreadable level, absent root, nothing to audit) fails closed like
+# FAIL: missing evidence is never read as a clean result.
+_BLOCKING = {state for state, action in RECOMMENDED_CONSUMER_VERDICT.items()
+             if action == "DO NOT TRAIN"}
+
+
+def _finding_row(f: dict) -> dict:
+    return {"code": f["code"], "severity": f["severity"], "level": f["level"],
+            "evidence_state": f.get("evidence_state"),
+            "detail": f["detail"][:160]}
+
 
 def health_report(base_url: str, root: str, samples: int = 24,
-                 spread: int = 5) -> dict:
+                 spread: int = 5, *, store=None, scorer=score_volume) -> dict:
     report: dict = {"root": root, "base_url": base_url,
                    "quality_samples": samples, "quality_spread": spread}
 
     # --- integrity: header-only, never reads array data ---
-    store = open_store(base_url)
-    try:
-        pm = read_pyramid(store, root)
-        findings, levels, prec = audit_one(pm)
-    except Exception as exc:
-        findings, levels, prec = [], [], {}
-        report["integrity_error"] = str(exc)
+    # zpa.report.audit_root never raises: transport failures become UNKNOWN
+    # evidence and an unexpected exception becomes a high AUDIT_ERROR (FAIL).
+    if store is None:
+        store = open_store(base_url)
+    audit = audit_root(store, root)
+    integrity = audit["integrity"]
+    findings = audit["findings"]
     high = [f for f in findings if f["severity"] == "high"]
     med = [f for f in findings if f["severity"] == "medium"]
-    integrity = ("FAIL" if high else
-                 "WARN" if med else "PASS")
+    unknown = [f for f in findings if f.get("evidence_state") == "UNKNOWN"]
+    if any(f["code"] == "AUDIT_ERROR" for f in findings):
+        report["integrity_error"] = next(
+            f["detail"] for f in findings if f["code"] == "AUDIT_ERROR")
     report["integrity"] = {
         "verdict": integrity,
-        "n_levels": prec.get("n_levels", 0),
+        "consumer_action": RECOMMENDED_CONSUMER_VERDICT[integrity],
+        "evidence": audit.get("evidence"),
+        "schema_version": audit.get("schema_version"),
+        "tool_version": audit.get("tool_version"),
+        "n_levels": audit["coverage"]["levels_declared"],
         "n_findings": len(findings),
-        "high": [{"code": f["code"], "level": f["level"],
-                  "detail": f["detail"][:160]} for f in high],
-        "medium": [{"code": f["code"], "level": f["level"],
-                    "detail": f["detail"][:160]} for f in med],
+        "high": [_finding_row(f) for f in high],
+        "medium": [_finding_row(f) for f in med],
+        "unknown_evidence": [_finding_row(f) for f in unknown],
+        "findings": [_finding_row(f) for f in findings],
     }
 
     # --- quality: sampled voxel decode (24 samples, 5x5x5 grid: the campaign standard) ---
-    q = score_volume(base_url, root, samples=samples, spread=spread)
+    q = scorer(base_url, root, samples=samples, spread=spread)
     report["quality"] = q
 
     # --- combined verdict ---
     if integrity == "FAIL":
         verdict, reason = ("DO NOT TRAIN",
                            f"{len(high)} high-severity integrity finding(s)")
+    elif integrity in _BLOCKING:
+        codes = sorted({f["code"] for f in unknown or findings}) or [
+            (audit.get("evidence") or {}).get("reason") or "no auditable evidence"]
+        verdict, reason = ("DO NOT TRAIN",
+                           f"integrity {integrity}: missing evidence ({', '.join(codes)})")
     elif integrity == "WARN":
         verdict, reason = ("CAUTION",
                            f"{len(med)} medium-severity integrity finding(s)")

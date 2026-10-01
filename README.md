@@ -79,7 +79,19 @@ When the dataset contains the spiral fitter's `umbilicus.json` (or `--umbilicus 
 
 The report's `ray_order` section records the umbilicus and input SHA-256s, every parameter, comparable-pair and inversion counts per frame, the largest radial inversions, and a **review queue** ranking points by how many comparable neighbours they disagree with — an isolated mis-numbered annotation surfaces as one point at the head of the queue, with VC3D XYZ coordinates. Inversions are warnings and passport review actions, never errors: a strongly folded region can legitimately make a ray cross windings out of order. A malformed or explicitly named but missing umbilicus fails closed.
 
-What it does not establish: patch attachment, CT support, relative-winding graph holonomy across collections, or held-out spiral-fit accuracy. Those remain the next Winding IQ / Spiral IQ layers.
+**First real run — PHercParis4 `spiral-input`** ([`artifacts/2026-10-01-paris4-winding-ray-order/`](artifacts/2026-10-01-paris4-winding-ray-order/), workflow `paris4-winding-ray-order.yml`; input SHA-256s in the reports). Of 2,232 annotated absolute/relative points, 2,166 (97%) have at least one comparable neighbour. **2 of 13,700** comparable pairs are inverted, both by under 0.1 voxel (0.071 and 0.041) between points about 60 voxels apart along the sheet — below hand-placement precision, so this dataset shows no meaningful ray-order violation. The near-total agreement also checks the coordinate conventions: a wrong axis or swapped XYZ order would invert roughly half the pairs.
+
+**Can it catch errors on that geometry? Injection control.** [`bin/ray_order_control.py`](bin/ray_order_control.py) mis-numbers one real point at a time by ±s (200 points per shift, seed 0; the 4 already-flagged points excluded) and reruns the check on otherwise unmodified data:
+
+| shift | detected | corrupted point ranked first | median rank |
+|---|---:|---:|---:|
+| ±2 | 0 / 191 testable (9 untestable) | — | — |
+| ±3 | 179 / 200 (89.5%) | 19% | 4 |
+| ±5 | 171 / 200 (85.5%) | 88% | 1 |
+
+The ±2 row is a **limit of the design, not a tuning miss**: with the minimum compared gap of 2, a shifted point can only invert against a neighbour whose true winding lies strictly between its old and new label, which needs |s| ≥ 3 (`tests/test_ray_order_control.py` pins this). At ±3 the corrupted point and its one inverted partner are often indistinguishable, hence the lower rank-1 share. Absolute points are only 5 of each 200-point sample, too few for a role-specific figure. The ranking was not tuned on this control.
+
+What it does not establish: patch attachment, CT support, relative-winding graph holonomy across collections, ±1/±2 errors, or held-out spiral-fit accuracy. Those remain the next Winding IQ / Spiral IQ layers.
 
 ## Fiber IQ: native VC3D + trace continuity audit
 
@@ -317,15 +329,21 @@ ScrolIQ is the prioritization half of a two-part data-quality suite:
 
 - **TRAIN** — integrity passes and quality is usable
 - **CAUTION** — integrity warns, quality is low, or quality cannot be scored
-- **DO NOT TRAIN** — high-severity integrity findings
+- **DO NOT TRAIN** — integrity FAIL (a high-severity finding, or an audit that crashed) **or integrity UNKNOWN** (an unreadable level, an absent root, nothing auditable)
+
+Integrity comes from the companion's versioned report (`zpa.report.audit_root`, which never raises) and follows its `RECOMMENDED_CONSUMER_VERDICT`: missing evidence fails closed and is never read as a clean result. Every finding is kept with its code and evidence state. Until 2026-10-01, `scrollq-health` counted only high/medium findings, so UNKNOWN evidence or an audit exception left integrity at PASS — the divergence the companion's [`docs/INTEGRATION.md`](https://github.com/Svyable/zarr-pyramid-audit/blob/main/docs/INTEGRATION.md#scroliq-integration-surface) recorded.
 
 This creates a practical gate before expensive downstream work begins.
 
-Both verdict paths are proven against live data
-(`artifacts/2026-09-30-health-verdicts/`): **TRAIN** on the healthy PHerc0813
-dl volume (integrity PASS, quality 76.2); **DO NOT TRAIN** on the defective
-PHerc0814 S3 pyramid (6 high-severity integrity findings — quality honestly
-unscorable, verdict from the audit alone).
+All verdict paths are proven against live data with the fail-closed code
+(`artifacts/2026-10-01-health-verdicts-fail-closed/`, workflow
+`health-verdicts.yml`): **TRAIN** on the healthy PHerc0813 dl volume
+(integrity PASS, quality 76.2); **DO NOT TRAIN** on the defective PHerc0814 S3
+pyramid (6 high-severity `LEVEL_NO_CHUNKS` — quality honestly unscorable,
+verdict from the audit alone); **CAUTION** on a v2 dev mesh (quality
+unscorable); and **DO NOT TRAIN** on a negative-control root that does not
+exist (integrity UNKNOWN, `ROOT_ABSENT`). The three published verdicts are
+unchanged from `artifacts/2026-09-30-health-verdicts/`.
 
 ## Quick start
 
