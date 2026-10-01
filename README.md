@@ -80,6 +80,23 @@ The report's `ray_order` section records the umbilicus and input SHA-256s, every
 
 What it does not establish: patch attachment, CT support, relative-winding graph holonomy across collections, or held-out spiral-fit accuracy. Those remain the next Winding IQ / Spiral IQ layers.
 
+## Fiber IQ: trace continuity audit
+
+`scroliq-fiber` reads ordered fiber traces (CSV `trace_id,x,y,z`, rows in
+trace order) and lists trace-break candidates for review: *gaps* (a step
+longer than `--gap-factor`, default 4, times that trace's median step) and
+*sharp turns* (a direction change above `--turn-degrees`, default 60).
+Single-point traces are reported, not dropped; any parse error fails the
+audit; the input file's SHA-256 is recorded.
+
+```bash
+scroliq-fiber traces.csv --out fiber-audit.json
+```
+
+It is tested on synthetic traces only and has not yet been run on real
+community fiber traces. It does not prove that a trace follows one fiber or
+one sheet, so the passport's fiber stage stays `unknown`.
+
 ## Mesh IQ: native TIFXYZ audit
 
 `scroliq-mesh` audits one native Vesuvius TIFXYZ surface without rewriting it:
