@@ -129,3 +129,5 @@ def test_score_volume_reports_sampling_completeness(monkeypatch, status):
         "chunk_read_failures": 0,
         "chunk_decode_failures": 0,
     }
+    # excluded_chunks only appears when exclude is passed
+    assert "excluded_chunks" not in result["sampling"]

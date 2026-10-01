@@ -135,6 +135,16 @@ console script. A new entry point must therefore be declared in
    irreproducible. Don't cite them as a stability measurement.
    A second deterministic sample is `scrollq-score --rotate N`; commit the
    full output, including its `sampling` provenance.
+   **Truly-disjoint measurement 2026-10-01**
+   (`artifacts/2026-10-01-truly-disjoint/`, two-phase exclusion protocol):
+   64/64 volumes with zero chunk overlap (mean Jaccard 0.0), ρ = **0.63**,
+   mean |Δ| = 7.95, top-10 4/10 — **below the gate**. This is the honest
+   number: 24-chunk means from heterogeneous volumes are noisy, and the
+   leaderboard is a triage band, not a precise 1-to-64 ranking. Largest
+   mover: PHerc0841, 31.4 → 75.1 (Δ=43.7). 13 sparse volumes could not
+   supply 24 fresh chunks in phase 2 (visible via `excluded_chunks`).
+   The Pareto frontier (PHerc0813 + PHerc1447) and label-next flags are
+   robust to this noise.
 5. **Weights are a judgment call, published with every score.** Changing them
    is fine; hiding them is not. Update the September page when they change.
 6. **Sampling provenance travels with the score.** Every result carries

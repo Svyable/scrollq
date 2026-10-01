@@ -123,6 +123,11 @@ and we do not claim otherwise. This is why `score_volume()` records provenance
 and `bin/stability.py` reports identity overlap: so no future claim of
 disjointness rests on candidate order alone.
 
+**Superseded 2026-10-01:** `bin/stability.py ... disjoint` implements a
+two-phase exclusion protocol that guarantees zero chunk overlap by
+construction. See `artifacts/2026-10-01-truly-disjoint/` for the honest
+measurement: ρ = 0.63, mean |Δ| = 7.95, top-10 4/10, 64/64 truly disjoint.
+
 ## Reproduce
 
 ```bash

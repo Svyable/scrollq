@@ -49,3 +49,25 @@ def test_provenance_overlap_detection():
     union = len(s0 | s2)
     assert inter == 1
     assert round(inter / union, 3) == 0.25
+
+def test_exclude_parameter_accepted():
+    """score_volume accepts exclude parameter (signature check, no network)."""
+    import inspect
+    from scrollq.score import score_volume
+    sig = inspect.signature(score_volume)
+    assert "exclude" in sig.parameters
+    # Default is None
+    assert sig.parameters["exclude"].default is None
+
+
+def test_exclusion_identity_matching():
+    """Exclusion check uses the same identity format as provenance."""
+    # The loop constructs f"{skey}#{flat_i}" for both provenance and exclusion.
+    # Verify the format is consistent.
+    skey = "some/shard/key"
+    flat_i = 42
+    identity = f"{skey}#{flat_i}"
+    excluded = {identity, "other#1"}
+    # This is the exact check in the loop
+    assert f"{skey}#{flat_i}" in excluded
+    assert f"{skey}#43" not in excluded

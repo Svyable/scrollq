@@ -92,7 +92,7 @@ existing tools added below.</li>
 <div class="stats">
 <div class="stat"><div class="n good">64 / 64</div><div class="l">listed volcomp scroll volumes scored<br>real L0 voxels decoded</div></div>
 <div class="stat"><div class="n">22.9</div><div class="l">mean chunks decoded / volume<br>24-sample, 5×5×5 campaign</div></div>
-<div class="stat"><div class="n warn">0.7944</div><div class="l">Spearman ρ vs resample<br>below our 0.85 gate; provenance shows<br>only 2/64 truly disjoint (mean 63% re-read)</div></div>
+<div class="stat"><div class="n warn">0.63</div><div class="l">Spearman ρ, truly-disjoint resample<br>below our 0.85 gate; 64/64 zero chunk<br>overlap by construction (2026-10-01)</div></div>
 <div class="stat"><div class="n">14</div><div class="l">top-quartile exact-volume entries<br>flagged “label next”</div></div>
 </div>
 </div></header>
@@ -146,10 +146,12 @@ fiber, or spiral stages from <code>unknown</code>.</li>
 triage layer with <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>,
 so structurally defective data can be rejected before a quality score is trusted.</li>
 </ul>
-<div class="callout warn"><b>Important negative result:</b> the dense campaign's disjoint resample
-reaches Spearman ρ = 0.7944, below the documented ρ ≥ 0.85 gate. We publish the failure rather than
-rounding it away. Mean |Δscore| is 4.195 and top-10 overlap is 7/10; the evidence says the volumes
-are heterogeneous enough that rankings should be treated as triage bands, not precise truth.</div></div>
+<div class="callout warn"><b>Important negative result:</b> the truly-disjoint resample (2026-10-01,
+two-phase exclusion protocol, 64/64 zero chunk overlap by construction) reaches
+Spearman ρ = 0.63, below the documented ρ ≥ 0.85 gate. We publish the failure rather than
+rounding it away. Mean |Δscore| is 7.95 and top-10 overlap is 4/10; the evidence says the volumes
+are heterogeneous enough that rankings should be treated as triage bands, not precise truth.
+(The earlier ρ = 0.79 was inflated by 63% chunk re-reading between "disjoint" runs.)</div></div>
 
 <div class="panel"><h2><span class="q">(3)</span> What does it enable that was not possible before?</h2>
 <ul>
