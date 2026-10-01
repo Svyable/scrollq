@@ -17,11 +17,13 @@ scroliq-passport \
   --volumes artifacts/2026-09-30-scrollq/volumes.json \
   --coverage artifacts/2026-09-30-scrollq/coverage.json \
   --winding-audit out/PHerc0813.winding-audit.json \
+  --mesh-audit out/PHerc0813.mesh-audit.json \
+  --ink-audit out/PHerc0813.ink-audit.json \
   --root PHerc0813 \
   --out out/PHerc0813.passport.json
 ```
 
-Today the passport can directly populate data-access/decode provenance, sampled scan-health evidence, label/segment coverage, and a volume-bound winding-input audit. Surface, mesh, fiber, winding geometry, spiral, label-localization, and ink-reliability fields stay explicitly `unknown` or `partial` until direct diagnostics are supplied. That is the contract: **measure the limiting stage; never manufacture confidence for missing evidence.**
+Today the passport can directly populate data-access/decode provenance, sampled scan-health evidence, label/segment coverage, volume-bound winding inputs, native TIFXYZ mesh evidence, and ink-validation provenance. Surface support, fiber connectivity, winding geometry, spiral-fit accuracy, label localization, and biological ink identity stay explicitly `unknown` or `partial` until direct diagnostics are supplied. That is the contract: **measure the limiting stage; never manufacture confidence for missing evidence.**
 
 The implementation roadmap is mapped directly to the Challenge's open problems in [`docs/open-problems-alignment.md`](docs/open-problems-alignment.md).
 
@@ -71,6 +73,37 @@ It checks `abs_winding.json`, `relative_windings.json`, and `same_windings.json`
 When the artifact will be attached to a passport, `--volume-root` binds it to the exact CT root; the passport rejects unbound or mismatched winding artifacts. When a fit/evaluation z-window is supplied, ScrolIQ also reports **annotation-center axial coverage**: one median-z center per collection, the largest gap between collection centers, and empty equal-width z bands. Counting collections rather than raw points prevents a densely sampled line from looking like broad coverage. Empty bins are prioritization cues for where another verified constraint may have leverage; they do **not** make the audit fail or prove that a nonempty bin is geometrically constrained.
 
 This is intentionally a **constraint-input audit, not a geometry verdict**. It does not yet establish CT support, patch attachment, relative-winding graph consistency, loop holonomy, or held-out spiral-fit accuracy. Those are the next Winding IQ / Spiral IQ layers.
+
+## Mesh IQ: native TIFXYZ audit
+
+`scroliq-mesh` audits one native Vesuvius TIFXYZ surface without rewriting it:
+
+```bash
+scroliq-mesh \
+  --tifxyz /path/to/surface.tifxyz \
+  --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
+  --out out/PHerc0813.mesh-audit.json
+```
+
+The audit follows the upstream TIFXYZ contract: `x.tif`, `y.tif`, `z.tif`, `meta.json`, reciprocal `scale`, the `Z <= 0` validity convention, and integer-multiple `mask.tif` semantics. It records exact file hashes and checks malformed/empty grids, disconnected valid-vertex components, enclosed invalid-grid components, stale metadata bounding boxes, scale-versus-measured spacing, abrupt local edge jumps, severe neighboring-normal reversals, and symmetric quad-area distortion relative to the nominal 2D parameterization.
+
+A passing audit is deliberately **partial Mesh IQ**, not a proof that the traced sheet is correct. It does not establish CT support, sheet/winding identity, or freedom from nonlocal self-intersections. Those require direct volume support and complementary geometry tools.
+
+## Ink IQ: leakage and falsification-evidence audit
+
+`scroliq-ink-audit` validates an experiment manifest before ink output is treated as evidence:
+
+```bash
+scroliq-ink-audit \
+  --manifest experiment/ink-evidence.json \
+  --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
+  --normal-offsets=-3,0,3 \
+  --out out/PHerc0813.ink-audit.json
+```
+
+The manifest declares exact checkpoint identity and SHA-256, seeds, half-open ZYX training/evaluation boxes, held-out split names, per-evaluation run provenance, and falsification controls. The audit fails on declared train/evaluation spatial overlap or malformed provenance, and stays partial when controls such as normal offsets, adjacent winding, geometry perturbation, or an independent checkpoint are missing.
+
+This is an **evidence-quality audit, not an ink classifier**. A pass means the declared experiment is spatially separated and the requested controls are present; it does not prove that a prediction is ink or that it generalizes across scrolls.
 
 ## Why this exists
 
