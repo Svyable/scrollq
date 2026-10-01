@@ -27,16 +27,27 @@ def idx_grid(shape):
     return np.stack([x, y, z], axis=-1)  # xyz
 
 
-def make_pair(fine_soft, coarse_soft, seed_landmarks=5):
+def make_pair(fine_soft, coarse_soft, seed_landmarks=5, n_f=48,
+              rot_deg=90.0):
     """Moving = fine scan (96^3, 2um) rotated 90deg about z vs fixed = coarse
     scan (48^3, 4um) of the same physical field."""
-    n_m, n_f = 96, 48
-    shift = np.array([n_m * PX_FINE, 0.0, 0.0])
+    n_m = 96
+    if rot_deg == 90.0:
+        rot = ROT
+        shift = np.array([n_m * PX_FINE, 0.0, 0.0])
+    else:
+        a_ = np.deg2rad(rot_deg)
+        rot = np.array([[np.cos(a_), -np.sin(a_), 0.0],
+                        [np.sin(a_), np.cos(a_), 0.0], [0.0, 0.0, 1.0]])
+        corners = np.array([[x, y, z] for x in (0, n_m - 1)
+                            for y in (0, n_m - 1) for z in (0, n_m - 1)],
+                           dtype=float) * PX_FINE @ rot.T
+        shift = -corners.min(axis=0) + 4.0
     p_m = idx_grid((n_m,) * 3) * PX_FINE
-    phys_m = p_m @ ROT.T + shift                      # moving voxel -> phys
+    phys_m = p_m @ rot.T + shift                      # moving voxel -> phys
     moving = field(phys_m, fine_soft)
     fixed = field(idx_grid((n_f,) * 3) * PX_COARSE, coarse_soft)
-    a = (PX_FINE / PX_COARSE) * ROT
+    a = (PX_FINE / PX_COARSE) * rot
     b = shift / PX_COARSE
     rng = np.random.default_rng(seed_landmarks)
     lm = rng.uniform(5, 90, (8, 3))
@@ -298,3 +309,89 @@ def test_alignment_test_has_teeth_wrong_mapping_decorrelates(monkeypatch):
     monkeypatch.setattr(type(pr.registration), "fixed_to_moving",
                         lambda self, pts: wrong(pts))
     assert _aligned_correlation(pr, [24.0, 24.0, 24.0]) < 0.6
+
+
+# -- deviations D1 / D2 (see artifacts/2026-10-01-protocol-pairs/README.md) ----
+def test_partial_footprint_rescan_samples_efficiently_inside_the_overlap():
+    # fixed scan is 2x wider per axis (8x the volume) than the rescan footprint
+    pr = make_pair(fine_soft=0.05, coarse_soft=0.9, n_f=96)
+    res = run(pr)
+    assert res["ok"] and res["accepted"] == 10
+    assert res["candidates_tried"] <= 25          # not 8x the budget
+    # every accepted center lies inside the rescan's footprint in fixed voxels
+    for r in res["regions"]:
+        back = pr.registration.fixed_to_moving(
+            np.array([r["center_fixed_xyz"]]))[0]
+        assert (back >= 0).all() and (back <= 95).all()
+
+
+def test_footprint_that_cannot_hold_a_cube_is_reported_not_crashed():
+    pr = make_pair(fine_soft=0.05, coarse_soft=0.9)
+    res = pp.run_pair(pr, seed=1, n_regions=4, target_um=4.0, cube_n=64)
+    assert not res["ok"]
+    assert "no full cube" in res["reason"] or "smaller than one cube" in \
+        res["reason"]
+
+
+def test_chunk_with_contradictory_size_rejects_regions_not_the_pair():
+    pr = make_pair(fine_soft=0.05, coarse_soft=0.9)
+    # a corner chunk, so only some candidate cubes touch it; it is stored 8x
+    # too large, as in the real PHerc0343P defect
+    key = "vol.zarr/1/0/0/0"
+    assert key in pr.moving.store.data
+    pr.moving.store.data[key] += b"\x01" * (7 * 16**3)
+    pr.moving._cache.clear()
+    res = run(pr)
+    assert res["ok"] and res["accepted"] >= 1
+    assert res["rejections"]["inconsistent_chunk"] >= 1
+
+
+# -- post-hoc lattice-control arms (deviation D4) ---------------------------------
+def test_grid_rotation_preserves_spacing_and_center():
+    c = np.array([10.0, 20.0, 30.0])
+    th = np.deg2rad(30.0)
+    rz = np.array([[np.cos(th), -np.sin(th), 0], [np.sin(th), np.cos(th), 0],
+                   [0, 0, 1]])
+    g0 = pp.cube_grid_xyz(c, 5, 2.0)
+    g1 = pp.cube_grid_xyz(c, 5, 2.0, rz)
+    assert np.allclose(g1.reshape(-1, 3).mean(axis=0), c)
+    # neighbour spacing along every lattice axis is unchanged
+    for ax in range(3):
+        d0 = np.linalg.norm(np.diff(g0, axis=ax), axis=-1)
+        d1 = np.linalg.norm(np.diff(g1, axis=ax), axis=-1)
+        assert np.allclose(d0, 2.0) and np.allclose(d1, 2.0)
+    # a 90 degree rotation maps the lattice onto itself as a point set
+    r90 = pp.cube_grid_xyz(c, 5, 2.0, ROT)
+    key = lambda g: sorted(map(tuple, np.round(g.reshape(-1, 3), 6)))
+    assert key(r90) == key(g0)
+
+
+def test_arms_recover_ordering_under_a_non_axis_rotation():
+    pr = make_pair(fine_soft=0.05, coarse_soft=0.9, n_f=96, rot_deg=30.0)
+    res = run(pr)
+    assert res["ok"] and res["accepted"] == 10
+    assert all(r["arms"]["aligned"] and r["arms"]["rotated"]
+               for r in res["regions"])
+    for arm in ("aligned", "rotated"):
+        for k in pp.PRIMARY_METRICS:
+            a = res["arm_summary"][arm][k]
+            assert a["n"] == 10 and a["median_d"] > 0
+            assert a["frac_positive"] == 1.0
+    # the registered rotation is the one the pair was built with
+    q = pr.registration.lattice_rotation()
+    assert abs(np.degrees(np.arctan2(q[1, 0], q[0, 0])) - 30.0) < 1e-3
+
+
+def test_arms_show_no_difference_when_protocols_are_identical():
+    pr = make_pair(fine_soft=0.3, coarse_soft=0.3, n_f=96, rot_deg=30.0)
+    res = run(pr)
+    for arm in ("aligned", "rotated"):
+        for k in pp.PRIMARY_METRICS:
+            assert abs(res["arm_summary"][arm][k]["median_d"]) < 0.1
+
+
+def test_candidate_factor_caps_the_search():
+    pr = make_pair(fine_soft=0.05, coarse_soft=0.9)
+    res = pp.run_pair(pr, seed=1, n_regions=50, target_um=4.0, cube_n=16,
+                      candidate_factor=1)
+    assert res["candidates_tried"] <= 50 and res["candidate_factor"] == 1

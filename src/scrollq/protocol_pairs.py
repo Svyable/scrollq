@@ -32,7 +32,7 @@ from pathlib import Path
 import numpy as np
 
 from .metrics import chunk_metrics
-from .omezarr import HttpStore, OmeZarrVolume, ReadStats
+from .omezarr import HttpStore, OmeZarrVolume, ReadStats, UnsupportedZarr
 from .registration import Registration, RegistrationError, infer_registration
 from .score import score_from_metrics
 
@@ -167,12 +167,19 @@ def _seed_for(*parts) -> int:
 # --------------------------------------------------------------------------
 # sampling
 # --------------------------------------------------------------------------
-def cube_grid_xyz(center_xyz, n: int, step: float) -> np.ndarray:
-    """``(n, n, n, 3)`` x,y,z points; axes are ``(iz, iy, ix)``."""
+def cube_grid_xyz(center_xyz, n: int, step: float,
+                  rotation: np.ndarray | None = None) -> np.ndarray:
+    """``(n, n, n, 3)`` x,y,z points; axes are ``(iz, iy, ix)``.
+
+    ``rotation`` (3x3, acting on x,y,z column vectors) rotates the grid about
+    its center without changing its spacing.
+    """
     offs = (np.arange(n, dtype=np.float64) - (n - 1) / 2.0) * step
     oz, oy, ox = np.meshgrid(offs, offs, offs, indexing="ij")
-    c = np.asarray(center_xyz, dtype=np.float64)
-    return np.stack([c[0] + ox, c[1] + oy, c[2] + oz], axis=-1)
+    off = np.stack([ox, oy, oz], axis=-1)
+    if rotation is not None:
+        off = off @ np.asarray(rotation, dtype=np.float64).T
+    return np.asarray(center_xyz, dtype=np.float64) + off
 
 
 def _to_level_zyx(vol: OmeZarrVolume, level: int, pts_xyz: np.ndarray):
@@ -219,7 +226,7 @@ def _fine_coarse(pr: PairRun):
 
 def run_pair(pr: PairRun, *, seed: int, n_regions: int = N_REGIONS,
              target_um: float = TARGET_SPACING_UM, cube_n: int = CUBE_N,
-             progress=None) -> dict:
+             candidate_factor: int = CANDIDATE_FACTOR, progress=None) -> dict:
     """Run the paired comparison for one registered pair of scans."""
     fine_name, coarse_name = _fine_coarse(pr)
     vols = {"moving": pr.moving, "fixed": pr.fixed}
@@ -243,13 +250,41 @@ def run_pair(pr: PairRun, *, seed: int, n_regions: int = N_REGIONS,
     hi = np.array([fshape_zyx[2], fshape_zyx[1], fshape_zyx[0]]) - half_diag
     if (hi <= lo).any():
         return {"ok": False, "reason": "fixed volume smaller than one cube"}
+    # Deviation D1 (see the artifact README): a rescan often covers only part
+    # of the earlier scan's field of view, so draw centers from the part of
+    # the fixed box that the moving scan's footprint can contain, and reject
+    # cubes that leave either volume *before* reading any chunk. Acceptance
+    # rules are unchanged.
+    mz, my, mx = pr.moving.levels[0].shape
+    mcorners = np.array([[x, y, z] for x in (0, mx - 1) for y in (0, my - 1)
+                         for z in (0, mz - 1)], dtype=np.float64)
+    footprint = pr.registration.moving_to_fixed(mcorners)
+    lo = np.maximum(lo, footprint.min(axis=0) + half_diag)
+    hi = np.minimum(hi, footprint.max(axis=0) - half_diag)
+    if (hi <= lo).any():
+        return {"ok": False,
+                "reason": "moving scan footprint contains no full cube"}
     rng = np.random.default_rng(_seed_for(seed, pr.sample, pr.moving_id))
+    signs = np.array([[a, b, c] for a in (-1, 1) for b in (-1, 1)
+                      for c in (-1, 1)], dtype=np.float64)
+    ext = ((cube_n - 1) / 2.0 + 1.5) * step_fixed  # incl. null shift + interp
+
+    def corners_inside(center) -> bool:
+        cf = np.asarray(center) + signs * ext
+        for k in ("fixed", "moving"):
+            p = cf if k == "fixed" else pr.registration.fixed_to_moving(cf)
+            lv_ = vols[k].levels[lvl[k]]
+            zyx = p[:, ::-1] / np.array(lv_.scale)
+            if (zyx < 0).any() or (zyx > np.array(lv_.shape) - 2).any():
+                return False
+        return True
 
     rows: list[dict] = []
-    rejections = {"outside_volume": 0, "occupancy": 0, "flat": 0}
+    rejections = {"outside_volume": 0, "occupancy": 0, "flat": 0,
+                  "inconsistent_chunk": 0}
     stats = ReadStats()
     tried = 0
-    max_tries = CANDIDATE_FACTOR * n_regions
+    max_tries = candidate_factor * n_regions
     keys = list(PRIMARY_METRICS) + list(EXPLORATORY_METRICS)
 
     def metrics_at(center_fixed, shift=0.0):
@@ -265,10 +300,59 @@ def run_pair(pr: PairRun, *, seed: int, n_regions: int = N_REGIONS,
             out[k] = (cube, vfrac)
         return out
 
+    q_lattice = pr.registration.lattice_rotation()
+    step_moving0 = h_um / pr.px_moving_um  # moving level-0 voxels per step
+
+    def lattice_arms(center, m_primary) -> dict:
+        """Post-hoc control (deviation D4): remove lattice-geometry asymmetry.
+
+        The primary comparison samples the fixed scan on its own aligned
+        lattice but the moving scan on a lattice rotated relative to its
+        voxels, so the two get different interpolation geometry. These arms
+        sample both on aligned lattices ("aligned") and both on rotated
+        lattices ("rotated"). Invalid or unreadable cubes give ``None``.
+        """
+        out: dict = {}
+        try:
+            f_rot, fv, st = sample_cube(
+                vols["fixed"], lvl["fixed"],
+                cube_grid_xyz(center, cube_n, step_fixed, q_lattice), cube_n)
+            stats.add(st)
+            c_m = pr.registration.fixed_to_moving(
+                np.asarray(center).reshape(1, 3))[0]
+            m_al, mv, st = sample_cube(
+                vols["moving"], lvl["moving"],
+                cube_grid_xyz(c_m, cube_n, step_moving0), cube_n)
+            stats.add(st)
+        except UnsupportedZarr:
+            return {"aligned": None, "rotated": None}
+        mm = {"fixed_rot": separability_metrics(f_rot) if fv == 1.0 else None,
+              "moving_aligned": separability_metrics(m_al) if mv == 1.0
+              else None}
+        pairs = {"aligned": (m_primary["fixed"], mm["moving_aligned"]),
+                 "rotated": (mm["fixed_rot"], m_primary["moving"])}
+        for name, (fx_, mv_) in pairs.items():
+            if fx_ is None or mv_ is None:
+                out[name] = None
+                continue
+            a = {"fixed": fx_, "moving": mv_}
+            out[name] = {"d": {k: a[fine_name][k] - a[coarse_name][k]
+                               for k in keys}}
+        return out
+
     while len(rows) < n_regions and tried < max_tries:
         tried += 1
         c = rng.uniform(lo, hi)
-        cubes = metrics_at(c)
+        if not corners_inside(c):
+            rejections["outside_volume"] += 1
+            continue
+        try:
+            cubes = metrics_at(c)
+        except UnsupportedZarr:
+            # Deviation D2: a chunk whose stored size contradicts the array
+            # metadata (a bucket defect) makes this region unreadable.
+            rejections["inconsistent_chunk"] += 1
+            continue
         if any(v[1] < 1.0 for v in cubes.values()):
             rejections["outside_volume"] += 1
             continue
@@ -281,12 +365,18 @@ def run_pair(pr: PairRun, *, seed: int, n_regions: int = N_REGIONS,
             continue
         # pipeline-null control: identical volume + pipeline, grid shifted by
         # half a step. Any "effect" here is resampling noise, not protocol.
-        shifted = metrics_at(c, shift=0.5)
+        try:
+            shifted = metrics_at(c, shift=0.5)
+        except UnsupportedZarr:
+            rejections["inconsistent_chunk"] += 1
+            continue
         if any(v[1] < 1.0 for v in shifted.values()):
             rejections["outside_volume"] += 1
             continue
         mn = {k: separability_metrics(shifted[k][0]) for k in shifted}
+        arms = lattice_arms(c, m)
         row = {"center_fixed_xyz": [round(float(v), 2) for v in c],
+               "arms": arms,
                "fine": {k: m[fine_name][k] for k in keys},
                "coarse": {k: m[coarse_name][k] for k in keys},
                "d": {k: m[fine_name][k] - m[coarse_name][k] for k in keys},
@@ -300,6 +390,8 @@ def run_pair(pr: PairRun, *, seed: int, n_regions: int = N_REGIONS,
     summary = summarize_pair(rows, seed=_seed_for(seed, pr.sample, "ci"))
     return {
         "ok": True, "fine": fine_name, "coarse": coarse_name,
+        "candidate_factor": candidate_factor,
+        "arm_summary": summarize_arms(rows),
         "levels": {k: lvl[k] for k in lvl},
         "level_spacing_um": {k: round(spacing[k], 4) for k in spacing},
         "grid_spacing_um": round(h_um, 4), "cube_n": cube_n,
@@ -310,6 +402,24 @@ def run_pair(pr: PairRun, *, seed: int, n_regions: int = N_REGIONS,
         "bytes_read": stats.bytes_read,
         "regions": rows, "summary": summary,
     }
+
+
+def summarize_arms(rows: list[dict]) -> dict:
+    """Primary-metric concordance of the lattice-control arms (post-hoc D4)."""
+    out: dict = {}
+    for arm in ("aligned", "rotated"):
+        out[arm] = {}
+        for k in PRIMARY_METRICS:
+            d = np.array([r["arms"][arm]["d"][k] for r in rows
+                          if r.get("arms", {}).get(arm)], dtype=np.float64)
+            d = d[np.isfinite(d)]
+            out[arm][k] = {
+                "n": int(len(d)),
+                "median_d": float(np.median(d)) if len(d) else float("nan"),
+                "frac_positive": float((d > 0).mean()) if len(d)
+                else float("nan"),
+            }
+    return out
 
 
 def summarize_pair(rows: list[dict], seed: int) -> dict:
@@ -584,6 +694,9 @@ def main(argv=None) -> int:
     ap.add_argument("--sample", action="append",
                     help="restrict to a sample (repeatable)")
     ap.add_argument("--regions", type=int, default=N_REGIONS)
+    ap.add_argument("--candidate-factor", type=int, default=CANDIDATE_FACTOR,
+                    help="max candidates tried = factor * regions "
+                         f"(pre-registered default {CANDIDATE_FACTOR})")
     ap.add_argument("--seed", type=int, default=20261001)
     ap.add_argument("--sensitivity", action="store_true",
                     help="also run pairs excluded only for landmark residual; "
@@ -599,6 +712,9 @@ def main(argv=None) -> int:
     report: dict = {
         "schema_version": SCHEMA_VERSION, "index": args.index,
         "index_sha256": index_sha, "seed": args.seed,
+        "run_parameters": {"regions": args.regions,
+                           "candidate_factor": args.candidate_factor,
+                           "sensitivity": bool(args.sensitivity)},
         "preregistered": preregistered_constants(), "pairs": [],
     }
     for spec in specs:
@@ -620,6 +736,7 @@ def main(argv=None) -> int:
                 pr = open_pair(entry["spec"])
                 res = run_pair(
                     pr, seed=args.seed, n_regions=args.regions,
+                    candidate_factor=args.candidate_factor,
                     progress=lambda s, i, n: print(f"  {s} {i}/{n}",
                                                    file=sys.stderr))
             except Exception as exc:  # recorded, not silently dropped

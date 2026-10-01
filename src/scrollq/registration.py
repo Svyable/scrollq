@@ -52,6 +52,23 @@ class Registration:
         inverse = self.direction == "moving_to_fixed"
         return self._apply(pts, inverse=inverse)
 
+    def lattice_rotation(self) -> np.ndarray:
+        """Rotation taking the moving scan's voxel axes into the fixed frame.
+
+        Columns are the images of the moving ``x, y, z`` unit steps in fixed
+        voxel units, reduced to their orthogonal (polar) factor. A grid
+        aligned with the fixed frame is rotated by the inverse of this
+        relative to the moving scan's own voxel lattice.
+        """
+        origin = self.moving_to_fixed(np.zeros((1, 3)))[0]
+        axes = (self.moving_to_fixed(np.eye(3)) - origin).T  # columns
+        u, _, vt = np.linalg.svd(axes)
+        q = u @ vt
+        if np.linalg.det(q) < 0:  # a reflection cannot be a lattice rotation
+            u[:, -1] *= -1
+            q = u @ vt
+        return q
+
     def moving_to_fixed(self, pts_xyz: np.ndarray) -> np.ndarray:
         pts = np.asarray(pts_xyz, dtype=np.float64).reshape(-1, 3)
         inverse = self.direction == "fixed_to_moving"

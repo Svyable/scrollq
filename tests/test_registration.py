@@ -89,3 +89,15 @@ def test_malformed_transforms_fail_closed(mutate, msg):
     mutate(doc)
     with pytest.raises(RegistrationError, match=msg):
         infer_registration(doc)
+
+
+@pytest.mark.parametrize("direction", ["moving_to_fixed", "fixed_to_moving"])
+@pytest.mark.parametrize("order", ["xyz", "zyx"])
+def test_lattice_rotation_recovers_the_construction_rotation(direction,
+                                                             order):
+    doc, *_ = _doc(direction, order)
+    q = infer_registration(doc).lattice_rotation()
+    assert np.allclose(q @ q.T, np.eye(3), atol=1e-9)
+    assert np.isclose(np.linalg.det(q), 1.0)
+    # _doc builds fixed = 0.47 * R * moving + b, so moving axes map through R
+    assert np.allclose(q, _rot(), atol=1e-9)
