@@ -79,7 +79,7 @@ Use `.venv/bin/<tool>` or an activated venv. Setup:
 
 ```bash
 scrollq-score --volumes volumes.txt --samples 24 --spread 5 --workers 8 [--rotate N] --out-dir out/
-scrollq-leaderboard --in out/volumes.json [--coverage out/coverage.json] --out out/index.html
+scrollq-leaderboard --in out/volumes.json [--coverage out/coverage.json] [--rank-bands artifacts/2026-10-stability-v2/stability-v2.json] --out out/index.html
 scrollq-coverage --s3-roots <roots.jsonl> --volumes out/volumes.json --out out/coverage.json
 scrollq-health --root <dl volume root>
 scrollq-grand-prize --volumes artifacts/2026-09-30-scrollq-n24-dense/volumes.json \
@@ -145,6 +145,16 @@ console script. A new entry point must therefore be declared in
    supply 24 fresh chunks in phase 2 (visible via `excluded_chunks`).
    The Pareto frontier (PHerc0813 + PHerc1447) and label-next flags are
    robust to this noise.
+   **Stability v2, 2026-10-01** (pre-registered: `docs/stability-v2-protocol.md`,
+   `artifacts/2026-10-stability-v2/`): the default x-major candidate order lets a
+   24-chunk sample sit in one or two x-slabs. With a balanced, interleaved order
+   (`score_volume(order="balanced", part=(2, i))`, spread 7, 48 chunks per run),
+   the B − A shift vanishes and noise drops to the iid level, but Spearman
+   ρ = 0.750 on 48 eligible volumes — **FAIL**, so the leaderboard shows rank
+   bands (`scrollq-leaderboard --rank-bands`). Pearson is 0.911: scores are
+   reliable, ranks among close volumes are not. September scores differ from the
+   v2 pooled score by 6.9 points on average (PHerc0813 −6.0), so the frontier
+   claim above is **under re-evaluation**, pending a new dated v2-design campaign.
 5. **Weights are a judgment call, published with every score.** Changing them
    is fine; hiding them is not. Update the September page when they change.
 6. **Sampling provenance travels with the score.** Every result carries
