@@ -28,6 +28,8 @@ import numpy as np
 
 SCHEMA_VERSION = 2
 DIAGNOSTIC = "fiber-trace-audit"
+VC3D_FORMAT_REFERENCE_COMMIT = "56d7c3aeea4bbccf5f56b195ce2a44ea2cf601dd"
+VC3D_FORMAT_REFERENCE_PATH = "vesuvius/src/vc3d_fiber_format/__init__.py"
 _VC3D_VERSIONS = {1, 3, 4}
 _GOALS = {"global", "cspline", "lasagna", "trace"}
 _MODES = {"cspline", "lasagna", "trace"}
@@ -386,6 +388,11 @@ def audit_vc3d_json(
         out["counts"]["parse_errors"] += len(errors)
     out["input_format"] = "vc3d_fiber_json"
     out["input"] = provenance
+    out["format_reference"] = {
+        "repository": "ScrollPrize/villa",
+        "commit": VC3D_FORMAT_REFERENCE_COMMIT,
+        "path": VC3D_FORMAT_REFERENCE_PATH,
+    }
 
     if version is not None:
         native = [s for s in segments if s["interp_mode"] == "trace"]
