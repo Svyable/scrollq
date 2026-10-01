@@ -2,7 +2,7 @@
 
 `scroliq-provenance` validates one machine-readable provenance graph for a 2027 Grand Prize submission. It is intentionally fail-closed for eligibility evidence that can be checked mechanically; it does **not** claim that text is legible or that the recto surface is complete.
 
-The graph ties each submitted render back through the exact eligible CT volume, surface, numbered tifxyz mesh, ink model/checkpoint, training datasets, training/prediction regions, stochastic seeds, and public experiment runs. It also pins the code commit, Docker image digest, Zarr audit manifest digest, package file digests, documented human-input hours, and the full-scroll banner.
+The graph ties each submitted render back through the exact eligible CT volume, surface, numbered tifxyz mesh, ink model/checkpoint, training datasets, training/prediction regions, stochastic seeds, public experiment runs, and a pinned held-out ink-validation artifact. It also pins the code commit, Docker image digest, Zarr audit manifest digest, package file digests, documented human-input hours, and the full-scroll banner.
 
 ## Usage
 
@@ -32,6 +32,7 @@ eligible CT
   -> training-region exclusion proof
   -> training/inference seeds
   -> public training/inference runs
+  -> held-out known-ground-truth validation + falsification controls
 ```
 
 ## Fail-closed checks
@@ -50,6 +51,7 @@ The current validator rejects a manifest when any of these conditions is not pro
 - a mesh is not named `column_NN.tifxyz`, lacks the low-distortion-isometric flattening declaration, or duplicates a column;
 - a render does not match its mesh filename stem/column, lacks a 1 cm scale-bar declaration, or is not tied to the pinned code commit;
 - training and prediction regions overlap on the same eligible volume;
+- held-out ink validation is missing, does not use known ground truth, is not explicitly disjoint from training, lacks a model-window declaration or falsification control, does not match the submitted checkpoint, or lacks balanced-accuracy / false-positive evidence;
 - the full-scroll banner does not enumerate all submitted renders with column numbers overlaid;
 - `--root-dir` is supplied and any package file is missing, escapes the package root, or has the wrong SHA-256.
 
@@ -89,4 +91,11 @@ A submission pipeline can make the manifest a release gate:
 
 Commit both the manifest and validation report with the submission artifacts. The manifest should be regenerated whenever the CT source, surface, mesh, render, checkpoint, training data, region split, seeds, experiment runs, code commit, Docker image, or package files change.
 
-The official rules remain authoritative. This validator captures machine-checkable provenance/eligibility requirements; papyrological legibility, complete recto coverage, false-positive plausibility, and held-out performance still require their own evidence.
+The official rules remain authoritative. This validator captures machine-checkable provenance/eligibility requirements and now requires a pinned `scroliq-ink-validate` artifact for held-out known-ground-truth testing and false-positive controls. Papyrological legibility and complete recto coverage still require separate evidence.
+
+
+## Held-out ink evidence (schema 2)
+
+Schema 2 requires an `ink_validation` record that pins the output of `scroliq-ink-validate`. The manifest duplicates the critical fields so the graph can be checked even without the package directory: model/checkpoint, held-out split id, explicit no-overlap declaration, public known-ground-truth source, model window, falsification-control names, exact evaluated-array digest, balanced accuracy, false-positive rate, and both-class coverage.
+
+When `--root-dir` is supplied, `scroliq-provenance` also hashes and parses the report file and cross-checks those fields against the manifest. A prose claim that validation happened is therefore not enough.
