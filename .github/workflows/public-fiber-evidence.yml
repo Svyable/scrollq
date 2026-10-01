@@ -1,0 +1,50 @@
+name: Public Fiber Evidence
+
+on:
+  push:
+    paths:
+      - "scripts/public_fiber_campaign.py"
+      - ".github/workflows/public-fiber-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  campaign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install .
+      - name: Audit pinned public PHercParis4 fibers
+        id: campaign
+        continue-on-error: true
+        run: |
+          python scripts/public_fiber_campaign.py \
+            --out out/public-fiber-campaign/summary.json
+      - name: Verify frozen stable evidence
+        if: steps.campaign.outcome == 'success'
+        run: |
+          python artifacts/2026-10-01-public-fiber-audit/verify.py \
+            out/public-fiber-campaign/summary.json \
+            artifacts/2026-10-01-public-fiber-audit/summary.json
+      - name: Print compact evidence
+        if: always()
+        run: |
+          echo "=== PUBLIC_FIBER_CAMPAIGN_SUMMARY ==="
+          cat out/public-fiber-campaign/summary.json
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-fiber-campaign
+          path: out/public-fiber-campaign/summary.json
+          if-no-files-found: error
+      - name: Enforce campaign result
+        if: steps.campaign.outcome != 'success'
+        run: exit 1

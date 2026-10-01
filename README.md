@@ -127,12 +127,18 @@ errors fail closed; geometry findings remain advisory unless
 `--fail-on-findings` is requested. See
 [`docs/fiber-audit.md`](docs/fiber-audit.md).
 
-The implementation has synthetic regression coverage for v1/v3/v4,
-schema drift, provenance, fallback accounting, geometry findings and CLI
-gating. A reproducible public run over the current June 2026 VC3D training
-fiber corpus is still missing. When a report is produced with the exact
-`--volume-root`, `scroliq-passport --fiber-audit ...` can carry it as partial
-Fiber IQ evidence while still refusing to infer physical fiber or sheet identity.
+The implementation has regression coverage for v1/v3/v4, schema drift,
+provenance, fallback accounting, geometry findings and CLI gating, plus a
+[frozen public-data campaign](artifacts/2026-10-01-public-fiber-audit/) over
+eight PHercParis4 VC3D fibers (53,828 rendered points, 369 spans). The pinned
+run found 11 gap candidates and 26 sharp-turn candidates, with zero
+control-line offsets or order inversions; 354/369 spans used native tracing and
+15/369 used fallback interpolation. These are review signals, not proof of a
+sheet switch. The public dataset directory is not asserted to name one exact CT
+volume, so that campaign is deliberately **not** passport evidence. Reports
+produced with an exact `--volume-root` can be carried by
+`scroliq-passport --fiber-audit ...` as partial Fiber IQ evidence while still
+refusing to infer physical fiber or sheet identity.
 
 ## Mesh IQ: native TIFXYZ audit
 
