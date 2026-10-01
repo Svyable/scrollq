@@ -1058,7 +1058,7 @@ def validate_manifest(
             "Grand Prize recto coverage manifest is required",
         )
     else:
-        expected_root = ct_volume.get("uri") if isinstance(ct_volume, dict) else None
+        expected_root = ct.get("uri") if isinstance(ct, dict) else None
         recto_coverage_proof = audit_recto_coverage(
             recto_coverage,
             expected_volume_root=expected_root if isinstance(expected_root, str) else None,
