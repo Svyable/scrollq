@@ -7,11 +7,11 @@ import scrollq.cli as cli
 
 
 @pytest.mark.parametrize("extra, expected_rotate", [([], 0), (["--rotate", "9"], 9)])
-def test_scrollq_score_forwards_rotate(monkeypatch, tmp_path, extra, expected_rotate):
+def test_scrollq_score_forwards_rotate_and_spread(monkeypatch, tmp_path, extra, expected_rotate):
     calls = []
 
-    def fake_score(base, root, samples=4, rotate=0):
-        calls.append((root, samples, rotate))
+    def fake_score(base, root, samples=4, rotate=0, spread=3):
+        calls.append((root, samples, rotate, spread))
         return {"root": root, "ok": True, "score": 50.0}
 
     volumes = tmp_path / "volumes.txt"
@@ -20,10 +20,12 @@ def test_scrollq_score_forwards_rotate(monkeypatch, tmp_path, extra, expected_ro
     monkeypatch.setattr(
         sys, "argv",
         ["scrollq-score", "--volumes", str(volumes), "--samples", "2",
-         "--workers", "1", "--out-dir", str(tmp_path / "out"), *extra],
+         "--spread", "5", "--workers", "1", "--out-dir", str(tmp_path / "out"),
+         *extra],
     )
 
     cli.main()
 
-    assert calls == [("root/a", 2, expected_rotate), ("root/b", 2, expected_rotate)]
+    assert calls == [("root/a", 2, expected_rotate, 5),
+                     ("root/b", 2, expected_rotate, 5)]
     assert len(json.loads((tmp_path / "out" / "volumes.json").read_text())) == 2
