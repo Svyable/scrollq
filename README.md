@@ -291,6 +291,22 @@ PHerc0813, and PHerc1447**. The larger frontier is a useful warning: this
 external geometry proxy creates real trade-offs and should drive focused
 held-out geometry tests, not an opaque weighted winner score.
 
+## 2027 Grand Prize provenance gate
+
+`scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. One manifest pins the exact eligible CT volume and zarr-pyramid-audit run, then links each surface → numbered tifxyz mesh → render → checkpoint → training datasets/regions → stochastic seeds → public training/inference experiment runs.
+
+```bash
+scroliq-provenance \
+  --manifest submission/provenance.json \
+  --root-dir submission \
+  --format github \
+  --out submission/provenance.validation.json
+```
+
+The gate fails closed on wrong-volume lineage, training/prediction overlap, non-public or incorrectly licensed training data, prohibited higher-resolution same-scroll training sources, missing stochastic seeds or experiment runs, broken mesh/render column traceability, package SHA mismatches, missing 1 cm scale-bar declarations, and incomplete banner coverage. It also records a canonical graph SHA-256 and emits a complete provenance chain for every submitted render.
+
+See [the provenance-manifest specification](docs/grand-prize-provenance.md) and [example manifest](examples/grand-prize-provenance.example.json).
+
 ## Evaluation path
 
 A fast way to inspect the project end to end:
