@@ -37,6 +37,7 @@ def test_alignment_manifest_names_pipeline_bottlenecks_without_ranking_them():
         "surface-topology",
         "mesh-connectivity",
         "fiber-connectivity",
+        "winding-annotations",
         "spiral-fitting",
         "label-quality",
         "ink-reliability",
@@ -56,7 +57,7 @@ def test_passport_keeps_unmeasured_downstream_stages_unknown():
         action["open_problem"] == "scan-diagnostics"
         for action in passport["next_actions"]
     )
-    for stage in ("surface", "mesh", "fibers", "spiral", "ink"):
+    for stage in ("surface", "mesh", "fibers", "winding", "spiral", "ink"):
         assert passport["stages"][stage]["status"] == "unknown"
 
 
@@ -129,4 +130,80 @@ def test_passport_fails_closed_on_spatial_map_for_different_volume():
     assert passport["stages"]["scan"]["spatial_map"]["status"] == "excluded"
     assert "different volume root" in (
         passport["stages"]["scan"]["spatial_map"]["reason"]
+    )
+
+
+
+def _winding_audit(volume_root, *, status="pass", empty_bins=None):
+    fit_window = None
+    if empty_bins is not None:
+        fit_window = {
+            "z_range": [1000.0, 2000.0],
+            "bins": 4,
+            "empty_bins": list(empty_bins),
+            "nonempty_bins": 4 - len(empty_bins),
+            "nonempty_bin_fraction": (4 - len(empty_bins)) / 4,
+        }
+    return {
+        "diagnostic": "winding-annotation-audit",
+        "volume_root": volume_root,
+        "status": status,
+        "present_roles": ["same_winding", "relative"],
+        "missing_roles": ["absolute"],
+        "totals": {"collections": 12, "points": 48, "annotated_points": 8},
+        "error_count": 0 if status != "fail" else 1,
+        "warning_count": 0,
+        "axial_coverage": {
+            "collection_centers": 12,
+            "observed_z_range": [1100.0, 1900.0],
+            "fit_window": fit_window,
+        },
+    }
+
+
+def test_passport_accepts_volume_bound_winding_audit_without_overclaiming_geometry():
+    volume = _volume()
+    passport = build_passport(
+        volume,
+        winding_audit=_winding_audit(volume["root"], empty_bins=[1, 3]),
+    )
+
+    winding = passport["stages"]["winding"]
+    assert winding["status"] == "partial"
+    assert winding["audit_status"] == "pass"
+    assert winding["totals"]["collections"] == 12
+    assert "does not establish CT support" in winding["limitation"]
+    assert any(
+        action["open_problem"] == "winding-annotations"
+        and "[1, 3]" in action["action"]
+        for action in passport["next_actions"]
+    )
+
+
+def test_passport_rejects_unbound_or_wrong_volume_winding_audit():
+    volume = _volume()
+
+    unbound = _winding_audit(None)
+    passport = build_passport(volume, winding_audit=unbound)
+    assert passport["stages"]["winding"]["status"] == "excluded"
+    assert "no exact volume_root binding" in passport["stages"]["winding"]["reason"]
+
+    wrong = _winding_audit("different-volume")
+    passport = build_passport(volume, winding_audit=wrong)
+    assert passport["stages"]["winding"]["status"] == "excluded"
+    assert "different volume root" in passport["stages"]["winding"]["reason"]
+
+
+def test_failed_bound_winding_audit_blocks_winding_stage():
+    volume = _volume()
+    passport = build_passport(
+        volume,
+        winding_audit=_winding_audit(volume["root"], status="fail"),
+    )
+
+    assert passport["stages"]["winding"]["status"] == "blocked"
+    assert any(
+        action["open_problem"] == "winding-annotations"
+        and action["priority"] == "high"
+        for action in passport["next_actions"]
     )
