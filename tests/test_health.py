@@ -57,11 +57,15 @@ def test_unreadable_level_blocks_even_with_good_quality(monkeypatch):
 def test_absent_root_blocks(monkeypatch):
     report = _run(
         monkeypatch,
-        _audit("UNKNOWN", [("ROOT_ABSENT", "low", "UNKNOWN")],
-               evidence={"state": "UNKNOWN", "reason": "ROOT_ABSENT"}),
+        # As observed live (artifacts/2026-10-01-health-verdicts-fail-closed/
+        # absent-root.json): integrity UNKNOWN, but the finding and the
+        # report evidence both say ABSENT, so no finding is "UNKNOWN".
+        _audit("UNKNOWN", [("ROOT_ABSENT", "low", "ABSENT")],
+               evidence={"state": "ABSENT", "reason": "NOT_FOUND"}),
         quality={"ok": False, "error": "no chunks"},
     )
     assert report["verdict"] == "DO NOT TRAIN"
+    assert "ROOT_ABSENT" in report["verdict_reason"]
 
 
 def test_audit_exception_is_a_failure_not_a_pass(monkeypatch):

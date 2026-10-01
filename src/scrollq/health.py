@@ -75,7 +75,7 @@ def health_report(base_url: str, root: str, samples: int = 24,
         verdict, reason = ("DO NOT TRAIN",
                            f"{len(high)} high-severity integrity finding(s)")
     elif integrity in _BLOCKING:
-        codes = sorted({f["code"] for f in unknown}) or [
+        codes = sorted({f["code"] for f in unknown or findings}) or [
             (audit.get("evidence") or {}).get("reason") or "no auditable evidence"]
         verdict, reason = ("DO NOT TRAIN",
                            f"integrity {integrity}: missing evidence ({', '.join(codes)})")
