@@ -303,9 +303,9 @@ def audit_tifxyz(
         errors.append("meta.json scale must contain two finite positive numbers")
 
     try:
-        x = np.asarray(_read_tiff(root / "x.tif"), dtype=np.float64)
-        y = np.asarray(_read_tiff(root / "y.tif"), dtype=np.float64)
-        z = np.asarray(_read_tiff(root / "z.tif"), dtype=np.float64)
+        x = np.asarray(_read_tiff(root / "x.tif"), dtype=np.float32)
+        y = np.asarray(_read_tiff(root / "y.tif"), dtype=np.float32)
+        z = np.asarray(_read_tiff(root / "z.tif"), dtype=np.float32)
     except Exception as exc:
         x = y = z = np.empty((0, 0))
         errors.append(f"coordinate TIFFs could not be decoded: {exc}")
