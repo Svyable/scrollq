@@ -111,8 +111,9 @@ an incomplete read.</li>
 ink labels are surfaced as <code>label_next</code> candidates, turning an invisible allocation gap into
 an inspectable queue.</li>
 <li><b>Spatial evidence replaces one-number blindness.</b> <code>scroliq-scan-map</code> retains the L0
-voxel bounding box of each observation, and <code>scroliq-passport</code> keeps unmeasured surface,
-mesh, fiber, spiral, and ink stages explicitly <code>unknown</code> instead of inferring them from CT health.</li>
+voxel bounding box of each observation, while <code>scroliq-passport</code> can attach exact-volume
+winding, native TIFXYZ mesh, and ink-validation evidence without upgrading still-unmeasured surface,
+fiber, or spiral stages from <code>unknown</code>.</li>
 <li><b>Integrity and quality can be checked together.</b> <code>scrollq-health</code> combines this
 triage layer with <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>,
 so structurally defective data can be rejected before a quality score is trusted.</li>
@@ -133,14 +134,22 @@ resampling test, per-chunk score distributions, and a public stability gate. A m
 volumes on a weight-free Pareto frontier over scan-health score and existing segment count, while
 pinning the exact eligible volume and recording prohibited same-scroll higher-resolution alternatives.</li>
 <li><b>Evidence passports instead of synthetic readiness scores.</b> <code>scroliq-passport</code>
-organizes measured data, scan, label, and winding evidence around the Challenge bottlenecks and leaves
-unmeasured stages unknown.</li>
+organizes data, scan, label, winding, native TIFXYZ mesh, and ink-validation evidence around the
+Challenge bottlenecks and leaves unmeasured stages unknown.</li>
 <li><b>Submission-lineage validation.</b> <code>scroliq-provenance</code> checks exact-volume lineage,
 training/prediction separation, public dataset/checkpoint provenance, stochastic seeds, experiment
-runs, mesh/render traceability, scale-bar declarations, and banner coverage for 2027-style submissions.</li>
+runs, mesh/render traceability, scale-bar declarations, banner coverage, and public held-out validation
+against known ground truth; same-volume training/validation overlap fails closed.</li>
 <li><b>Winding-input diagnostics.</b> <code>scroliq-winding</code> audits PointCollections v1 inputs,
 SHA-256 provenance, role semantics, numeric sanity, volume binding, and axial annotation coverage
 before winding constraints are trusted as geometry evidence.</li>
+<li><b>Native Mesh IQ.</b> <code>scroliq-mesh</code> audits TIFXYZ structure and hashes, mask-aware
+connectivity and enclosed gaps, bbox/scale consistency, local edge jumps, severe normal reversals,
+and symmetric quad-area distortion without pretending those local checks prove sheet identity.</li>
+<li><b>Ink falsification discipline.</b> <code>scroliq-ink-audit</code> checks exact-volume experiment
+binding, checkpoint identity, train/evaluation separation, held-out declarations, run provenance,
+and controls including normal offsets, adjacent winding, geometry perturbation, and an independent
+checkpoint. Missing controls remain visibly partial rather than being inferred.</li>
 </ul></div>
 
 <div class="panel"><h2><span class="q">(4)</span> What evidence have you provided?</h2>
@@ -171,6 +180,16 @@ manifest dated 2026-09-30; PHerc1203 higher-resolution substitute explicitly exc
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-health-verdicts"><code>artifacts/2026-09-30-health-verdicts/</code></a> —
 healthy TRAIN case and defective-data DO NOT TRAIN case.</td></tr>
 
+<tr><td>Native TIFXYZ mesh checks and ink falsification controls are implemented and tested</td>
+<td><a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/tifxyz_audit.py"><code>scroliq-mesh</code></a> and
+<a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_audit.py"><code>scroliq-ink-audit</code></a>,
+with deterministic coverage in <code>tests/test_tifxyz_audit.py</code> and <code>tests/test_ink_audit.py</code>.</td></tr>
+
+<tr><td>Grand Prize provenance now requires public held-out validation per trained model</td>
+<td><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-provenance.md"><code>docs/grand-prize-provenance.md</code></a> —
+schema v2 requires public input + known ground truth, numeric metrics, a public evaluation run, a hashed
+result artifact, code-commit binding, and same-volume training/validation exclusion proof.</td></tr>
+
 <tr><td>Challenge bottlenecks are represented without inventing downstream confidence</td>
 <td><a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md"><code>docs/open-problems-alignment.md</code></a>,
 <a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-provenance.md"><code>docs/grand-prize-provenance.md</code></a>,
@@ -184,9 +203,9 @@ spatial evidence, expose missing constraints, bind artifacts to the correct CT r
 fail closed before a result is packaged.</p>
 <p>The current Grand Prize tooling therefore favors <b>auditability over a single winner score</b>.
 The primary target qualifier publishes a Pareto frontier instead of hiding trade-offs inside arbitrary
-weights; passports keep unmeasured stages unknown; provenance validation rejects training/prediction
-overlap and wrong-volume lineage; winding evidence must be bound to the exact CT root before a passport
-will consume it.</p>
+weights; passports keep unmeasured stages unknown; provenance validation rejects wrong-volume lineage,
+training/prediction overlap, and training/held-out overlap while requiring public known-ground-truth
+validation; mesh and ink evidence remain explicitly partial unless their own direct diagnostics pass.</p>
 <div class="callout"><b>Design target:</b> ScrolIQ should eventually answer one practical question for
 each candidate scroll: <i>what specific, evidenced bottleneck prevents the next verified step toward a
 complete, low-distortion, legible, reproducible unrolling?</i></div></div>
@@ -216,7 +235,8 @@ coverage joins, stability tests, and the live evaluator leaderboard.</p>
 
 <div class="card"><h3>ScrolIQ</h3>
 <p><b>Find the bottleneck.</b> Spatial scan maps, diagnostic passports, Grand Prize provenance,
-winding-input auditing, and a path toward surface / mesh / fiber / spiral / label / ink diagnostics.</p>
+winding-input auditing, native TIFXYZ Mesh IQ, Ink IQ falsification controls, and a path toward
+surface / fiber / spiral / label diagnostics.</p>
 <p><a href="open-problems-alignment.md">open-problems alignment</a></p></div>
 </div></div>
 
