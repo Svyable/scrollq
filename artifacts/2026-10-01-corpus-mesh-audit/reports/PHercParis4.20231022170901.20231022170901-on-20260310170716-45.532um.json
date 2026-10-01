@@ -1,0 +1,241 @@
+{
+  "schema_version": 1,
+  "diagnostic": "tifxyz-mesh-audit",
+  "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260310170716-45.532um-11.0m-74keV-masked.zarr",
+  "tifxyz_path": "out/corpus-s3/PHercParis4/segments/20231022170901/mesh/20231022170901-on-20260310170716-45.532um.tifxyz",
+  "status": "pass",
+  "metadata": {
+    "format": "tifxyz",
+    "scale": [
+      0.05000000074505806,
+      0.05000000074505806
+    ],
+    "uuid": "out",
+    "type": "seg"
+  },
+  "provenance": {
+    "meta.json": {
+      "sha256": "bdcba10eeaa2fa1d5baf7ecf7bbf68f5a3162e146037a52614aa99018197fe74",
+      "bytes": 422
+    },
+    "x.tif": {
+      "sha256": "f5344c323bb07d525aa236eb1dc4835fe271043fb62621d64722473087907f88",
+      "bytes": 68454
+    },
+    "y.tif": {
+      "sha256": "7e8b0701d1ef4b4fb8358c08ac9d4ba4708359ba0dd44a3b93f0511db67214cd",
+      "bytes": 68454
+    },
+    "z.tif": {
+      "sha256": "b81d7e10040049f39284e88a8d1242f9a8215af5604b286f865bc9b3bacc823d",
+      "bytes": 68454
+    }
+  },
+  "grid": {
+    "shape_yx": [
+      56,
+      305
+    ],
+    "vertices": 17080,
+    "valid_vertices": 15356,
+    "valid_vertex_fraction": 0.899063231850117,
+    "mask": {
+      "present": false,
+      "applied": false
+    },
+    "valid_vertex_components": {
+      "components": 1,
+      "cells": 15356,
+      "largest_component_cells": 15356,
+      "largest_component_fraction": 1.0,
+      "border_touching_components": 1,
+      "enclosed_components": 0
+    },
+    "enclosed_invalid_components": 0
+  },
+  "bbox": {
+    "metadata_present": true,
+    "observed_bbox_xyz": [
+      [
+        993.642578125,
+        1082.779052734375,
+        2992.858154296875
+      ],
+      [
+        1376.4566650390625,
+        1573.5064697265625,
+        3932.08154296875
+      ]
+    ],
+    "metadata_bbox_xyz": [
+      [
+        993.642578125,
+        1082.779052734375,
+        2992.858154296875
+      ],
+      [
+        1376.4566650390625,
+        1573.5064697265625,
+        3932.08154296875
+      ]
+    ],
+    "contains_observed_vertices": true,
+    "max_abs_error_voxels": 0.0
+  },
+  "spacing": {
+    "columns": {
+      "measured_median_voxels": 19.955081939697266,
+      "nominal_voxels_from_scale": 19.99999970197678,
+      "measured_to_nominal_ratio": 0.9977541118525579,
+      "tolerance_ratio": 1.5,
+      "within_tolerance": true
+    },
+    "rows": {
+      "measured_median_voxels": 19.849081993103027,
+      "nominal_voxels_from_scale": 19.99999970197678,
+      "measured_to_nominal_ratio": 0.9924541144438699,
+      "tolerance_ratio": 1.5,
+      "within_tolerance": true
+    }
+  },
+  "edges": {
+    "columns": {
+      "distance_voxels": {
+        "count": 15248,
+        "min": 15.037731170654297,
+        "p05": 19.30945930480957,
+        "median": 19.955081939697266,
+        "p95": 20.378696155548095,
+        "max": 21.611040115356445
+      },
+      "nominal_distance_voxels": 19.99999970197678,
+      "stretch_ratio": {
+        "count": 15248,
+        "min": 0.7518865466117859,
+        "p05": 0.9654729723930359,
+        "median": 0.9977540969848633,
+        "p95": 1.0189347684383392,
+        "max": 1.0805519819259644
+      },
+      "jump_ratio_threshold": 4.0,
+      "jump_distance_threshold_voxels": 79.82032775878906,
+      "jump_edges": 0
+    },
+    "rows": {
+      "distance_voxels": {
+        "count": 15050,
+        "min": 13.416376113891602,
+        "p05": 18.239325046539307,
+        "median": 19.849081993103027,
+        "p95": 20.36734266281128,
+        "max": 21.41789436340332
+      },
+      "nominal_distance_voxels": 19.99999970197678,
+      "stretch_ratio": {
+        "count": 15050,
+        "min": 0.6708188056945801,
+        "p05": 0.9119662284851074,
+        "median": 0.9924540817737579,
+        "p95": 1.0183671355247497,
+        "max": 1.070894718170166
+      },
+      "jump_ratio_threshold": 4.0,
+      "jump_distance_threshold_voxels": 79.39633178710938,
+      "jump_edges": 0
+    }
+  },
+  "quads": {
+    "valid_quads": 14943,
+    "valid_quad_fraction": 0.8937200956937799,
+    "degenerate_quads": 0,
+    "surface_area_voxels2": 5844570.0,
+    "nominal_flat_area_voxels2": 5977199.821865563,
+    "area_ratio_3d_to_flat": {
+      "count": 14943,
+      "min": 0.6614289879798889,
+      "p05": 0.9001799523830414,
+      "median": 0.9878131747245789,
+      "p95": 1.0199342966079712,
+      "max": 1.0677387714385986
+    },
+    "symmetric_area_distortion": {
+      "count": 14943,
+      "min": 1.0000061988830566,
+      "p05": 1.001516878604889,
+      "median": 1.0176312923431396,
+      "p95": 1.1108889818191527,
+      "max": 1.5118781328201294
+    },
+    "isometry": {
+      "method": "per-triangle singular values of the flat-to-3D Jacobian",
+      "triangles": 29886,
+      "degenerate_triangles": 0,
+      "sigma_min": {
+        "count": 29886,
+        "min": 0.6440312266349792,
+        "p05": 0.9014266133308411,
+        "median": 0.9808628559112549,
+        "p95": 1.0027039051055908,
+        "max": 1.031162977218628
+      },
+      "sigma_max": {
+        "count": 29886,
+        "min": 0.8553629517555237,
+        "p05": 0.981637179851532,
+        "median": 1.0079116225242615,
+        "p95": 1.0312278866767883,
+        "max": 1.2084697484970093
+      },
+      "symmetric_stretch_distortion": {
+        "count": 29886,
+        "min": 1.0006539821624756,
+        "p05": 1.007440984249115,
+        "median": 1.0237081050872803,
+        "p95": 1.1094917058944702,
+        "max": 1.5527197122573853
+      },
+      "anisotropy": {
+        "count": 29886,
+        "min": 1.0001511573791504,
+        "p05": 1.0069578886032104,
+        "median": 1.027768313884735,
+        "p95": 1.113649159669876,
+        "max": 1.85564386844635
+      },
+      "symmetric_dirichlet_energy": {
+        "count": 29886,
+        "min": 4.000002384185791,
+        "p05": 4.0002747774124146,
+        "median": 4.002613306045532,
+        "p95": 4.046404719352722,
+        "max": 4.954120635986328
+      }
+    },
+    "normal_neighbor_dot": {
+      "count": 29476,
+      "min": -0.09075188636779785,
+      "p05": 0.8641619831323624,
+      "median": 0.985134094953537,
+      "p95": 0.9991945624351501,
+      "max": 0.9999995231628418
+    },
+    "normal_flip_angle_deg": 120.0,
+    "normal_reversal_pairs": 0
+  },
+  "ct_preflight": {
+    "status": "unknown",
+    "tool": "vesuvius.surface_preflight",
+    "reason": "no upstream vesuvius.surface_preflight report supplied"
+  },
+  "self_intersection": {
+    "status": "unknown",
+    "tool": "vc_tifxyz_selfcross",
+    "reason": "no upstream vc_tifxyz_selfcross report supplied"
+  },
+  "error_count": 0,
+  "warning_count": 0,
+  "errors": [],
+  "warnings": [],
+  "findings": [],
+  "limitation": "This audit combines local TIFXYZ geometry. It does not establish correct winding identity or readable ink. CT support remains unverified. Freedom from nonlocal transverse self-intersections remains unverified."
+}

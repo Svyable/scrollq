@@ -115,6 +115,16 @@ For nonlocal self-intersections, ScrolIQ does not duplicate VC3D's geometry kern
 
 A passing audit is deliberately **partial Mesh IQ**, not a proof that the traced sheet is correct. With a fully clean validated self-cross census it establishes freedom from the specific non-adjacent transverse contacts tested by VC3D under the recorded parameters; it still does not establish CT support or correct sheet/winding identity.
 
+### Triangle meshes (Wavefront OBJ)
+
+`scroliq-obj` applies the same audit to a triangle mesh, such as the `*_original.obj` files published next to each segment in the open bucket:
+
+```bash
+scroliq-obj --obj /path/to/segment_original.obj --out out/segment.obj-audit.json
+```
+
+It accepts `v`, `vt` and `f` records (`v`, `v/vt`, `v/vt/vn`, `v//vn`, negative indices; polygons are fan-triangulated). With no grid, adjacency comes from shared edges, so the report covers edge-connected components, interior boundary loops (holes), edge jumps against the median edge length, and neighbouring-normal reversals. It also covers defects only a free-form mesh can have: non-manifold edges, inconsistent face winding (kept separate from real folds), and zero-area faces. When faces carry texture coordinates, it measures per-triangle UV-to-3D Jacobian singular values (UVs rescaled by one global factor) and counts folded-over UV triangles; without UVs, isometry stays `unknown`. An OBJ with no faces fails rather than passing.
+
 ## Ink IQ: leakage and falsification-evidence audit
 
 `scroliq-ink-audit` validates an experiment manifest before ink output is treated as evidence:
@@ -136,6 +146,20 @@ This is an **evidence-quality audit, not an ink classifier**. A pass means the d
 `scroliq-ink-validate` complements that manifest audit with deterministic measurements over explicit 2D NPY/TIFF predictions, known binary labels, and a held-out mask. It reports confusion counts, balanced accuracy, false-positive rate, F1/IoU, probability separation, exact input hashes, and same-mask deltas for named falsification controls. The resulting JSON can be hash-pinned as a `held_out_validations[]` artifact in the Grand Prize provenance manifest.
 
 The command fails closed when the mask is empty or single-class, inputs are malformed, the split is not declared held out, training overlap is not declared absent, or no falsification control is supplied. Those checks make the output an auditable evidence artifact; they do not prove that a URL is public, independently establish the declared train/validation split, set a performance threshold, or claim readability. See the [held-out ink protocol](docs/ink-validation.md).
+
+## How ScrolIQ compares with existing tools
+
+ScrolIQ reads the community's tool outputs and checks them against the exact data they claim to describe; where a tool already does a job, ScrolIQ consumes its report instead of reimplementing it.
+
+| Job | Existing tool or practice | What ScrolIQ adds |
+|---|---|---|
+| Non-local self-intersection of a TIFXYZ surface | VC3D `vc_tifxyz_selfcross` | Validates the report against the exact surface and grid; adds local checks (components, holes, edge jumps, folds, Jacobian isometry) |
+| CT support of a surface | Villa `vesuvius.surface_preflight` | Binds the report to the exact volume root and surface; a report from another scan of the same scroll fails |
+| Finding broken segments | Opening segments one at a time in a viewer | One command over every published mesh in TIFXYZ and OBJ, with a dated flag list ([corpus audit](artifacts/2026-10-01-corpus-mesh-audit/README.md): 77 of 307 segments flagged) |
+| Zarr store integrity | Noticing errors downstream | `scrollq-health` runs zarr-pyramid-audit before any quality verdict |
+| Choosing the next volume to label or train on | We found no published per-volume scan comparison | Scan-health survey of all 64 volcomp volumes with sampling provenance and a weight-free Grand Prize frontier |
+
+[Usage by format](docs/usage-by-format.md) maps each community format to the command that reads it.
 
 ## Why this exists
 

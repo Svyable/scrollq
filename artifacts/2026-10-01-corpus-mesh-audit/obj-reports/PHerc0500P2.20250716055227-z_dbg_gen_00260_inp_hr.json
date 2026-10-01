@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "diagnostic": "obj-mesh-audit",
+  "obj_path": "out/corpus-obj/PHerc0500P2.20250716055227-z_dbg_gen_00260_inp_hr.obj",
+  "status": "partial",
+  "provenance": {
+    "sha256": "5afddefe62d7cff3c68f9fda0b3e7a6317d018f66b7158cbff579685fb313c0e",
+    "bytes": 5532658
+  },
+  "mesh": {
+    "vertices": 27794,
+    "unreferenced_vertices": 0,
+    "polygons": 54464,
+    "triangles": 54464,
+    "degenerate_triangles": 0,
+    "surface_area": 11611903.913245678,
+    "bbox": [
+      [
+        4564.405273,
+        4131.350098,
+        6441.059082
+      ],
+      [
+        8168.169922,
+        5371.131836,
+        11591.625977
+      ]
+    ]
+  },
+  "topology": {
+    "components": 1,
+    "largest_component_faces": 54464,
+    "edges": 82272,
+    "boundary_edges": 1152,
+    "nonmanifold_edges": 0,
+    "boundary_loops": 16,
+    "holes": 15,
+    "inconsistent_winding_edges": 0
+  },
+  "edges": {
+    "length": {
+      "count": 82272,
+      "min": 14.125289873253353,
+      "p05": 19.239507649325823,
+      "median": 20.48555471298421,
+      "p95": 29.7583659241934,
+      "max": 2087.3902384463972
+    },
+    "jump_ratio": 4.0,
+    "jump_edges": 94
+  },
+  "normals": {
+    "neighbor_dot": {
+      "count": 81120,
+      "min": -0.9999703104470691,
+      "p05": 0.9858471016013072,
+      "median": 0.9994912987181306,
+      "p95": 0.99999788694893,
+      "max": 0.9999999999981622
+    },
+    "flip_angle_deg": 120.0,
+    "reversal_pairs": 44
+  },
+  "isometry": {
+    "status": "measured",
+    "method": "per-triangle singular values of the UV-to-3D Jacobian, UVs rescaled by one global factor so total areas match",
+    "global_uv_scale": 1.0324807229529613,
+    "textured_triangles": 54464,
+    "untextured_triangles": 0,
+    "degenerate_uv_triangles": 0,
+    "flipped_uv_triangles": 0,
+    "symmetric_stretch_distortion": {
+      "count": 54464,
+      "min": 1.0021221959442812,
+      "p05": 1.029459860081464,
+      "median": 1.05651890731305,
+      "p95": 1.1540847544532098,
+      "max": 140.96179398966456
+    }
+  },
+  "error_count": 0,
+  "warning_count": 3,
+  "errors": [],
+  "warnings": [
+    "15 interior boundary loop(s) (holes)",
+    "44 neighbouring face pair(s) reverse by more than 120 degrees",
+    "94 edge(s) exceed 4x the median edge length"
+  ],
+  "findings": [
+    {
+      "kind": "hole",
+      "severity": "review",
+      "message": "15 interior boundary loop(s)"
+    },
+    {
+      "kind": "normal-reversal",
+      "severity": "review",
+      "message": "44 severe neighbouring-normal reversals"
+    },
+    {
+      "kind": "edge-jump",
+      "severity": "review",
+      "message": "94 edges exceed 4x median length"
+    }
+  ],
+  "limitation": "Geometry and parameterization only. Says nothing about whether the surface follows the papyrus sheet in the CT; self-intersection is not checked."
+}
