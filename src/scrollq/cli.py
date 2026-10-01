@@ -31,8 +31,15 @@ def main() -> None:
 
     def work(root: str):
         print(f"scoring {root}", flush=True)
-        return score_volume(args.base, root, samples=args.samples,
-                            spread=args.spread)
+        try:
+            return score_volume(args.base, root, samples=args.samples,
+                                spread=args.spread)
+        except Exception as exc:
+            # Containment, not suppression: the failure is recorded in
+            # volumes.json so one bad volume cannot discard a whole
+            # campaign's results (ex.map re-raises on iteration).
+            return {"root": root, "ok": False,
+                    "error": f"unhandled {type(exc).__name__}: {exc}"}
 
     results = []
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
