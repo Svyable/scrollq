@@ -14,6 +14,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+from statistics import median
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
@@ -207,8 +208,10 @@ def audit_document(
                 "collection contains no points",
             )
 
+        total_points += len(raw_points)
         winding_values: list[int] = []
         point_rows: list[tuple[int, int | None]] = []
+        collection_coords: list[list[float]] = []
         seen_point_ids: dict[int, str] = {}
 
         for point_key, point in raw_points.items():
@@ -257,7 +260,9 @@ def audit_document(
                     "p must contain exactly three finite numeric coordinates",
                 )
             else:
-                all_coords.append([float(value) for value in coords])
+                xyz = [float(value) for value in coords]
+                all_coords.append(xyz)
+                collection_coords.append(xyz)
 
             has_wind = "wind_a" in point and point.get("wind_a") is not None
             wind_value: int | None = None
@@ -294,7 +299,6 @@ def audit_document(
 
             if point_id is not None:
                 point_rows.append((point_id, wind_value))
-            total_points += 1
 
         role_stats: dict[str, Any] = {}
         if role in {"absolute", "relative"} and winding_values:
@@ -335,6 +339,35 @@ def audit_document(
                     "all relative wind_a values are equal, so this collection encodes no winding separation",
                 )
 
+        geometry: dict[str, Any] = {
+            "valid_coordinate_points": len(collection_coords),
+            "xyz_bounds": None,
+            "z_range": None,
+            "median_z": None,
+        }
+        if collection_coords:
+            geometry.update(
+                {
+                    "xyz_bounds": {
+                        "min": [
+                            min(point[i] for point in collection_coords)
+                            for i in range(3)
+                        ],
+                        "max": [
+                            max(point[i] for point in collection_coords)
+                            for i in range(3)
+                        ],
+                    },
+                    "z_range": [
+                        min(point[2] for point in collection_coords),
+                        max(point[2] for point in collection_coords),
+                    ],
+                    "median_z": float(
+                        median(point[2] for point in collection_coords)
+                    ),
+                }
+            )
+
         collections_report.append(
             {
                 "id": collection_id,
@@ -342,6 +375,7 @@ def audit_document(
                 "name": name if isinstance(name, str) else None,
                 "points": len(raw_points),
                 "annotated_points": len(winding_values),
+                "geometry": geometry,
                 "role_stats": role_stats,
             }
         )
@@ -355,7 +389,7 @@ def audit_document(
         raw_bounds = {
             "min": [min(point[i] for point in all_coords) for i in range(3)],
             "max": [max(point[i] for point in all_coords) for i in range(3)],
-            "coordinate_order": "raw PointCollections p order",
+            "coordinate_order": "xyz (VC3D PointCollections p)",
         }
 
     return {
@@ -373,6 +407,127 @@ def audit_document(
         "findings": findings,
     }
 
+
+
+def summarize_axial_coverage(
+    documents: dict[str, dict[str, Any]],
+    *,
+    z_range: tuple[float, float] | None = None,
+    bins: int = 12,
+) -> dict[str, Any]:
+    """Summarize annotation-center coverage along the scroll axis.
+
+    Each collection contributes one value: the median z of its valid XYZ points.
+    Counting collections instead of raw points prevents a densely sampled path from
+    masquerading as broader annotation coverage.
+    """
+    if bins < 1:
+        raise ValueError("z bins must be >= 1")
+    if z_range is not None:
+        start, stop = (float(z_range[0]), float(z_range[1]))
+        if not math.isfinite(start) or not math.isfinite(stop) or stop <= start:
+            raise ValueError("z_range requires finite start < stop")
+        z_range = (start, stop)
+
+    by_role: dict[str, list[float]] = {role: [] for role in ROLE_FILES}
+    centers: list[dict[str, Any]] = []
+    for role in ROLE_FILES:
+        document = documents.get(role) or {}
+        for collection in document.get("collections") or []:
+            geometry = collection.get("geometry") or {}
+            value = geometry.get("median_z")
+            if not _is_finite_number(value):
+                continue
+            z = float(value)
+            by_role[role].append(z)
+            centers.append(
+                {
+                    "role": role,
+                    "collection_id": collection.get("id"),
+                    "source_id": collection.get("source_id"),
+                    "name": collection.get("name"),
+                    "median_z": z,
+                }
+            )
+
+    ordered_z = sorted(item["median_z"] for item in centers)
+    largest_gap = None
+    if len(ordered_z) >= 2:
+        left, right = max(
+            zip(ordered_z, ordered_z[1:]),
+            key=lambda pair: (pair[1] - pair[0], -pair[0]),
+        )
+        largest_gap = {
+            "gap_slices": right - left,
+            "between_median_z": [left, right],
+        }
+
+    report: dict[str, Any] = {
+        "measure": "collection-median-z coverage proxy",
+        "coordinate_order": "xyz (VC3D PointCollections p)",
+        "collection_centers": len(centers),
+        "observed_z_range": [min(ordered_z), max(ordered_z)] if ordered_z else None,
+        "largest_collection_center_gap": largest_gap,
+        "by_role": {
+            role: {
+                "collection_centers": len(values),
+                "observed_z_range": [min(values), max(values)] if values else None,
+            }
+            for role, values in by_role.items()
+        },
+        "fit_window": None,
+        "limitation": (
+            "Coverage counts one median-z center per collection. It is an axial "
+            "annotation-density proxy, not proof that a winding or surface is "
+            "geometrically constrained throughout a bin."
+        ),
+    }
+
+    if z_range is None:
+        return report
+
+    start, stop = z_range
+    width = (stop - start) / bins
+    counts = [0 for _ in range(bins)]
+    outside = 0
+    for item in centers:
+        z = item["median_z"]
+        if z < start or z > stop:
+            outside += 1
+            continue
+        index = bins - 1 if z == stop else int((z - start) / width)
+        index = max(0, min(index, bins - 1))
+        counts[index] += 1
+
+    bin_rows = []
+    empty_bins = []
+    for index, count in enumerate(counts):
+        lo = start + index * width
+        hi = start + (index + 1) * width
+        if count == 0:
+            empty_bins.append(index)
+        bin_rows.append(
+            {
+                "index": index,
+                "z_interval": [lo, hi],
+                "right_closed": index == bins - 1,
+                "collection_centers": count,
+            }
+        )
+
+    nonempty = bins - len(empty_bins)
+    report["fit_window"] = {
+        "z_range": [start, stop],
+        "bins": bins,
+        "bin_width_slices": width,
+        "collection_centers_inside": sum(counts),
+        "collection_centers_outside": outside,
+        "nonempty_bins": nonempty,
+        "empty_bins": empty_bins,
+        "nonempty_bin_fraction": nonempty / bins,
+        "bin_counts": bin_rows,
+    }
+    return report
 
 def audit_file(path: Path, *, role: str) -> dict[str, Any]:
     """Audit one winding document and retain exact file provenance."""
@@ -425,6 +580,9 @@ def audit_dataset(
     dataset: Path,
     *,
     required_roles: Iterable[str] = (),
+    z_range: tuple[float, float] | None = None,
+    z_bins: int = 12,
+    volume_root: str | None = None,
 ) -> dict[str, Any]:
     """Audit conventional spiral winding inputs under one dataset root."""
     dataset = Path(dataset)
@@ -467,6 +625,7 @@ def audit_dataset(
         "diagnostic": "winding-annotation-audit",
         "open_problem": OPEN_PROBLEM_URL,
         "dataset": str(dataset),
+        "volume_root": volume_root,
         "status": status,
         "present_roles": present_roles,
         "missing_roles": missing_roles,
@@ -481,6 +640,9 @@ def audit_dataset(
         "error_count": len(errors),
         "warning_count": len(warnings),
         "documents": documents,
+        "axial_coverage": summarize_axial_coverage(
+            documents, z_range=z_range, bins=z_bins
+        ),
         "findings": findings,
         "limitation": (
             "This audit checks PointCollections structure, role semantics, numeric sanity, "
@@ -488,6 +650,20 @@ def audit_dataset(
             "graph consistency, or held-out spiral-fit accuracy."
         ),
     }
+
+
+def _parse_z_range(value: str) -> tuple[float, float]:
+    try:
+        fields = [float(part.strip()) for part in value.split(",")]
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("z range must be BEGIN,END") from exc
+    if (
+        len(fields) != 2
+        or not all(math.isfinite(field) for field in fields)
+        or fields[1] <= fields[0]
+    ):
+        raise argparse.ArgumentTypeError("z range requires finite BEGIN < END")
+    return fields[0], fields[1]
 
 
 def main() -> None:
@@ -502,6 +678,24 @@ def main() -> None:
         default=[],
         help="fail when this conventional winding role is absent; repeatable",
     )
+    ap.add_argument(
+        "--volume-root",
+        help=(
+            "optional exact ScrollQ/CT volume root binding; required when this "
+            "artifact will be attached to a ScrolIQ passport"
+        ),
+    )
+    ap.add_argument(
+        "--z-range",
+        type=_parse_z_range,
+        help="optional fit/evaluation axial window as BEGIN,END in L0 voxel z",
+    )
+    ap.add_argument(
+        "--z-bins",
+        type=int,
+        default=12,
+        help="number of equal-width axial coverage bins inside --z-range (default: 12)",
+    )
     ap.add_argument("--out", help="optional JSON report path")
     ap.add_argument(
         "--format",
@@ -510,7 +704,15 @@ def main() -> None:
     )
     args = ap.parse_args()
 
-    report = audit_dataset(Path(args.dataset), required_roles=args.require_role)
+    if args.z_bins < 1:
+        ap.error("--z-bins must be >= 1")
+    report = audit_dataset(
+        Path(args.dataset),
+        required_roles=args.require_role,
+        z_range=args.z_range,
+        z_bins=args.z_bins,
+        volume_root=args.volume_root,
+    )
     if args.out:
         out = Path(args.out)
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -533,6 +735,22 @@ def main() -> None:
             f"points={report['totals']['points']} "
             f"annotated={report['totals']['annotated_points']}"
         )
+        coverage = report["axial_coverage"]
+        gap = coverage.get("largest_collection_center_gap")
+        if gap:
+            print(
+                "axial collection-center gap="
+                f"{gap['gap_slices']:.1f} slices between "
+                f"{gap['between_median_z'][0]:.1f} and "
+                f"{gap['between_median_z'][1]:.1f}"
+            )
+        fit_window = coverage.get("fit_window")
+        if fit_window:
+            print(
+                "axial fit-window bins="
+                f"{fit_window['nonempty_bins']}/{fit_window['bins']} nonempty; "
+                f"empty={fit_window['empty_bins']}"
+            )
         for role in ROLE_FILES:
             doc = report["documents"][role]
             digest = doc.get("sha256", "")

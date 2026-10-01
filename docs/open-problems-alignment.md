@@ -20,7 +20,7 @@ The existing ScrollQ score remains useful, but it means one narrow thing: sample
 | Surface topology | Surface IQ | Planned | CT support, competing-surface ambiguity, topology-risk map |
 | Mesh connectivity | Mesh IQ | Planned | Holes, mergers, self-intersections, sheet-switch risk, local distortion |
 | Fiber connectivity | Fiber IQ | Planned | Continuity/orientation confidence and trace-break candidates |
-| Winding annotations | Winding IQ | Partial: PointCollections v1 role/schema/numeric/provenance audit via `scroliq-winding` | Patch attachment, graph/holonomy consistency, held-out constraint residuals, annotation-leverage map |
+| Winding annotations | Winding IQ | Partial: PointCollections v1 role/schema/numeric/provenance audit plus collection-center axial coverage via `scroliq-winding` | Patch attachment, graph/holonomy consistency, held-out constraint residuals, annotation-leverage map |
 | Spiral fitting | Spiral IQ | Planned | Held-out constraint residuals, sensitivity, under-constrained regions |
 | Label quality | Label IQ | Partial: label/segment coverage and `label_next` triage | Normal-direction label offset, snapping candidates, active-learning queue |
 | Ink generalization and false positives | Ink IQ | Planned | Leakage audit, held-out validation, depth/perturbation stability, cross-scroll checks |
@@ -43,6 +43,7 @@ A passport does **not** infer unmeasured stages from the scan-quality score. Tod
 - `data`: measured or partial, based on actual read/decode provenance;
 - `scan`: measured, based on sampled level-0 voxels;
 - `labels`: partial when coverage data is supplied;
+- `winding`: partial when a structurally valid winding audit is explicitly bound to the exact selected volume; unbound/mismatched artifacts are excluded;
 - `surface`, `mesh`, `fibers`, `spiral`, `ink`: `unknown` until direct evidence is supplied.
 
 That asymmetry is intentional. It makes missing evidence visible instead of disguising it as confidence.
@@ -70,7 +71,7 @@ Measure whether surface/fiber labels are physically localized on the feature the
 
 ### 3. Winding IQ
 
-Audit the winding constraints before fitting. The first implemented layer, `scroliq-winding`, checks the conventional VC3D PointCollections documents for parseability, exact-file SHA-256 provenance, role-consistent `wind_a` semantics, numeric sanity, and basic coverage statistics without pretending that structurally valid annotations are geometrically correct.
+Audit the winding constraints before fitting. The implemented `scroliq-winding` layer can bind its report to the exact CT volume root so passports fail closed on cross-volume evidence. It checks the conventional VC3D PointCollections documents for parseability, exact-file SHA-256 provenance, role-consistent `wind_a` semantics, numeric sanity, and collection-center axial coverage. For a declared fit window it exposes empty z bands and the largest gap between collection centers as annotation-prioritization evidence, without pretending that structurally valid or axially present annotations are geometrically correct.
 
 Next, attach those constraints to verified patches and the fitted coordinate system, reuse the upstream winding-graph machinery to detect inconsistent cycles / holonomy, and measure which regions remain under-constrained or high-leverage for another annotation.
 
