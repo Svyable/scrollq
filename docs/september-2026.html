@@ -336,7 +336,16 @@ are testable. Injection control, one real point mis-numbered at a time (200 per 
 workflow <code>paris4-winding-ray-order.yml</code>; tests in <code>tests/test_winding_geometry.py</code>,
 <code>tests/test_ray_order_control.py</code>.</td></tr>
 
-<tr><td>Native TIFXYZ/OBJ mesh checks, ink falsification controls, held-out ink validation, VC3D-native fiber auditing, and the fit/held-out geometry gap certificate are implemented and tested. Mesh IQ has now run on real segments (row above); ink, fiber and geometry-probe evidence remains fixture/synthetic-only where stated. Fiber IQ additionally validates current v1/v3/v4 persisted VC3D span/tracer metadata and can gate review findings in CI</td>
+<tr><td>Fiber IQ on public data: 8 SHA-256-pinned PHercParis4 VC3D fibers (53,828 rendered points,
+369 spans: 354 native-trace, 15 fallback). 1 pass / 7 caution; 11 gap candidates, all in one fiber that also has
+the sample's largest fallback share (7 / 28 spans), and 26 sharp-turn candidates; 0 control-line offsets and
+0 control-order inversions. A deterministic 8-file subset, not exhaustive; co-occurrence, not causation; not
+passport evidence (no exact CT volume is asserted for the public directory)</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-public-fiber-audit"><code>artifacts/2026-10-01-public-fiber-audit/</code></a> —
+<code>run.sh</code> (hash-pinned downloads, fails closed on changed bytes), <code>summary.json</code>,
+<code>verify.py</code>; offline tests tie the summary to the pins.</td></tr>
+
+<tr><td>Native TIFXYZ/OBJ mesh checks, ink falsification controls, held-out ink validation, VC3D-native fiber auditing, and the fit/held-out geometry gap certificate are implemented and tested. Mesh IQ and Fiber IQ have now run on real public data (rows above and below); ink and geometry-probe evidence remains fixture/synthetic-only where stated. Fiber IQ additionally validates current v1/v3/v4 persisted VC3D span/tracer metadata and can gate review findings in CI</td>
 <td><a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/tifxyz_audit.py"><code>scroliq-mesh</code></a>,
 <a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_audit.py"><code>scroliq-ink-audit</code></a>,
 <a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_validation.py"><code>scroliq-ink-validate</code></a>,
