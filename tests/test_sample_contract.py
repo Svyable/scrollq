@@ -140,4 +140,7 @@ def test_score_volume_reports_sampling_completeness(monkeypatch, status):
         "shard_candidates": 1,
         "missing_shards": int(status == 404),
         "shard_read_failures": int(status == 503),
+        "shard_index_invalid": 0,
+        "chunk_read_failures": 0,
+        "chunk_decode_failures": 0,
     }

@@ -209,11 +209,14 @@ A quality score should not quietly look authoritative when the requested data co
   "spread": 3,
   "shard_candidates": 27,
   "missing_shards": 0,
-  "shard_read_failures": 0
+  "shard_read_failures": 0,
+  "shard_index_invalid": 0,
+  "chunk_read_failures": 0,
+  "chunk_decode_failures": 0
 }
 ```
 
-Missing shards and transport/read failures are tracked separately, and partial sampling is explicitly marked incomplete.
+Missing shards and transport/read failures are tracked separately, and partial sampling is explicitly marked incomplete. Failures below the shard level are counted too: a structurally invalid shard index (`shard_index_invalid`), a failed chunk range read (`chunk_read_failures`), and a chunk the decoder rejected or whose shape cannot be interpreted (`chunk_decode_failures`). `complete: true` only means the sampling budget was met, so check these counters before treating a score as failure-free. Artifacts produced before these counters existed simply lack the keys; they were not re-run and their scores are unaffected.
 
 The `spread` parameter controls the per-dimension shard-candidate count (`spread³` candidates; default 3 → 27). A denser spread (e.g., 5 → 125) finds more present shards on sparse volumes — PHerc0813 goes from 2 to 12 decoded chunks — but costs more candidate probes. Denser is not automatically better: our diagnostic showed that when different shards are actually read, heterogeneous volumes produce noisier scores, so choose the spread that matches how much of the volume you need to cover.
 
