@@ -223,3 +223,58 @@ def test_dataset_can_bind_audit_to_exact_volume_root(tmp_path: Path):
     report = audit_dataset(tmp_path, volume_root=root)
 
     assert report["volume_root"] == root
+
+
+# -- shape of real VC3D output ---------------------------------------------
+# Anchored to ScrollPrize/villa volume-cartographer/core/src/PointCollections.cpp
+# (to_json): every point has "p" and "creation_time", an explicit "wind_a"
+# (null when unannotated), optional "links", optional "fiber_dir"; collections
+# may carry "windings_linked". SpiralPclRole.hpp: same-winding points carry no
+# wind_a (the editor writes null), relative points an integer wind_a counting
+# 0, 1, 2, ... in placement order. Genuine editor output must not false-positive.
+def _vc3d_point(xyz, wind_a, **extra):
+    point = {"p": xyz, "creation_time": 1760000000, "wind_a": wind_a}
+    point.update(extra)
+    return point
+
+
+def test_genuine_vc3d_same_winding_output_has_no_findings():
+    doc = _doc(
+        {
+            "0": _vc3d_point([10.5, 20.25, 30.0], None, fiber_dir="h"),
+            "1": _vc3d_point([11.5, 21.25, 31.0], None, links=[0]),
+        },
+        name="same-winding collection 3",
+    )
+    doc["collections"]["0"]["windings_linked"] = []
+    report = audit_document(doc, role="same_winding")
+    assert report["status"] == "pass", report["findings"]
+    assert report["findings"] == []
+
+
+def test_genuine_vc3d_relative_output_counts_from_zero_with_extras():
+    doc = _doc(
+        {
+            "0": _vc3d_point([1.0, 2.0, 3.0], 0.0),
+            "1": _vc3d_point([4.0, 5.0, 6.0], 1.0, links=[0]),
+            "2": _vc3d_point([7.0, 8.0, 9.0], 2.0, fiber_dir="v"),
+        },
+        metadata={"winding_is_absolute": False},
+    )
+    report = audit_document(doc, role="relative")
+    assert report["status"] == "pass", report["findings"]
+    assert report["collections"][0]["role_stats"]["winding_span"] == 2
+
+
+def test_integer_valued_floats_are_accepted_but_fractions_are_not():
+    # VC3D serializes wind_a as a double, so 2.0 is the normal on-disk form
+    ok = audit_document(
+        _doc({"0": _vc3d_point([1, 2, 3], 0.0),
+              "1": _vc3d_point([4, 5, 6], 2.0)}),
+        role="relative")
+    assert ok["status"] == "pass"
+    bad = audit_document(
+        _doc({"0": _vc3d_point([1, 2, 3], 0.0),
+              "1": _vc3d_point([4, 5, 6], 1.5)}),
+        role="relative")
+    assert any(f["code"] == "WINDING_INVALID_WIND_A" for f in bad["findings"])
