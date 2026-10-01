@@ -17,11 +17,13 @@ scroliq-passport \
   --volumes artifacts/2026-09-30-scrollq/volumes.json \
   --coverage artifacts/2026-09-30-scrollq/coverage.json \
   --winding-audit out/PHerc0813.winding-audit.json \
+  --mesh-audit out/PHerc0813.mesh-audit.json \
+  --ink-audit out/PHerc0813.ink-audit.json \
   --root PHerc0813 \
   --out out/PHerc0813.passport.json
 ```
 
-Today the passport can directly populate data-access/decode provenance, sampled scan-health evidence, label/segment coverage, and a volume-bound winding-input audit. Surface, mesh, fiber, winding geometry, spiral, label-localization, and ink-reliability fields stay explicitly `unknown` or `partial` until direct diagnostics are supplied. That is the contract: **measure the limiting stage; never manufacture confidence for missing evidence.**
+Today the passport can directly populate data-access/decode provenance, sampled scan-health evidence, label/segment coverage, volume-bound winding inputs, native TIFXYZ mesh evidence, and ink-validation provenance. Surface support, fiber connectivity, winding geometry, spiral-fit accuracy, label localization, and biological ink identity stay explicitly `unknown` or `partial` until direct diagnostics are supplied. That is the contract: **measure the limiting stage; never manufacture confidence for missing evidence.**
 
 The implementation roadmap is mapped directly to the Challenge's open problems in [`docs/open-problems-alignment.md`](docs/open-problems-alignment.md).
 
@@ -71,6 +73,43 @@ It checks `abs_winding.json`, `relative_windings.json`, and `same_windings.json`
 When the artifact will be attached to a passport, `--volume-root` binds it to the exact CT root; the passport rejects unbound or mismatched winding artifacts. When a fit/evaluation z-window is supplied, ScrolIQ also reports **annotation-center axial coverage**: one median-z center per collection, the largest gap between collection centers, and empty equal-width z bands. Counting collections rather than raw points prevents a densely sampled line from looking like broad coverage. Empty bins are prioritization cues for where another verified constraint may have leverage; they do **not** make the audit fail or prove that a nonempty bin is geometrically constrained.
 
 This is intentionally a **constraint-input audit, not a geometry verdict**. It does not yet establish CT support, patch attachment, relative-winding graph consistency, loop holonomy, or held-out spiral-fit accuracy. Those are the next Winding IQ / Spiral IQ layers.
+
+## Mesh IQ: native TIFXYZ audit
+
+`scroliq-mesh` audits one native Vesuvius TIFXYZ surface without rewriting it:
+
+```bash
+scroliq-mesh \
+  --tifxyz /path/to/surface.tifxyz \
+  --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
+  --out out/PHerc0813.mesh-audit.json
+```
+
+The audit follows the upstream TIFXYZ contract: `x.tif`, `y.tif`, `z.tif`, `meta.json`, reciprocal `scale`, the `Z <= 0` validity convention, and integer-multiple `mask.tif` semantics. It records exact file hashes and checks malformed/empty grids, disconnected valid-vertex components, enclosed invalid-grid components, stale metadata bounding boxes, scale-versus-measured spacing, abrupt local edge jumps, severe neighboring-normal reversals, and symmetric quad-area distortion relative to the nominal 2D parameterization.
+
+A passing audit is deliberately **partial Mesh IQ**, not a proof that the traced sheet is correct. It does not establish CT support, sheet/winding identity, or freedom from nonlocal self-intersections. Those require direct volume support and complementary geometry tools.
+
+## Ink IQ: leakage and falsification-evidence audit
+
+`scroliq-ink-audit` validates an experiment manifest before ink output is treated as evidence:
+
+```bash
+scroliq-ink-audit \
+  --manifest experiment/ink-evidence.json \
+  --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
+  --normal-offsets=-3,0,3 \
+  --out out/PHerc0813.ink-audit.json
+```
+
+The manifest declares exact checkpoint identity and SHA-256, seeds, half-open ZYX training/evaluation boxes, held-out split names, per-evaluation run provenance, and falsification controls. The audit fails on declared train/evaluation spatial overlap or malformed provenance, and stays partial when controls such as normal offsets, adjacent winding, geometry perturbation, or an independent checkpoint are missing.
+
+This is an **evidence-quality audit, not an ink classifier**. A pass means the declared experiment is spatially separated and the requested controls are present; it does not prove that a prediction is ink or that it generalizes across scrolls.
+
+### Held-out ink measurement
+
+`scroliq-ink-validate` complements that manifest audit with deterministic measurements over explicit 2D NPY/TIFF predictions, known binary labels, and a held-out mask. It reports confusion counts, balanced accuracy, false-positive rate, F1/IoU, probability separation, exact input hashes, and same-mask deltas for named falsification controls. The resulting JSON can be hash-pinned as a `held_out_validations[]` artifact in the Grand Prize provenance manifest.
+
+The command fails closed when the mask is empty or single-class, inputs are malformed, the split is not declared held out, training overlap is not declared absent, or no falsification control is supplied. Those checks make the output an auditable evidence artifact; they do not prove that a URL is public, independently establish the declared train/validation split, set a performance threshold, or claim readability. See the [held-out ink protocol](docs/ink-validation.md).
 
 ## Why this exists
 
@@ -312,31 +351,25 @@ PHerc0813, and PHerc1447**. The larger frontier is a useful warning: this
 external geometry proxy creates real trade-offs and should drive focused
 held-out geometry tests, not an opaque weighted winner score.
 
-## Held-out ink validation and falsification controls
 
-`scroliq-ink-validate` turns the prize's held-out-validation and false-positive-mitigation requirements into a deterministic evidence artifact. It scores a model prediction against known binary ink ground truth on an explicit validation mask, records balanced accuracy / false-positive rate / F1 / IoU, pins the checkpoint and exact evaluated arrays, and compares the correct surface against deliberately wrong physical controls such as normal offsets or an adjacent winding.
+## 2027 Grand Prize recto-coverage ledger
+
+`scroliq-recto-coverage` turns the full-recto requirement into an explicit accounting gate. A frozen reference inventory declares the total recto surface area and decomposes it into the main sheet plus attached, detached, or disconnected outer patches. Every in-scope component must be unrolled and linked to submitted mesh IDs; the only permitted exclusion is a `disconnected-outer-patch`, and the sum of excluded area must remain **strictly below 10%** of the declared total surface.
 
 ```bash
-scroliq-ink-validate \
-  --prediction heldout/prediction.tif \
-  --labels heldout/inklabels.tif \
-  --validation-mask heldout/validation_mask.tif \
-  --prediction-scale uint8 \
-  --split-id public-kfold-fold-3 \
-  --held-out --training-overlap none \
-  --ground-truth-source-url https://scrollprize.org/... \
-  --model-checkpoint-sha256 <64-hex> \
-  --model-window 17x256x256 \
-  --control normal-plus-3=heldout/normal_plus_3.tif \
-  --control adjacent-winding=heldout/adjacent_winding.tif \
-  --out submission/ink-validation.json
+scroliq-recto-coverage \
+  --manifest submission/recto-coverage.json \
+  --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
+  --out submission/recto-coverage.audit.json
 ```
 
-The command fails closed as prize evidence unless the split is held out, training overlap is explicitly absent, the validation mask contains both classes, and at least one falsification control is evaluated. It deliberately imposes no arbitrary score cutoff; the output is evidence, not a readability claim. See [the ink-validation protocol](docs/ink-validation.md).
+The audit also catches reference/component area imbalance and mesh IDs reused across multiple components, which would otherwise allow accidental double-counting. A pass means **100% of the declared in-scope reference inventory is accounted for**. It deliberately does not claim that the reference inventory itself discovered every papyrus fragment; that upstream completeness proof remains separate evidence.
+
+See [the example coverage manifest](examples/grand-prize-recto-coverage.example.json).
 
 ## 2027 Grand Prize provenance gate
 
-`scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. One manifest pins the exact eligible CT volume and zarr-pyramid-audit run, then links each surface → numbered tifxyz mesh → render → checkpoint → training datasets/regions → stochastic seeds → public training/inference experiment runs.
+`scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. Schema v2 pins the exact eligible CT volume and zarr-pyramid-audit run, then links each surface → numbered tifxyz mesh → render → checkpoint → training datasets/regions → stochastic seeds → public training/inference experiment runs → public held-out validation against known ground truth.
 
 ```bash
 scroliq-provenance \
@@ -346,7 +379,7 @@ scroliq-provenance \
   --out submission/provenance.validation.json
 ```
 
-The gate fails closed on wrong-volume lineage, training/prediction overlap, non-public or incorrectly licensed training data, prohibited higher-resolution same-scroll training sources, missing stochastic seeds or experiment runs, broken mesh/render column traceability, package SHA mismatches, missing 1 cm scale-bar declarations, and incomplete banner coverage. It also records a canonical graph SHA-256 and emits a complete provenance chain for every submitted render.
+The gate fails closed on wrong-volume lineage, training/prediction overlap, non-public or incorrectly licensed training data, prohibited higher-resolution same-scroll training sources, missing stochastic seeds or experiment runs, missing public held-out validation, same-volume training/validation overlap, broken mesh/render column traceability, package SHA mismatches, missing 1 cm scale-bar declarations, and incomplete banner coverage. It also records a canonical graph SHA-256, emits a complete provenance chain for every submitted render, and records held-out exclusion proofs. It deliberately does not set a performance threshold or claim papyrological legibility.
 
 See [the provenance-manifest specification](docs/grand-prize-provenance.md) and [example manifest](examples/grand-prize-provenance.example.json).
 

@@ -25,7 +25,7 @@ scroliq-ink-validate \
   --out submission/ink-validation.json
 ```
 
-The command exits zero only when the report is suitable as prize evidence: the split is declared held-out, training overlap is explicitly `none`, both ink and background are present in the validation mask, and at least one falsification control was evaluated.
+The command exits zero only when the report is complete enough to pin as prize evidence: the split is declared held-out, training overlap is explicitly `none`, both ink and background are present in the validation mask, and at least one falsification control was evaluated. The declaration is not independently proven by this command; `scroliq-provenance` separately checks region-set exclusion.
 
 No arbitrary performance cutoff is imposed. The tool reports measurements and control deltas so reviewers can see whether the correct physical surface carries more ink evidence than deliberately wrong surfaces.
 
@@ -38,7 +38,7 @@ A plausible-looking letter is not enough. Useful controls hold the model and gro
 - perturb the geometry;
 - run an independent checkpoint/fold.
 
-A strong result should remain reproducible on held-out known ground truth while signal degrades under physically wrong controls. This is stricter than a pretty render and produces an auditable artifact that can be pinned from the Grand Prize provenance graph.
+A strong result should remain reproducible on held-out known ground truth while signal degrades under physically wrong controls. This is stricter than a pretty render and produces an auditable artifact that can be hash-pinned from the Grand Prize provenance graph through `held_out_validations[].path` and `held_out_validations[].sha256`.
 
 ## Supported arrays
 

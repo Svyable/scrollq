@@ -12,6 +12,7 @@ license = { text = "MIT" }
 authors = [{ name = "Sven" }]
 dependencies = [
     "numpy",
+    "Pillow",
     "requests",
     "tifffile>=2024.1",
     "zarr-pyramid-audit @ git+https://github.com/Svyable/zarr-pyramid-audit.git",
@@ -29,6 +30,9 @@ scroliq-scan-map = "scrollq.scan_map:main"
 scroliq-provenance = "scrollq.provenance:main"
 scroliq-ink-validate = "scrollq.ink_validation:main"
 scroliq-winding = "scrollq.winding_audit:main"
+scroliq-mesh = "scrollq.tifxyz_audit:main"
+scroliq-ink-audit = "scrollq.ink_audit:main"
+scroliq-recto-coverage = "scrollq.recto_coverage:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

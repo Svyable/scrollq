@@ -5,6 +5,7 @@ from scrollq.ink_validation import (
     _normalize_prediction,
     build_report,
     evaluate_prediction,
+    main,
 )
 
 
@@ -118,3 +119,107 @@ def test_float_outside_unit_range_requires_explicit_encoding():
     arr = np.array([[0.0, 2.0]], dtype=np.float32)
     with pytest.raises(ValueError, match="outside"):
         _normalize_prediction(arr, "auto")
+
+
+def test_empty_mask_and_nonbinary_inputs_fail_explicitly():
+    prediction, labels, mask = _arrays()
+    with pytest.raises(ValueError, match="zero pixels"):
+        evaluate_prediction(prediction, labels, np.zeros_like(mask))
+    labels[0, 0] = 2
+    with pytest.raises(ValueError, match="labels must be binary"):
+        evaluate_prediction(prediction, labels, mask)
+    labels[0, 0] = 1
+    mask[0, 0] = 2
+    with pytest.raises(ValueError, match="mask must be binary"):
+        evaluate_prediction(prediction, labels, mask)
+
+
+def test_shape_mismatch_and_nonfinite_prediction_fail():
+    prediction, labels, mask = _arrays()
+    with pytest.raises(ValueError, match="shape mismatch"):
+        evaluate_prediction(prediction[:-1], labels, mask)
+    prediction[0, 0] = np.nan
+    with pytest.raises(ValueError, match="finite probabilities"):
+        evaluate_prediction(prediction, labels, mask)
+
+
+def test_single_class_mask_is_measured_but_not_ready():
+    prediction, labels, mask = _arrays()
+    mask[labels == 0] = 0
+    report = build_report(
+        prediction=prediction,
+        labels=labels,
+        validation_mask=mask,
+        threshold=0.5,
+        split_id="fold-1",
+        held_out=True,
+        training_overlap="none",
+        ground_truth_source_url="https://example.org/public-ground-truth",
+        model_checkpoint_sha256="d" * 64,
+        model_window_voxels=(17, 64, 64),
+        controls={"normal+3": prediction},
+    )
+
+    assert report["evaluation"]["both_classes_present"] is False
+    assert report["prize_evidence_ready"] is False
+
+
+def test_digest_changes_when_a_control_changes():
+    prediction, labels, mask = _arrays()
+    kwargs = dict(
+        prediction=prediction,
+        labels=labels,
+        validation_mask=mask,
+        threshold=0.5,
+        split_id="fold-1",
+        held_out=True,
+        training_overlap="none",
+        ground_truth_source_url="https://example.org/public-ground-truth",
+        model_checkpoint_sha256="e" * 64,
+        model_window_voxels=(17, 64, 64),
+    )
+    first = build_report(**kwargs, controls={"offset": np.zeros_like(prediction)})
+    second = build_report(**kwargs, controls={"offset": np.ones_like(prediction)})
+
+    assert first["evaluated_arrays_sha256"] != second["evaluated_arrays_sha256"]
+
+
+def test_cli_writes_report_and_returns_fail_closed_status(tmp_path):
+    prediction, labels, mask = _arrays()
+    prediction_path = tmp_path / "prediction.npy"
+    labels_path = tmp_path / "labels.npy"
+    mask_path = tmp_path / "mask.npy"
+    out_path = tmp_path / "report.json"
+    np.save(prediction_path, prediction)
+    np.save(labels_path, labels)
+    np.save(mask_path, mask)
+
+    status = main(
+        [
+            "--prediction",
+            str(prediction_path),
+            "--labels",
+            str(labels_path),
+            "--validation-mask",
+            str(mask_path),
+            "--split-id",
+            "fold-1",
+            "--held-out",
+            "--training-overlap",
+            "none",
+            "--ground-truth-source-url",
+            "https://example.org/public-ground-truth",
+            "--model-checkpoint-sha256",
+            "f" * 64,
+            "--model-window",
+            "17x64x64",
+            "--out",
+            str(out_path),
+            "--format",
+            "json",
+        ]
+    )
+
+    assert status == 1
+    assert out_path.is_file()
+    assert '"prize_evidence_ready": false' in out_path.read_text()

@@ -281,6 +281,137 @@ def _check_region_exclusion(
     return proof
 
 
+def _check_holdout_exclusion(
+    *,
+    validation_id: str,
+    region_id: str,
+    model: dict[str, Any],
+    region_sets: dict[str, dict[str, Any]],
+    datasets: dict[str, dict[str, Any]],
+    errors: list[dict[str, str]],
+) -> dict[str, Any]:
+    """Prove held-out validation regions do not intersect same-volume training."""
+
+    proof: dict[str, Any] = {
+        "validation_id": validation_id,
+        "region_set_id": region_id,
+        "training_region_set_ids": [],
+        "checked_pairs": 0,
+        "overlaps": [],
+    }
+    holdout = region_sets.get(region_id)
+    if holdout is None:
+        _error(
+            errors,
+            "GP_MISSING_REGION_SET",
+            f"held_out_validations[{validation_id}].region_set_id",
+            f"unknown region set {region_id!r}",
+        )
+        return proof
+    if holdout.get("role") != "validation":
+        _error(
+            errors,
+            "GP_REGION_ROLE",
+            f"region_sets[{region_id}].role",
+            "held-out region set must have role='validation'",
+        )
+    coord = holdout.get("coordinate_space")
+    if coord != "level0-voxel-index":
+        _error(
+            errors,
+            "GP_REGION_COORDINATES",
+            f"region_sets[{region_id}].coordinate_space",
+            "held-out checking currently requires level0-voxel-index coordinates",
+        )
+
+    holdout_boxes = []
+    for i, box in enumerate(_as_list(holdout.get("boxes"))):
+        parsed = _validate_box(
+            box, f"region_sets[{region_id}].boxes[{i}]", errors
+        )
+        if parsed:
+            holdout_boxes.append(parsed)
+    if not holdout_boxes:
+        _error(
+            errors,
+            "GP_EMPTY_VALIDATION_REGION",
+            f"region_sets[{region_id}].boxes",
+            "at least one held-out validation box is required",
+        )
+
+    training_ids: list[str] = []
+    for dataset_id in _as_list(model.get("training_dataset_ids")):
+        dataset = datasets.get(dataset_id)
+        if dataset is None:
+            continue
+        training_id = dataset.get("training_region_set_id")
+        if training_id:
+            training_ids.append(str(training_id))
+    proof["training_region_set_ids"] = training_ids
+
+    for training_id in training_ids:
+        train = region_sets.get(training_id)
+        if train is None:
+            continue
+        if train.get("role") != "training":
+            _error(
+                errors,
+                "GP_REGION_ROLE",
+                f"region_sets[{training_id}].role",
+                "training dataset region set must have role='training'",
+            )
+        if train.get("volume_id") != holdout.get("volume_id"):
+            continue
+        if train.get("coordinate_space") != coord:
+            _error(
+                errors,
+                "GP_REGION_COORDINATES",
+                f"region_sets[{training_id}].coordinate_space",
+                "same-volume training/validation regions must share a coordinate space",
+            )
+            continue
+
+        train_boxes = []
+        for i, box in enumerate(_as_list(train.get("boxes"))):
+            parsed = _validate_box(
+                box, f"region_sets[{training_id}].boxes[{i}]", errors
+            )
+            if parsed:
+                train_boxes.append(parsed)
+        if not train_boxes:
+            _error(
+                errors,
+                "GP_EMPTY_TRAINING_REGION",
+                f"region_sets[{training_id}].boxes",
+                "same-volume training region set must contain boxes",
+            )
+            continue
+
+        for ti, tbox in enumerate(train_boxes):
+            for vi, vbox in enumerate(holdout_boxes):
+                proof["checked_pairs"] += 1
+                if _boxes_overlap(tbox, vbox):
+                    proof["overlaps"].append(
+                        {
+                            "training_region_set_id": training_id,
+                            "training_box": ti,
+                            "validation_box": vi,
+                        }
+                    )
+
+    if proof["overlaps"]:
+        _error(
+            errors,
+            "GP_TRAIN_HOLDOUT_OVERLAP",
+            f"held_out_validations[{validation_id}]",
+            (
+                "training/held-out validation region overlap detected "
+                f"({len(proof['overlaps'])} pair(s))"
+            ),
+        )
+    return proof
+
+
 def _verify_local_file(
     record: dict[str, Any],
     path: str,
@@ -323,235 +454,6 @@ def _verify_local_file(
             )
 
 
-
-def _verify_ink_validation(
-    record: dict[str, Any],
-    models: dict[str, dict[str, Any]],
-    root_dir: Path | None,
-    errors: list[dict[str, str]],
-) -> None:
-    """Validate held-out ink evidence and, when local, cross-check its report."""
-    p = "ink_validation"
-    if record.get("tool") != "scroliq-ink-validate":
-        _error(
-            errors,
-            "GP_INK_VALIDATION_TOOL",
-            f"{p}.tool",
-            "tool must be 'scroliq-ink-validate'",
-        )
-
-    _check_sha(record, p, errors)
-    _verify_local_file(record, p, root_dir, errors)
-
-    model_id = record.get("model_id")
-    model = models.get(model_id) if isinstance(model_id, str) else None
-    if model is None:
-        _error(
-            errors,
-            "GP_INK_VALIDATION_MODEL",
-            f"{p}.model_id",
-            "ink validation must name a model in models[]",
-        )
-
-    checkpoint_sha = record.get("model_checkpoint_sha256")
-    if not isinstance(checkpoint_sha, str) or not SHA256_RE.fullmatch(checkpoint_sha):
-        _error(
-            errors,
-            "GP_INK_VALIDATION_CHECKPOINT",
-            f"{p}.model_checkpoint_sha256",
-            "lowercase 64-hex checkpoint digest is required",
-        )
-    elif model is not None and checkpoint_sha != model.get("sha256"):
-        _error(
-            errors,
-            "GP_INK_VALIDATION_CHECKPOINT",
-            f"{p}.model_checkpoint_sha256",
-            "held-out validation checkpoint must match the submitted model",
-        )
-
-    if record.get("held_out") is not True:
-        _error(
-            errors,
-            "GP_INK_VALIDATION_HELD_OUT",
-            f"{p}.held_out",
-            "held-out validation must be explicitly true",
-        )
-    if record.get("training_overlap") != "none":
-        _error(
-            errors,
-            "GP_INK_VALIDATION_OVERLAP",
-            f"{p}.training_overlap",
-            "held-out validation must explicitly declare no training overlap",
-        )
-    if record.get("known_ground_truth") is not True:
-        _error(
-            errors,
-            "GP_INK_VALIDATION_GROUND_TRUTH",
-            f"{p}.known_ground_truth",
-            "validation must use known ground truth",
-        )
-    _check_public_url(
-        record.get("ground_truth_source_url"),
-        f"{p}.ground_truth_source_url",
-        errors,
-        "GP_INK_VALIDATION_GROUND_TRUTH",
-    )
-
-    split_id = record.get("split_id")
-    if not isinstance(split_id, str) or not split_id:
-        _error(
-            errors,
-            "GP_INK_VALIDATION_SPLIT",
-            f"{p}.split_id",
-            "non-empty held-out split id is required",
-        )
-
-    window = record.get("model_window_voxels_zyx")
-    if (
-        not isinstance(window, list)
-        or len(window) != 3
-        or not all(isinstance(v, int) and v > 0 for v in window)
-    ):
-        _error(
-            errors,
-            "GP_INK_VALIDATION_WINDOW",
-            f"{p}.model_window_voxels_zyx",
-            "positive integer [z,y,x] model window is required",
-        )
-
-    control_names = record.get("control_names")
-    if (
-        not isinstance(control_names, list)
-        or not control_names
-        or not all(isinstance(v, str) and v for v in control_names)
-    ):
-        _error(
-            errors,
-            "GP_INK_VALIDATION_CONTROLS",
-            f"{p}.control_names",
-            "at least one named falsification control is required",
-        )
-
-    evaluated_digest = record.get("evaluated_arrays_sha256")
-    if (
-        not isinstance(evaluated_digest, str)
-        or not SHA256_RE.fullmatch(evaluated_digest)
-    ):
-        _error(
-            errors,
-            "GP_INK_VALIDATION_ARRAY_DIGEST",
-            f"{p}.evaluated_arrays_sha256",
-            "digest of the exact evaluated arrays is required",
-        )
-
-    metrics = record.get("metrics")
-    if not isinstance(metrics, dict):
-        _error(
-            errors,
-            "GP_INK_VALIDATION_METRICS",
-            f"{p}.metrics",
-            "held-out validation metrics are required",
-        )
-    else:
-        if metrics.get("both_classes_present") is not True:
-            _error(
-                errors,
-                "GP_INK_VALIDATION_CLASSES",
-                f"{p}.metrics.both_classes_present",
-                "held-out mask must contain both ink and background",
-            )
-        for name in ("balanced_accuracy", "false_positive_rate"):
-            value = metrics.get(name)
-            if not isinstance(value, (int, float)) or not 0 <= float(value) <= 1:
-                _error(
-                    errors,
-                    "GP_INK_VALIDATION_METRICS",
-                    f"{p}.metrics.{name}",
-                    f"{name} must be a numeric value in [0,1]",
-                )
-
-    if root_dir is None:
-        return
-    rel = record.get("path")
-    if not isinstance(rel, str) or not rel:
-        return
-    target = (root_dir / rel).resolve()
-    try:
-        target.relative_to(root_dir.resolve())
-    except ValueError:
-        return
-    if not target.is_file():
-        return
-
-    try:
-        report = json.loads(target.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
-        _error(
-            errors,
-            "GP_INK_VALIDATION_REPORT",
-            f"{p}.path",
-            f"cannot read held-out validation report: {exc}",
-        )
-        return
-
-    if report.get("tool") != "scroliq-ink-validate":
-        _error(
-            errors,
-            "GP_INK_VALIDATION_REPORT",
-            f"{p}.path",
-            "report was not produced by scroliq-ink-validate",
-        )
-    if report.get("prize_evidence_ready") is not True:
-        _error(
-            errors,
-            "GP_INK_VALIDATION_REPORT",
-            f"{p}.path",
-            "held-out validation report is not prize_evidence_ready",
-        )
-
-    report_split = report.get("split") if isinstance(report.get("split"), dict) else {}
-    report_model = report.get("model") if isinstance(report.get("model"), dict) else {}
-    report_eval = (
-        report.get("evaluation") if isinstance(report.get("evaluation"), dict) else {}
-    )
-    report_controls = _as_list(report.get("controls"))
-
-    mismatches: list[str] = []
-    if report_split.get("id") != split_id:
-        mismatches.append("split_id")
-    if report_split.get("held_out") is not True:
-        mismatches.append("held_out")
-    if report_split.get("training_overlap") != "none":
-        mismatches.append("training_overlap")
-    if report_model.get("checkpoint_sha256") != checkpoint_sha:
-        mismatches.append("checkpoint_sha256")
-    if report_model.get("window_voxels_zyx") != window:
-        mismatches.append("model_window_voxels_zyx")
-    if report.get("evaluated_arrays_sha256") != evaluated_digest:
-        mismatches.append("evaluated_arrays_sha256")
-    if sorted(
-        str(item.get("name"))
-        for item in report_controls
-        if isinstance(item, dict) and item.get("name")
-    ) != sorted(control_names if isinstance(control_names, list) else []):
-        mismatches.append("control_names")
-    if isinstance(metrics, dict):
-        if report_eval.get("balanced_accuracy") != metrics.get("balanced_accuracy"):
-            mismatches.append("balanced_accuracy")
-        if report_eval.get("false_positive_rate") != metrics.get("false_positive_rate"):
-            mismatches.append("false_positive_rate")
-        if report_eval.get("both_classes_present") != metrics.get("both_classes_present"):
-            mismatches.append("both_classes_present")
-
-    if mismatches:
-        _error(
-            errors,
-            "GP_INK_VALIDATION_MISMATCH",
-            p,
-            "manifest/report mismatch: " + ", ".join(sorted(set(mismatches))),
-        )
-
-
 def validate_manifest(
     manifest: dict[str, Any],
     *,
@@ -561,6 +463,7 @@ def validate_manifest(
     errors: list[dict[str, str]] = []
     warnings: list[dict[str, str]] = []
     chains: list[dict[str, Any]] = []
+    held_out_proofs: list[dict[str, Any]] = []
 
     if manifest.get("schema_version") != SCHEMA_VERSION:
         _error(
@@ -758,22 +661,11 @@ def validate_manifest(
     surfaces = _index(manifest.get("surfaces"), "surfaces", errors)
     meshes = _index(manifest.get("meshes"), "meshes", errors)
     renders = _index(manifest.get("renders"), "renders", errors)
-
-    ink_validation = manifest.get("ink_validation")
-    if not isinstance(ink_validation, dict):
-        _error(
-            errors,
-            "GP_INK_VALIDATION",
-            "ink_validation",
-            "held-out ink validation evidence is required",
-        )
-    else:
-        _verify_ink_validation(
-            ink_validation,
-            models,
-            root_dir,
-            errors,
-        )
+    held_out_validations = _index(
+        manifest.get("held_out_validations"),
+        "held_out_validations",
+        errors,
+    )
 
     for name, records in (
         ("datasets", datasets),
@@ -782,6 +674,7 @@ def validate_manifest(
         ("surfaces", surfaces),
         ("meshes", meshes),
         ("renders", renders),
+        ("held_out_validations", held_out_validations),
     ):
         if not records:
             _error(
@@ -939,6 +832,130 @@ def validate_manifest(
                     errors,
                     "GP_RUN_NOT_PUBLIC",
                 )
+
+
+    held_out_by_model: dict[str, list[str]] = {}
+    for validation_id, validation in held_out_validations.items():
+        p = f"held_out_validations[{validation_id}]"
+        model_id = validation.get("model_id")
+        if model_id not in models:
+            _error(
+                errors,
+                "GP_HELD_OUT_MODEL",
+                f"{p}.model_id",
+                f"unknown model {model_id!r}",
+            )
+        else:
+            held_out_by_model.setdefault(str(model_id), []).append(validation_id)
+
+        _check_public_url(
+            validation.get("public_input_url"),
+            f"{p}.public_input_url",
+            errors,
+            "GP_HELD_OUT_INPUT_PUBLIC",
+        )
+        _check_public_url(
+            validation.get("ground_truth_url"),
+            f"{p}.ground_truth_url",
+            errors,
+            "GP_HELD_OUT_GROUND_TRUTH_PUBLIC",
+        )
+        _check_public_url(
+            validation.get("public_url"),
+            f"{p}.public_url",
+            errors,
+            "GP_HELD_OUT_RESULTS_PUBLIC",
+        )
+
+        protocol = validation.get("protocol")
+        if protocol not in {"held-out", "k-fold"}:
+            _error(
+                errors,
+                "GP_HELD_OUT_PROTOCOL",
+                f"{p}.protocol",
+                "protocol must be 'held-out' or 'k-fold'",
+            )
+        elif protocol == "k-fold":
+            fold_count = validation.get("fold_count")
+            if not isinstance(fold_count, int) or fold_count < 2:
+                _error(
+                    errors,
+                    "GP_HELD_OUT_PROTOCOL",
+                    f"{p}.fold_count",
+                    "k-fold validation requires integer fold_count >= 2",
+                )
+
+        metrics = validation.get("metrics")
+        if (
+            not isinstance(metrics, dict)
+            or not metrics
+            or any(
+                isinstance(value, bool) or not isinstance(value, (int, float))
+                for value in metrics.values()
+            )
+        ):
+            _error(
+                errors,
+                "GP_HELD_OUT_METRICS",
+                f"{p}.metrics",
+                "non-empty numeric held-out metric results are required",
+            )
+
+        run = validation.get("experiment_run")
+        if not isinstance(run, dict) or run.get("public") is not True:
+            _error(
+                errors,
+                "GP_HELD_OUT_RUN",
+                f"{p}.experiment_run",
+                "public held-out evaluation run is required",
+            )
+        else:
+            _check_public_url(
+                run.get("url"),
+                f"{p}.experiment_run.url",
+                errors,
+                "GP_HELD_OUT_RUN",
+            )
+
+        if validation.get("code_commit") != code.get("commit"):
+            _error(
+                errors,
+                "GP_HELD_OUT_COMMIT",
+                f"{p}.code_commit",
+                "held-out validation must pin the submission code commit",
+            )
+
+        _check_sha(validation, p, errors)
+        _verify_local_file(validation, p, root_dir, errors)
+
+        region_id = validation.get("region_set_id")
+        if not isinstance(region_id, str) or not region_id:
+            _error(
+                errors,
+                "GP_HELD_OUT_REGION",
+                f"{p}.region_set_id",
+                "held-out validation region set is required",
+            )
+        elif model_id in models:
+            held_out_proofs.append(
+                _check_holdout_exclusion(
+                    validation_id=validation_id,
+                    region_id=region_id,
+                    model=models[str(model_id)],
+                    region_sets=regions,
+                    datasets=datasets,
+                    errors=errors,
+                )
+            )
+
+    for model_id in models:
+        if not held_out_by_model.get(model_id):
+            _error(
+                errors,
+                "GP_HELD_OUT_VALIDATION",
+                f"models[{model_id}]",
+                "every trained model requires public held-out validation evidence",
+            )
 
     for surface_id, surface in surfaces.items():
         p = f"surfaces[{surface_id}]"
@@ -1259,6 +1276,7 @@ def validate_manifest(
         "errors": errors,
         "warnings": warnings,
         "render_chains": chains,
+        "held_out_validation_proofs": held_out_proofs,
     }
 
 

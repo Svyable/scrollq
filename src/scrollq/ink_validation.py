@@ -105,11 +105,25 @@ def evaluate_prediction(
 ) -> dict[str, Any]:
     """Compute deterministic binary ink metrics on the validation mask."""
     p = np.asarray(prediction, dtype=np.float32)
-    y = np.asarray(labels) > 0
+    raw_labels = np.asarray(labels)
+    if not np.all(np.isfinite(p)) or np.any((p < 0.0) | (p > 1.0)):
+        raise ValueError("prediction must contain finite probabilities in [0,1]")
+    if not np.all(np.isfinite(raw_labels)) or not np.all(
+        np.isin(raw_labels, (0, 1, 255))
+    ):
+        raise ValueError("labels must be binary values encoded as 0/1 or 0/255")
+    y = raw_labels > 0
     if validation_mask is None:
         m = np.ones(y.shape, dtype=bool)
     else:
-        m = np.asarray(validation_mask) > 0
+        raw_mask = np.asarray(validation_mask)
+        if not np.all(np.isfinite(raw_mask)) or not np.all(
+            np.isin(raw_mask, (0, 1, 255))
+        ):
+            raise ValueError(
+                "validation mask must be binary values encoded as 0/1 or 0/255"
+            )
+        m = raw_mask > 0
 
     if p.shape != y.shape or m.shape != y.shape:
         raise ValueError(
@@ -182,12 +196,29 @@ def evaluate_prediction(
 
 
 def _evaluated_digest(
-    prediction: np.ndarray, labels: np.ndarray, validation_mask: np.ndarray
+    prediction: np.ndarray,
+    labels: np.ndarray,
+    validation_mask: np.ndarray,
+    controls: dict[str, np.ndarray],
 ) -> str:
+    """Hash canonical evaluated values, shapes, and named controls."""
     h = hashlib.sha256()
-    h.update(np.asarray(prediction, dtype="<f4").tobytes(order="C"))
-    h.update((np.asarray(labels) > 0).astype(np.uint8).tobytes(order="C"))
-    h.update((np.asarray(validation_mask) > 0).astype(np.uint8).tobytes(order="C"))
+
+    def add(name: str, array: np.ndarray, dtype: str) -> None:
+        encoded = name.encode("utf-8")
+        canonical = np.asarray(array, dtype=dtype)
+        h.update(len(encoded).to_bytes(8, "big"))
+        h.update(encoded)
+        h.update(len(canonical.shape).to_bytes(8, "big"))
+        for size in canonical.shape:
+            h.update(int(size).to_bytes(8, "big"))
+        h.update(canonical.tobytes(order="C"))
+
+    add("prediction", prediction, "<f4")
+    add("labels", np.asarray(labels) > 0, "u1")
+    add("validation_mask", np.asarray(validation_mask) > 0, "u1")
+    for name, control in sorted(controls.items()):
+        add(f"control:{name}", control, "<f4")
     return h.hexdigest()
 
 
@@ -227,6 +258,8 @@ def build_report(
     )
     control_rows: list[dict[str, Any]] = []
     for name, control in sorted((controls or {}).items()):
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("control names must be non-empty strings")
         metrics = evaluate_prediction(control, labels, validation_mask, threshold=threshold)
         delta_balanced = None
         if (
@@ -281,7 +314,7 @@ def build_report(
         "evaluation": primary,
         "controls": control_rows,
         "evaluated_arrays_sha256": _evaluated_digest(
-            prediction, labels, validation_mask
+            prediction, labels, validation_mask, controls or {}
         ),
         "inputs": input_records or {},
         "prize_evidence_ready": not readiness_reasons,

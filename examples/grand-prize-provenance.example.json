@@ -66,6 +66,26 @@
           ]
         }
       ]
+    },
+    {
+      "id": "regions:held-out",
+      "role": "validation",
+      "volume_id": "PUBLIC-VALIDATION-VOLUME",
+      "coordinate_space": "level0-voxel-index",
+      "boxes": [
+        {
+          "start": [
+            500,
+            500,
+            500
+          ],
+          "stop": [
+            700,
+            700,
+            700
+          ]
+        }
+      ]
     }
   ],
   "datasets": [
@@ -151,32 +171,26 @@
     ],
     "column_numbers_overlaid": true
   },
-  "ink_validation": {
-    "tool": "scroliq-ink-validate",
-    "path": "validation/ink-validation.json",
-    "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
-    "model_id": "model:ink-v1",
-    "model_checkpoint_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-    "split_id": "public-kfold-fold-3",
-    "held_out": true,
-    "training_overlap": "none",
-    "known_ground_truth": true,
-    "ground_truth_source_url": "https://scrollprize.org/public-held-out-ground-truth",
-    "model_window_voxels_zyx": [
-      17,
-      256,
-      256
-    ],
-    "control_names": [
-      "normal-plus-3",
-      "normal-minus-3",
-      "adjacent-winding"
-    ],
-    "evaluated_arrays_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
-    "metrics": {
-      "balanced_accuracy": 0.9,
-      "false_positive_rate": 0.05,
-      "both_classes_present": true
+  "held_out_validations": [
+    {
+      "id": "validation:ink-v1",
+      "model_id": "model:ink-v1",
+      "protocol": "held-out",
+      "region_set_id": "regions:held-out",
+      "public_input_url": "https://example.org/validation/input-volume",
+      "ground_truth_url": "https://example.org/validation/ground-truth",
+      "public_url": "https://example.org/validation/results/ink-v1",
+      "path": "validation/held-out-ink-v1.json",
+      "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "metrics": {
+        "precision": 0.91,
+        "recall": 0.87
+      },
+      "experiment_run": {
+        "url": "https://wandb.ai/OWNER/PROJECT/runs/HELDOUT",
+        "public": true
+      },
+      "code_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     }
-  }
+  ]
 }

@@ -1,6 +1,5 @@
 import copy
 import hashlib
-import json
 
 from scrollq.provenance import validate_manifest
 
@@ -61,6 +60,18 @@ def _manifest():
                     }
                 ],
             },
+            {
+                "id": "regions:held-out",
+                "role": "validation",
+                "volume_id": "public-validation-volume",
+                "coordinate_space": "level0-voxel-index",
+                "boxes": [
+                    {
+                        "start": [200, 200, 200],
+                        "stop": [210, 210, 210],
+                    }
+                ],
+            },
         ],
         "datasets": [
             {
@@ -102,26 +113,6 @@ def _manifest():
                 },
             }
         ],
-        "ink_validation": {
-            "tool": "scroliq-ink-validate",
-            "path": "ink-validation.json",
-            "sha256": "2" * 64,
-            "model_id": "model:ink-v1",
-            "model_checkpoint_sha256": "d" * 64,
-            "split_id": "public-fold-1",
-            "held_out": True,
-            "training_overlap": "none",
-            "known_ground_truth": True,
-            "ground_truth_source_url": "https://example.org/public-ground-truth",
-            "model_window_voxels_zyx": [17, 64, 64],
-            "control_names": ["normal+3"],
-            "evaluated_arrays_sha256": "3" * 64,
-            "metrics": {
-                "balanced_accuracy": 0.9,
-                "false_positive_rate": 0.1,
-                "both_classes_present": True,
-            },
-        },
         "surfaces": [
             {
                 "id": "surface:column-01",
@@ -159,39 +150,42 @@ def _manifest():
                 },
             }
         ],
+        "held_out_validations": [
+            {
+                "id": "validation:ink-v1",
+                "model_id": "model:ink-v1",
+                "protocol": "held-out",
+                "region_set_id": "regions:held-out",
+                "public_input_url": (
+                    "https://example.org/validation/input-volume"
+                ),
+                "ground_truth_url": (
+                    "https://example.org/validation/ground-truth"
+                ),
+                "public_url": (
+                    "https://example.org/validation/results/ink-v1"
+                ),
+                "path": "held_out_validation.json",
+                "sha256": "2" * 64,
+                "metrics": {
+                    "precision": 0.91,
+                    "recall": 0.87,
+                },
+                "experiment_run": {
+                    "url": (
+                        "https://wandb.ai/example/project/runs/held-out"
+                    ),
+                    "public": True,
+                },
+                "code_commit": "a" * 40,
+            }
+        ],
         "banner": {
             "path": "banner.tif",
             "sha256": "1" * 64,
             "render_ids": ["render:column-01"],
             "column_numbers_overlaid": True,
         },
-    }
-
-
-def _ink_report():
-    return {
-        "schema_version": 1,
-        "tool": "scroliq-ink-validate",
-        "split": {
-            "id": "public-fold-1",
-            "held_out": True,
-            "training_overlap": "none",
-            "known_ground_truth": True,
-            "ground_truth_source_url": "https://example.org/public-ground-truth",
-        },
-        "model": {
-            "checkpoint_sha256": "d" * 64,
-            "window_voxels_zyx": [17, 64, 64],
-        },
-        "evaluation": {
-            "balanced_accuracy": 0.9,
-            "false_positive_rate": 0.1,
-            "both_classes_present": True,
-        },
-        "controls": [{"name": "normal+3", "metrics": {}}],
-        "evaluated_arrays_sha256": "3" * 64,
-        "prize_evidence_ready": True,
-        "readiness_reasons": [],
     }
 
 
@@ -212,6 +206,7 @@ def test_valid_manifest_builds_a_complete_render_chain():
     assert chain["training_seed"] == 1234
     assert chain["inference_seed"] == 5678
     assert chain["region_exclusion"]["overlaps"] == []
+    assert report["held_out_validation_proofs"][0]["overlaps"] == []
 
 
 def test_wrong_same_scroll_volume_fails_closed():
@@ -312,9 +307,7 @@ def test_package_file_hashes_are_verified(tmp_path):
         "column_01.tifxyz": b"mesh",
         "column_01.tif": b"render",
         "banner.tif": b"banner",
-        "ink-validation.json": (
-            json.dumps(_ink_report(), sort_keys=True).encode("utf-8")
-        ),
+        "held_out_validation.json": b"held-out",
     }
     for name, payload in payloads.items():
         (tmp_path / name).write_bytes(payload)
@@ -328,8 +321,8 @@ def test_package_file_hashes_are_verified(tmp_path):
     manifest["banner"]["sha256"] = hashlib.sha256(
         payloads["banner.tif"]
     ).hexdigest()
-    manifest["ink_validation"]["sha256"] = hashlib.sha256(
-        payloads["ink-validation.json"]
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        payloads["held_out_validation.json"]
     ).hexdigest()
 
     report = validate_manifest(manifest, root_dir=tmp_path)
@@ -351,47 +344,56 @@ def test_pseudo_label_producer_checkpoint_must_use_cc_by_nc():
     assert "GP_CHECKPOINT_LICENSE" in _codes(report)
 
 
-def test_ink_validation_is_required():
+
+def test_each_model_requires_held_out_validation():
     manifest = _manifest()
-    del manifest["ink_validation"]
+    manifest["held_out_validations"] = []
 
     report = validate_manifest(manifest)
 
-    assert "GP_INK_VALIDATION" in _codes(report)
+    assert "GP_HELD_OUT_VALIDATION" in _codes(report)
 
 
-def test_ink_validation_must_be_held_out_without_overlap():
+def test_training_holdout_overlap_is_detected():
     manifest = _manifest()
-    manifest["ink_validation"]["held_out"] = False
-    manifest["ink_validation"]["training_overlap"] = "present"
+    train = manifest["region_sets"][0]
+    train["volume_id"] = "public-validation-volume"
+    train["boxes"] = [
+        {
+            "start": [205, 205, 205],
+            "stop": [220, 220, 220],
+        }
+    ]
 
     report = validate_manifest(manifest)
 
-    assert "GP_INK_VALIDATION_HELD_OUT" in _codes(report)
-    assert "GP_INK_VALIDATION_OVERLAP" in _codes(report)
+    assert "GP_TRAIN_HOLDOUT_OVERLAP" in _codes(report)
+    proof = report["held_out_validation_proofs"][0]
+    assert proof["checked_pairs"] == 1
+    assert len(proof["overlaps"]) == 1
 
 
-def test_local_ink_validation_report_is_cross_checked(tmp_path):
+def test_held_out_validation_requires_public_ground_truth_metrics_and_run():
     manifest = _manifest()
-    for name, payload in {
-        "column_01.tifxyz": b"mesh",
-        "column_01.tif": b"render",
-        "banner.tif": b"banner",
-    }.items():
-        (tmp_path / name).write_bytes(payload)
-        if name == "column_01.tifxyz":
-            manifest["meshes"][0]["sha256"] = hashlib.sha256(payload).hexdigest()
-        elif name == "column_01.tif":
-            manifest["renders"][0]["sha256"] = hashlib.sha256(payload).hexdigest()
-        else:
-            manifest["banner"]["sha256"] = hashlib.sha256(payload).hexdigest()
+    validation = manifest["held_out_validations"][0]
+    validation["ground_truth_url"] = "private://ground-truth"
+    validation["metrics"] = {}
+    validation["experiment_run"]["public"] = False
 
-    ink_report = _ink_report()
-    ink_report["model"]["checkpoint_sha256"] = "9" * 64
-    raw = json.dumps(ink_report, sort_keys=True).encode("utf-8")
-    (tmp_path / "ink-validation.json").write_bytes(raw)
-    manifest["ink_validation"]["sha256"] = hashlib.sha256(raw).hexdigest()
+    report = validate_manifest(manifest)
 
-    report = validate_manifest(manifest, root_dir=tmp_path)
+    assert {
+        "GP_HELD_OUT_GROUND_TRUTH_PUBLIC",
+        "GP_HELD_OUT_METRICS",
+        "GP_HELD_OUT_RUN",
+    } <= _codes(report)
 
-    assert "GP_INK_VALIDATION_MISMATCH" in _codes(report)
+
+def test_k_fold_validation_requires_fold_count():
+    manifest = _manifest()
+    validation = manifest["held_out_validations"][0]
+    validation["protocol"] = "k-fold"
+
+    report = validate_manifest(manifest)
+
+    assert "GP_HELD_OUT_PROTOCOL" in _codes(report)
