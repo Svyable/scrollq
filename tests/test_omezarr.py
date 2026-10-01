@@ -4,8 +4,7 @@ import numpy as np
 import pytest
 
 from omezarr_fixture import build_store
-from scrollq.omezarr import (DictStore, HttpStore, OmeZarrVolume,
-                             UnsupportedZarr)
+from scrollq.omezarr import HttpStore, OmeZarrVolume, UnsupportedZarr
 
 
 def _vol(shape=(20, 17, 23), seed=1):

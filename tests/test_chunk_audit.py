@@ -1,8 +1,6 @@
 import json
 import urllib.parse
 
-import pytest
-
 from scrollq import chunk_audit as ca
 
 BUCKET = "https://bucket.test"
