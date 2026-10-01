@@ -27,6 +27,12 @@ jobs:
         run: |
           python scripts/public_fiber_campaign.py \
             --out out/public-fiber-campaign/summary.json
+      - name: Verify frozen stable evidence
+        if: steps.campaign.outcome == 'success'
+        run: |
+          python artifacts/2026-10-01-public-fiber-audit/verify.py \
+            out/public-fiber-campaign/summary.json \
+            artifacts/2026-10-01-public-fiber-audit/summary.json
       - name: Print compact evidence
         if: always()
         run: |
