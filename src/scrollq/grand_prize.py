@@ -331,7 +331,11 @@ def qualify(
     sensitivity analysis and never changes ScrolIQ's published quality score.
     """
     manifest = manifest or DEFAULT_MANIFEST
-    prize = manifest.get("prize", "2027 Grand Prize")
+    # Which released predictions a target needs before it can be compared.
+    # Grand Prize spiral fitting needs both; derived manifests for other
+    # prizes may require fewer (see scrollq.prize_manifest).
+    prize = (manifest.get("prize") or manifest.get("prize_label")
+             or "2027 Grand Prize")
     required = tuple(manifest.get("required_assets", DEFAULT_REQUIRED_ASSETS))
     support_by_scroll = {
         r["scroll"]: r for r in (surface_support or {}).get("rows", [])
@@ -352,6 +356,9 @@ def qualify(
             "source_url": target["source_url"],
             "excluded_same_scroll_higher_res": target.get(
                 "excluded_same_scroll_higher_res", []
+            ),
+            "same_scroll_higher_res_scans": target.get(
+                "same_scroll_higher_res_scans", []
             ),
             "quality_score": None,
             "quality_root": None,
@@ -430,6 +437,9 @@ def qualify(
         "frontier": frontier,
         "targets": rows,
     }
+    for key in ("prize_id", "prize_label", "provenance", "problems"):
+        if key in manifest:
+            result[key] = manifest[key]
 
     if surface_support is not None:
         support_axes = ("quality_score", "segments", "surface_support_frac")
