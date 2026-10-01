@@ -132,6 +132,10 @@ def audit_ink_manifest(
         warnings.append("no training regions were declared; spatial leakage cannot be excluded against undeclared data")
     if not evaluation:
         errors.append("at least one evaluation region is required")
+    if volume_root and evaluation and not any(
+        row["volume_root"] == volume_root for row in evaluation
+    ):
+        errors.append("no evaluation region is bound to manifest volume_root")
 
     non_held = [
         row["id"] for row in evaluation
@@ -202,8 +206,13 @@ def audit_ink_manifest(
         run_eval_ids.add(region_id)
         if type(run.get("seed")) is not int:
             warnings.append(f"runs[{i}] does not declare an integer seed")
-        if not isinstance(run.get("checkpoint_sha256"), str):
-            warnings.append(f"runs[{i}] does not declare checkpoint_sha256")
+        run_sha = run.get("checkpoint_sha256")
+        if (
+            not isinstance(run_sha, str)
+            or len(run_sha) != 64
+            or any(c not in "0123456789abcdefABCDEF" for c in run_sha)
+        ):
+            warnings.append(f"runs[{i}] does not declare a valid checkpoint_sha256")
     missing_run_regions = sorted(eval_ids - run_eval_ids)
     if evaluation and missing_run_regions:
         warnings.append("no run provenance for evaluation regions: " + ", ".join(missing_run_regions))
