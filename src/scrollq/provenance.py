@@ -18,7 +18,7 @@ from typing import Any
 from .grand_prize import DEFAULT_MANIFEST
 from .recto_coverage import audit_recto_coverage
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 RULES_URL = "https://scrollprize.org/prizes"
 CC_BY_NC_4 = {"CC-BY-NC-4.0", "CC BY-NC 4.0"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -453,6 +453,260 @@ def _verify_local_file(
                 f"{path}.sha256",
                 f"declared {digest}, actual {actual}",
             )
+
+
+def _verify_ink_evidence(
+    *,
+    validation_id: str,
+    validation: dict[str, Any],
+    model: dict[str, Any],
+    root_dir: Path | None,
+    errors: list[dict[str, str]],
+) -> None:
+    """Validate deterministic held-out ink evidence and its falsification controls."""
+
+    p = f"held_out_validations[{validation_id}].ink_evidence"
+    evidence = validation.get("ink_evidence")
+    if not isinstance(evidence, dict):
+        _error(
+            errors,
+            "GP_INK_EVIDENCE",
+            p,
+            "scroliq-ink-validate evidence is required for every held-out validation",
+        )
+        return
+
+    if evidence.get("tool") != "scroliq-ink-validate":
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_TOOL",
+            f"{p}.tool",
+            "tool must be 'scroliq-ink-validate'",
+        )
+
+    checkpoint_sha = evidence.get("model_checkpoint_sha256")
+    if not isinstance(checkpoint_sha, str) or not SHA256_RE.fullmatch(checkpoint_sha):
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_CHECKPOINT",
+            f"{p}.model_checkpoint_sha256",
+            "lowercase 64-hex checkpoint digest is required",
+        )
+    elif checkpoint_sha != model.get("sha256"):
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_CHECKPOINT",
+            f"{p}.model_checkpoint_sha256",
+            "ink validation checkpoint must match the submitted model",
+        )
+
+    split_id = evidence.get("split_id")
+    if not isinstance(split_id, str) or not split_id:
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_SPLIT",
+            f"{p}.split_id",
+            "non-empty held-out split id is required",
+        )
+    if evidence.get("held_out") is not True:
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_HELD_OUT",
+            f"{p}.held_out",
+            "ink validation must explicitly declare a held-out split",
+        )
+    if evidence.get("training_overlap") != "none":
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_OVERLAP",
+            f"{p}.training_overlap",
+            "ink validation must explicitly declare no training overlap",
+        )
+    if evidence.get("known_ground_truth") is not True:
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_GROUND_TRUTH",
+            f"{p}.known_ground_truth",
+            "ink validation must use known ground truth",
+        )
+    _check_public_url(
+        evidence.get("ground_truth_source_url"),
+        f"{p}.ground_truth_source_url",
+        errors,
+        "GP_INK_EVIDENCE_GROUND_TRUTH",
+    )
+
+    window = evidence.get("model_window_voxels_zyx")
+    if (
+        not isinstance(window, list)
+        or len(window) != 3
+        or not all(isinstance(v, int) and not isinstance(v, bool) and v > 0 for v in window)
+    ):
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_WINDOW",
+            f"{p}.model_window_voxels_zyx",
+            "positive integer [z,y,x] model window is required",
+        )
+
+    control_names = evidence.get("control_names")
+    if (
+        not isinstance(control_names, list)
+        or not control_names
+        or not all(isinstance(v, str) and v for v in control_names)
+        or len(set(control_names)) != len(control_names)
+    ):
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_CONTROLS",
+            f"{p}.control_names",
+            "at least one unique named falsification control is required",
+        )
+
+    evaluated_digest = evidence.get("evaluated_arrays_sha256")
+    if (
+        not isinstance(evaluated_digest, str)
+        or not SHA256_RE.fullmatch(evaluated_digest)
+    ):
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_ARRAY_DIGEST",
+            f"{p}.evaluated_arrays_sha256",
+            "digest of the exact evaluated arrays is required",
+        )
+
+    evidence_metrics = evidence.get("metrics")
+    if not isinstance(evidence_metrics, dict):
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_METRICS",
+            f"{p}.metrics",
+            "held-out ink metrics are required",
+        )
+    else:
+        if evidence_metrics.get("both_classes_present") is not True:
+            _error(
+                errors,
+                "GP_INK_EVIDENCE_CLASSES",
+                f"{p}.metrics.both_classes_present",
+                "validation mask must contain both ink and background",
+            )
+        for name in ("balanced_accuracy", "false_positive_rate"):
+            value = evidence_metrics.get(name)
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not 0 <= float(value) <= 1
+            ):
+                _error(
+                    errors,
+                    "GP_INK_EVIDENCE_METRICS",
+                    f"{p}.metrics.{name}",
+                    f"{name} must be a numeric value in [0,1]",
+                )
+
+    if root_dir is None:
+        return
+
+    rel = validation.get("path")
+    if not isinstance(rel, str) or not rel:
+        return
+    target = (root_dir / rel).resolve()
+    try:
+        target.relative_to(root_dir.resolve())
+    except ValueError:
+        return
+    if not target.is_file():
+        return
+
+    try:
+        report = json.loads(target.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_REPORT",
+            f"held_out_validations[{validation_id}].path",
+            f"cannot parse scroliq-ink-validate report: {exc}",
+        )
+        return
+
+    if report.get("tool") != "scroliq-ink-validate":
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_REPORT",
+            f"held_out_validations[{validation_id}].path",
+            "held-out artifact was not produced by scroliq-ink-validate",
+        )
+    if report.get("prize_evidence_ready") is not True:
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_REPORT",
+            f"held_out_validations[{validation_id}].path",
+            "scroliq-ink-validate report is not prize_evidence_ready",
+        )
+
+    report_split = report.get("split") if isinstance(report.get("split"), dict) else {}
+    report_model = report.get("model") if isinstance(report.get("model"), dict) else {}
+    report_eval = (
+        report.get("evaluation") if isinstance(report.get("evaluation"), dict) else {}
+    )
+    report_controls = _as_list(report.get("controls"))
+
+    mismatches: list[str] = []
+    expected_pairs = (
+        ("split_id", report_split.get("id"), split_id),
+        ("held_out", report_split.get("held_out"), True),
+        ("training_overlap", report_split.get("training_overlap"), "none"),
+        (
+            "known_ground_truth",
+            report_split.get("known_ground_truth"),
+            True,
+        ),
+        (
+            "ground_truth_source_url",
+            report_split.get("ground_truth_source_url"),
+            evidence.get("ground_truth_source_url"),
+        ),
+        (
+            "checkpoint_sha256",
+            report_model.get("checkpoint_sha256"),
+            checkpoint_sha,
+        ),
+        (
+            "model_window_voxels_zyx",
+            report_model.get("window_voxels_zyx"),
+            window,
+        ),
+        (
+            "evaluated_arrays_sha256",
+            report.get("evaluated_arrays_sha256"),
+            evaluated_digest,
+        ),
+    )
+    for name, actual, expected in expected_pairs:
+        if actual != expected:
+            mismatches.append(name)
+
+    actual_controls = sorted(
+        str(item.get("name"))
+        for item in report_controls
+        if isinstance(item, dict) and item.get("name")
+    )
+    if actual_controls != sorted(control_names if isinstance(control_names, list) else []):
+        mismatches.append("control_names")
+
+    if isinstance(evidence_metrics, dict):
+        for name in ("balanced_accuracy", "false_positive_rate", "both_classes_present"):
+            if report_eval.get(name) != evidence_metrics.get(name):
+                mismatches.append(name)
+
+    if mismatches:
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_MISMATCH",
+            p,
+            "manifest/report mismatch: " + ", ".join(sorted(set(mismatches))),
+        )
 
 
 def validate_manifest(
@@ -928,6 +1182,15 @@ def validate_manifest(
 
         _check_sha(validation, p, errors)
         _verify_local_file(validation, p, root_dir, errors)
+
+        if model_id in models:
+            _verify_ink_evidence(
+                validation_id=validation_id,
+                validation=validation,
+                model=models[str(model_id)],
+                root_dir=root_dir,
+                errors=errors,
+            )
 
         region_id = validation.get("region_set_id")
         if not isinstance(region_id, str) or not region_id:
