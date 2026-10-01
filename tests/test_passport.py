@@ -364,3 +364,104 @@ def test_alignment_manifest_marks_mesh_and_ink_partial():
     state = {item["id"]: item["scroliq"] for item in alignment_manifest()["open_problems"]}
     assert state["mesh-connectivity"] == "partial"
     assert state["ink-reliability"] == "partial"
+
+
+
+def _fiber_audit(volume_root, *, status="pass", findings=None):
+    findings = list(findings or [])
+    return {
+        "diagnostic": "fiber-trace-audit",
+        "schema_version": 2,
+        "volume_root": volume_root,
+        "status": status,
+        "input_format": "vc3d_fiber_json",
+        "input": {"path": "fiber.json", "sha256": "f" * 64, "bytes": 123},
+        "format_reference": {
+            "repository": "ScrollPrize/villa",
+            "commit": "56d7c3aeea4bbccf5f56b195ce2a44ea2cf601dd",
+        },
+        "counts": {
+            "rows": 100,
+            "valid_traces": 1,
+            "parse_errors": 0 if status != "fail" else 1,
+            "gaps": sum(1 for x in findings if x.get("kind") == "gap"),
+            "sharp_turns": sum(1 for x in findings if x.get("kind") == "sharp_turn"),
+        },
+        "findings": findings,
+        "vc3d_fiber": {
+            "version": 4,
+            "native_trace_segments": 3,
+            "fallback_segments": 1,
+            "fallback_fraction": 0.25,
+        },
+        "parameters": {"gap_factor": 4.0, "turn_degrees": 60.0},
+    }
+
+
+def test_passport_accepts_exact_volume_fiber_audit_without_claiming_identity():
+    volume = _volume()
+    passport = build_passport(
+        volume,
+        fiber_audit=_fiber_audit(volume["root"]),
+    )
+
+    fibers = passport["stages"]["fibers"]
+    assert fibers["status"] == "partial"
+    assert fibers["audit_status"] == "pass"
+    assert fibers["vc3d_fiber"]["version"] == 4
+    assert "does not establish that the trace follows one physical papyrus fiber" in fibers["limitation"]
+    assert any(
+        action["open_problem"] == "fiber-connectivity"
+        and "CT-conditioned orientation/support" in action["action"]
+        for action in passport["next_actions"]
+    )
+
+
+def test_passport_rejects_unbound_and_cross_volume_fiber_evidence():
+    volume = _volume()
+
+    unbound = build_passport(volume, fiber_audit=_fiber_audit(None))
+    assert unbound["stages"]["fibers"]["status"] == "excluded"
+    assert "no exact volume_root binding" in unbound["stages"]["fibers"]["reason"]
+
+    wrong = build_passport(volume, fiber_audit=_fiber_audit("different-volume"))
+    assert wrong["stages"]["fibers"]["status"] == "excluded"
+    assert "different volume root" in wrong["stages"]["fibers"]["reason"]
+
+
+def test_fiber_findings_become_high_priority_review_action():
+    volume = _volume()
+    finding = {"trace_id": "line_points", "kind": "gap", "segment": 8, "ratio": 7.0}
+    passport = build_passport(
+        volume,
+        fiber_audit=_fiber_audit(volume["root"], status="caution", findings=[finding]),
+    )
+
+    assert passport["stages"]["fibers"]["status"] == "partial"
+    assert passport["stages"]["fibers"]["audit_status"] == "caution"
+    assert any(
+        action["open_problem"] == "fiber-connectivity"
+        and action["priority"] == "high"
+        and "1 fiber geometry finding" in action["action"]
+        for action in passport["next_actions"]
+    )
+
+
+def test_failed_bound_fiber_audit_blocks_fiber_stage():
+    volume = _volume()
+    passport = build_passport(
+        volume,
+        fiber_audit=_fiber_audit(volume["root"], status="fail"),
+    )
+
+    assert passport["stages"]["fibers"]["status"] == "blocked"
+    assert any(
+        action["open_problem"] == "fiber-connectivity"
+        and action["priority"] == "high"
+        for action in passport["next_actions"]
+    )
+
+
+def test_alignment_manifest_marks_fiber_partial():
+    state = {item["id"]: item["scroliq"] for item in alignment_manifest()["open_problems"]}
+    assert state["fiber-connectivity"] == "partial"
