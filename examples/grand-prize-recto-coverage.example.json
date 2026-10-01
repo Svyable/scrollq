@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "volume_root": "community-uploads/forrest/volcomp/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr",
+  "generated_by": {
+    "command": "python -m pipeline.measure_recto --volume PHerc0813 --out submission/recto-reference.json",
+    "code_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "reference": {
+    "surface_area": 100,
+    "area_unit": "mm^2",
+    "method": "Union-area inventory from a frozen recto reference segmentation",
+    "artifact_url": "https://example.org/submission/recto-reference.json",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "components": [
+    {
+      "id": "main-sheet",
+      "kind": "main-sheet",
+      "area": 80,
+      "unrolled": true,
+      "excluded": false,
+      "mesh_ids": [
+        "mesh:column-01",
+        "mesh:column-02"
+      ]
+    },
+    {
+      "id": "detached-patch-01",
+      "kind": "detached-patch",
+      "area": 15,
+      "unrolled": true,
+      "excluded": false,
+      "mesh_ids": [
+        "mesh:detached-01"
+      ]
+    },
+    {
+      "id": "outer-patch-01",
+      "kind": "disconnected-outer-patch",
+      "area": 5,
+      "unrolled": false,
+      "excluded": true,
+      "mesh_ids": [],
+      "exclusion_reason": "Disconnected outer patch; aggregate excluded area is below 10% of total recto reference area."
+    }
+  ]
+}
