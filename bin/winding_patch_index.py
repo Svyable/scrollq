@@ -143,6 +143,59 @@ def reach(rows: list[dict], bboxes: dict[str, list[list[float]]], margin: float 
     }
 
 
+def patches_touching(rows: list[dict], bboxes: dict[str, list[list[float]]],
+                     roles=("absolute", "relative"), margin: float = 8.0) -> list[str]:
+    """Patch names whose (expanded) bbox contains a point of the given roles."""
+    names = sorted(bboxes)
+    if not names:
+        return []
+    lo = np.asarray([bboxes[n][0] for n in names]) - margin
+    hi = np.asarray([bboxes[n][1] for n in names]) + margin
+    hit = np.zeros(len(names), dtype=bool)
+    for row in rows:
+        if row["role"] in roles:
+            p = np.asarray(row["xyz"])
+            hit |= np.all((lo <= p) & (p <= hi), axis=1)
+    return [n for n, h in zip(names, hit) if h]
+
+
+def _http_size(url: str, timeout: float = 30.0) -> int | None:
+    req = urllib.request.Request(url, method="HEAD")
+    with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310 - public read-only data
+        length = resp.headers.get("Content-Length")
+        return int(length) if length is not None else None
+
+
+def size_sample(base_url: str, names: list[str], n: int, seed: int = 0,
+                files=("x.tif", "y.tif", "z.tif", "meta.json"), workers: int = 32,
+                head=_http_size) -> dict:
+    """Estimate the download cost of ``names`` from a seeded sample of patches."""
+    import random
+    sample = random.Random(seed).sample(names, min(n, len(names)))
+
+    def one(name):
+        sizes = {}
+        for f in files:
+            try:
+                sizes[f] = head(f"{base_url.rstrip('/')}/{name}{f}")
+            except Exception:  # noqa: BLE001
+                sizes[f] = None
+        return name, sizes
+
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        results = list(ex.map(one, sample))
+    totals = [sum(v for v in s.values() if v) for _, s in results if all(v is not None for v in s.values())]
+    mean = sum(totals) / len(totals) if totals else None
+    return {
+        "population": len(names),
+        "sampled": len(sample),
+        "complete_samples": len(totals),
+        "mean_bytes_per_patch": round(mean) if mean else None,
+        "median_bytes_per_patch": sorted(totals)[len(totals) // 2] if totals else None,
+        "estimated_total_gb": round(mean * len(names) / 1e9, 2) if mean else None,
+    }
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("dataset")
@@ -151,6 +204,8 @@ def main() -> None:
     ap.add_argument("out")
     ap.add_argument("--margin", type=float, default=8.0)
     ap.add_argument("--workers", type=int, default=64)
+    ap.add_argument("--size-sample", type=int, default=0,
+                    help="HEAD-sample this many patches touching absolute/relative points to estimate download cost")
     args = ap.parse_args()
     entries = patch_entries(Path(args.listing).read_text(errors="replace"))
     index = fetch_index(args.base_url, entries, workers=args.workers)
@@ -163,6 +218,10 @@ def main() -> None:
         "error_examples": dict(list(index["errors"].items())[:5]),
         "reach": reach(rows, index["bbox"], margin=args.margin),
     }
+    if args.size_sample:
+        touching = patches_touching(rows, index["bbox"], margin=args.margin)
+        report["download_cost_for_annotation_patches"] = size_sample(
+            args.base_url, touching, args.size_sample)
     Path(args.out).write_text(json.dumps({"report": report, "index": index}) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))
 

@@ -46,7 +46,7 @@ jobs:
         run: |
           python bin/winding_patch_index.py input verified_patches.html \
             https://dl.ash2txt.org/datasets/spiral_datasets/PHercParis4/verified_patches \
-            patch-index.json --margin 8 --workers 64
+            patch-index.json --margin 8 --workers 64 --size-sample 300
       - name: Keep the index for step 3 (Actions artifact, not committed)
         uses: actions/upload-artifact@v4
         with:

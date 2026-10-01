@@ -99,3 +99,16 @@ def test_reach_links_frames_through_a_shared_patch_and_counts_cycles():
     g = r["frame_graph"]
     assert g["frames_linked"] == 3 and g["edges"] == 3 and g["components"] == 1 and g["independent_cycles"] == 1
     assert pidx.reach(rows, {}, margin=0)["points_inside_a_bbox"] == 0
+
+
+def test_patches_touching_and_size_sample():
+    rows = [{"role": "relative", "frame": "relative:1", "xyz": [5, 5, 5]},
+            {"role": "same_winding", "frame": "same_winding:2", "xyz": [50, 50, 50]}]
+    bboxes = {"a/": [[0, 0, 0], [10, 10, 10]], "b/": [[45, 45, 45], [55, 55, 55]]}
+    assert pidx.patches_touching(rows, bboxes, margin=0) == ["a/"]
+    sizes = {"x.tif": 100, "y.tif": 100, "z.tif": 100, "meta.json": 10}
+    est = pidx.size_sample("https://h", ["a/", "b/", "c/", "d/"], n=2,
+                           head=lambda url: sizes[url.rsplit("/", 1)[1]])
+    assert est["sampled"] == 2 and est["complete_samples"] == 2
+    assert est["mean_bytes_per_patch"] == 310
+    assert est["estimated_total_gb"] == round(310 * 4 / 1e9, 2)
