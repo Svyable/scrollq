@@ -6,7 +6,10 @@ a trace is the correct papyrus fiber or even the correct sheet.
 The Vesuvius Challenge uses fibers as evidence and constraints for large-scale
 unwrapping, and the current Villa/VC3D toolchain persists fibers as
 `vc3d_fiber` JSON. ScrolIQ therefore reads that format directly rather than
-requiring a lossy intermediate conversion.
+requiring a lossy intermediate conversion. The validator is explicitly pinned
+in each JSON report to Villa commit `56d7c3aeea4bbccf5f56b195ce2a44ea2cf601dd`
+and `vesuvius/src/vc3d_fiber_format/__init__.py`, so later upstream schema drift
+is visible instead of silently changing the meaning of an audit.
 
 ## Inputs
 
@@ -43,7 +46,7 @@ For VC3D JSON the audit checks the current structural contract used by Villa:
 - native-trace meeting error and meeting-error ratio;
 - the persisted tracer configuration and its numeric domains;
 - version-4 span tags;
-- SHA-256 and byte length of the exact input.
+- SHA-256 and byte length of the exact input;\n- the exact Villa commit/path used as the format reference.
 
 The line geometry is then audited for:
 
