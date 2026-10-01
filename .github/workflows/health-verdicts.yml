@@ -1,0 +1,100 @@
+name: scrollq-health live verdicts
+
+on:
+  workflow_dispatch:
+  # Also runs when this file changes on a branch, so a PR can carry fresh
+  # live evidence before the workflow exists on main.
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - .github/workflows/health-verdicts.yml
+
+permissions:
+  contents: write
+
+jobs:
+  verdicts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      # Anonymous S3 reads; the global endpoint is unreachable from some networks.
+      AWS_ENDPOINT_URL_S3: https://s3.us-east-1.amazonaws.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+          python -m pip install -e .
+
+      - name: Re-run the three published verdict paths
+        run: |
+          set -uxo pipefail
+          out="artifacts/2026-10-01-health-verdicts-fail-closed"
+          mkdir -p "$out"
+          scrollq-health \
+            --root "PHerc0814/segments/20260226123353-auto_grown_20260226123353106/surface-volumes/1.129um-0.22m-59keV-volume-20260521123630-L1.zarr" \
+            --base s3://vesuvius-challenge-open-data \
+            --out "$out/do-not-train-pherc0814.json" | tee "$out/do-not-train-pherc0814.log"
+          scrollq-health \
+            --root "community-uploads/forrest/volcomp/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr" \
+            --base https://dl.ash2txt.org \
+            --out "$out/train-pherc0813.json" | tee "$out/train-pherc0813.log"
+          scrollq-health \
+            --root "other/dev/meshes/20231022170900-ome.zarr" \
+            --base https://dl.ash2txt.org \
+            --out "$out/caution-dev-mesh.json" | tee "$out/caution-dev-mesh.log"
+          # Negative control: a root that does not exist must not read as clean.
+          scrollq-health \
+            --root "community-uploads/scroliq-negative-control/does-not-exist.zarr" \
+            --base https://dl.ash2txt.org \
+            --out "$out/absent-root.json" | tee "$out/absent-root.log"
+          ls -l "$out"
+
+      - name: Commit verdict artifacts
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euxo pipefail
+          out="artifacts/2026-10-01-health-verdicts-fail-closed"
+          python - "$out" <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          out = Path(sys.argv[1])
+          rows = []
+          for path in sorted(out.glob("*.json")):
+              r = json.loads(path.read_text())
+              i = r["integrity"]
+              codes = ", ".join(sorted({f["code"] for f in i.get("findings", [])})) or "none"
+              rows.append(f"| `{path.name}` | {r['verdict']} | {i['verdict']} | {codes} | {r['verdict_reason']} |")
+          readme = "\n".join([
+              "# scrollq-health live verdicts, fail-closed integrity — 2026-10-01",
+              "",
+              f"Source commit: `{os.environ['SOURCE_SHA']}` (workflow `health-verdicts.yml`).",
+              "Integrity now comes from `zpa.report.audit_root`; UNKNOWN integrity",
+              "(unreadable level, absent root, audit error) is DO NOT TRAIN, per the",
+              "companion contract's RECOMMENDED_CONSUMER_VERDICT. Every finding code",
+              "is recorded, including informational ones the 2026-09-30 reports dropped.",
+              "",
+              "| report | verdict | integrity | finding codes | reason |",
+              "|---|---|---|---|---|",
+              *rows,
+              "",
+              "Commands: see the workflow. Compare with `../2026-09-30-health-verdicts/`.",
+          ])
+          (out / "README.md").write_text(readme + "\n", encoding="utf-8")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$out"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Add fail-closed scrollq-health live verdict artifacts"
+          branch="${{ github.ref_name }}"
+          if [ "$branch" = main ]; then branch=scroliq-health-verdicts; fi
+          git push origin "HEAD:$branch"
