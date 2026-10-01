@@ -25,19 +25,32 @@ def _spread(n: int, k: int) -> list[int]:
     return sorted({round(i * (n - 1) / (k - 1)) for i in range(k)})
 
 
+def score_components(m: dict) -> dict[str, float]:
+    """Unrounded additive terms of the documented 0-100 triage formula.
+
+    This is the single place the weights live: the score and the published
+    per-volume ``components`` breakdown are both derived from it, so they
+    cannot drift apart. Keys are the public JSON component names.
+    """
+    return {
+        "signal_40": 40.0 * min(1.0, m["nonzero_frac"] / 0.9),
+        "texture_30": 30.0 * min(1.0, m["grad_energy"] / 12.0),
+        "dynamic_20": 20.0 * min(1.0, m["dyn_range"] / 200.0),
+        "pen_sat": 25.0 * min(1.0, m["sat_frac"] / 0.05),
+        "pen_dead": min(30.0, 15.0 * m["dead_slices"]),
+    }
+
+
 def score_from_metrics(m: dict) -> float:
     """Apply the documented 0-100 triage formula to one chunk's metrics.
 
     Calibrated against the PHerc0009B reference volume; weights are a
     judgment call, published here so anyone can re-weight.
     """
-    s_signal = 40.0 * min(1.0, m["nonzero_frac"] / 0.9)
-    s_texture = 30.0 * min(1.0, m["grad_energy"] / 12.0)
-    s_dynamic = 20.0 * min(1.0, m["dyn_range"] / 200.0)
-    p_sat = 25.0 * min(1.0, m["sat_frac"] / 0.05)
-    p_dead = min(30.0, 15.0 * m["dead_slices"])
-    return max(0.0, min(100.0, s_signal + s_texture + s_dynamic
-                        - p_sat - p_dead))
+    c = score_components(m)
+    return max(0.0, min(100.0, c["signal_40"] + c["texture_30"]
+                        + c["dynamic_20"] - c["pen_sat"] - c["pen_dead"]))
+
 
 def score_volume(base_url: str, root: str, samples: int = 4,
                  rotate: int = 0, spread: int = 3) -> dict:
@@ -193,13 +206,8 @@ def score_volume(base_url: str, root: str, samples: int = 4,
         "score_std": round(float(np.std(cs)), 1),
         "score_min": round(float(np.min(cs)), 1),
         "score_max": round(float(np.max(cs)), 1),
-        "components": {
-            "signal_40": round(40.0 * min(1.0, agg["nonzero_frac"] / 0.9), 1),
-            "texture_30": round(30.0 * min(1.0, agg["grad_energy"] / 12.0), 1),
-            "dynamic_20": round(20.0 * min(1.0, agg["dyn_range"] / 200.0), 1),
-            "pen_sat": round(25.0 * min(1.0, agg["sat_frac"] / 0.05), 1),
-            "pen_dead": round(min(30.0, 15.0 * agg["dead_slices"]), 1),
-        },
+        "components": {k: round(v, 1)
+                       for k, v in score_components(agg).items()},
         "metrics": {k: round(v, 4) if isinstance(v, float) else v
                     for k, v in agg.items()},
     })
