@@ -17,23 +17,15 @@ def _install(monkeypatch, *, inner=(128, 128, 128), get_range=None,
              decode=None, parse_index=None):
     """One 1-shard, 1-chunk volume; each stage is overridable."""
 
-    class Response:
-        status_code = 206
-        content = b"index"
-
-        def raise_for_status(self):
-            return None
-
-    class Session:
-        def get(self, *args, **kwargs):
-            return Response()
-
     class Store:
         def get_json(self, path):
             return {}
 
-        def _session(self):
-            return Session()
+        def get_suffix(self, path, length):
+            return b"index"
+
+        def head(self, path):
+            return SimpleNamespace(exists=True, status=200)
 
         def get_range(self, path, start, length):
             return b"blob"
@@ -135,3 +127,38 @@ def test_failures_do_not_hide_behind_a_complete_budget(monkeypatch):
 def test_counters_are_integers(monkeypatch, key):
     _install(monkeypatch)
     assert isinstance(_run()["sampling"][key], int)
+
+
+def _two_chunk_shard(monkeypatch):
+    _install(monkeypatch)
+    monkeypatch.setattr(score_mod.vc, "inner_chunks_per_shard",
+                        lambda i, sc: (2, 1, 1))
+
+
+def test_default_sampling_has_no_exclusion_key(monkeypatch):
+    # exclude=None must leave the published sampling record unchanged.
+    _two_chunk_shard(monkeypatch)
+    r = score_mod.score_volume("https://example.test", "root", samples=2)
+    assert "excluded_chunks" not in r["sampling"]
+
+
+def test_exclude_forces_chunk_disjoint_resample(monkeypatch):
+    _two_chunk_shard(monkeypatch)
+    first = score_mod.score_volume("https://example.test", "root", samples=1)
+    seen = {p["identity"] for p in first["sample_provenance"]}
+    second = score_mod.score_volume("https://example.test", "root",
+                                    samples=1, exclude=seen)
+    assert second["ok"] is True
+    assert seen.isdisjoint(p["identity"] for p in second["sample_provenance"])
+    assert second["sampling"]["excluded_chunks"] == 1
+
+
+def test_exclude_everything_reports_shortfall_not_reuse(monkeypatch):
+    _install(monkeypatch)
+    first = score_mod.score_volume("https://example.test", "root", samples=1)
+    seen = {p["identity"] for p in first["sample_provenance"]}
+    r = score_mod.score_volume("https://example.test", "root", samples=1,
+                               exclude=seen)
+    assert r["ok"] is False
+    assert r["sampling"]["decoded"] == 0
+    assert r["sampling"]["excluded_chunks"] == 1

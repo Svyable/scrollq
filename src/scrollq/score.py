@@ -7,6 +7,8 @@ per-chunk metrics, and produces a documented 0-100 triage score.
 
 from __future__ import annotations
 
+from collections.abc import Collection
+
 import numpy as np
 
 from zpa.httpstore import open_store
@@ -23,6 +25,27 @@ def _spread(n: int, k: int) -> list[int]:
     if n <= k:
         return list(range(n))
     return sorted({round(i * (n - 1) / (k - 1)) for i in range(k)})
+
+
+def _read_shard_index(
+    store, path: str, length: int
+) -> tuple[bytes | None, str, str | None]:
+    """Read a shard-index suffix through the public store contract.
+
+    A failed suffix read is not evidence that an object is absent.  Confirm a
+    404 with the public ``head`` API; every other failure remains explicitly
+    unknown/read-failure evidence.
+    """
+    try:
+        return store.get_suffix(path, length), "present", None
+    except Exception as exc:
+        try:
+            info = store.head(path)
+        except Exception:
+            return None, "read-failure", str(exc)
+        if not info.exists and info.status == 404:
+            return None, "missing", None
+        return None, "read-failure", str(exc)
 
 
 def score_components(m: dict) -> dict[str, float]:
@@ -53,7 +76,8 @@ def score_from_metrics(m: dict) -> float:
 
 
 def score_volume(base_url: str, root: str, samples: int = 4,
-                 rotate: int = 0, spread: int = 3) -> dict:
+                 rotate: int = 0, spread: int = 3,
+                 exclude: Collection[str] | None = None) -> dict:
     """Score one volcomp scroll volume. Returns a result dict.
 
     ``rotate`` cyclically shifts the shard-candidate order, giving a
@@ -61,6 +85,12 @@ def score_volume(base_url: str, root: str, samples: int = 4,
     per-dimension candidate count (spread^3 candidates); 3 gives 27,
     5 gives 125. Denser spreads find more present shards on sparse
     volumes, at the cost of more candidate probes.
+
+    ``exclude`` is a set of chunk identities (``shard_key#inner_flat``, as
+    recorded in ``sample_provenance``) that must not be read. Passing a
+    previous run's identities forces a chunk-disjoint resample; the run
+    may then decode fewer than ``samples`` chunks, which ``sampling``
+    reports. ``None`` (the default) leaves sampling unchanged.
     """
     result: dict = {"root": root, "ok": False}
     if samples < 1:
@@ -94,7 +124,7 @@ def score_volume(base_url: str, root: str, samples: int = 4,
     shard_index_invalid = 0
     chunk_read_failures = 0
     chunk_decode_failures = 0
-    sess = store._session()
+    excluded_chunks = 0
     # Spread shard candidates per-dimension (flat-index spread degenerates
     # to an edge line on non-cubic grids). Skip shards that are nearly
     # all mask so the score reflects the scroll body, not the background.
@@ -115,16 +145,16 @@ def score_volume(base_url: str, root: str, samples: int = 4,
             n_inner *= c
         try:
             idx_size = vc.index_encoded_size(n_inner, info.index_codecs)
-            r = sess.get(f"{base_url}/{skey}",
-                         headers={"Range": f"bytes=-{idx_size}"},
-                         timeout=60)
-            if r.status_code == 404:
-                missing_shards += 1
-                continue
-            r.raise_for_status()
-            raw_index = (r.content[-idx_size:] if r.status_code == 200
-                         else r.content)
         except Exception:
+            shard_read_failures += 1
+            continue
+        raw_index, index_state, _index_error = _read_shard_index(
+            store, skey, idx_size
+        )
+        if index_state == "missing":
+            missing_shards += 1
+            continue
+        if index_state == "read-failure" or raw_index is None:
             shard_read_failures += 1
             continue
         entries = vc.parse_index(raw_index, n_inner, info.index_codecs)
@@ -154,6 +184,9 @@ def score_volume(base_url: str, root: str, samples: int = 4,
             ic = tuple(reversed(ic))
             off, ln = entries[flat_i]
             if off == vc.MISSING:
+                continue
+            if exclude is not None and f"{skey}#{flat_i}" in exclude:
+                excluded_chunks += 1
                 continue
             try:
                 blob = store.get_range(skey, off, ln)
@@ -208,6 +241,8 @@ def score_volume(base_url: str, root: str, samples: int = 4,
         "chunk_read_failures": chunk_read_failures,
         "chunk_decode_failures": chunk_decode_failures,
     }
+    if exclude is not None:
+        sampling["excluded_chunks"] = excluded_chunks
     result["sampling"] = sampling
     # Provenance: stable identity per decoded chunk. Enables verifying
     # that two runs actually sampled disjoint chunks (not just disjoint
