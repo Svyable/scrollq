@@ -131,12 +131,24 @@ def audit_rows(rows, gap_factor: float = 4.0, turn_degrees: float = 60.0) -> dic
     }
 
 
-def audit_csv(path, *, volume_root: str | None = None, **kwargs) -> dict:
-    """Audit a CSV file and record its SHA-256 for provenance."""
+def audit_csv(
+    path,
+    *,
+    volume_root: str | None = None,
+    gap_factor: float = 4.0,
+    turn_degrees: float = 60.0,
+    control_line_factor: float = 4.0,
+) -> dict:
+    """Audit a CSV file and record its SHA-256 for provenance.
+
+    ``control_line_factor`` is accepted for CLI/API symmetry but applies only
+    to native VC3D JSON, which carries control points.
+    """
+    del control_line_factor
     path = Path(path)
     with path.open(newline="", encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))
-    out = audit_rows(rows, **kwargs)
+    out = audit_rows(rows, gap_factor=gap_factor, turn_degrees=turn_degrees)
     out["input_format"] = "csv"
     out["volume_root"] = volume_root
     out["input"] = {
@@ -278,12 +290,110 @@ def _segment_summary(raw: Any, index: int, version: int) -> dict[str, Any]:
     }
 
 
+
+def _control_line_consistency(
+    line_points: list[list[float]],
+    controls: list[list[float]],
+    *,
+    distance_factor: float,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Compare persisted control points with the rendered VC3D line.
+
+    Distances are normalized by the rendered line's median non-zero step so
+    the audit does not bake in an absolute voxel-size assumption.
+    """
+    if distance_factor <= 1:
+        raise ValueError("control_line_factor must be > 1")
+    if not line_points or not controls:
+        return {
+            "status": "unknown",
+            "reason": "line_points and control_points are both required",
+            "distance_factor": distance_factor,
+        }, []
+
+    line = np.asarray(line_points, dtype=np.float64)
+    cps = np.asarray(controls, dtype=np.float64)
+    if len(line) < 2:
+        return {
+            "status": "unknown",
+            "reason": "at least two line_points are required for a scale-relative check",
+            "distance_factor": distance_factor,
+            "control_points": int(len(cps)),
+        }, []
+
+    steps = np.linalg.norm(np.diff(line, axis=0), axis=1)
+    positive = steps[np.isfinite(steps) & (steps > 0)]
+    baseline = float(np.median(positive)) if positive.size else 0.0
+    if baseline <= 0:
+        return {
+            "status": "unknown",
+            "reason": "rendered line has no non-zero step length",
+            "distance_factor": distance_factor,
+            "control_points": int(len(cps)),
+        }, []
+
+    nearest_indices: list[int] = []
+    nearest_distances: list[float] = []
+    findings: list[dict[str, Any]] = []
+    for index, point in enumerate(cps):
+        distances2 = np.sum((line - point) ** 2, axis=1)
+        nearest = int(np.argmin(distances2))
+        distance = float(math.sqrt(float(distances2[nearest])))
+        ratio = distance / baseline
+        nearest_indices.append(nearest)
+        nearest_distances.append(distance)
+        if ratio > distance_factor:
+            findings.append({
+                "trace_id": "line_points",
+                "kind": "control_line_offset",
+                "control_point": index,
+                "nearest_line_point": nearest,
+                "distance": distance,
+                "ratio_to_median_step": ratio,
+            })
+
+    order_inversions = 0
+    for index, (a, b) in enumerate(zip(nearest_indices, nearest_indices[1:])):
+        if b < a:
+            order_inversions += 1
+            findings.append({
+                "trace_id": "line_points",
+                "kind": "control_order_inversion",
+                "control_segment": index,
+                "from_nearest_line_point": a,
+                "to_nearest_line_point": b,
+            })
+
+    distances = np.asarray(nearest_distances, dtype=np.float64)
+    ratios = distances / baseline
+    return {
+        "status": "measured",
+        "distance_factor": distance_factor,
+        "median_line_step": baseline,
+        "control_points": int(len(cps)),
+        "offset_candidates": sum(
+            1 for item in findings if item["kind"] == "control_line_offset"
+        ),
+        "order_inversions": order_inversions,
+        "nearest_distance": {
+            "max": float(distances.max()) if distances.size else None,
+            "p95": float(np.quantile(distances, 0.95)) if distances.size else None,
+        },
+        "ratio_to_median_step": {
+            "max": float(ratios.max()) if ratios.size else None,
+            "p95": float(np.quantile(ratios, 0.95)) if ratios.size else None,
+        },
+        "nearest_index_monotonic": order_inversions == 0,
+    }, findings
+
+
 def audit_vc3d_json(
     path: str | Path,
     *,
     volume_root: str | None = None,
     gap_factor: float = 4.0,
     turn_degrees: float = 60.0,
+    control_line_factor: float = 4.0,
 ) -> dict:
     src = Path(path)
     payload = src.read_bytes()
@@ -385,6 +495,28 @@ def audit_vc3d_json(
         for p in line_points
     ]
     out = audit_rows(rows, gap_factor=gap_factor, turn_degrees=turn_degrees)
+    try:
+        control_line, control_findings = _control_line_consistency(
+            line_points, controls, distance_factor=control_line_factor
+        )
+    except ValueError as exc:
+        control_line = {
+            "status": "fail",
+            "distance_factor": control_line_factor,
+            "reason": str(exc),
+        }
+        control_findings = []
+        errors.append({"field": "parameters.control_line_factor", "error": str(exc)})
+    out["control_line"] = control_line
+    out["findings"].extend(control_findings)
+    out["counts"]["control_line_offsets"] = sum(
+        1 for item in control_findings if item["kind"] == "control_line_offset"
+    )
+    out["counts"]["control_order_inversions"] = sum(
+        1 for item in control_findings if item["kind"] == "control_order_inversion"
+    )
+    if control_findings and out["status"] == "pass":
+        out["status"] = "caution"
     if errors:
         out["status"] = "fail"
         out["errors"].extend(errors)
@@ -472,12 +604,14 @@ def main(argv=None) -> None:
     ap.add_argument("--volume-root", default=None, help="exact CT volume root this fiber belongs to")
     ap.add_argument("--gap-factor", type=float, default=4.0)
     ap.add_argument("--turn-degrees", type=float, default=60.0)
+    ap.add_argument("--control-line-factor", type=float, default=4.0, help="flag a control point farther from rendered line_points than this multiple of the median non-zero line step")
     ap.add_argument("--fail-on-findings", action="store_true")
     ap.add_argument("--out")
     a = ap.parse_args(argv)
     result = audit_path(
         a.input, input_format=a.format, volume_root=a.volume_root,
         gap_factor=a.gap_factor, turn_degrees=a.turn_degrees,
+        control_line_factor=a.control_line_factor,
     )
     text = json.dumps(result, indent=2)
     if a.out:

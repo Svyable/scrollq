@@ -67,7 +67,7 @@ scroliq-winding --dataset <dir with abs_winding.json etc.> --umbilicus <umbilicu
 scroliq-fiber fiber.json --volume-root <exact CT root> --out out/fiber.json\nscroliq-fiber fiber.json --volume-root <exact CT root> --fail-on-findings --out out/fiber.gated.json\n# CSV remains supported:\nscroliq-fiber traces.csv --out out/fibers.csv-audit.json
 ```
 
-Native VC3D JSON preserves interpolation mode, tracer acceptance diagnostics, fallback/failure codes, v4 span tags, and exact-file SHA-256. Bind it with the exact `--volume-root` before attaching it to a passport; cross-volume or unbound Fiber IQ is excluded. See `docs/fiber-audit.md`.\n\n## Ink\n
+Native VC3D JSON preserves interpolation mode, tracer acceptance diagnostics, fallback/failure codes, v4 span tags, and exact-file SHA-256. It also checks persisted control points against rendered `line_points` using a per-fiber, step-normalized distance and an order-consistency review. Bind it with the exact `--volume-root` before attaching it to a passport; cross-volume or unbound Fiber IQ is excluded. See `docs/fiber-audit.md`.\n\n## Ink\n
 ```bash
 scroliq-ink-validate --prediction pred.tif --labels labels.tif --validation-mask mask.tif \
   --split-id my-split --held-out --training-overlap none \
