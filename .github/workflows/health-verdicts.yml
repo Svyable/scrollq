@@ -1,14 +1,10 @@
 name: scrollq-health live verdicts
 
+# Manual only. A branch push trigger filtered on this file also fired on
+# every branch that merged main after the file landed, re-running the live
+# campaign and committing over frozen dated artifacts on unrelated PRs.
 on:
   workflow_dispatch:
-  # Also runs when this file changes on a branch, so a PR can carry fresh
-  # live evidence before the workflow exists on main.
-  push:
-    branches-ignore:
-      - main
-    paths:
-      - .github/workflows/health-verdicts.yml
 
 permissions:
   contents: write
