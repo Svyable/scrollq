@@ -210,7 +210,7 @@ def test_failed_bound_winding_audit_blocks_winding_stage():
 
 
 
-def _mesh_audit(volume_root, *, status="pass", selfcross=False):
+def _mesh_audit(volume_root, *, status="pass", selfcross=False, preflight=False):
     result = {
         "diagnostic": "tifxyz-mesh-audit",
         "volume_root": volume_root,
@@ -234,6 +234,18 @@ def _mesh_audit(volume_root, *, status="pass", selfcross=False):
             "tool": "vc_tifxyz_selfcross",
             "clean_of_transverse_self_intersection": True,
             "transverse_contacts": 0,
+        }
+    if preflight:
+        result["ct_preflight"] = {
+            "status": "pass",
+            "tool": "vesuvius.surface_preflight",
+            "declared_volume": volume_root,
+            "volume_root_matches": True,
+            "sampled_signal_support": {
+                "sample_count": 25,
+                "supported_count": 25,
+                "support_fraction": 1.0,
+            },
         }
     return result
 
@@ -279,7 +291,7 @@ def test_passport_carries_clean_vc3d_selfcross_without_reasking_for_it():
 
     mesh = passport["stages"]["mesh"]
     assert mesh["self_intersection"]["status"] == "pass"
-    assert "validated VC3D transverse self-intersection census" in mesh["limitation"]
+    assert "validated upstream VC3D transverse self-intersection census" in mesh["limitation"]
     mesh_actions = [
         item["action"]
         for item in passport["next_actions"]
@@ -287,6 +299,31 @@ def test_passport_carries_clean_vc3d_selfcross_without_reasking_for_it():
     ]
     assert mesh_actions
     assert all("selfcross" not in action.lower() for action in mesh_actions)
+
+
+def test_passport_carries_clean_villa_preflight_without_reasking_for_ct_support():
+    volume = _volume()
+    passport = build_passport(
+        volume,
+        mesh_audit=_mesh_audit(
+            volume["root"],
+            selfcross=True,
+            preflight=True,
+        ),
+    )
+
+    mesh = passport["stages"]["mesh"]
+    assert mesh["ct_preflight"]["status"] == "pass"
+    assert mesh["self_intersection"]["status"] == "pass"
+    assert "validated upstream Villa CT surface preflight" in mesh["limitation"]
+    assert "validated upstream VC3D transverse self-intersection census" in mesh["limitation"]
+    assert "CT support" not in mesh["limitation"]
+    mesh_actions = [
+        item["action"]
+        for item in passport["next_actions"]
+        if item["open_problem"] == "mesh-connectivity"
+    ]
+    assert mesh_actions == ["add sheet-identity evidence"]
 
 
 def test_passport_rejects_cross_volume_mesh_and_ink_evidence():
