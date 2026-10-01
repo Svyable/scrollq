@@ -47,7 +47,8 @@ The current validator rejects a manifest when any of these conditions is not pro
 - a same-scroll alternate training source is higher resolution than the eligible scan, or omits the resolution needed to exclude that case;
 - a trained model lacks its checkpoint digest, dataset references, stochasticity declaration, required random seed, or public training/inference experiment run;
 - a trained model lacks public held-out validation against known ground truth, the validation protocol/results are incomplete, or same-volume training and held-out regions overlap;
-- the required recto-coverage ledger fails its own accounting checks, pins a different code commit/CT root, or its mesh-ID set differs from the submitted mesh set;\n- surfaces, meshes, or renders break lineage to `ct:eligible`;
+- the required recto-coverage ledger fails its own accounting checks, pins a different code commit/CT root, or its mesh-ID set differs from the submitted mesh set;
+- surfaces, meshes, or renders break lineage to `ct:eligible`;
 - a mesh is not named `column_NN.tifxyz`, lacks the low-distortion-isometric flattening declaration, or duplicates a column;
 - a render does not match its mesh filename stem/column, lacks a 1 cm scale-bar declaration, or is not tied to the pinned code commit;
 - training and prediction regions overlap on the same eligible volume;
