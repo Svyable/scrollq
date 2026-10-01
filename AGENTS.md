@@ -34,13 +34,17 @@ weight-free Pareto frontier (triage, not a readability claim).
     → `scrollq-health`
   - `leaderboard.py` → `scrollq-leaderboard` (renders `docs/index.html`)
   - `coverage.py` → `scrollq-coverage` (join scores with ink-label roots)
-  - `grand_prize.py` → `scrollq-grand-prize`: dated target manifest
-    (`DEFAULT_MANIFEST`, `as_of`), Pareto frontier, optional surface-support
-    import
+  - `grand_prize.py` → `scrollq-grand-prize`: dated target manifests
+    (`DEFAULT_MANIFEST`, `FIRST_LETTERS_MANIFEST` via `--prize`, `as_of`,
+    per-prize `required_assets`), Pareto frontier, `--run` for stability
+    reports, optional surface-support sensitivity axis
+  - `support.py` → `scroliq-support`: exact-scan surface-prediction CT support
+    (phantom = prediction > 127 on masked CT == 0) with bootstrap 95% CI
   - evidence layers, each its own `scroliq-*` script: `passport.py`,
     `scan_map.py`, `provenance.py`, `recto_coverage.py`, `tifxyz_audit.py`
     (`scroliq-mesh`), `ink_audit.py`, `ink_validation.py`, `winding_audit.py`;
-    `geometry_probe.py` → `scrollq-geometry-probe`
+    `geometry_probe.py` → `scrollq-geometry-probe`; `fiber_audit.py` →
+    `scroliq-fiber`
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
@@ -142,6 +146,9 @@ console script. A new entry point must therefore be declared in
    quality is never put on the frontier, and surface-support evidence is
    rejected unless its CT URL contains the exact volume ID. The frontier is
    deliberately weight-free — do not add a blended "best scroll" score.
+   First Letters uses the same rule. A support survey run on another scan is
+   not evidence for the eligible one: PHerc1203's 2.403 µm survey reads 0.698,
+   its eligible scan 0.454 (`artifacts/2026-09-30-first-letters-support/`).
 8. **Dated data is frozen data.** The Grand Prize manifest and artifacts are
    as-of 2026-09-30. Updating them means a new `as_of`, a new dated artifact
    directory, and updated README/docs numbers — not an in-place edit of the
