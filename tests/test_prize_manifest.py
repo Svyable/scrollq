@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from scrollq import prize_manifest as pm
-from scrollq.grand_prize import DEFAULT_MANIFEST, qualify
+from scrollq.grand_prize import DEFAULT_MANIFEST, FIRST_LETTERS_MANIFEST, qualify
 from scrollq.bucket import load_json_maybe_gz
 
 ART = Path(__file__).resolve().parents[1] / "artifacts"
@@ -164,6 +164,19 @@ def test_first_letters_snapshot_derivation_is_complete_and_flags_0846a():
                      if t.get("same_scroll_higher_res_scans"))
     assert flagged == ["PHerc0846A", "PHerc1203"]
     assert all(t["surface_prediction"] for t in fl["targets"])
+
+
+def test_builtin_first_letters_manifest_matches_pinned_official_sources():
+    """The hand-entered FIRST_LETTERS_MANIFEST (#43) and the manifest derived
+    here from pinned official sources agree on all 22 scans: volume id, voxel
+    size, energy, segments, released predictions and known higher-resolution
+    scans of the same scroll."""
+    elig, esha = load_json_maybe_gz(str(SNAP / "prizeEligibility.json"))
+    index, isha = load_json_maybe_gz(str(INDEX))
+    fl = pm.derive_manifest("first-letters-2027", elig, index,
+                            as_of="2026-10-01", eligibility_source="snap",
+                            eligibility_sha256=esha, index_sha256=isha)
+    assert pm.compare_targets(FIRST_LETTERS_MANIFEST, fl) == []
 
 
 def test_cli_roundtrip(tmp_path, capsys):

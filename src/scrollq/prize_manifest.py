@@ -126,6 +126,13 @@ def derive_manifest(prize_id: str, eligibility: dict, index: dict, *,
 _COMPARED = ("volume_id", "voxel_size_um", "energy_kev", "segments")
 
 
+def _higher_res_ids(target: dict) -> set:
+    return {h["volume_id"]
+            for key in ("excluded_same_scroll_higher_res",
+                        "same_scroll_higher_res_scans")
+            for h in target.get(key, [])}
+
+
 def compare_targets(reference: dict, derived: dict) -> list[str]:
     """Differences between a hand-copied manifest and a derived one.
 
@@ -151,10 +158,11 @@ def compare_targets(reference: dict, derived: dict) -> list[str]:
                         ("lasagna_prediction", "all_lasagna_predictions")):
             if r.get(k) and r[k] not in d.get(pool, []):
                 out.append(f"{scroll}: {k} {r[k]!r} not among {d.get(pool)}")
-        rh = {h["volume_id"] for h in r.get("excluded_same_scroll_higher_res",
-                                            [])}
-        dh = {h["volume_id"] for h in d.get("excluded_same_scroll_higher_res",
-                                            [])}
+        # The same set of known higher-resolution scans must be recorded,
+        # whether a manifest files them as prohibited (Grand Prize) or as
+        # informational (First Letters, whose rules do not prohibit them).
+        rh = _higher_res_ids(r)
+        dh = _higher_res_ids(d)
         if rh != dh:
             out.append(f"{scroll}: higher-resolution exclusions "
                        f"{sorted(rh)} != {sorted(dh)}")

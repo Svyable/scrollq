@@ -73,7 +73,9 @@ Companion integrity gate: <a href="https://github.com/Svyable/zarr-pyramid-audit
 held-out geometry work merged on 2026-09-30, and the label-coverage join is corrected (16 → 14
 <code>label_next</code> entries; see the evidence table). No scan-health score changed.<br>
 Also added: First Letters target qualification and exact-scan surface-prediction CT support;
-new numbers are in sections (3)–(4) with their artifacts.</span></div>
+new numbers are in sections (3)–(4) with their artifacts. Also added: an OME-Zarr v2 reader and
+whole-bucket chunk audit for the Challenge's open S3 bucket, a pre-registered protocol-pair test of the
+scan metrics (negative result), and prize manifests derived from pinned official sources.</span></div>
 
 <div class="stats">
 <div class="stat"><div class="n good">64 / 64</div><div class="l">listed volcomp scroll volumes scored<br>real L0 voxels decoded</div></div>
@@ -100,6 +102,9 @@ The qualifier explicitly excludes same-scroll higher-resolution substitutes; for
 <li><b>All 22 First Letters prize scans</b>, matched by the exact scan IDs on the prize page, plus the
 released m7 surface prediction made on each of those scans (public <code>vesuvius-challenge-open-data</code>
 bucket), read at level 0 alongside the masked CT.</li>
+<li><b>The Challenge's open S3 bucket</b> in its OME-Zarr v2 layout: stored chunk sizes sampled across all 65
+indexed volumes and checked exhaustively for the 23 prize-eligible volumes, plus four rescans registered to their
+original scan by the published <code>transform.json</code>.</li>
 <li><b>PHerc1667 as a known-success control</b> for the spatial scan metrics, so target observations can
 be compared against a scroll that has already been completely virtually unwrapped and read.</li>
 </ul></div>
@@ -150,6 +155,15 @@ released surface prediction lies on real CT material (prediction voxel &gt; 127 
 0 counts as phantom), on the exact eligible scan, with a bootstrap 95% interval. A prediction made on a
 different scan of the same scroll fails closed. External surveys are now imported by a script pinned to
 the source commit instead of by hand.</li>
+<li><b>Open-bucket access and integrity.</b> A dependency-light OME-Zarr v2 reader for the bucket VC3D
+streams from, and <code>scroliq-chunk-audit</code>, which checks every stored chunk object against the size
+its <code>.zarray</code> declares without downloading chunks.</li>
+<li><b>A pre-registered test of the scan metrics.</b> <code>scroliq-pairs</code> asks whether
+intensity-invariant metrics rate the documented-better scan protocol higher on registered rescans. The
+hypothesis and decision rule were committed before any real-data metric was computed.</li>
+<li><b>Prize manifests derived, not hand-copied.</b> <code>scroliq-manifest</code> derives the Grand Prize
+and First Letters target lists from the pinned official eligibility list and bucket index, and tests fail
+if the hand-entered manifests drift from them.</li>
 <li><b>Evidence passports instead of synthetic readiness scores.</b> <code>scroliq-passport</code>
 organizes data, scan, label, winding, native TIFXYZ mesh, and ink-validation evidence around the
 Challenge bottlenecks and leaves unmeasured stages unknown.</li>
@@ -231,6 +245,28 @@ the frontier in both runs</td>
 <code>targets_with_native_support.json</code>, <code>targets_run1_with_native_support.json</code>;
 tests in <code>tests/test_support.py</code>.</td></tr>
 
+<tr><td>Open-bucket chunk audit: <b>1</b> declared-vs-stored mismatch across 65 volumes / 390 levels
+(942,696 sampled objects). PHerc0343P 8.64 µm level 0 stores <b>555 of 8,543</b> chunk objects at a size
+other than declared. The 23 prize-eligible volumes, checked exhaustively (4,228,772 objects), have
+<b>none</b>. Reported as an observed mismatch; cause unknown; not filed upstream</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-bucket-chunk-audit"><code>artifacts/2026-10-01-bucket-chunk-audit/</code></a> —
+<code>chunk-audit.json</code>, <code>prize-volumes-full.json</code>,
+<code>pherc0343p-8.64um-full.json</code>, and an unfiled issue draft.</td></tr>
+
+<tr><td>Pre-registered protocol-pair test is <b>negative</b>: on 4 registered rescan pairs, the
+documented-better protocol is rated lower by <code>otsu_eta</code> in 3/4 pairs and by
+<code>edge_sharpness</code> in 2/4. So ScrolIQ scores must not be compared across different scans of the
+same scroll</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-protocol-pairs"><code>artifacts/2026-10-01-protocol-pairs/</code></a> —
+<code>protocol-pairs.json</code> (verdict from <code>decide()</code>), run logs, deviation log;
+protocol: <a href="https://github.com/Svyable/scrollq/blob/main/docs/protocol-pairs-protocol.md"><code>docs/protocol-pairs-protocol.md</code></a>.</td></tr>
+
+<tr><td>Hand-entered prize manifests match pinned official sources: Grand Prize <b>13 / 13</b>, First
+Letters <b>22 / 22</b> (volume ID, voxel size, energy, segments, released predictions, same-scroll
+higher-resolution scans)</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-prize-targets"><code>artifacts/2026-10-01-prize-targets/</code></a>;
+regression tests in <code>tests/test_prize_manifest.py</code>.</td></tr>
+
 <tr><td>Combined integrity + quality verdict path proven on live data</td>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-health-verdicts"><code>artifacts/2026-09-30-health-verdicts/</code></a> —
 healthy TRAIN case and defective-data DO NOT TRAIN case.</td></tr>
@@ -280,7 +316,9 @@ ink quality, or Grand Prize readiness. It does not infer text from CT texture. A
 mean a scroll will read; a low score does not prove it will not. The score weights are visible in
 <code>src/scrollq/score.py</code>, and the September stability gate is published as failed.
 Surface-prediction CT support is likewise a geometry-prior sanity check: it says how much of a released
-prediction sits on scanned material, not whether that surface carries ink or text.</p>
+prediction sits on scanned material, not whether that surface carries ink or text. And because the
+pre-registered protocol-pair test came out negative, scores from different scans of the same scroll are
+not comparable.</p>
 <p>This distinction is part of the contribution: every later ScrolIQ layer is designed to keep
 <code>measured</code>, <code>partial</code>, and <code>unknown</code> states separate instead of converting
 missing evidence into confidence.</p></div>
