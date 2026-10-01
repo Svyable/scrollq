@@ -81,6 +81,8 @@ and prize manifests derived from pinned official sources (<a href="https://githu
 <li>Fiber IQ trace-continuity audit, <code>scroliq-fiber</code> (<a href="https://github.com/Svyable/scrollq/pull/45">#45</a>), and
 provenance schema v4 binding held-out ink evidence to its exact report
 (<a href="https://github.com/Svyable/scrollq/pull/44">#44</a>).</li>
+<li>Mesh IQ run on all 21 published Grand Prize segment meshes (real data); one broken PHerc1447
+segment found.</li>
 </ul></div>
 
 <div class="stats">
@@ -111,6 +113,9 @@ bucket), read at level 0 alongside the masked CT.</li>
 <li><b>The Challenge's open S3 bucket</b> in its OME-Zarr v2 layout: stored chunk sizes sampled across all 65
 indexed volumes and checked exhaustively for the 23 prize-eligible volumes, plus four rescans registered to their
 original scan by the published <code>transform.json</code>.</li>
+<li><b>All 21 published TIFXYZ segment meshes for the two Grand Prize targets that have public
+segments</b> (PHerc1447: 15, PHerc0800: 6), read from the open S3 bucket and audited against each
+target's exact eligible CT volume.</li>
 <li><b>PHerc1667 as a known-success control</b> for the spatial scan metrics, so target observations can
 be compared against a scroll that has already been completely virtually unwrapped and read.</li>
 </ul></div>
@@ -190,7 +195,8 @@ symmetric quad-area distortion, and per-triangle Jacobian singular-value isometr
 area-preserving anisotropic stretch that an area check misses). It can also validate an official VC3D
 <code>vc_tifxyz_selfcross</code> census and a Villa <code>vesuvius.surface_preflight</code> CT-support
 report against the exact surface and volume being audited, failing closed on stale or mismatched
-evidence. None of these local checks proves sheet identity.</li>
+evidence. None of these local checks proves sheet identity. First run on real data: all 21
+published Grand Prize segment meshes, which found one broken PHerc1447 segment (see the evidence table).</li>
 <li><b>Ink falsification discipline.</b> <code>scroliq-ink-audit</code> checks exact-volume experiment
 binding, checkpoint identity, train/evaluation separation, held-out declarations, run provenance,
 and controls including normal offsets, adjacent winding, geometry perturbation, and an independent
@@ -279,13 +285,23 @@ higher-resolution scans)</td>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-prize-targets"><code>artifacts/2026-10-01-prize-targets/</code></a>;
 regression tests in <code>tests/test_prize_manifest.py</code>.</td></tr>
 
+<tr><td><b>Real-segment mesh audit:</b> all 21 published TIFXYZ meshes for PHerc1447 (15) and PHerc0800 (6).
+All 6 PHerc0800 meshes pass. 14 of 15 PHerc1447 meshes are coherent but have enclosed holes flagged
+for review. One published PHerc1447 segment, <code>20251105093211-z_dbg_gen_00320</code>, is broken:
+153 disconnected pieces, 1,335 edge jumps, 386 severe normal reversals, p95 local stretch 5.07.
+Observed, cause unknown, not filed upstream</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-real-mesh-audit"><code>artifacts/2026-10-01-real-mesh-audit/</code></a> —
+<code>run.sh</code> (bucket listing → download → <code>scroliq-mesh</code>), per-segment reports with
+file SHA-256s, <code>summary.json</code>.</td></tr>
+
 <tr><td>Combined integrity + quality verdict path proven on live data</td>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-health-verdicts"><code>artifacts/2026-09-30-health-verdicts/</code></a> —
 healthy TRAIN case and defective-data DO NOT TRAIN case.</td></tr>
 
 <tr><td>Native TIFXYZ mesh checks, ink falsification controls, held-out ink validation, fiber trace
-continuity, and the fit/held-out geometry gap certificate are implemented and tested (synthetic
-fixtures; not yet run on real community segments or traces)</td>
+continuity, and the fit/held-out geometry gap certificate are implemented and tested. Mesh IQ has now run on
+real segments (row above); the ink, fiber and geometry-probe checks are still tested on synthetic
+fixtures only</td>
 <td><a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/tifxyz_audit.py"><code>scroliq-mesh</code></a>,
 <a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_audit.py"><code>scroliq-ink-audit</code></a>,
 <a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_validation.py"><code>scroliq-ink-validate</code></a>,
