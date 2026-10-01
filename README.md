@@ -72,7 +72,7 @@ The repository includes the exact outputs behind the September 30, 2026 campaign
 | Result | Evidence |
 |---|---|
 | **64 / 64** listed volcomp scroll volumes scored | [`volumes.json`](artifacts/2026-09-30-scrollq-n12/volumes.json) |
-| Ranking is **stable under resampling**: clears our own gate | Disjoint-shard resample ([`stability-n12.json`](artifacts/2026-09-30-resampling-stability/stability-n12.json)): **Spearman ρ = 0.99**, mean **|Δscore| = 0.56**, top-10 overlap **10 / 10** — clears our ρ ≥ 0.85 gate. (We first measured at 4 samples: ρ = 0.76, ≈±5 pts noise — below the gate — so we tripled the sampling and re-measured.) |
+| Ranking is **reproducible**: clears our own gate, with a documented caveat | Disjoint-candidate resample ([`stability-n12.json`](artifacts/2026-09-30-resampling-stability/stability-n12.json)): **Spearman ρ = 0.99**, mean **|Δscore| = 0.56**, top-10 overlap **10 / 10** — clears our ρ ≥ 0.85 gate. (We first measured at 4 samples: ρ = 0.76, ≈±5 pts noise — below the gate — so we tripled the sampling and re-measured.) Caveat: a dense-grid diagnostic showed the 0.99 is partly shard re-reading on sparse volumes, and volumes are heterogeneous — thin-volume scores (see per-volume `sampling.decoded`) are reproducible but cover less of the volume. |
 | Acquisition dropout scan found no verified dead slices in the campaign | **0 hits across 64 volumes** |
 | Label coverage was highly concentrated in the open-data snapshot | **70 / 70** discovered ink-detection roots were on PHercParis4; the top 12 quality-ranked scrolls had none |
 | High-quality, unlabeled targets were made actionable | **14** top-quartile volumes were flagged **“label next”** |
@@ -194,8 +194,8 @@ Score the repository’s 64-volume list and build a local leaderboard:
 ```bash
 scrollq-score \
   --volumes volumes.txt \
-  --samples 4 \
-  --workers 4 \
+  --samples 12 \
+  --workers 8 \
   --out-dir out/
 
 scrollq-leaderboard \
