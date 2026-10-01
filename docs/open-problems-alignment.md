@@ -33,9 +33,10 @@ The existing ScrolIQ score remains useful, but it means one narrow thing: sample
 
 ```bash
 scroliq-passport \
-  --volumes artifacts/2026-09-30-scrollq/volumes.json \
-  --coverage artifacts/2026-09-30-scrollq/coverage.json \
-  --root PHerc0813 \
+  --volumes artifacts/2026-09-30-scrollq-n24-dense/volumes.json \
+  --coverage artifacts/2026-09-30-scrollq-n24-dense/coverage.json \
+  --scan-map artifacts/2026-09-30-spatial-scan-campaign/PHerc0813.scan-map.json \
+  --root 20250821151723 \
   --out out/PHerc0813.passport.json
 ```
 
