@@ -60,7 +60,7 @@ footer a{color:var(--muted)}
 <a href="open-problems-alignment.md">ScrolIQ × 2026 open problems →</a></p>
 <div class="stats">
 <div class="stat"><div class="n">64</div><div class="l">scroll volumes scored<br>0–100, all components published</div></div>
-<div class="stat"><div class="n">0.99</div><div class="l">Spearman ρ vs disjoint resample<br>clears our 0.85 stability gate (12 samples/volume)</div></div>
+<div class="stat"><div class="n">0.79</div><div class="l">Spearman ρ vs disjoint resample<br>honest on heterogeneous volumes (24 samples, 125 candidates)</div></div>
 <div class="stat"><div class="n">0</div><div class="l">dead slices<br>strict detector, clean bill</div></div>
 <div class="stat"><div class="n">16</div><div class="l">🎯 label-next volumes<br>top quartile, zero ink labels</div></div>
 </div>
@@ -87,9 +87,9 @@ against auditable evidence. Alignment:
 <p>Segmentation is the bottleneck: expert hours and GPU time are scarce, and
 every volume costs both. ScrollQ directs that scarce effort where the data is
 healthiest. The headline finding: <b>all 70 published ink-detection labels sit
-on PHercParis4 — quality rank 13 of 39 scrolls</b> — while the healthiest
-volumes (PHerc0813 at 77.4, PHerc0139 at 75.8 with 114 segments but zero ink
-labels) have no labels at all. The leaderboard flags 14 top-quartile volumes
+on PHercParis4 — quality rank 2 of 39 scrolls</b> — while the healthiest
+volumes (PHerc0172 at 78.3, PHerc0139 at 76.3 with 114 segments but zero ink
+labels) have no labels at all. The leaderboard flags 16 top-quartile volumes
 as <b>🎯 label next</b>: the highest-leverage labeling targets in the open
 data. Same scanner, same settings produced both the best and worst volumes —
 data health varies more than hardware does.</p></div>
@@ -97,7 +97,7 @@ data health varies more than hardware does.</p></div>
 <div class="panel"><h2><span class="q">3.</span> Evidence</h2>
 <table><thead><tr><th>claim</th><th>evidence</th></tr></thead><tbody>
 <tr><td><b>64/64</b> scroll volumes scored</td><td><code>artifacts/2026-09-30-scrollq-n12/volumes.json</code> in the repo (12 samples/volume); every score ships its components</td></tr>
-<tr><td>Ranking is <b>reproducible</b> — clears our own gate, with a documented caveat</td><td>We first measured at 4 samples/volume and found ≈±5 points of sampling noise (ρ = 0.76, below our ρ ≥ 0.85 gate) — so we tripled the sampling to 12 and re-measured. Independent resample with disjoint candidate order (<code>artifacts/2026-09-30-resampling-stability/stability-n12.json</code>): Spearman ρ = 0.99, mean |Δscore| = 0.56, top-10 overlap 10/10 — <b>clears the gate</b>. PHerc0813 is #1 at 77.4 in every 3×3×3 run. Honest caveats: the score has ceiling effects (components saturate), so read it as ~±1 point of noise, not infinite precision; and a dense-grid diagnostic (5×5×5 candidates) revealed that on sparse volumes both resample runs can end up reading the <i>same</i> few present shards — so thin-volume scores (see per-volume <code>sampling.decoded</code>) are reproducible but cover less of the volume. Volumes are heterogeneous; the ranking is the best stable triage signal we have, not a uniform-quality certificate.</td></tr>
+<tr><td>Ranking is <b>representative</b> — honest about heterogeneity</td><td>We started at 4 samples/volume (ρ = 0.76, ≈±5 pts noise — below our ρ ≥ 0.85 gate), moved to 12 samples on a 3×3×3 candidate grid (ρ = 0.99 — but we then proved this was inflated: on sparse volumes both runs re-read the <i>same</i> present shards). The published campaign uses <b>24 samples from a 5×5×5=125 candidate grid</b> (<code>artifacts/2026-09-30-scrollq-n24-dense/</code>): mean 22.9 chunks decoded per volume (vs 6.9 before), disjoint resample gives Spearman ρ = <b>0.79</b>, mean |Δscore| = 4.2, top-10 overlap 7/10. This does <b>not</b> clear our 0.85 gate — because the volumes are genuinely heterogeneous (individual volumes swung up to 44 points between runs). We publish it because a representative ranking with honest uncertainty beats a stable ranking built on re-read shards. PHerc0172 leads at 78.3; the Grand Prize Pareto frontier (PHerc0813 + PHerc1447) is unchanged.</td></tr>
 <tr><td><b>No</b> acquisition dropouts</td><td>Dead-slice scan (dense-chunk, both-neighbor rule): 0 hits across 64 volumes — a clean bill, published as a result</td></tr>
 <tr><td>Label coverage is <b>concentrated</b> on PHercParis4</td><td>Join with the full S3 bucket crawl (957 roots): 70/70 ink-detection roots on PHercParis4 (quality rank 13/39); 14 top-quartile zero-label volumes flagged 🎯 label next</td></tr>
 <tr><td>Grand Prize targets <b>qualified</b> against auditable evidence</td><td><code>artifacts/2026-09-30-grand-prize-qualifier/</code> — weight-free Pareto frontier over scan-quality score × public segment count across all 13 current Grand Prize volumes: <b>PHerc0813, PHerc1447</b></td></tr>
@@ -133,7 +133,7 @@ probes.</p>
 <p>Runs the integrity audit <b>and</b> the quality score on any volume and
 issues one verdict: <b>TRAIN / CAUTION / DO NOT TRAIN</b>. Fresh runs 2026-09-30
 (<code>artifacts/2026-09-30-health-verdicts/</code>): TRAIN on the healthy
-PHerc0813 dl volume (integrity PASS, quality 77.4); DO NOT TRAIN on the
+PHerc0813 dl volume (integrity PASS, quality 76.2 under the n24-dense campaign); DO NOT TRAIN on the
 defective PHerc0814 S3 pyramid (6 high-severity integrity findings — quality
 honestly unscorable, verdict from the audit alone); CAUTION on the v2 dev
 mesh <code>other/dev/meshes/20231022170900-ome.zarr</code> (integrity PASS,

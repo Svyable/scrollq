@@ -2,14 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ScrolIQ — Diagnostics for reading Herculaneum scrolls</title>
-<meta name="description" content="Challenge-aligned diagnostics for Vesuvius scrolls: scan health, surface/mesh readiness, label quality, ink reliability, held-out validation, and Grand Prize reproducibility.">
-<meta name="theme-color" content="#0d0b08">
-<meta name="color-scheme" content="dark">
-<link rel="canonical" href="https://svyable.github.io/scrollq/">
-<meta property="og:type" content="website">
-<meta property="og:title" content="ScrolIQ — Evidence for reading Herculaneum scrolls">
-<meta property="og:description" content="Reproducible scan diagnostics, exact-volume Grand Prize qualification, held-out geometry, and ink falsification controls.">
-<meta property="og:url" content="https://svyable.github.io/scrollq/">
+<meta name="description" content="Challenge-aligned diagnostics for Vesuvius scrolls: scan health, surface/mesh readiness, label quality, ink reliability, and reproducibility.">
 <style>
 :root{
   --bg:#0d0b08; --panel:#161310; --panel2:#1c1813; --line:#2c251b;
@@ -18,27 +11,11 @@
   --good:#8fd694; --warn:#ff9e5e; --bad:#ff6b6b;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
   -webkit-font-smoothing:antialiased}
 a{color:var(--amber)}
-a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-.skip{position:fixed;left:1rem;top:1rem;z-index:1000;transform:translateY(-180%);
-  background:var(--gold);color:#171008;padding:.55rem .8rem;border-radius:8px;font-weight:800;text-decoration:none}
-.skip:focus{transform:none}
 .wrap{max-width:1200px;margin:0 auto;padding:0 1.25rem}
-.topbar{position:sticky;top:0;z-index:50;background:rgba(13,11,8,.88);
-  backdrop-filter:blur(16px);border-bottom:1px solid rgba(44,37,27,.78)}
-.navinner{max-width:1200px;margin:0 auto;padding:.7rem 1.25rem;display:flex;align-items:center;gap:1rem}
-.brand{display:flex;align-items:center;gap:.6rem;color:var(--ink);text-decoration:none;font-weight:800}
-.brandmark{width:26px;height:26px;border-radius:7px;border:1px solid #6f3b18;display:grid;place-items:center;
-  color:var(--ember);font-family:Georgia,serif;background:#17110c;font-size:.72rem}
-.navlinks{display:flex;gap:.2rem;margin-left:auto;align-items:center;flex-wrap:wrap}
-.navlinks a{color:var(--muted);text-decoration:none;font-size:.82rem;padding:.38rem .58rem;border-radius:7px}
-.navlinks a:hover{color:var(--ink);background:var(--panel2)}
-.navstatus{font-size:.72rem;color:var(--good);border:1px solid rgba(143,214,148,.24);
-  background:rgba(143,214,148,.06);padding:.3rem .55rem;border-radius:999px;white-space:nowrap}
 /* ---------- hero ---------- */
 .hero{position:relative;overflow:hidden;padding:4.5rem 0 3rem;
   background:
@@ -140,63 +117,32 @@ code{font-size:.78rem;color:var(--amber)}
 .wtable td:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--gold)}
 .scope{border-left:3px solid var(--ember);padding:.6rem 1rem;background:#171208;
   border-radius:0 8px 8px 0;color:var(--muted);line-height:1.65;font-size:.93rem}
-.actiongrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
-.actiongrid h3{margin:.1rem 0 .5rem;font-size:.95rem;color:var(--ink)}
-.actiongrid p{color:var(--muted);line-height:1.6;font-size:.9rem}
-.evidence-link{font-size:.84rem}
 /* ---------- suite strip / footer ---------- */
 .suite{display:flex;gap:1rem;flex-wrap:wrap;align-items:stretch}
 .suite .card{flex:1;min-width:260px}
 footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
   color:var(--dim);font-size:.82rem;line-height:1.7}
 .hidden{display:none!important}
-@media(max-width:700px){.compbar{min-width:70px}thead th:nth-child(5),tbody td:nth-child(5){display:none}
-  .navstatus{display:none}.navlinks a{padding:.34rem .42rem}}
-/* ---------- analytics + creature comforts ---------- */
-.analytics{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.7rem}
-.metric{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:.85rem 1rem;min-width:0}
-.metric .n{font-size:1.45rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap}
-.metric .n.compact{font-size:1.08rem}
-.metric .l{font-size:.73rem;color:var(--muted);margin-top:.25rem;line-height:1.35}
-.actionbtn,.copybtn{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:.45rem .75rem;font-size:.78rem;cursor:pointer}
-.actionbtn:hover,.copybtn:hover{border-color:var(--ember);color:var(--ink)}
-.control-meta{margin-left:auto;color:var(--dim);font-size:.78rem;font-variant-numeric:tabular-nums}
-.copybtn{margin-left:.6rem;padding:.3rem .55rem;vertical-align:middle}
-.dist-meta{color:var(--muted);font-size:.88rem;margin:.4rem 0 .8rem}
-tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
-.detail-grid code{overflow-wrap:anywhere}
-@media(max-width:700px){.control-meta{width:100%;margin-left:0}.actionbtn{flex:1}.analytics{grid-template-columns:repeat(2,minmax(0,1fr))}}
-
+@media(max-width:700px){.compbar{min-width:70px}thead th:nth-child(5),tbody td:nth-child(5){display:none}}
 </style></head><body>
-
-<a class="skip" href="#main">Skip to evidence</a>
-<nav class="topbar" aria-label="Primary"><div class="navinner">
-  <a class="brand" href="./"><span class="brandmark">IQ</span><span>ScrolIQ</span></a>
-  <div class="navlinks">
-    <a href="#grand-prize">Grand Prize</a><a href="#evidence">Evidence</a>
-    <a href="#leaderboard">Survey</a><a href="#method">Method</a>
-    <a href="./september-2026.html">Writeup</a><a href="https://github.com/Svyable/scrollq">GitHub</a>
-  </div>
-  <span class="navstatus">● reproducible evidence</span>
-</div></nav>
 
 <header class="hero"><div class="wrap">
   <div class="eyebrow">VESUVIUS CHALLENGE · SEPTEMBER 2026</div>
   <h1>Scrol<span class="q">IQ</span></h1>
   <p class="tagline">Diagnostics for reading Herculaneum scrolls. <em>Find the bottleneck.</em></p>
-  <p class="lede">ScrolIQ is evolving from a scan-quality survey into an observability layer for the Vesuvius Challenge pipeline. The current score still measures sampled CT health from real level-0 voxels; surface, mesh, fiber, spiral, label-localization, and ink state remain explicitly unknown until direct evidence exists. See the <a href="https://scrollprize.org/2026_open_problems">official open problems</a>, the <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">alignment roadmap</a>, and the <a href="#grand-prize">2027 Grand Prize campaign →</a></p>
+  <p class="lede">ScrolIQ is evolving from a scan-quality survey into an observability layer for the Vesuvius Challenge pipeline. The current score still measures sampled CT health from real level-0 voxels; surface, mesh, fiber, spiral, label-localization, and ink state remain explicitly unknown until direct evidence exists. See the <a href="https://scrollprize.org/2026_open_problems">official open problems</a> and the <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">alignment roadmap</a>.</p>
   <div class="stats">
     <div class="stat"><div class="n">64</div><div class="l">scroll volumes scored</div></div>
     <div class="stat"><div class="n">13.5&ndash;78.3</div><div class="l">score range (0&ndash;100)</div></div>
     <div class="stat"><div class="n">0</div><div class="l">dead slices found under the strict detector</div></div>
-    <div class="stat"><div class="n">16 🎯</div><div class="l">top-quartile volumes with zero ink labels — label next</div></div>
+    <div class="stat"><div class="n">0 🎯</div><div class="l">top-quartile volumes with zero ink labels — label next</div></div>
   </div>
 </div></header>
 
-<main id="main" class="wrap">
+<div class="wrap">
 
 
-<div class="panel alignment" id="pipeline"><h2>Open-problem diagnostics<span class="sub">ScrolIQ maps evidence to the Vesuvius Challenge pipeline instead of treating one score as readiness.</span></h2>
+<div class="panel alignment"><h2>Open-problem diagnostics<span class="sub">ScrolIQ maps evidence to the Vesuvius Challenge pipeline instead of treating one score as readiness.</span></h2>
 <div class="problem-grid">
   <div class="problem"><div><h3>Scan + data</h3><span class="state live">LIVE</span></div><p>Real-voxel health, decode provenance, and coordinate-preserving spatial scan maps. Next: validated layer-separability and decohesion diagnostics.</p></div>
   <div class="problem"><div><h3>Surface topology</h3><span class="state next">NEXT</span></div><p>CT support, competing sheets, topology risk, and surface-placement uncertainty.</p></div>
@@ -210,37 +156,7 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
 <p class="alignment-links"><a href="https://scrollprize.org/2026_open_problems">Official 2026 Open Problems</a> · <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">ScrolIQ alignment roadmap</a></p>
 </div>
 
-<div class="panel" id="grand-prize"><h2>2027 Grand Prize campaign<span class="sub">Exact eligible inputs, held-out geometry, and ink falsification before whole-scroll commitment.</span></h2>
-  <div class="actiongrid">
-    <div><h3>Exact-volume eligibility</h3>
-      <p><b>13 prize targets</b> are matched by exact volume ID. Same-scroll higher-resolution scans are explicitly excluded rather than silently substituted.</p>
-      <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-grand-prize-qualifier">Frozen qualifier artifacts →</a></p></div>
-    <div><h3>Blind geometry first</h3>
-      <p>Each first-wave target gets the same deterministic <b>24-region</b> sample: 18 fit regions and <b>6 held-out</b> regions. Failed regions stay in the denominator.</p>
-      <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-probe-protocol.md">Blind probe protocol →</a></p></div>
-    <div><h3>Try to falsify the ink</h3>
-      <p>Promising signals are checked on the correct surface, <b>&plusmn;3 voxel</b> normal offsets, an adjacent winding, perturbed geometry, and an independent checkpoint/fold.</p></div>
-    <div><h3>Reproducibility ledger</h3>
-      <p>Exact inputs, hashes, fixed seeds, held-out splits, failure counts, experiment artifacts, and human-input time are part of the evidence trail — not cleanup work at submission time.</p></div>
-  </div>
-
-<div class="panel" id="grand-prize"><h2>2027 Grand Prize campaign<span class="sub">Exact eligible inputs, held-out geometry, and ink falsification before whole-scroll commitment.</span></h2>
-  <div class="actiongrid">
-    <div><h3>Exact-volume eligibility</h3>
-      <p><b>13 prize targets</b> are matched by exact volume ID. Same-scroll higher-resolution scans are explicitly excluded rather than silently substituted.</p>
-      <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-grand-prize-qualifier">Frozen qualifier artifacts →</a></p></div>
-    <div><h3>Blind geometry first</h3>
-      <p>Each first-wave target gets the same deterministic <b>24-region</b> sample: 18 fit regions and <b>6 held-out</b> regions. Failed regions stay in the denominator.</p>
-      <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-probe-protocol.md">Blind probe protocol →</a></p></div>
-    <div><h3>Try to falsify the ink</h3>
-      <p>Promising signals are checked on the correct surface, <b>&plusmn;3 voxel</b> normal offsets, an adjacent winding, perturbed geometry, and an independent checkpoint/fold.</p></div>
-    <div><h3>Reproducibility ledger</h3>
-      <p>Exact inputs, hashes, fixed seeds, held-out splits, failure counts, experiment artifacts, and human-input time are part of the evidence trail — not cleanup work at submission time.</p></div>
-  </div>
-  <div class="scope"><b>No opaque winner score.</b> The frozen two-axis qualifier exposes a Pareto frontier rather than claiming readability. Its current frontier contains <b>PHerc0813</b> and <b>PHerc1447</b>; <b>PHerc0800</b> remains in the first-wave blind probe as a deliberately different geometry hypothesis.</div>
-</div>
-
-<div class="insights" id="evidence">
+<div class="insights">
   <div class="card"><h3>Healthiest volume</h3>
     <p class="big">PHerc0172</p>
     <p><b>78.3</b> / 100 · 7.910µm · 53keV<br>Same scanner family
@@ -250,75 +166,58 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
     <p>All <b>70</b> published ink-detection labels sit on
     <b>PHercParis4</b> — quality rank <b>13 of 39 scrolls</b> (each scroll
     ranked by its best volume). The healthiest volumes (<b>PHerc0172</b> 78.3, <b>PHerc0139</b> 75.9) have
-    <b>zero</b> ink labels. The published campaign exposes <b>16</b>
-    top-quartile zero-label volumes as allocation candidates — without claiming
-    that ink is present on any of them.</p></div>
-  <div class="card"><h3>Failed the gate, fixed the experiment</h3>
-    <p>The first 4-sample resample missed our own stability gate
-    (<b>&rho; = 0.76</b>). We did not lower the threshold: we tripled the
-    sampling budget and re-ran all 64 volumes. The frozen 12-sample result is
-    <b>&rho; = 0.9948</b>, mean |&Delta;| <b>0.556</b>, top-10 overlap
-    <b>10/10</b> — above the &rho; &ge; 0.85 gate. Caveat: dense-grid
-    diagnostics show that sparse volumes can re-read shards, so achieved sample
-    counts remain visible rather than being hidden behind the headline metric.
-    <a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-09-30-resampling-stability/stability-n12.json">Frozen stability JSON →</a></p></div>
+    <b>zero</b> ink labels. Labeling effort goes furthest at the 🎯 rows —
+    16 flagged on the published run, 10 of them stable across an independent
+    resample.</p></div>
+  <div class="card"><h3>Stable, not sacred</h3>
+    <p>An independent deterministic resample (fully disjoint shard sets)
+    re-scored all 64 volumes: rank correlation <b>&rho; = 0.76</b>,
+    mean |&Delta;| <b>7.4</b>, top-10 overlap <b>6/10</b> — below our
+    &rho; &ge; 0.85 gate. Scores carry roughly &plusmn;5 points of sampling
+    noise, so treat the ranking as a triage <i>band</i>: the #1 pick
+    (PHerc0813, 77.4 in both runs) is robust, but neighbors within ~10 points
+    are interchangeable. Full method + both runs:
+    <code>artifacts/2026-09-30-resampling-stability/</code>.</p></div>
 </div>
 
 <div class="panel"><h2>Scan-quality distribution<span class="sub">64 volumes · 5-point bins</span></h2>
   <div class="hist" role="img" aria-label="Score distribution, 5-point bins: 25–30: 0, 30–35: 2, 35–40: 2, 40–45: 3, 45–50: 3, 50–55: 6, 55–60: 10, 60–65: 15, 65–70: 12, 70–75: 4, 75–80: 6"><div class="bar"><div class="bv">0</div><div class="fill" style="height:0%"></div><div class="bl" aria-hidden="false">25</div></div><div class="bar"><div class="bv">2</div><div class="fill" style="height:13%"></div><div class="bl" aria-hidden="false">30</div></div><div class="bar"><div class="bv">2</div><div class="fill" style="height:13%"></div><div class="bl" aria-hidden="false">35</div></div><div class="bar"><div class="bv">3</div><div class="fill" style="height:20%"></div><div class="bl" aria-hidden="false">40</div></div><div class="bar"><div class="bv">3</div><div class="fill" style="height:20%"></div><div class="bl" aria-hidden="false">45</div></div><div class="bar"><div class="bv">6</div><div class="fill" style="height:40%"></div><div class="bl" aria-hidden="false">50</div></div><div class="bar"><div class="bv">10</div><div class="fill" style="height:67%"></div><div class="bl" aria-hidden="false">55</div></div><div class="bar"><div class="bv">15</div><div class="fill" style="height:100%"></div><div class="bl" aria-hidden="false">60</div></div><div class="bar"><div class="bv">12</div><div class="fill" style="height:80%"></div><div class="bl" aria-hidden="false">65</div></div><div class="bar"><div class="bv">4</div><div class="fill" style="height:27%"></div><div class="bl" aria-hidden="false">70</div></div><div class="bar"><div class="bv">6</div><div class="fill" style="height:40%"></div><div class="bl" aria-hidden="false">75</div></div></div>
-  <p class="dist-meta" id="distMeta"></p>
   <p style="color:var(--muted);font-size:.88rem">Legacy triage bands: <span class="tier S">S</span> ≥ 70 ·
   <span class="tier A">A</span> 60&ndash;70 · <span class="tier B">B</span> 45&ndash;60 ·
   <span class="tier C">C</span> &lt; 45</p>
 </div>
 
-<div class="panel analytics-panel"><h2>Scan-quality analytics<span class="sub" id="analyticsSub">Updates with the current view</span></h2>
-  <div class="analytics">
-    <div class="metric"><div class="n" id="meanScore">—</div><div class="l">mean score</div></div>
-    <div class="metric"><div class="n" id="medianScore">—</div><div class="l">median score</div></div>
-    <div class="metric"><div class="n" id="topQuartile">—</div><div class="l">top-quartile cutoff</div></div>
-    <div class="metric"><div class="n" id="uniqueScrolls">—</div><div class="l">unique scrolls</div></div>
-    <div class="metric"><div class="n compact" id="tierMix">—</div><div class="l">S / A / B / C volumes</div></div>
-    <div class="metric"><div class="n compact" id="segmentCoverage">—</div><div class="l">with segment roots</div></div>
-  </div>
-</div>
-
-<div class="panel" id="leaderboard"><h2>Scan-quality survey<span class="sub">Click a column to sort · click a row for the full breakdown</span></h2>
+<div class="panel"><h2>Scan-quality survey<span class="sub">Click a column to sort · click a row for the full breakdown</span></h2>
   <div class="controls">
-    <input id="q" type="search" placeholder="Filter by scroll id…  / to focus" aria-label="filter leaderboard">
+    <input id="q" type="search" placeholder="Filter by scroll id, e.g. PHerc0139…" aria-label="filter">
     <button class="tierbtn on" data-t="">all</button>
     <button class="tierbtn" data-t="S">S</button>
     <button class="tierbtn" data-t="A">A</button>
     <button class="tierbtn" data-t="B">B</button>
     <button class="tierbtn" data-t="C">C</button>
     <button class="tierbtn" data-t="label">🎯 label next</button>
-    <button class="tierbtn" data-t="unlabeled">0 labels</button>
-    <button class="tierbtn" data-t="segments">has segments</button>
-    <button class="actionbtn" id="reset" type="button">reset</button>
-    <button class="actionbtn" id="csv" type="button">export CSV</button>
-    <span class="control-meta" id="resultCount" aria-live="polite"></span>
   </div>
   <div style="overflow-x:auto"><table id="lb"><thead><tr>
     <th data-k="rank">#</th><th data-k="id">volume</th><th data-k="score">score</th>
     <th data-k="tier">tier</th><th>components</th>
     <th data-k="signal">signal</th><th data-k="tex">texture</th><th data-k="dyn">dynamic</th>
     <th data-k="pen">penalties</th><th data-k="ink">ink labels</th><th data-k="seg">segments</th><th>note</th>
-  </tr></thead><tbody><tr class="vol" data-rank="1" data-id="pherc0172 20241024131839-7.910um-53kev-masked" data-score="78.3" data-tier="S" data-signal="37.0" data-tex="25.2" data-dyn="16.5" data-pen="0.3" data-ink="0" data-seg="0" data-label="1"><td class="num rn">1</td><td><span class="scrollid">PHerc0172</span><br><span class="volsub">7.910µm · 53keV</span></td><td class="num score" style="color:rgb(251,206,102)">78.3</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 37.0 / texture 25.2 / dynamic 16.5"><span class="cb-s" style="width:41.1%"></span><span class="cb-t" style="width:28.0%"></span><span class="cb-d" style="width:18.3%"></span></div></td><td class="num">37.0</td><td class="num">25.2</td><td class="num">16.5</td><td class="num pen">−0.3</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0172/volumes/20241024131839-7.910um-53keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.8317</div></div><div><div class="k">gradient energy</div><div class="v">10.080</div></div><div><div class="k">dynamic range</div><div class="v">165</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 37.0/40 — nonzero voxel fraction 0.832 · texture 25.2/30 — gradient energy 10.08 · dynamic 16.5/20 — range 165 · saturation penalty −0.3 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="2" data-id="phercparis4 20260310173927-45.532um-11.0m-110kev-masked" data-score="77.2" data-tier="S" data-signal="31.5" data-tex="30.0" data-dyn="15.8" data-pen="0.1" data-ink="0" data-seg="0" data-label="1"><td class="num rn">2</td><td><span class="scrollid">PHercParis4</span><br><span class="volsub">45.532µm · 110keV</span></td><td class="num score" style="color:rgb(249,204,102)">77.2</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 31.5 / texture 30.0 / dynamic 15.8"><span class="cb-s" style="width:35.0%"></span><span class="cb-t" style="width:33.3%"></span><span class="cb-d" style="width:17.6%"></span></div></td><td class="num">31.5</td><td class="num">30.0</td><td class="num">15.8</td><td class="num pen">−0.1</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHercParis4/volumes/20260310173927-45.532um-11.0m-110keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.7085</div></div><div><div class="k">gradient energy</div><div class="v">12.480</div></div><div><div class="k">dynamic range</div><div class="v">158</div></div><div><div class="k">chunks decoded</div><div class="v">21</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 31.5/40 — nonzero voxel fraction 0.709 · texture 30.0/30 — gradient energy 12.48 · dynamic 15.8/20 — range 158 · saturation penalty −0.1 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="3" data-id="pherc0139 20250820105138-2.403um-0.2m-77kev-masked" data-score="76.3" data-tier="S" data-signal="40.0" data-tex="17.4" data-dyn="20.0" data-pen="1.1" data-ink="0" data-seg="0" data-label="1"><td class="num rn">3</td><td><span class="scrollid">PHerc0139</span><br><span class="volsub">2.403µm · 77keV</span></td><td class="num score" style="color:rgb(247,203,102)">76.3</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 17.4 / dynamic 20.0"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:19.3%"></span><span class="cb-d" style="width:22.2%"></span></div></td><td class="num">40.0</td><td class="num">17.4</td><td class="num">20.0</td><td class="num pen">−1.1</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0139/volumes/20250820105138-2.403um-0.2m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9952</div></div><div><div class="k">gradient energy</div><div class="v">6.979</div></div><div><div class="k">dynamic range</div><div class="v">213</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.995 · texture 17.4/30 — gradient energy 6.98 · dynamic 20.0/20 — range 213 · saturation penalty −1.1 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="4" data-id="pherc0813 20250821151723-9.362um-1.2m-113kev-masked" data-score="76.2" data-tier="S" data-signal="40.0" data-tex="21.4" data-dyn="15.0" data-pen="0.2" data-ink="0" data-seg="0" data-label="1"><td class="num rn">4</td><td><span class="scrollid">PHerc0813</span><br><span class="volsub">9.362µm · 113keV</span></td><td class="num score" style="color:rgb(246,203,102)">76.2</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 21.4 / dynamic 15.0"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:23.8%"></span><span class="cb-d" style="width:16.7%"></span></div></td><td class="num">40.0</td><td class="num">21.4</td><td class="num">15.0</td><td class="num pen">−0.2</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9272</div></div><div><div class="k">gradient energy</div><div class="v">8.559</div></div><div><div class="k">dynamic range</div><div class="v">150</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.927 · texture 21.4/30 — gradient energy 8.56 · dynamic 15.0/20 — range 150 · saturation penalty −0.2 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="5" data-id="pherc0139 20250728140407-9.362um-1.2m-113kev-masked" data-score="75.8" data-tier="S" data-signal="40.0" data-tex="20.1" data-dyn="15.8" data-pen="0.0" data-ink="0" data-seg="0" data-label="1"><td class="num rn">5</td><td><span class="scrollid">PHerc0139</span><br><span class="volsub">9.362µm · 113keV</span></td><td class="num score" style="color:rgb(246,202,102)">75.8</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 20.1 / dynamic 15.8"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:22.3%"></span><span class="cb-d" style="width:17.6%"></span></div></td><td class="num">40.0</td><td class="num">20.1</td><td class="num">15.8</td><td class="num pen">−0.0</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9193</div></div><div><div class="k">gradient energy</div><div class="v">8.034</div></div><div><div class="k">dynamic range</div><div class="v">158</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.919 · texture 20.1/30 — gradient energy 8.03 · dynamic 15.8/20 — range 158 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="6" data-id="pherc0139 20250822062710-2.403um-0.2m-77kev-masked" data-score="75.7" data-tier="S" data-signal="40.0" data-tex="16.6" data-dyn="20.0" data-pen="0.9" data-ink="0" data-seg="0" data-label="1"><td class="num rn">6</td><td><span class="scrollid">PHerc0139</span><br><span class="volsub">2.403µm · 77keV</span></td><td class="num score" style="color:rgb(245,202,102)">75.7</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 16.6 / dynamic 20.0"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:18.4%"></span><span class="cb-d" style="width:22.2%"></span></div></td><td class="num">40.0</td><td class="num">16.6</td><td class="num">20.0</td><td class="num pen">−0.9</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0139/volumes/20250822062710-2.403um-0.2m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9901</div></div><div><div class="k">gradient energy</div><div class="v">6.626</div></div><div><div class="k">dynamic range</div><div class="v">200</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.990 · texture 16.6/30 — gradient energy 6.63 · dynamic 20.0/20 — range 200 · saturation penalty −0.9 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="7" data-id="pherc1203 20250820131727-9.362um-1.2m-113kev-masked" data-score="74.7" data-tier="S" data-signal="40.0" data-tex="21.1" data-dyn="13.8" data-pen="0.2" data-ink="0" data-seg="0" data-label="1"><td class="num rn">7</td><td><span class="scrollid">PHerc1203</span><br><span class="volsub">9.362µm · 113keV</span></td><td class="num score" style="color:rgb(243,201,102)">74.7</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 21.1 / dynamic 13.8"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:23.4%"></span><span class="cb-d" style="width:15.3%"></span></div></td><td class="num">40.0</td><td class="num">21.1</td><td class="num">13.8</td><td class="num pen">−0.2</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc1203/volumes/20250820131727-9.362um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9232</div></div><div><div class="k">gradient energy</div><div class="v">8.437</div></div><div><div class="k">dynamic range</div><div class="v">138</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.923 · texture 21.1/30 — gradient energy 8.44 · dynamic 13.8/20 — range 138 · saturation penalty −0.2 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="8" data-id="pherc0846b 20250804142305-9.362um-1.2m-113kev-masked" data-score="72.0" data-tier="S" data-signal="37.0" data-tex="20.7" data-dyn="14.4" data-pen="0.2" data-ink="0" data-seg="0" data-label="1"><td class="num rn">8</td><td><span class="scrollid">PHerc0846B</span><br><span class="volsub">9.362µm · 113keV</span></td><td class="num score" style="color:rgb(237,197,102)">72.0</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 37.0 / texture 20.7 / dynamic 14.4"><span class="cb-s" style="width:41.1%"></span><span class="cb-t" style="width:23.0%"></span><span class="cb-d" style="width:16.0%"></span></div></td><td class="num">37.0</td><td class="num">20.7</td><td class="num">14.4</td><td class="num pen">−0.2</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0846B/volumes/20250804142305-9.362um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.8333</div></div><div><div class="k">gradient energy</div><div class="v">8.282</div></div><div><div class="k">dynamic range</div><div class="v">144</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 37.0/40 — nonzero voxel fraction 0.833 · texture 20.7/30 — gradient energy 8.28 · dynamic 14.4/20 — range 144 · saturation penalty −0.2 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="9" data-id="pherc0139 20260319133554-2.403um-0.2m-77kev-masked" data-score="70.7" data-tier="S" data-signal="40.0" data-tex="13.9" data-dyn="17.0" data-pen="0.2" data-ink="0" data-seg="0" data-label="1"><td class="num rn">9</td><td><span class="scrollid">PHerc0139</span><br><span class="volsub">2.403µm · 77keV</span></td><td class="num score" style="color:rgb(235,195,102)">70.7</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 13.9 / dynamic 17.0"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:15.4%"></span><span class="cb-d" style="width:18.9%"></span></div></td><td class="num">40.0</td><td class="num">13.9</td><td class="num">17.0</td><td class="num pen">−0.2</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0139/volumes/20260319133554-2.403um-0.2m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9958</div></div><div><div class="k">gradient energy</div><div class="v">5.555</div></div><div><div class="k">dynamic range</div><div class="v">170</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.996 · texture 13.9/30 — gradient energy 5.55 · dynamic 17.0/20 — range 170 · saturation penalty −0.2 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="10" data-id="phercparis4 20260323153942-2.400um-0.2m-137kev-masked" data-score="70.4" data-tier="S" data-signal="40.0" data-tex="16.1" data-dyn="14.3" data-pen="0.1" data-ink="0" data-seg="0" data-label="1"><td class="num rn">10</td><td><span class="scrollid">PHercParis4</span><br><span class="volsub">2.400µm · 137keV</span></td><td class="num score" style="color:rgb(234,194,102)">70.4</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 16.1 / dynamic 14.3"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:17.9%"></span><span class="cb-d" style="width:15.9%"></span></div></td><td class="num">40.0</td><td class="num">16.1</td><td class="num">14.3</td><td class="num pen">−0.1</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHercParis4/volumes/20260323153942-2.400um-0.2m-137keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9400</div></div><div><div class="k">gradient energy</div><div class="v">6.443</div></div><div><div class="k">dynamic range</div><div class="v">143</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.940 · texture 16.1/30 — gradient energy 6.44 · dynamic 14.3/20 — range 143 · saturation penalty −0.1 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="11" data-id="pherc0814 20250804134230-9.362um-1.2m-113kev-masked" data-score="69.4" data-tier="A" data-signal="31.6" data-tex="23.0" data-dyn="15.4" data-pen="0.7" data-ink="0" data-seg="0" data-label="1"><td class="num rn">11</td><td><span class="scrollid">PHerc0814</span><br><span class="volsub">9.362µm · 113keV</span></td><td class="num score" style="color:rgb(232,193,102)">69.4</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 31.6 / texture 23.0 / dynamic 15.4"><span class="cb-s" style="width:35.1%"></span><span class="cb-t" style="width:25.6%"></span><span class="cb-d" style="width:17.1%"></span></div></td><td class="num">31.6</td><td class="num">23.0</td><td class="num">15.4</td><td class="num pen">−0.7</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0814/volumes/20250804134230-9.362um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.7120</div></div><div><div class="k">gradient energy</div><div class="v">9.215</div></div><div><div class="k">dynamic range</div><div class="v">154</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 31.6/40 — nonzero voxel fraction 0.712 · texture 23.0/30 — gradient energy 9.21 · dynamic 15.4/20 — range 154 · saturation penalty −0.7 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="12" data-id="pherc0139 20260319133050-2.403um-0.2m-77kev-masked" data-score="68.9" data-tier="A" data-signal="40.0" data-tex="13.2" data-dyn="16.0" data-pen="0.3" data-ink="0" data-seg="0" data-label="1"><td class="num rn">12</td><td><span class="scrollid">PHerc0139</span><br><span class="volsub">2.403µm · 77keV</span></td><td class="num score" style="color:rgb(231,192,102)">68.9</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 40.0 / texture 13.2 / dynamic 16.0"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:14.7%"></span><span class="cb-d" style="width:17.8%"></span></div></td><td class="num">40.0</td><td class="num">13.2</td><td class="num">16.0</td><td class="num pen">−0.3</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0139/volumes/20260319133050-2.403um-0.2m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9986</div></div><div><div class="k">gradient energy</div><div class="v">5.268</div></div><div><div class="k">dynamic range</div><div class="v">160</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.999 · texture 13.2/30 — gradient energy 5.27 · dynamic 16.0/20 — range 160 · saturation penalty −0.3 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="13" data-id="pherc0332 20251211183505-2.399um-0.2m-78kev-masked" data-score="68.6" data-tier="A" data-signal="40.0" data-tex="13.3" data-dyn="15.6" data-pen="0.3" data-ink="0" data-seg="0" data-label="1"><td class="num rn">13</td><td><span class="scrollid">PHerc0332</span><br><span class="volsub">2.399µm · 78keV</span></td><td class="num score" style="color:rgb(230,192,102)">68.6</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 40.0 / texture 13.3 / dynamic 15.6"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:14.8%"></span><span class="cb-d" style="width:17.3%"></span></div></td><td class="num">40.0</td><td class="num">13.3</td><td class="num">15.6</td><td class="num pen">−0.3</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0332/volumes/20251211183505-2.399um-0.2m-78keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9029</div></div><div><div class="k">gradient energy</div><div class="v">5.337</div></div><div><div class="k">dynamic range</div><div class="v">156</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.903 · texture 13.3/30 — gradient energy 5.34 · dynamic 15.6/20 — range 156 · saturation penalty −0.3 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="14" data-id="pherc0009b 20250820154339-2.401um-0.3m-77kev-masked" data-score="68.1" data-tier="A" data-signal="40.0" data-tex="13.0" data-dyn="16.0" data-pen="0.9" data-ink="0" data-seg="0" data-label="1"><td class="num rn">14</td><td><span class="scrollid">PHerc0009B</span><br><span class="volsub">2.401µm · 77keV</span></td><td class="num score" style="color:rgb(229,191,102)">68.1</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 40.0 / texture 13.0 / dynamic 16.0"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:14.4%"></span><span class="cb-d" style="width:17.8%"></span></div></td><td class="num">40.0</td><td class="num">13.0</td><td class="num">16.0</td><td class="num pen">−0.9</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0009B/volumes/20250820154339-2.401um-0.3m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9438</div></div><div><div class="k">gradient energy</div><div class="v">5.209</div></div><div><div class="k">dynamic range</div><div class="v">160</div></div><div><div class="k">chunks decoded</div><div class="v">20</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.944 · texture 13.0/30 — gradient energy 5.21 · dynamic 16.0/20 — range 160 · saturation penalty −0.9 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="15" data-id="pherc0841 20260319124803-2.403um-0.2m-77kev-masked" data-score="68.1" data-tier="A" data-signal="40.0" data-tex="13.0" data-dyn="15.3" data-pen="0.2" data-ink="0" data-seg="0" data-label="1"><td class="num rn">15</td><td><span class="scrollid">PHerc0841</span><br><span class="volsub">2.403µm · 77keV</span></td><td class="num score" style="color:rgb(229,191,102)">68.1</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 40.0 / texture 13.0 / dynamic 15.3"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:14.4%"></span><span class="cb-d" style="width:17.0%"></span></div></td><td class="num">40.0</td><td class="num">13.0</td><td class="num">15.3</td><td class="num pen">−0.2</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0841/volumes/20260319124803-2.403um-0.2m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9530</div></div><div><div class="k">gradient energy</div><div class="v">5.191</div></div><div><div class="k">dynamic range</div><div class="v">153</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.953 · texture 13.0/30 — gradient energy 5.19 · dynamic 15.3/20 — range 153 · saturation penalty −0.2 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
-<tr class="vol" data-rank="16" data-id="pherc1203 20260319130212-2.403um-0.2m-77kev-masked" data-score="67.7" data-tier="A" data-signal="40.0" data-tex="12.9" data-dyn="14.9" data-pen="0.1" data-ink="0" data-seg="0" data-label="1"><td class="num rn">16</td><td><span class="scrollid">PHerc1203</span><br><span class="volsub">2.403µm · 77keV</span></td><td class="num score" style="color:rgb(228,190,102)">67.7</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 40.0 / texture 12.9 / dynamic 14.9"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:14.3%"></span><span class="cb-d" style="width:16.6%"></span></div></td><td class="num">40.0</td><td class="num">12.9</td><td class="num">14.9</td><td class="num pen">−0.1</td><td class="num">0</td><td class="num">0</td><td><span class="flag">🎯 label next</span></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc1203/volumes/20260319130212-2.403um-0.2m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9794</div></div><div><div class="k">gradient energy</div><div class="v">5.166</div></div><div><div class="k">dynamic range</div><div class="v">149</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.979 · texture 12.9/30 — gradient energy 5.17 · dynamic 14.9/20 — range 149 · saturation penalty −0.1 · 🎯 top-quartile quality with zero ink labels — label next</div></td></tr>
+  </tr></thead><tbody><tr class="vol" data-rank="1" data-id="pherc0172 20241024131839-7.910um-53kev-masked" data-score="78.3" data-tier="S" data-signal="37.0" data-tex="25.2" data-dyn="16.5" data-pen="0.3" data-ink="0" data-seg="0" data-label="0"><td class="num rn">1</td><td><span class="scrollid">PHerc0172</span><br><span class="volsub">7.910µm · 53keV</span></td><td class="num score" style="color:rgb(251,206,102)">78.3</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 37.0 / texture 25.2 / dynamic 16.5"><span class="cb-s" style="width:41.1%"></span><span class="cb-t" style="width:28.0%"></span><span class="cb-d" style="width:18.3%"></span></div></td><td class="num">37.0</td><td class="num">25.2</td><td class="num">16.5</td><td class="num pen">−0.3</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0172/volumes/20241024131839-7.910um-53keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.8317</div></div><div><div class="k">gradient energy</div><div class="v">10.080</div></div><div><div class="k">dynamic range</div><div class="v">165</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 37.0/40 — nonzero voxel fraction 0.832 · texture 25.2/30 — gradient energy 10.08 · dynamic 16.5/20 — range 165 · saturation penalty −0.3</div></td></tr>
+<tr class="vol" data-rank="2" data-id="phercparis4 20260310173927-45.532um-11.0m-110kev-masked" data-score="77.2" data-tier="S" data-signal="31.5" data-tex="30.0" data-dyn="15.8" data-pen="0.1" data-ink="0" data-seg="0" data-label="0"><td class="num rn">2</td><td><span class="scrollid">PHercParis4</span><br><span class="volsub">45.532µm · 110keV</span></td><td class="num score" style="color:rgb(249,204,102)">77.2</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 31.5 / texture 30.0 / dynamic 15.8"><span class="cb-s" style="width:35.0%"></span><span class="cb-t" style="width:33.3%"></span><span class="cb-d" style="width:17.6%"></span></div></td><td class="num">31.5</td><td class="num">30.0</td><td class="num">15.8</td><td class="num pen">−0.1</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHercParis4/volumes/20260310173927-45.532um-11.0m-110keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.7085</div></div><div><div class="k">gradient energy</div><div class="v">12.480</div></div><div><div class="k">dynamic range</div><div class="v">158</div></div><div><div class="k">chunks decoded</div><div class="v">21</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 31.5/40 — nonzero voxel fraction 0.709 · texture 30.0/30 — gradient energy 12.48 · dynamic 15.8/20 — range 158 · saturation penalty −0.1</div></td></tr>
+<tr class="vol" data-rank="3" data-id="pherc0139 20250820105138-2.403um-0.2m-77kev-masked" data-score="76.3" data-tier="S" data-signal="40.0" data-tex="17.4" data-dyn="20.0" data-pen="1.1" data-ink="0" data-seg="0" data-label="0"><td class="num rn">3</td><td><span class="scrollid">PHerc0139</span><br><span class="volsub">2.403µm · 77keV</span></td><td class="num score" style="color:rgb(247,203,102)">76.3</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 17.4 / dynamic 20.0"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:19.3%"></span><span class="cb-d" style="width:22.2%"></span></div></td><td class="num">40.0</td><td class="num">17.4</td><td class="num">20.0</td><td class="num pen">−1.1</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0139/volumes/20250820105138-2.403um-0.2m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9952</div></div><div><div class="k">gradient energy</div><div class="v">6.979</div></div><div><div class="k">dynamic range</div><div class="v">213</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.995 · texture 17.4/30 — gradient energy 6.98 · dynamic 20.0/20 — range 213 · saturation penalty −1.1</div></td></tr>
+<tr class="vol" data-rank="4" data-id="pherc0813 20250821151723-9.362um-1.2m-113kev-masked" data-score="76.2" data-tier="S" data-signal="40.0" data-tex="21.4" data-dyn="15.0" data-pen="0.2" data-ink="0" data-seg="0" data-label="0"><td class="num rn">4</td><td><span class="scrollid">PHerc0813</span><br><span class="volsub">9.362µm · 113keV</span></td><td class="num score" style="color:rgb(246,203,102)">76.2</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 21.4 / dynamic 15.0"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:23.8%"></span><span class="cb-d" style="width:16.7%"></span></div></td><td class="num">40.0</td><td class="num">21.4</td><td class="num">15.0</td><td class="num pen">−0.2</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9272</div></div><div><div class="k">gradient energy</div><div class="v">8.559</div></div><div><div class="k">dynamic range</div><div class="v">150</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.927 · texture 21.4/30 — gradient energy 8.56 · dynamic 15.0/20 — range 150 · saturation penalty −0.2</div></td></tr>
+<tr class="vol" data-rank="5" data-id="pherc0139 20250728140407-9.362um-1.2m-113kev-masked" data-score="75.8" data-tier="S" data-signal="40.0" data-tex="20.1" data-dyn="15.8" data-pen="0.0" data-ink="0" data-seg="0" data-label="0"><td class="num rn">5</td><td><span class="scrollid">PHerc0139</span><br><span class="volsub">9.362µm · 113keV</span></td><td class="num score" style="color:rgb(246,202,102)">75.8</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 20.1 / dynamic 15.8"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:22.3%"></span><span class="cb-d" style="width:17.6%"></span></div></td><td class="num">40.0</td><td class="num">20.1</td><td class="num">15.8</td><td class="num pen">−0.0</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9193</div></div><div><div class="k">gradient energy</div><div class="v">8.034</div></div><div><div class="k">dynamic range</div><div class="v">158</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.919 · texture 20.1/30 — gradient energy 8.03 · dynamic 15.8/20 — range 158</div></td></tr>
+<tr class="vol" data-rank="6" data-id="pherc0139 20250822062710-2.403um-0.2m-77kev-masked" data-score="75.7" data-tier="S" data-signal="40.0" data-tex="16.6" data-dyn="20.0" data-pen="0.9" data-ink="0" data-seg="0" data-label="0"><td class="num rn">6</td><td><span class="scrollid">PHerc0139</span><br><span class="volsub">2.403µm · 77keV</span></td><td class="num score" style="color:rgb(245,202,102)">75.7</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 16.6 / dynamic 20.0"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:18.4%"></span><span class="cb-d" style="width:22.2%"></span></div></td><td class="num">40.0</td><td class="num">16.6</td><td class="num">20.0</td><td class="num pen">−0.9</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0139/volumes/20250822062710-2.403um-0.2m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9901</div></div><div><div class="k">gradient energy</div><div class="v">6.626</div></div><div><div class="k">dynamic range</div><div class="v">200</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.990 · texture 16.6/30 — gradient energy 6.63 · dynamic 20.0/20 — range 200 · saturation penalty −0.9</div></td></tr>
+<tr class="vol" data-rank="7" data-id="pherc1203 20250820131727-9.362um-1.2m-113kev-masked" data-score="74.7" data-tier="S" data-signal="40.0" data-tex="21.1" data-dyn="13.8" data-pen="0.2" data-ink="0" data-seg="0" data-label="0"><td class="num rn">7</td><td><span class="scrollid">PHerc1203</span><br><span class="volsub">9.362µm · 113keV</span></td><td class="num score" style="color:rgb(243,201,102)">74.7</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 21.1 / dynamic 13.8"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:23.4%"></span><span class="cb-d" style="width:15.3%"></span></div></td><td class="num">40.0</td><td class="num">21.1</td><td class="num">13.8</td><td class="num pen">−0.2</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc1203/volumes/20250820131727-9.362um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9232</div></div><div><div class="k">gradient energy</div><div class="v">8.437</div></div><div><div class="k">dynamic range</div><div class="v">138</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.923 · texture 21.1/30 — gradient energy 8.44 · dynamic 13.8/20 — range 138 · saturation penalty −0.2</div></td></tr>
+<tr class="vol" data-rank="8" data-id="pherc0846b 20250804142305-9.362um-1.2m-113kev-masked" data-score="72.0" data-tier="S" data-signal="37.0" data-tex="20.7" data-dyn="14.4" data-pen="0.2" data-ink="0" data-seg="0" data-label="0"><td class="num rn">8</td><td><span class="scrollid">PHerc0846B</span><br><span class="volsub">9.362µm · 113keV</span></td><td class="num score" style="color:rgb(237,197,102)">72.0</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 37.0 / texture 20.7 / dynamic 14.4"><span class="cb-s" style="width:41.1%"></span><span class="cb-t" style="width:23.0%"></span><span class="cb-d" style="width:16.0%"></span></div></td><td class="num">37.0</td><td class="num">20.7</td><td class="num">14.4</td><td class="num pen">−0.2</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0846B/volumes/20250804142305-9.362um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.8333</div></div><div><div class="k">gradient energy</div><div class="v">8.282</div></div><div><div class="k">dynamic range</div><div class="v">144</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 37.0/40 — nonzero voxel fraction 0.833 · texture 20.7/30 — gradient energy 8.28 · dynamic 14.4/20 — range 144 · saturation penalty −0.2</div></td></tr>
+<tr class="vol" data-rank="9" data-id="pherc0139 20260319133554-2.403um-0.2m-77kev-masked" data-score="70.7" data-tier="S" data-signal="40.0" data-tex="13.9" data-dyn="17.0" data-pen="0.2" data-ink="0" data-seg="0" data-label="0"><td class="num rn">9</td><td><span class="scrollid">PHerc0139</span><br><span class="volsub">2.403µm · 77keV</span></td><td class="num score" style="color:rgb(235,195,102)">70.7</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 13.9 / dynamic 17.0"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:15.4%"></span><span class="cb-d" style="width:18.9%"></span></div></td><td class="num">40.0</td><td class="num">13.9</td><td class="num">17.0</td><td class="num pen">−0.2</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0139/volumes/20260319133554-2.403um-0.2m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9958</div></div><div><div class="k">gradient energy</div><div class="v">5.555</div></div><div><div class="k">dynamic range</div><div class="v">170</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.996 · texture 13.9/30 — gradient energy 5.55 · dynamic 17.0/20 — range 170 · saturation penalty −0.2</div></td></tr>
+<tr class="vol" data-rank="10" data-id="phercparis4 20260323153942-2.400um-0.2m-137kev-masked" data-score="70.4" data-tier="S" data-signal="40.0" data-tex="16.1" data-dyn="14.3" data-pen="0.1" data-ink="0" data-seg="0" data-label="0"><td class="num rn">10</td><td><span class="scrollid">PHercParis4</span><br><span class="volsub">2.400µm · 137keV</span></td><td class="num score" style="color:rgb(234,194,102)">70.4</td><td><span class="tier S">S</span></td><td><div class="compbar" title="signal 40.0 / texture 16.1 / dynamic 14.3"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:17.9%"></span><span class="cb-d" style="width:15.9%"></span></div></td><td class="num">40.0</td><td class="num">16.1</td><td class="num">14.3</td><td class="num pen">−0.1</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHercParis4/volumes/20260323153942-2.400um-0.2m-137keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9400</div></div><div><div class="k">gradient energy</div><div class="v">6.443</div></div><div><div class="k">dynamic range</div><div class="v">143</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.940 · texture 16.1/30 — gradient energy 6.44 · dynamic 14.3/20 — range 143 · saturation penalty −0.1</div></td></tr>
+<tr class="vol" data-rank="11" data-id="pherc0814 20250804134230-9.362um-1.2m-113kev-masked" data-score="69.4" data-tier="A" data-signal="31.6" data-tex="23.0" data-dyn="15.4" data-pen="0.7" data-ink="0" data-seg="0" data-label="0"><td class="num rn">11</td><td><span class="scrollid">PHerc0814</span><br><span class="volsub">9.362µm · 113keV</span></td><td class="num score" style="color:rgb(232,193,102)">69.4</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 31.6 / texture 23.0 / dynamic 15.4"><span class="cb-s" style="width:35.1%"></span><span class="cb-t" style="width:25.6%"></span><span class="cb-d" style="width:17.1%"></span></div></td><td class="num">31.6</td><td class="num">23.0</td><td class="num">15.4</td><td class="num pen">−0.7</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0814/volumes/20250804134230-9.362um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.7120</div></div><div><div class="k">gradient energy</div><div class="v">9.215</div></div><div><div class="k">dynamic range</div><div class="v">154</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 31.6/40 — nonzero voxel fraction 0.712 · texture 23.0/30 — gradient energy 9.21 · dynamic 15.4/20 — range 154 · saturation penalty −0.7</div></td></tr>
+<tr class="vol" data-rank="12" data-id="pherc0139 20260319133050-2.403um-0.2m-77kev-masked" data-score="68.9" data-tier="A" data-signal="40.0" data-tex="13.2" data-dyn="16.0" data-pen="0.3" data-ink="0" data-seg="0" data-label="0"><td class="num rn">12</td><td><span class="scrollid">PHerc0139</span><br><span class="volsub">2.403µm · 77keV</span></td><td class="num score" style="color:rgb(231,192,102)">68.9</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 40.0 / texture 13.2 / dynamic 16.0"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:14.7%"></span><span class="cb-d" style="width:17.8%"></span></div></td><td class="num">40.0</td><td class="num">13.2</td><td class="num">16.0</td><td class="num pen">−0.3</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0139/volumes/20260319133050-2.403um-0.2m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9986</div></div><div><div class="k">gradient energy</div><div class="v">5.268</div></div><div><div class="k">dynamic range</div><div class="v">160</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.999 · texture 13.2/30 — gradient energy 5.27 · dynamic 16.0/20 — range 160 · saturation penalty −0.3</div></td></tr>
+<tr class="vol" data-rank="13" data-id="pherc0332 20251211183505-2.399um-0.2m-78kev-masked" data-score="68.6" data-tier="A" data-signal="40.0" data-tex="13.3" data-dyn="15.6" data-pen="0.3" data-ink="0" data-seg="0" data-label="0"><td class="num rn">13</td><td><span class="scrollid">PHerc0332</span><br><span class="volsub">2.399µm · 78keV</span></td><td class="num score" style="color:rgb(230,192,102)">68.6</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 40.0 / texture 13.3 / dynamic 15.6"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:14.8%"></span><span class="cb-d" style="width:17.3%"></span></div></td><td class="num">40.0</td><td class="num">13.3</td><td class="num">15.6</td><td class="num pen">−0.3</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0332/volumes/20251211183505-2.399um-0.2m-78keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9029</div></div><div><div class="k">gradient energy</div><div class="v">5.337</div></div><div><div class="k">dynamic range</div><div class="v">156</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.903 · texture 13.3/30 — gradient energy 5.34 · dynamic 15.6/20 — range 156 · saturation penalty −0.3</div></td></tr>
+<tr class="vol" data-rank="14" data-id="pherc0009b 20250820154339-2.401um-0.3m-77kev-masked" data-score="68.1" data-tier="A" data-signal="40.0" data-tex="13.0" data-dyn="16.0" data-pen="0.9" data-ink="0" data-seg="0" data-label="0"><td class="num rn">14</td><td><span class="scrollid">PHerc0009B</span><br><span class="volsub">2.401µm · 77keV</span></td><td class="num score" style="color:rgb(229,191,102)">68.1</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 40.0 / texture 13.0 / dynamic 16.0"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:14.4%"></span><span class="cb-d" style="width:17.8%"></span></div></td><td class="num">40.0</td><td class="num">13.0</td><td class="num">16.0</td><td class="num pen">−0.9</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0009B/volumes/20250820154339-2.401um-0.3m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9438</div></div><div><div class="k">gradient energy</div><div class="v">5.209</div></div><div><div class="k">dynamic range</div><div class="v">160</div></div><div><div class="k">chunks decoded</div><div class="v">20</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.944 · texture 13.0/30 — gradient energy 5.21 · dynamic 16.0/20 — range 160 · saturation penalty −0.9</div></td></tr>
+<tr class="vol" data-rank="15" data-id="pherc0841 20260319124803-2.403um-0.2m-77kev-masked" data-score="68.1" data-tier="A" data-signal="40.0" data-tex="13.0" data-dyn="15.3" data-pen="0.2" data-ink="0" data-seg="0" data-label="0"><td class="num rn">15</td><td><span class="scrollid">PHerc0841</span><br><span class="volsub">2.403µm · 77keV</span></td><td class="num score" style="color:rgb(229,191,102)">68.1</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 40.0 / texture 13.0 / dynamic 15.3"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:14.4%"></span><span class="cb-d" style="width:17.0%"></span></div></td><td class="num">40.0</td><td class="num">13.0</td><td class="num">15.3</td><td class="num pen">−0.2</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0841/volumes/20260319124803-2.403um-0.2m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9530</div></div><div><div class="k">gradient energy</div><div class="v">5.191</div></div><div><div class="k">dynamic range</div><div class="v">153</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.953 · texture 13.0/30 — gradient energy 5.19 · dynamic 15.3/20 — range 153 · saturation penalty −0.2</div></td></tr>
+<tr class="vol" data-rank="16" data-id="pherc1203 20260319130212-2.403um-0.2m-77kev-masked" data-score="67.7" data-tier="A" data-signal="40.0" data-tex="12.9" data-dyn="14.9" data-pen="0.1" data-ink="0" data-seg="0" data-label="0"><td class="num rn">16</td><td><span class="scrollid">PHerc1203</span><br><span class="volsub">2.403µm · 77keV</span></td><td class="num score" style="color:rgb(228,190,102)">67.7</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 40.0 / texture 12.9 / dynamic 14.9"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:14.3%"></span><span class="cb-d" style="width:16.6%"></span></div></td><td class="num">40.0</td><td class="num">12.9</td><td class="num">14.9</td><td class="num pen">−0.1</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc1203/volumes/20260319130212-2.403um-0.2m-77keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9794</div></div><div><div class="k">gradient energy</div><div class="v">5.166</div></div><div><div class="k">dynamic range</div><div class="v">149</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.979 · texture 12.9/30 — gradient energy 5.17 · dynamic 14.9/20 — range 149 · saturation penalty −0.1</div></td></tr>
 <tr class="vol" data-rank="17" data-id="pherc0358 20250821151737-9.362um-1.2m-113kev-masked" data-score="66.3" data-tier="A" data-signal="37.2" data-tex="18.0" data-dyn="11.2" data-pen="0.1" data-ink="0" data-seg="0" data-label="0"><td class="num rn">17</td><td><span class="scrollid">PHerc0358</span><br><span class="volsub">9.362µm · 113keV</span></td><td class="num score" style="color:rgb(225,188,102)">66.3</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 37.2 / texture 18.0 / dynamic 11.2"><span class="cb-s" style="width:41.3%"></span><span class="cb-t" style="width:20.0%"></span><span class="cb-d" style="width:12.4%"></span></div></td><td class="num">37.2</td><td class="num">18.0</td><td class="num">11.2</td><td class="num pen">−0.1</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc0358/volumes/20250821151737-9.362um-1.2m-113keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.8374</div></div><div><div class="k">gradient energy</div><div class="v">7.186</div></div><div><div class="k">dynamic range</div><div class="v">112</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 37.2/40 — nonzero voxel fraction 0.837 · texture 18.0/30 — gradient energy 7.19 · dynamic 11.2/20 — range 112 · saturation penalty −0.1</div></td></tr>
 <tr class="vol" data-rank="18" data-id="phercparis4 20260310170716-45.532um-11.0m-74kev-masked" data-score="66.3" data-tier="A" data-signal="31.6" data-tex="20.1" data-dyn="14.8" data-pen="0.2" data-ink="0" data-seg="0" data-label="0"><td class="num rn">18</td><td><span class="scrollid">PHercParis4</span><br><span class="volsub">45.532µm · 74keV</span></td><td class="num score" style="color:rgb(225,188,102)">66.3</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 31.6 / texture 20.1 / dynamic 14.8"><span class="cb-s" style="width:35.1%"></span><span class="cb-t" style="width:22.3%"></span><span class="cb-d" style="width:16.4%"></span></div></td><td class="num">31.6</td><td class="num">20.1</td><td class="num">14.8</td><td class="num pen">−0.2</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHercParis4/volumes/20260310170716-45.532um-11.0m-74keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.7119</div></div><div><div class="k">gradient energy</div><div class="v">8.032</div></div><div><div class="k">dynamic range</div><div class="v">148</div></div><div><div class="k">chunks decoded</div><div class="v">21</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 31.6/40 — nonzero voxel fraction 0.712 · texture 20.1/30 — gradient energy 8.03 · dynamic 14.8/20 — range 148 · saturation penalty −0.2</div></td></tr>
 <tr class="vol" data-rank="19" data-id="pherc1299 20260309130042-2.399um-0.2m-78kev-masked" data-score="66.0" data-tier="A" data-signal="40.0" data-tex="11.6" data-dyn="14.4" data-pen="0.1" data-ink="0" data-seg="0" data-label="0"><td class="num rn">19</td><td><span class="scrollid">PHerc1299</span><br><span class="volsub">2.399µm · 78keV</span></td><td class="num score" style="color:rgb(225,188,103)">66.0</td><td><span class="tier A">A</span></td><td><div class="compbar" title="signal 40.0 / texture 11.6 / dynamic 14.4"><span class="cb-s" style="width:44.4%"></span><span class="cb-t" style="width:12.9%"></span><span class="cb-d" style="width:16.0%"></span></div></td><td class="num">40.0</td><td class="num">11.6</td><td class="num">14.4</td><td class="num pen">−0.1</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHerc1299/volumes/20260309130042-2.399um-0.2m-78keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.9072</div></div><div><div class="k">gradient energy</div><div class="v">4.651</div></div><div><div class="k">dynamic range</div><div class="v">144</div></div><div><div class="k">chunks decoded</div><div class="v">20</div></div><div><div class="k">dead slices</div><div class="v">0</div></div></div><div class="why">signal 40.0/40 — nonzero voxel fraction 0.907 · texture 11.6/30 — gradient energy 4.65 · dynamic 14.4/20 — range 144 · saturation penalty −0.1</div></td></tr>
@@ -369,7 +268,7 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
 <tr class="vol" data-rank="64" data-id="phercmanb 20260323091048-2.399um-0.2m-78kev-masked" data-score="13.5" data-tier="C" data-signal="32.8" data-tex="4.0" data-dyn="6.8" data-pen="30.0" data-ink="0" data-seg="0" data-label="0"><td class="num rn">64</td><td><span class="scrollid">PHercMANB</span><br><span class="volsub">2.399µm · 78keV</span></td><td class="num score" style="color:rgb(138,127,106)">13.5</td><td><span class="tier C">C</span></td><td><div class="compbar" title="signal 32.8 / texture 4.0 / dynamic 6.8"><span class="cb-s" style="width:36.4%"></span><span class="cb-t" style="width:4.4%"></span><span class="cb-d" style="width:7.6%"></span></div></td><td class="num">32.8</td><td class="num">4.0</td><td class="num">6.8</td><td class="num pen">−30.0</td><td class="num">0</td><td class="num">0</td><td></td></tr><tr class="detail hidden"><td colspan="12"><div class="detail-grid"><div><div class="k">full root</div><div class="v"><code>community-uploads/forrest/volcomp/PHercMANB/volumes/20260323091048-2.399um-0.2m-78keV-masked.zarr</code></div></div><div><div class="k">nonzero fraction</div><div class="v">0.7371</div></div><div><div class="k">gradient energy</div><div class="v">1.581</div></div><div><div class="k">dynamic range</div><div class="v">68</div></div><div><div class="k">chunks decoded</div><div class="v">24</div></div><div><div class="k">dead slices</div><div class="v">11</div></div></div><div class="why">signal 32.8/40 — nonzero voxel fraction 0.737 · texture 4.0/30 — gradient energy 1.58 · dynamic 6.8/20 — range 68 · dead slices: 11</div></td></tr></tbody></table></div>
 </div>
 
-<div class="panel" id="method"><h2>Scan-health score (one diagnostic)</h2>
+<div class="panel"><h2>Scan-health score (one diagnostic)</h2>
 <div class="method">
   <div><table class="wtable">
     <tr><td>Signal presence (nonzero voxel fraction)</td><td>40</td></tr>
@@ -389,10 +288,9 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
   segmentation and labeling effort goes where the data is strongest. The
   weights are a judgment call, published with every score.</div>
   <p style="color:var(--muted);font-size:.88rem;line-height:1.65;margin-top:1rem">
-  Campaign request: up to <b>12 &times; 128&sup3;</b> chunks per volume,
-  spread across the shard grid. Sparse volumes may decode fewer; the achieved
-  count and sampling provenance stay attached to every result. Decoded with the
-  vendored libvolcomp via
+  Sampling: 4 &times; 128&sup3; chunks per volume, spread per-dimension across
+  the shard grid (flat-index spread degenerates to an edge line on non-cubic
+  grids). Decoded with the vendored libvolcomp via
   <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>.</p></div>
 </div></div>
 
@@ -410,62 +308,26 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
     <p><code>scrollq-health --root &lt;volume&gt;</code></p></div>
 </div></div>
 
-</main>
+</div><!-- /wrap -->
 
 <footer><div class="wrap">
   Generated by <a href="https://github.com/Svyable/scrollq">ScrolIQ</a> from public dl.ash2txt.org volumes,
-  2026-10-01 00:52 UTC. Scores are heuristic and published with their components — audit the
+  2026-10-01 00:49 UTC. Scores are heuristic and published with their components — audit the
   weights, don't worship the ranking. Companion:
   <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>.
   · <a href="./september-2026.html">September 2026 writeup →</a>
 </div></footer>
 
 <script>
-(function dashboard(){
+(function(){
   const tb = document.querySelector("#lb tbody");
   const rows = Array.from(tb.querySelectorAll("tr.vol"));
   rows.forEach(r => { r._detail = r.nextElementSibling; });
-
-  const q = document.getElementById("q");
-  const resultCount = document.getElementById("resultCount");
-  let sortK = "score", asc = false, tierF = "", qF = "", currentRows = rows.slice();
-
+  let sortK = "score", asc = false, tierF = "", qF = "";
   function tierOf(r){ return r.dataset.tier; }
-  function scoreStats(sample){
-    const values = sample.map(r => Number(r.dataset.score)).filter(Number.isFinite).sort((a,b) => a-b);
-    if (!values.length) return null;
-    const mean = values.reduce((a,b) => a+b, 0) / values.length;
-    const mid = Math.floor(values.length / 2);
-    const median = values.length % 2 ? values[mid] : (values[mid - 1] + values[mid]) / 2;
-    const desc = values.slice().reverse();
-    const qIndex = Math.max(0, Math.ceil(desc.length * .25) - 1);
-    return { mean, median, topQ: desc[qIndex] };
-  }
-  function updateAnalytics(sample){
-    const stats = scoreStats(sample);
-    const scrolls = new Set(sample.map(r => r.querySelector(".scrollid")?.textContent.trim()).filter(Boolean));
-    const tiers = {S:0,A:0,B:0,C:0};
-    sample.forEach(r => { if (tiers[r.dataset.tier] !== undefined) tiers[r.dataset.tier]++; });
-    const segmented = sample.filter(r => Number(r.dataset.seg) > 0).length;
-    document.getElementById("analyticsSub").textContent =
-      sample.length ? `${sample.length} visible volumes · ${scrolls.size} scrolls` : "No rows match the current view";
-    document.getElementById("meanScore").textContent = stats ? stats.mean.toFixed(1) : "—";
-    document.getElementById("medianScore").textContent = stats ? stats.median.toFixed(1) : "—";
-    document.getElementById("topQuartile").textContent = stats ? `≥ ${stats.topQ.toFixed(1)}` : "—";
-    document.getElementById("uniqueScrolls").textContent = scrolls.size || "—";
-    document.getElementById("tierMix").textContent = `${tiers.S} / ${tiers.A} / ${tiers.B} / ${tiers.C}`;
-    document.getElementById("segmentCoverage").textContent = `${segmented} / ${sample.length}`;
-  }
-  function matchesFilter(r){
-    if (!tierF) return true;
-    if (tierF === "label") return r.dataset.label === "1";
-    if (tierF === "unlabeled") return Number(r.dataset.ink) === 0;
-    if (tierF === "segments") return Number(r.dataset.seg) > 0;
-    return tierOf(r) === tierF;
-  }
   function apply(){
     let vis = rows.filter(r =>
-      matchesFilter(r) &&
+      (!tierF || (tierF === "label" ? r.dataset.label === "1" : tierOf(r) === tierF)) &&
       (!qF || r.dataset.id.toLowerCase().includes(qF)));
     vis.sort((a, b) => {
       const x = parseFloat(a.dataset[sortK] ?? a.dataset.rank),
@@ -479,27 +341,11 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
     vis.forEach((r, i) => {
       r.classList.remove("hidden");
       r._detail.classList.add("hidden");
-      r.setAttribute("aria-expanded", "false");
       r.querySelector(".rn").textContent = i + 1;
       frag.append(r, r._detail);
     });
-    rows.forEach(r => {
-      if (!vis.includes(r)) {
-        r.classList.add("hidden");
-        r._detail.classList.add("hidden");
-        r.setAttribute("aria-expanded", "false");
-      }
-    });
+    rows.forEach(r => { if (!vis.includes(r)) { r.classList.add("hidden"); r._detail.classList.add("hidden"); } });
     tb.append(frag);
-    currentRows = vis;
-    resultCount.textContent = `${vis.length} of ${rows.length} shown`;
-    updateAnalytics(vis);
-  }
-  function resetView(){
-    sortK = "score"; asc = false; tierF = ""; qF = ""; q.value = "";
-    document.querySelectorAll(".tierbtn").forEach(x => x.classList.toggle("on", x.dataset.t === ""));
-    document.querySelectorAll("#lb thead th .arr").forEach(e => e.remove());
-    apply();
   }
   document.querySelectorAll("#lb thead th[data-k]").forEach(th => {
     th.addEventListener("click", () => {
@@ -515,86 +361,18 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
     document.querySelectorAll(".tierbtn").forEach(x => x.classList.remove("on"));
     b.classList.add("on"); tierF = b.dataset.t; apply();
   }));
-  q.addEventListener("input", e => {
+  document.getElementById("q").addEventListener("input", e => {
     qF = e.target.value.trim().toLowerCase(); apply();
   });
-  document.getElementById("reset").addEventListener("click", resetView);
-
-  function csvCell(value){
-    const s = String(value ?? "").replace(/"/g, '""');
-    return '"' + s + '"';
-  }
-  document.getElementById("csv").addEventListener("click", () => {
-    const head = ["view_rank","volume","acquisition","score","tier","signal","texture","dynamic","penalty","ink_labels","segments","label_next","root"];
-    const lines = [head.map(csvCell).join(",")];
-    currentRows.forEach((r, i) => {
-      const root = r._detail.querySelector("code")?.textContent.trim() || "";
-      const values = [
-        i + 1,
-        r.querySelector(".scrollid")?.textContent.trim() || "",
-        r.querySelector(".volsub")?.textContent.trim() || "",
-        r.dataset.score, r.dataset.tier, r.dataset.signal, r.dataset.tex,
-        r.dataset.dyn, r.dataset.pen, r.dataset.ink, r.dataset.seg,
-        r.dataset.label === "1" ? "yes" : "no", root
-      ];
-      lines.push(values.map(csvCell).join(","));
-    });
-    const blob = new Blob([lines.join("
-")], {type:"text/csv;charset=utf-8"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "scrollq-filtered.csv";
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-  });
-
-  rows.forEach(r => {
-    r.tabIndex = 0;
-    r.setAttribute("role", "button");
-    r.setAttribute("aria-expanded", "false");
-    const toggle = () => {
-      if (!r._detail) return;
-      const opening = r._detail.classList.contains("hidden");
-      r._detail.classList.toggle("hidden");
-      r.setAttribute("aria-expanded", opening ? "true" : "false");
-    };
-    r.addEventListener("click", toggle);
-    r.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
-    });
-    const rootCode = r._detail?.querySelector("code");
-    if (rootCode) {
-      const btn = document.createElement("button");
-      btn.type = "button"; btn.className = "copybtn"; btn.textContent = "copy root";
-      btn.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(rootCode.textContent.trim());
-          btn.textContent = "copied";
-          setTimeout(() => { btn.textContent = "copy root"; }, 1200);
-        } catch {
-          btn.textContent = "copy failed";
-          setTimeout(() => { btn.textContent = "copy root"; }, 1400);
-        }
-      });
-      rootCode.parentElement.appendChild(btn);
-    }
-  });
-
-  const full = scoreStats(rows);
-  if (full) {
-    document.getElementById("distMeta").textContent =
-      `Full corpus: mean ${full.mean.toFixed(1)} · median ${full.median.toFixed(1)} · top quartile ≥ ${full.topQ.toFixed(1)}.`;
-  }
-  document.addEventListener("keydown", e => {
-    const tag = document.activeElement?.tagName;
-    if (e.key === "/" && tag !== "INPUT" && tag !== "TEXTAREA") {
-      e.preventDefault(); q.focus();
-    } else if (e.key === "Escape" && (qF || tierF)) {
-      resetView(); q.blur();
-    }
-  });
+  rows.forEach(r => r.addEventListener("click", () => {
+    if (r._detail) r._detail.classList.toggle("hidden");
+  }));
+  // reflect the initial sort (score, descending) in the header
   const scoreTh = document.querySelector('#lb thead th[data-k="score"]');
-  if (scoreTh) { const s0 = document.createElement("span"); s0.className = "arr"; s0.textContent = " ▼"; scoreTh.appendChild(s0); }
+  if (scoreTh) {
+    const s0 = document.createElement("span"); s0.className = "arr";
+    s0.textContent = " ▼"; scoreTh.appendChild(s0);
+  }
   apply();
 })();
 </script>
