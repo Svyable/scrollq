@@ -162,6 +162,11 @@ The repository includes the exact outputs behind the September 30, 2026 campaign
 | Acquisition dropout scan found no verified dead slices in the campaign | **0 hits across 64 volumes** |
 | Label coverage was highly concentrated in the open-data snapshot | **70 / 70** discovered ink-detection roots were on PHercParis4; the top quality-ranked scrolls had none |
 | High-quality, unlabeled targets were made actionable | **14** top-quartile volumes were flagged **“label next”** |
+| First Letters targets are a band, not a winner | All **22** scans qualified; only **PHerc0800** is on the frontier in both disjoint resample runs (subset ρ = **0.7211**) — [`first-letters-qualifier-n24-dense/`](artifacts/2026-09-30-first-letters-qualifier-n24-dense/) |
+| Exact-scan surface-prediction CT support reproduces an independent survey | **15 / 18** external values inside the native 95% interval, mean \|Δ\| **0.043**; first exact-scan numbers for 4 scans; a same-scroll higher-resolution survey overstated PHerc1203 by ~0.24 — [`first-letters-support/`](artifacts/2026-09-30-first-letters-support/) |
+| Open-bucket chunk integrity | **1** mismatched level in 65 volumes (PHerc0343P L0: 555 / 8,543 objects); **0** in the 23 prize volumes (4,228,772 objects) — [`bucket-chunk-audit/`](artifacts/2026-10-01-bucket-chunk-audit/) |
+| Scan metrics vs documented protocol quality (pre-registered) | **Negative**: `otsu_eta` reverses in 3/4 registered pairs, `edge_sharpness` in 2/4 — do not compare scores across scans of one scroll — [`protocol-pairs/`](artifacts/2026-10-01-protocol-pairs/) |
+| Hand-entered prize manifests match official sources | Grand Prize **13 / 13**, First Letters **22 / 22** — [`prize-targets/`](artifacts/2026-10-01-prize-targets/), `tests/test_prize_manifest.py` |
 
 The point is not that one heuristic ranking is final. The point is that **data quality and label coverage can be measured together**, turning an implicit resource-allocation decision into an inspectable one.
 

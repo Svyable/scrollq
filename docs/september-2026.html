@@ -69,13 +69,18 @@ Repo: <a href="https://github.com/Svyable/scrollq">github.com/Svyable/scrollq</a
 Live evaluator dashboard: <a href="./">svyable.github.io/scrollq</a><br>
 Challenge alignment: <a href="open-problems-alignment.md">ScrolIQ × Vesuvius Challenge open problems</a><br>
 Companion integrity gate: <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a><br>
-<span class="meta">Updated 2026-10-01: section (3) and the evidence table now describe mesh, ink-validation, and
-held-out geometry work merged on 2026-09-30, and the label-coverage join is corrected (16 → 14
-<code>label_next</code> entries; see the evidence table). No scan-health score changed.<br>
-Also added: First Letters target qualification and exact-scan surface-prediction CT support;
-new numbers are in sections (3)–(4) with their artifacts. Also added: an OME-Zarr v2 reader and
-whole-bucket chunk audit for the Challenge's open S3 bucket, a pre-registered protocol-pair test of the
-scan metrics (negative result), and prize manifests derived from pinned official sources.</span></div>
+<span class="meta"><b>Update log</b> (no scan-health score changed in any update):</span>
+<ul class="meta" style="margin:.3rem 0 0 1.1rem;padding:0">
+<li>Mesh, ink-validation and held-out geometry work described in section (3) and the evidence table;
+label-coverage join corrected (16 → 14 <code>label_next</code> entries).</li>
+<li>First Letters target qualification and exact-scan surface-prediction CT support
+(<a href="https://github.com/Svyable/scrollq/pull/43">#43</a>).</li>
+<li>OME-Zarr v2 reader and whole-bucket chunk audit, pre-registered protocol-pair test (negative result),
+and prize manifests derived from pinned official sources (<a href="https://github.com/Svyable/scrollq/pull/33">#33</a>).</li>
+<li>Fiber IQ trace-continuity audit, <code>scroliq-fiber</code> (<a href="https://github.com/Svyable/scrollq/pull/45">#45</a>), and
+provenance schema v4 binding held-out ink evidence to its exact report
+(<a href="https://github.com/Svyable/scrollq/pull/44">#44</a>).</li>
+</ul></div>
 
 <div class="stats">
 <div class="stat"><div class="n good">64 / 64</div><div class="l">listed volcomp scroll volumes scored<br>real L0 voxels decoded</div></div>
@@ -164,6 +169,10 @@ hypothesis and decision rule were committed before any real-data metric was comp
 <li><b>Prize manifests derived, not hand-copied.</b> <code>scroliq-manifest</code> derives the Grand Prize
 and First Letters target lists from the pinned official eligibility list and bucket index, and tests fail
 if the hand-entered manifests drift from them.</li>
+<li><b>Fiber trace continuity.</b> <code>scroliq-fiber</code> lists trace-break candidates in ordered
+fiber traces (gaps relative to each trace's median step, sharp turns), records the input's SHA-256, and
+fails on any parse error. It does not prove fiber or sheet identity, so the passport's fiber stage stays
+<code>unknown</code>.</li>
 <li><b>Evidence passports instead of synthetic readiness scores.</b> <code>scroliq-passport</code>
 organizes data, scan, label, winding, native TIFXYZ mesh, and ink-validation evidence around the
 Challenge bottlenecks and leaves unmeasured stages unknown.</li>
@@ -273,20 +282,25 @@ regression tests in <code>tests/test_prize_manifest.py</code>.</td></tr>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-health-verdicts"><code>artifacts/2026-09-30-health-verdicts/</code></a> —
 healthy TRAIN case and defective-data DO NOT TRAIN case.</td></tr>
 
-<tr><td>Native TIFXYZ mesh checks, ink falsification controls, held-out ink validation, and the
-fit/held-out geometry gap certificate are implemented and tested (synthetic fixtures; not yet run on
-real community segments)</td>
+<tr><td>Native TIFXYZ mesh checks, ink falsification controls, held-out ink validation, fiber trace
+continuity, and the fit/held-out geometry gap certificate are implemented and tested (synthetic
+fixtures; not yet run on real community segments or traces)</td>
 <td><a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/tifxyz_audit.py"><code>scroliq-mesh</code></a>,
 <a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_audit.py"><code>scroliq-ink-audit</code></a>,
-<a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_validation.py"><code>scroliq-ink-validate</code></a>, and
+<a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_validation.py"><code>scroliq-ink-validate</code></a>,
+<a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/fiber_audit.py"><code>scroliq-fiber</code></a>, and
 <a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/geometry_probe.py"><code>scrollq-geometry-probe</code></a>,
 with deterministic coverage in <code>tests/test_tifxyz_audit.py</code>, <code>tests/test_ink_audit.py</code>,
-<code>tests/test_ink_validation.py</code>, and <code>tests/test_geometry_probe.py</code>.</td></tr>
+<code>tests/test_ink_validation.py</code>, <code>tests/test_fiber_audit.py</code>, and
+<code>tests/test_geometry_probe.py</code>.</td></tr>
 
-<tr><td>Grand Prize provenance now requires public held-out validation per trained model</td>
+<tr><td>Grand Prize provenance requires public held-out validation per trained model, and (schema v4)
+binds each one to its exact <code>scroliq-ink-validate</code> report; the published example manifest
+validates with zero errors under v4</td>
 <td><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-provenance.md"><code>docs/grand-prize-provenance.md</code></a> —
 schema v2 requires public input + known ground truth, numeric metrics, a public evaluation run, a hashed
-result artifact, code-commit binding, and same-volume training/validation exclusion proof.</td></tr>
+result artifact, code-commit binding, and same-volume training/validation exclusion proof; schema v4 adds
+checkpoint, evaluated-array and falsification-control binding (<code>tests/test_provenance.py</code>).</td></tr>
 
 <tr><td>Challenge bottlenecks are represented without inventing downstream confidence</td>
 <td><a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md"><code>docs/open-problems-alignment.md</code></a>,
