@@ -394,6 +394,12 @@ def _fiber_audit(volume_root, *, status="pass", findings=None):
             "fallback_segments": 1,
             "fallback_fraction": 0.25,
         },
+        "control_line": {
+            "status": "measured",
+            "offset_candidates": 0,
+            "order_inversions": 0,
+            "nearest_index_monotonic": True,
+        },
         "parameters": {"gap_factor": 4.0, "turn_degrees": 60.0},
     }
 
@@ -409,6 +415,7 @@ def test_passport_accepts_exact_volume_fiber_audit_without_claiming_identity():
     assert fibers["status"] == "partial"
     assert fibers["audit_status"] == "pass"
     assert fibers["vc3d_fiber"]["version"] == 4
+    assert fibers["control_line"]["nearest_index_monotonic"] is True
     assert "does not establish that the trace follows one physical papyrus fiber" in fibers["limitation"]
     assert any(
         action["open_problem"] == "fiber-connectivity"
