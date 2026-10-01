@@ -21,6 +21,7 @@ SURFACES = {
     "protocol pairs": ({"protocol_pairs"},
                        {"bucket", "omezarr", "registration", "metrics",
                         "score"}),
+    "stability protocol v2": ({"stability_protocol"}, {"score"}),
 }
 
 
