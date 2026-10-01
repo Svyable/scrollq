@@ -16,8 +16,9 @@ from pathlib import Path
 from typing import Any
 
 from .grand_prize import DEFAULT_MANIFEST
+from .recto_coverage import audit_recto_coverage
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 RULES_URL = "https://scrollprize.org/prizes"
 CC_BY_NC_4 = {"CC-BY-NC-4.0", "CC BY-NC 4.0"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -1047,6 +1048,59 @@ def validate_manifest(
         _check_sha(mesh, p, errors)
         _verify_local_file(mesh, p, root_dir, errors)
 
+    recto_coverage = manifest.get("recto_coverage")
+    recto_coverage_proof: dict[str, Any] | None = None
+    if not isinstance(recto_coverage, dict):
+        _error(
+            errors,
+            "GP_RECTO_COVERAGE",
+            "recto_coverage",
+            "Grand Prize recto coverage manifest is required",
+        )
+    else:
+        expected_root = ct_volume.get("uri") if isinstance(ct_volume, dict) else None
+        recto_coverage_proof = audit_recto_coverage(
+            recto_coverage,
+            expected_volume_root=expected_root if isinstance(expected_root, str) else None,
+        )
+        if recto_coverage_proof.get("status") != "pass":
+            for message in _as_list(recto_coverage_proof.get("errors")):
+                _error(
+                    errors,
+                    "GP_RECTO_COVERAGE",
+                    "recto_coverage",
+                    str(message),
+                )
+
+        generated_by = recto_coverage.get("generated_by")
+        if (
+            not isinstance(generated_by, dict)
+            or generated_by.get("code_commit") != code.get("commit")
+        ):
+            _error(
+                errors,
+                "GP_RECTO_COMMIT",
+                "recto_coverage.generated_by.code_commit",
+                "recto coverage must pin the same code commit as the submission",
+            )
+
+        coverage_mesh_ids = set(
+            str(v) for v in _as_list(recto_coverage_proof.get("mesh_ids"))
+        )
+        package_mesh_ids = set(meshes)
+        if coverage_mesh_ids != package_mesh_ids:
+            missing = sorted(package_mesh_ids - coverage_mesh_ids)
+            extra = sorted(coverage_mesh_ids - package_mesh_ids)
+            _error(
+                errors,
+                "GP_RECTO_MESH_SET",
+                "recto_coverage.components",
+                (
+                    "recto coverage mesh IDs must exactly match submitted meshes; "
+                    f"missing={missing}, extra={extra}"
+                ),
+            )
+
     render_columns: dict[int, str] = {}
     for render_id, render in renders.items():
         p = f"renders[{render_id}]"
@@ -1277,6 +1331,7 @@ def validate_manifest(
         "warnings": warnings,
         "render_chains": chains,
         "held_out_validation_proofs": held_out_proofs,
+        "recto_coverage_proof": recto_coverage_proof,
     }
 
 
