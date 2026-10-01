@@ -247,6 +247,7 @@ def _fiber_stage(
         "counts": dict(audit.get("counts") or {}),
         "findings": list(audit.get("findings") or []),
         "vc3d_fiber": dict(audit.get("vc3d_fiber") or {}),
+        "control_line": dict(audit.get("control_line") or {}),
         "parameters": dict(audit.get("parameters") or {}),
         "limitation": (
             "A passing Fiber IQ audit establishes persisted-format/schema provenance "
