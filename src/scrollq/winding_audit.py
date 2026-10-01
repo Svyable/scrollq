@@ -582,6 +582,7 @@ def audit_dataset(
     required_roles: Iterable[str] = (),
     z_range: tuple[float, float] | None = None,
     z_bins: int = 12,
+    volume_root: str | None = None,
 ) -> dict[str, Any]:
     """Audit conventional spiral winding inputs under one dataset root."""
     dataset = Path(dataset)
@@ -624,6 +625,7 @@ def audit_dataset(
         "diagnostic": "winding-annotation-audit",
         "open_problem": OPEN_PROBLEM_URL,
         "dataset": str(dataset),
+        "volume_root": volume_root,
         "status": status,
         "present_roles": present_roles,
         "missing_roles": missing_roles,
@@ -677,6 +679,13 @@ def main() -> None:
         help="fail when this conventional winding role is absent; repeatable",
     )
     ap.add_argument(
+        "--volume-root",
+        help=(
+            "optional exact ScrollQ/CT volume root binding; required when this "
+            "artifact will be attached to a ScrolIQ passport"
+        ),
+    )
+    ap.add_argument(
         "--z-range",
         type=_parse_z_range,
         help="optional fit/evaluation axial window as BEGIN,END in L0 voxel z",
@@ -702,6 +711,7 @@ def main() -> None:
         required_roles=args.require_role,
         z_range=args.z_range,
         z_bins=args.z_bins,
+        volume_root=args.volume_root,
     )
     if args.out:
         out = Path(args.out)
