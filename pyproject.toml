@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "scrollq"
 version = "0.1.0"
-description = "Train on the best first: data-quality scores for Vesuvius scroll volumes"
+description = "Challenge-aligned diagnostics for Vesuvius scroll data and virtual unwrapping"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -22,8 +22,10 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
+    "Pillow",
     "requests",
-    "zarr-pyramid-audit>=0.3.0",
+    "tifffile>=2024.1",
+    "zarr-pyramid-audit @ git+https://github.com/Svyable/zarr-pyramid-audit.git",
 ]
 
 [project.urls]
@@ -37,6 +39,15 @@ scrollq-leaderboard = "scrollq.leaderboard:main"
 scrollq-coverage = "scrollq.coverage:main"
 scrollq-health = "scrollq.health:main"
 scrollq-grand-prize = "scrollq.grand_prize:main"
+scrollq-geometry-probe = "scrollq.geometry_probe:main"
+scroliq-passport = "scrollq.passport:main"
+scroliq-scan-map = "scrollq.scan_map:main"
+scroliq-provenance = "scrollq.provenance:main"
+scroliq-ink-validate = "scrollq.ink_validation:main"
+scroliq-winding = "scrollq.winding_audit:main"
+scroliq-mesh = "scrollq.tifxyz_audit:main"
+scroliq-ink-audit = "scrollq.ink_audit:main"
+scroliq-recto-coverage = "scrollq.recto_coverage:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

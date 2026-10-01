@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "brand": "ScrolIQ",
+  "package": "scrollq",
+  "volume_root": "community-uploads/forrest/volcomp/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr",
+  "open_problems_source": "https://scrollprize.org/2026_open_problems",
+  "stages": {
+    "data": {
+      "status": "measured",
+      "open_problem": "data-scale",
+      "sampling": {},
+      "evidence": "Real level-0 chunks are decoded through the volcomp path and read provenance is retained with the score."
+    },
+    "scan": {
+      "status": "measured",
+      "open_problem": "scan-diagnostics",
+      "quality_score": 77.4,
+      "metrics": {
+        "nonzero_frac": 1.0,
+        "grad_energy": 9.1367,
+        "dyn_range": 146.0,
+        "sat_frac": 0.0001,
+        "dead_slices": 0,
+        "chunks_decoded": 2
+      },
+      "components": {
+        "signal_40": 40.0,
+        "texture_30": 22.8,
+        "dynamic_20": 14.6,
+        "pen_sat": 0.0,
+        "pen_dead": 0.0
+      },
+      "sampling": {},
+      "limitation": "The legacy ScrolIQ score is sparse whole-volume triage. Spatial diagnostics, when supplied, remain sampled observations rather than a claim that every voxel has been characterized.",
+      "spatial_map": {
+        "status": "measured",
+        "coordinate_space": "level0-voxel-index",
+        "sampling": {
+          "grid_per_dimension": 6,
+          "chunks_per_shard": 1,
+          "rotate": 0,
+          "candidate_shards": 216,
+          "chunks_decoded": 48,
+          "status_counts": {
+            "unstored-shard": 159,
+            "decoded": 48,
+            "sparse-mask": 9
+          }
+        },
+        "metric_distribution": {
+          "nonzero_frac": {
+            "min": 0.004282,
+            "p10": 0.009461,
+            "median": 0.903377,
+            "p90": 0.999997,
+            "max": 1.0
+          },
+          "grad_energy": {
+            "min": 0.013853,
+            "p10": 0.030983,
+            "median": 7.107719,
+            "p90": 11.011927,
+            "max": 11.854323
+          },
+          "dyn_range": {
+            "min": 0.0,
+            "p10": 0.0,
+            "median": 138.0,
+            "p90": 157.3,
+            "max": 188.0
+          },
+          "sat_frac": {
+            "min": 0.0,
+            "p10": 0.0,
+            "median": 5e-05,
+            "p90": 0.000359,
+            "max": 0.001195
+          }
+        }
+      }
+    },
+    "surface": {
+      "status": "unknown",
+      "open_problem": "surface-topology",
+      "reason": "no surface-prediction or surface-support diagnostic was supplied"
+    },
+    "mesh": {
+      "status": "unknown",
+      "open_problem": "mesh-connectivity",
+      "reason": "no tifxyz or mesh diagnostic was supplied"
+    },
+    "fibers": {
+      "status": "unknown",
+      "open_problem": "fiber-connectivity",
+      "reason": "no fiber tracing evidence was supplied"
+    },
+    "spiral": {
+      "status": "unknown",
+      "open_problem": "spiral-fitting",
+      "reason": "no spiral fit or constraint evaluation was supplied"
+    },
+    "labels": {
+      "status": "partial",
+      "open_problem": "label-quality",
+      "ink_labels": 0,
+      "segments": 0,
+      "label_next": true,
+      "limitation": "Coverage measures where labels exist; it does not yet measure whether surface or fiber labels are physically well localized."
+    },
+    "ink": {
+      "status": "unknown",
+      "open_problem": "ink-reliability",
+      "reason": "no held-out ink inference, leakage audit, or stability evidence was supplied"
+    }
+  },
+  "next_actions": [
+    {
+      "priority": "high",
+      "action": "treat this volume as a candidate for new labels, then measure label localization quality",
+      "open_problem": "label-quality"
+    },
+    {
+      "priority": "next-evidence",
+      "action": "run spatial surface-support/topology diagnostics on released predictions or tifxyz",
+      "open_problem": "surface-topology"
+    },
+    {
+      "priority": "next-evidence",
+      "action": "validate mesh connectivity and sheet-switch risk before interpreting flattened renders",
+      "open_problem": "mesh-connectivity"
+    },
+    {
+      "priority": "next-evidence",
+      "action": "require held-out, non-overlapping validation before treating ink output as evidence",
+      "open_problem": "ink-reliability"
+    }
+  ],
+  "interpretation": "The existing quality score describes sampled CT health only. Unknown surface, mesh, spiral, label-localization, fiber, or ink state remains unknown."
+}

@@ -1,11 +1,11 @@
-"""2027 Grand Prize target qualification for ScrollQ.
+"""2027 Grand Prize target qualification for ScrolIQ.
 
-This module combines ScrollQ's existing scan-quality signal with current,
+This module combines ScrolIQ's existing scan-quality signal with current,
 explicitly versioned public bootstrap metadata. It intentionally does not
 invent a single weighted "best scroll" score. Candidates are compared using
 a Pareto frontier over two directly inspectable axes:
 
-1. ScrollQ scan-quality score for the exact prize-eligible volume.
+1. ScrolIQ scan-quality score for the exact prize-eligible volume.
 2. Existing public segment count for that scroll.
 
 Released surface and lasagna predictions are treated as bootstrap requirements,
@@ -246,9 +246,9 @@ def qualify(
 ) -> dict:
     """Build a transparent target-qualification report.
 
-    The primary result always uses ScrollQ quality and public segment count.
+    The primary result always uses ScrolIQ quality and public segment count.
     Optional imported surface-support evidence is reported as a separate
-    sensitivity analysis and never changes ScrollQ's published quality score.
+    sensitivity analysis and never changes ScrolIQ's published quality score.
     """
     manifest = manifest or DEFAULT_MANIFEST
     support_by_scroll = {
@@ -374,7 +374,7 @@ def qualify(
             "rule": (
                 "Sensitivity-only Pareto frontier among targets with exact-volume "
                 "surface-support evidence. It does not replace the primary frontier "
-                "and does not alter ScrollQ scores."
+                "and does not alter ScrolIQ scores."
             ),
             "comparable_targets": sorted(comparable_scrolls),
             "excluded_targets": excluded,

@@ -1,65 +1,283 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ScrollQ — September 2026 Progress Prize submission</title>
+<title>September 2026 submission — ScrolIQ</title>
+<meta name="description" content="ScrolIQ: reproducible scan-health triage and diagnostic provenance for Vesuvius scroll data. Measure the bottleneck before spending scarce annotation and GPU time.">
 <style>
-body{font-family:-apple-system,system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;color:#1a1a1a;line-height:1.55}
-h1{font-size:1.7rem}h2{font-size:1.25rem;margin-top:2rem}
-.note{background:#fff8e6;border:1px solid #e6c200;padding:.8rem 1rem;border-radius:6px}
-table{border-collapse:collapse;width:100%;font-size:.85rem;margin:1rem 0}
-th,td{border:1px solid #ddd;padding:.35rem .5rem;text-align:left}
-th{background:#f5f5f5}
-code{font-size:.8rem;background:#f4f4f4;padding:.1rem .3rem;border-radius:3px}
-a{color:#0b5fff}
+:root{--bg:#0d0b08;--panel:#161310;--panel2:#1c1813;--line:#2c251b;
+--ink:#ece3d2;--muted:#a89880;--dim:#6f6350;
+--ember:#ff7a1a;--gold:#ffd166;--amber:#ffb347;
+--good:#8fd694;--warn:#ff9e5e;--bad:#ff6b6b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+-webkit-font-smoothing:antialiased;line-height:1.65}
+a{color:var(--amber)}
+.wrap{max-width:960px;margin:0 auto;padding:0 1.25rem}
+.hero{padding:4rem 0 2.5rem;
+background:radial-gradient(1200px 500px at 70% -10%,rgba(255,122,26,.14),transparent 60%),
+radial-gradient(800px 400px at 15% 110%,rgba(255,209,102,.08),transparent 60%),var(--bg)}
+.eyebrow{letter-spacing:.28em;font-size:.72rem;color:var(--ember);font-weight:700}
+.hero h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2rem,5vw,3.2rem);
+margin:.4rem 0 .2rem;font-weight:700;letter-spacing:-.02em}
+.tagline{font-size:1.2rem;margin:.2rem 0 1rem}
+.tagline em{color:var(--amber);font-style:normal;font-weight:600}
+.byline{color:var(--muted);font-size:.92rem}
+.statusbox{background:rgba(22,19,16,.85);border:1px solid var(--line);border-radius:12px;
+padding:1rem 1.25rem;margin-top:1.5rem;font-size:.9rem;color:var(--muted)}
+.statusbox b{color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-top:2rem}
+.stat{background:rgba(22,19,16,.85);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem}
+.stat .n{font-size:1.8rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.stat .n.good{color:var(--good)} .stat .n.warn{color:var(--warn)}
+.stat .l{font-size:.78rem;color:var(--muted);margin-top:.25rem;line-height:1.4}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.5rem;margin:0 0 1.5rem}
+.panel h2{margin:.1rem 0 1rem;font-family:Georgia,serif;font-size:1.5rem}
+.panel h2 .q{color:var(--ember)}
+.panel p{color:var(--muted);font-size:.95rem}
+.panel p b,.panel li b{color:var(--ink)}
+.panel ul{color:var(--muted);font-size:.95rem}
+.panel li{margin:.5rem 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;margin:.8rem 0}
+thead th{text-align:left;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;
+color:var(--muted);padding:.6rem .5rem;border-bottom:1px solid var(--line)}
+tbody td{padding:.6rem .5rem;border-bottom:1px solid #211c14;vertical-align:top;color:var(--muted)}
+tbody td b{color:var(--ink)}
+tbody tr:hover td{background:#1e1913}
+code{font-size:.8rem;color:var(--amber)}
+.callout{border-left:3px solid var(--ember);padding:.6rem 1rem;background:#171208;
+border-radius:0 8px 8px 0;color:var(--muted);font-size:.93rem;margin-top:1rem}
+.callout.warn{border-left-color:var(--gold)}
+.meta{color:var(--dim);font-size:.85rem}
+.suite{display:flex;gap:1rem;flex-wrap:wrap}
+.suite .card{flex:1;min-width:250px;background:var(--panel2);border:1px solid var(--line);
+border-radius:12px;padding:1.1rem 1.25rem}
+.suite .card h3{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.14em;color:var(--ember);text-transform:uppercase}
+.suite .card p{margin:.3rem 0;font-size:.9rem}
+footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.4rem 0 3rem;color:var(--dim);font-size:.82rem}
+footer a{color:var(--muted)}
 </style></head><body>
-<h1>ScrollQ — train on the best first</h1>
-<p><strong>September 2026 Vesuvius Progress Prize submission</strong> by Sven
-(solo) + Muse (AI assistant).
-Repo: <a href="https://github.com/Svyable/scrollq">Svyable/scrollq</a> (MIT) ·
-<a href="https://svyable.github.io/scrollq/">Live leaderboard</a></p>
 
-<h2>1. What did you do?</h2>
-<p>Built <strong>ScrollQ</strong>, a data-quality triage system for the
-Vesuvius scroll volumes. It decodes real voxels from every scroll volume —
-via the vendored volcomp decoder, no approximations — and scores each
-volume 0–100 on signal presence, texture energy, dynamic range, and an
-acquisition-artifact (dead-slice) scan. All 64 scroll volumes on
-dl.ash2txt.org scored, published as a ranked leaderboard with every
-component exposed.</p>
+<header class="hero"><div class="wrap">
+<div class="eyebrow">VESUVIUS CHALLENGE · SEPTEMBER 2026 PROGRESS PRIZE</div>
+<h1>ScrolIQ</h1>
+<p class="tagline">Reproducible scan-health triage and diagnostic provenance. <em>Measure the bottleneck first.</em></p>
+<p class="byline">Submission by <b><a href="https://github.com/Svyable">Sven</a></b> (+ Muse, AI assistant)</p>
 
-<h2>2. How does this increase the probability of reading complete scrolls?</h2>
-<p>Segmentation is the bottleneck: expert hours and GPU time are scarce, and
-every volume costs both. ScrollQ directs that scarce effort where the data
-is healthiest. The headline finding: <strong>all 70 published ink-detection
-labels sit on PHercParis4 — quality rank 13 of 39</strong> — while the
-healthiest volumes (PHerc0813 at 77.4, PHerc0139 at 75.9 with 114 segments
-but zero ink labels) have no labels at all. The leaderboard flags 16
-top-quartile volumes as <strong>🎯 label next</strong>: the highest-leverage
-labeling targets in the open data. Same scanner, same settings produced both
-the best and worst volumes — data health varies more than hardware does.</p>
+<div class="statusbox"><b>Contribution URLs</b><br>
+Repo: <a href="https://github.com/Svyable/scrollq">github.com/Svyable/scrollq</a> (MIT)<br>
+Live evaluator dashboard: <a href="./">svyable.github.io/scrollq</a><br>
+Challenge alignment: <a href="open-problems-alignment.md">ScrolIQ × Vesuvius Challenge open problems</a><br>
+Companion integrity gate: <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a><br>
+<span class="meta">Updated 2026-10-01: section (3) and the evidence table now describe mesh, ink-validation, and
+held-out geometry work merged on 2026-09-30, and the label-coverage join is corrected (16 → 14
+<code>label_next</code> entries; see the evidence table). No scan-health score changed.</span></div>
 
-<h2>3. Evidence</h2>
-<table>
-<tr><th>claim</th><th>evidence</th></tr>
-<tr><td>64/64 scroll volumes scored</td><td><code>artifacts/2026-09-30-scrollq/volumes.json</code> in the repo; every score ships its components</td></tr>
-<tr><td>Ranking is stable, not sampling noise</td><td>Independent resample: Spearman ρ = 0.876, mean |Δscore| = 3.07, top-10 overlap 8/10</td></tr>
-<tr><td>No acquisition dropouts</td><td>Dead-slice scan (dense-chunk, both-neighbor rule): 0 hits across 64 volumes — a clean bill, published as a result</td></tr>
-<tr><td>Labels are misallocated</td><td>Join with the full S3 bucket crawl (957 roots): 70/70 ink-detection roots on PHercParis4; top-12 quality scrolls hold 0</td></tr>
-<tr><td>Reproducible</td><td><code>pip install git+https://github.com/Svyable/scrollq.git</code>, then <code>scrollq-score</code> / <code>scrollq-coverage</code> / <code>scrollq-leaderboard</code></td></tr>
-</table>
+<div class="stats">
+<div class="stat"><div class="n good">64 / 64</div><div class="l">listed volcomp scroll volumes scored<br>real L0 voxels decoded</div></div>
+<div class="stat"><div class="n">22.9</div><div class="l">mean chunks decoded / volume<br>24-sample, 5×5×5 campaign</div></div>
+<div class="stat"><div class="n warn">0.7944</div><div class="l">Spearman ρ vs resample<br>below our 0.85 gate; provenance shows<br>only 2/64 truly disjoint (mean 63% re-read)</div></div>
+<div class="stat"><div class="n">14</div><div class="l">top-quartile exact-volume entries<br>flagged “label next”</div></div>
+</div>
+</div></header>
 
-<h2>4. Honest scope</h2>
-<div class="note">ScrollQ is a <strong>triage signal, not a readability
-claim</strong>. It does not detect ink and does not predict which scroll
-reads first. The weights are a judgment call, published with every score —
-audit them, don't worship the ranking. During development a naive dead-slice
-rule false-positived on mask geometry; it was tightened and the clean bill
-above is what survived verification.</div>
+<div class="wrap" style="margin-top:2.5rem">
 
-<p>Companion entry: <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>
-("don't train on lies" — corruption detection for the open data).
-ScrollQ is "train on the best first." Together they are one data-quality
-suite: <code>scrollq-health</code> runs the integrity audit and the quality
-score on any volume and issues a single verdict —
-<strong>TRAIN / CAUTION / DO NOT TRAIN</strong>.</p>
+<div class="panel"><h2><span class="q">(1)</span> Which scroll data did you work on?</h2>
+<p>ScrolIQ was run on the public scroll-volume corpus rather than a hand-picked showcase:</p>
+<ul>
+<li><b>64 / 64 listed volcomp CT volumes</b> in <code>volumes.txt</code>, decoded from the public
+<code>dl.ash2txt.org</code> store with the real volcomp decoder. The frozen September campaign uses
+24 requested L0 chunks per volume from a 5×5×5 candidate grid.</li>
+<li><b>Open-data label and segment coverage</b> joined from the companion S3 inventory. The September
+inventory found 70 ink-detection roots associated with PHercParis4; the exact-volume join leaves
+14 top-quartile campaign entries with no matched ink labels and marks them <code>label_next</code>.</li>
+<li><b>All 13 then-current 2027 Grand Prize target volumes</b>, matched by exact prize-listed volume ID.
+The qualifier explicitly excludes same-scroll higher-resolution substitutes; for PHerc1203, the
+2.403 µm scan is recorded as excluded while the prize-listed 9.362 µm volume is used.</li>
+<li><b>PHerc1667 as a known-success control</b> for the spatial scan metrics, so target observations can
+be compared against a scroll that has already been completely virtually unwrapped and read.</li>
+</ul></div>
+
+<div class="panel"><h2><span class="q">(2)</span> How does it increase the probability of reading the scrolls?</h2>
+<p>The scarce resources in virtual unwrapping are expert attention, annotation time, and compute.
+ScrolIQ makes the scan-quality part of that allocation decision measurable instead of implicit.
+It does not claim to know which scroll contains the easiest text; it tells the team what the CT
+data actually supports before expensive downstream work begins.</p>
+<ul>
+<li><b>Real voxels, not metadata proxies.</b> Each score is built from decoded level-0 data:
+signal presence, gradient/texture energy, dynamic range, saturation, and a strict dead-slice scan.</li>
+<li><b>Sampling provenance travels with every score.</b> Requested, decoded, missing, sparse/background,
+transport-failure, and decode-failure states are recorded so an apparently precise score cannot hide
+an incomplete read.</li>
+<li><b>Label coverage is joined to scan health.</b> High-health exact-volume entries with no matched
+ink labels are surfaced as <code>label_next</code> candidates, turning an invisible allocation gap into
+an inspectable queue.</li>
+<li><b>Spatial evidence replaces one-number blindness.</b> <code>scroliq-scan-map</code> retains the L0
+voxel bounding box of each observation, while <code>scroliq-passport</code> can attach exact-volume
+winding, native TIFXYZ mesh, and ink-validation evidence without upgrading still-unmeasured surface,
+fiber, or spiral stages from <code>unknown</code>.</li>
+<li><b>Integrity and quality can be checked together.</b> <code>scrollq-health</code> combines this
+triage layer with <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>,
+so structurally defective data can be rejected before a quality score is trusted.</li>
+</ul>
+<div class="callout warn"><b>Important negative result:</b> the dense campaign's disjoint resample
+reaches Spearman ρ = 0.7944, below the documented ρ ≥ 0.85 gate. We publish the failure rather than
+rounding it away. Mean |Δscore| is 4.195 and top-10 overlap is 7/10; the evidence says the volumes
+are heterogeneous enough that rankings should be treated as triage bands, not precise truth.</div></div>
+
+<div class="panel"><h2><span class="q">(3)</span> What does it enable that was not possible before?</h2>
+<ul>
+<li><b>A reproducible corpus-wide scan-health survey.</b> One command scores the public volume list
+with real decoded voxels and emits machine-readable per-volume components plus sampling provenance.</li>
+<li><b>Uncertainty-aware prioritization.</b> The repository now includes a deliberately disjoint
+resampling test, per-chunk score distributions, and a public stability gate. A misleadingly stable
+3×3×3 result was superseded after we proved it was re-reading the same sparse shards.</li>
+<li><b>Exact-volume Grand Prize triage.</b> <code>scrollq-grand-prize</code> compares all 13 target
+volumes on a weight-free Pareto frontier over scan-health score and existing segment count, while
+pinning the exact eligible volume and recording prohibited same-scroll higher-resolution alternatives.</li>
+<li><b>Evidence passports instead of synthetic readiness scores.</b> <code>scroliq-passport</code>
+organizes data, scan, label, winding, native TIFXYZ mesh, and ink-validation evidence around the
+Challenge bottlenecks and leaves unmeasured stages unknown.</li>
+<li><b>Submission-lineage validation.</b> <code>scroliq-provenance</code> checks exact-volume lineage,
+training/prediction separation, public dataset/checkpoint provenance, stochastic seeds, experiment
+runs, mesh/render traceability, scale-bar declarations, banner coverage, and public held-out validation
+against known ground truth; same-volume training/validation overlap fails closed.</li>
+<li><b>Winding-input diagnostics.</b> <code>scroliq-winding</code> audits PointCollections v1 inputs,
+SHA-256 provenance, role semantics, numeric sanity, volume binding, and axial annotation coverage
+before winding constraints are trusted as geometry evidence.</li>
+<li><b>Native Mesh IQ.</b> <code>scroliq-mesh</code> audits TIFXYZ structure and hashes, mask-aware
+connectivity and enclosed gaps, bbox/scale consistency, local edge jumps, severe normal reversals,
+symmetric quad-area distortion, and per-triangle Jacobian singular-value isometry (which catches
+area-preserving anisotropic stretch that an area check misses). It can also validate an official VC3D
+<code>vc_tifxyz_selfcross</code> census and a Villa <code>vesuvius.surface_preflight</code> CT-support
+report against the exact surface and volume being audited, failing closed on stale or mismatched
+evidence. None of these local checks proves sheet identity.</li>
+<li><b>Ink falsification discipline.</b> <code>scroliq-ink-audit</code> checks exact-volume experiment
+binding, checkpoint identity, train/evaluation separation, held-out declarations, run provenance,
+and controls including normal offsets, adjacent winding, geometry perturbation, and an independent
+checkpoint. Missing controls remain visibly partial rather than being inferred.</li>
+<li><b>Held-out ink validation.</b> <code>scroliq-ink-validate</code> scores a prediction and its
+falsification controls (normal offsets, adjacent winding) against the same known ink labels and
+validation mask, and emits a hash-pinnable report for the provenance graph. It measures ink-signal
+recovery, not reading. See <a href="ink-validation.md">ink-validation.md</a>.</li>
+<li><b>Certified held-out geometry.</b> <code>scrollq-geometry-probe</code> freezes a blind
+fit/held-out regional split for the Grand Prize probe and certifies a predeclared minimum spatial gap
+between fit and held-out boxes, so held-out spiral-fit residuals cannot quietly leak from nearby fit
+inputs. See the <a href="grand-prize-probe-protocol.md">blind probe protocol</a>.</li>
+</ul></div>
+
+<div class="panel"><h2><span class="q">(4)</span> What evidence have you provided?</h2>
+<table><thead><tr><th>claim</th><th>evidence (in repo)</th></tr></thead><tbody>
+<tr><td><b>64 / 64</b> listed volumes scored; mean <b>22.9</b> decoded chunks / volume</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-scrollq-n24-dense"><code>artifacts/2026-09-30-scrollq-n24-dense/</code></a> —
+<code>volumes.json</code>, campaign log, generated leaderboard, coverage join, and campaign README.</td></tr>
+
+<tr><td>Resample: <b>ρ = 0.7944</b>, mean |Δ| = <b>4.195</b>, top-10 overlap <b>7 / 10</b>;
+documented gate <b>fails</b>. Per-chunk provenance proves only <b>2/64</b> volumes
+were truly disjoint (mean 63% chunk re-read) — ρ is inflated by re-reading</td>
+<td><a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json"><code>artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json</code></a> —
+rotate 0 vs 13, 64 volumes, 24 samples, spread 5, per-volume Jaccard overlap.</td></tr>
+
+<tr><td><b>14</b> top-quartile campaign entries flagged <code>label_next</code> (corrected 2026-10-01 from 16; see below)</td>
+<td><a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-09-30-scrollq-n24-dense/coverage.json"><code>artifacts/2026-09-30-scrollq-n24-dense/coverage.json</code></a> —
+exact-volume label/segment join used by the published leaderboard. The first published version of this
+file was joined against an empty inventory, so every volume showed zero labels and PHercParis4 (70 ink labels)
+was wrongly flagged. It was rebuilt from the same 2026-09-30 inventory recorded in the n=4 and n=12 campaigns,
+and <code>scrollq-coverage</code> now refuses an empty inventory.</td></tr>
+
+<tr><td>Known-success control does not justify calling ordinary target metric values failures</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-pherc1667-scan-control"><code>artifacts/2026-09-30-pherc1667-scan-control/</code></a> —
+PHerc1667 control comparison for spatial scan metrics.</td></tr>
+
+<tr><td>All <b>13</b> Grand Prize targets matched by exact eligible volume; primary frontier contains
+PHerc0813 and PHerc1447 under the two declared axes</td>
+<td><a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-09-30-grand-prize-qualifier-n24-dense/targets.json"><code>artifacts/2026-09-30-grand-prize-qualifier-n24-dense/targets.json</code></a> —
+manifest dated 2026-09-30; PHerc1203 higher-resolution substitute explicitly excluded.</td></tr>
+
+<tr><td>Combined integrity + quality verdict path proven on live data</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-health-verdicts"><code>artifacts/2026-09-30-health-verdicts/</code></a> —
+healthy TRAIN case and defective-data DO NOT TRAIN case.</td></tr>
+
+<tr><td>Native TIFXYZ mesh checks, ink falsification controls, held-out ink validation, and the
+fit/held-out geometry gap certificate are implemented and tested (synthetic fixtures; not yet run on
+real community segments)</td>
+<td><a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/tifxyz_audit.py"><code>scroliq-mesh</code></a>,
+<a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_audit.py"><code>scroliq-ink-audit</code></a>,
+<a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_validation.py"><code>scroliq-ink-validate</code></a>, and
+<a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/geometry_probe.py"><code>scrollq-geometry-probe</code></a>,
+with deterministic coverage in <code>tests/test_tifxyz_audit.py</code>, <code>tests/test_ink_audit.py</code>,
+<code>tests/test_ink_validation.py</code>, and <code>tests/test_geometry_probe.py</code>.</td></tr>
+
+<tr><td>Grand Prize provenance now requires public held-out validation per trained model</td>
+<td><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-provenance.md"><code>docs/grand-prize-provenance.md</code></a> —
+schema v2 requires public input + known ground truth, numeric metrics, a public evaluation run, a hashed
+result artifact, code-commit binding, and same-volume training/validation exclusion proof.</td></tr>
+
+<tr><td>Challenge bottlenecks are represented without inventing downstream confidence</td>
+<td><a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md"><code>docs/open-problems-alignment.md</code></a>,
+<a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-provenance.md"><code>docs/grand-prize-provenance.md</code></a>,
+and the tested CLIs in <code>src/scrollq/</code>.</td></tr>
+
+</tbody></table></div>
+
+<div class="panel"><h2>2027 Grand Prize bridge</h2>
+<p>ScrolIQ is not an unrolling or ink-detection submission by itself. Its role is to make
+the path to a qualifying full-scroll submission harder to fool: choose exact eligible data, preserve
+spatial evidence, expose missing constraints, bind artifacts to the correct CT root, and make provenance
+fail closed before a result is packaged.</p>
+<p>The current Grand Prize tooling therefore favors <b>auditability over a single winner score</b>.
+The primary target qualifier publishes a Pareto frontier instead of hiding trade-offs inside arbitrary
+weights; <code>scroliq-recto-coverage</code> requires every declared main/attached/detached component
+to be unrolled and enforces the strict &lt;10% disconnected-outer-patch exception; provenance schema
+v3 additionally requires the ledger's mesh-ID set to match the submitted mesh set exactly; passports
+keep unmeasured stages unknown; provenance validation rejects wrong-volume lineage, training/prediction
+overlap, and training/held-out overlap while requiring public known-ground-truth validation; mesh and
+ink evidence remain explicitly partial unless their own direct diagnostics pass.</p>
+<div class="callout"><b>Design target:</b> ScrolIQ should eventually answer one practical question for
+each candidate scroll: <i>what specific, evidenced bottleneck prevents the next verified step toward a
+complete, low-distortion, legible, reproducible unrolling?</i></div></div>
+
+<div class="panel"><h2>Honest scope</h2>
+<p><b>The 0–100 ScrolIQ score is scan-health triage only.</b> It is not readability, surface quality,
+ink quality, or Grand Prize readiness. It does not infer text from CT texture. A high score does not
+mean a scroll will read; a low score does not prove it will not. The score weights are visible in
+<code>src/scrollq/score.py</code>, and the September stability gate is published as failed.</p>
+<p>This distinction is part of the contribution: every later ScrolIQ layer is designed to keep
+<code>measured</code>, <code>partial</code>, and <code>unknown</code> states separate instead of converting
+missing evidence into confidence.</p></div>
+
+<div class="panel"><h2>One suite, three layers</h2>
+<div class="suite">
+<div class="card"><h3>zarr-pyramid-audit</h3>
+<p><b>Don't train on lies.</b> Structural integrity, publish-time gating, and chunk-content probes for
+the Vesuvius open data.</p>
+<p><a href="https://github.com/Svyable/zarr-pyramid-audit">repo</a> ·
+<a href="https://svyable.github.io/zarr-pyramid-audit/">dashboard</a></p></div>
+
+<div class="card"><h3>ScrolIQ</h3>
+<p><b>Train on the best evidence first.</b> Real-voxel scan-health triage, explicit sampling provenance,
+coverage joins, stability tests, and the live evaluator leaderboard.</p>
+<p><a href="./">leaderboard</a> ·
+<a href="https://github.com/Svyable/scrollq">repo</a></p></div>
+
+<div class="card"><h3>ScrolIQ</h3>
+<p><b>Find the bottleneck.</b> Spatial scan maps, diagnostic passports, Grand Prize provenance,
+winding-input auditing, native TIFXYZ Mesh IQ, Ink IQ falsification controls, and a path toward
+surface / fiber / spiral / label diagnostics.</p>
+<p><a href="open-problems-alignment.md">open-problems alignment</a></p></div>
+</div></div>
+
+<div class="panel"><h2>Team</h2>
+<p>Solo human contributor: <b>Sven</b>. Muse (AI assistant) was used for implementation, analysis,
+documentation, and review support. Code is MIT licensed; campaign outputs and the exact evidence behind
+the published claims are committed in the repository.</p></div>
+
+</div>
+
+<footer><div class="wrap">
+<a href="./">← back to the live evaluator dashboard</a><br><br>
+Built by Sven + Muse · September 2026 ·
+<a href="https://github.com/Svyable/scrollq">source</a>
+</div></footer>
 </body></html>

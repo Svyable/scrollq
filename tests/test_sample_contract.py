@@ -14,23 +14,15 @@ def test_score_volume_honors_sample_budget(monkeypatch, budget):
     from types import SimpleNamespace
     import scrollq.score as score_mod
 
-    class Response:
-        status_code = 206
-        content = b"index"
-
-        def raise_for_status(self):
-            return None
-
-    class Session:
-        def get(self, *args, **kwargs):
-            return Response()
-
     class Store:
         def get_json(self, path):
             return {}
 
-        def _session(self):
-            return Session()
+        def get_suffix(self, path, length):
+            return b"index"
+
+        def head(self, path):
+            return SimpleNamespace(exists=True, status=200)
 
         def get_range(self, path, start, length):
             return b"blob"
@@ -80,24 +72,17 @@ def test_score_volume_reports_sampling_completeness(monkeypatch, status):
     from types import SimpleNamespace
     import scrollq.score as score_mod
 
-    class Response:
-        status_code = status
-        content = b"index"
-
-        def raise_for_status(self):
-            if status >= 400:
-                raise RuntimeError("request failed")
-
-    class Session:
-        def get(self, *args, **kwargs):
-            return Response()
-
     class Store:
         def get_json(self, path):
             return {}
 
-        def _session(self):
-            return Session()
+        def get_suffix(self, path, length):
+            if status != 206:
+                raise RuntimeError("request failed")
+            return b"index"
+
+        def head(self, path):
+            return SimpleNamespace(exists=status != 404, status=status)
 
         def get_range(self, path, start, length):
             return b"blob"
@@ -136,7 +121,11 @@ def test_score_volume_reports_sampling_completeness(monkeypatch, status):
         "decoded": 2 if status == 206 else 0,
         "complete": False,
         "rotate": 0,
+        "spread": 3,
         "shard_candidates": 1,
         "missing_shards": int(status == 404),
         "shard_read_failures": int(status == 503),
+        "shard_index_invalid": 0,
+        "chunk_read_failures": 0,
+        "chunk_decode_failures": 0,
     }

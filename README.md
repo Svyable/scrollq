@@ -1,18 +1,130 @@
-# ScrollQ
+# ScrolIQ
 
-**Train on the best first.**
+**Find the bottleneck. Fix the bottleneck. Read the scroll.**
 
-ScrollQ is an open, reproducible data-quality triage system for the [Vesuvius Challenge](https://scrollprize.org/) scroll volumes. It decodes **real level-0 voxels** from volcomp-sharded Zarr data, measures signal and acquisition quality, and assigns each volume a transparent **0–100 quality score** so scarce segmentation, labeling, and GPU effort can be directed toward the healthiest data first.
+ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](https://scrollprize.org/) virtual-unwrapping pipeline. The existing `scrollq` package measures **real level-0 CT voxels** and keeps its current commands for compatibility, but the project is expanding beyond a single volume-quality ranking toward evidence-backed diagnostics for the Challenge's published [2026 Open Problems](https://scrollprize.org/2026_open_problems): scan degradation, surface topology, mesh connectivity, fibers, winding annotations, spiral fitting, label quality, ink reliability, and data-scale reproducibility.
 
-**[Live leaderboard](https://svyable.github.io/scrollq/)** · **[September 2026 Progress Prize write-up](https://svyable.github.io/scrollq/september-2026.html)** · **[Reproducible campaign artifacts](artifacts/2026-09-30-scrollq/)**
+**[Live scan-quality survey](https://svyable.github.io/scrollq/)** · **[Open-problems alignment](docs/open-problems-alignment.md)** · **[September 2026 Progress Prize write-up](https://svyable.github.io/scrollq/september-2026.html)** · **[Reproducible campaign artifacts](artifacts/2026-09-30-scrollq/)**
 
-> ScrollQ is a **triage signal, not a readability claim**. It does not detect ink and it does not predict which scroll will be read first.
+> The existing 0–100 ScrolIQ score is a **scan-health triage signal, not a readability or Grand Prize readiness score**. ScrolIQ treats unmeasured downstream stages as unknown rather than inferring them from CT quality.
+
+## Diagnostic passport
+
+The first ScrolIQ interface organizes the evidence for one volume around the Challenge's actual pipeline bottlenecks:
+
+```bash
+scroliq-passport \
+  --volumes artifacts/2026-09-30-scrollq/volumes.json \
+  --coverage artifacts/2026-09-30-scrollq/coverage.json \
+  --winding-audit out/PHerc0813.winding-audit.json \
+  --mesh-audit out/PHerc0813.mesh-audit.json \
+  --ink-audit out/PHerc0813.ink-audit.json \
+  --root PHerc0813 \
+  --out out/PHerc0813.passport.json
+```
+
+Today the passport can directly populate data-access/decode provenance, sampled scan-health evidence, label/segment coverage, volume-bound winding inputs, native TIFXYZ mesh evidence, and ink-validation provenance. Surface support, fiber connectivity, winding geometry, spiral-fit accuracy, label localization, and biological ink identity stay explicitly `unknown` or `partial` until direct diagnostics are supplied. That is the contract: **measure the limiting stage; never manufacture confidence for missing evidence.**
+
+The implementation roadmap is mapped directly to the Challenge's open problems in [`docs/open-problems-alignment.md`](docs/open-problems-alignment.md).
+
+
+## Spatial scan diagnostics
+
+The Challenge notes that scan quality is local: usable and severely degraded regions can coexist inside one volume. `scroliq-scan-map` therefore preserves spatial provenance instead of collapsing every observation into the legacy volume score.
+
+```bash
+scroliq-scan-map \
+  --root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
+  --grid 3 \
+  --chunks-per-shard 1 \
+  --out out/PHerc0813.scan-map.json
+```
+
+The report records sampled shard coordinates, level-0 voxel bounding boxes, decoded-chunk metrics, metric distributions, and explicit states for missing shards, sparse/background shards, read failures, and decode failures. It deliberately emits **no aggregate readability or readiness score**.
+
+A matching map can be attached to a passport:
+
+```bash
+scroliq-passport \
+  --volumes artifacts/2026-09-30-scrollq/volumes.json \
+  --root PHerc0813 \
+  --scan-map out/PHerc0813.scan-map.json \
+  --out out/PHerc0813.passport.json
+```
+
+The passport rejects a spatial artifact whose volume root does not exactly match the selected volume.
+
+
+## Winding annotation audit
+
+`scroliq-winding` audits the conventional VC3D / spiral-fitting point-collection inputs before they are trusted as geometry evidence:
+
+```bash
+scroliq-winding \
+  --dataset /path/to/spiral-dataset \
+  --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
+  --z-range 10500,11500 \
+  --z-bins 10 \
+  --out out/PHerc0813.winding-audit.json
+```
+
+It checks `abs_winding.json`, `relative_windings.json`, and `same_windings.json` against the PointCollections v1 shape used by VC3D and the spiral fitter. The report records exact SHA-256 provenance, collection and point counts, XYZ coordinate sanity, role-consistent `wind_a` semantics, winding spans, and machine-readable findings. Missing roles are reported as partial evidence rather than silently treated as failure; `--require-role` can make a role mandatory for a particular experiment.
+
+When the artifact will be attached to a passport, `--volume-root` binds it to the exact CT root; the passport rejects unbound or mismatched winding artifacts. When a fit/evaluation z-window is supplied, ScrolIQ also reports **annotation-center axial coverage**: one median-z center per collection, the largest gap between collection centers, and empty equal-width z bands. Counting collections rather than raw points prevents a densely sampled line from looking like broad coverage. Empty bins are prioritization cues for where another verified constraint may have leverage; they do **not** make the audit fail or prove that a nonempty bin is geometrically constrained.
+
+### Umbilicus ray-order review queue
+
+When the dataset contains the spiral fitter's `umbilicus.json` (or `--umbilicus PATH` is given), `scroliq-winding` also checks annotated winding numbers against the scroll axis **before any GPU fit is run**. Along a ray leaving the umbilicus, a sheet two or more windings further out should be crossed after the inner one. For every pair of annotated points in the same frame — all absolute-winding points share one frame; each relative-winding collection is its own frame — that lies in the same angular sector (`--ray-sector-degrees`, default 10) and z band (`--ray-z-tolerance`, default 64 voxels) with a winding difference of at least `--ray-min-winding-gap` (default and minimum 2), the higher-numbered point must not be closer to the axis. The two-winding minimum makes the test independent of where the winding number increments (the fitter's theta=0 branch cut), which can shift any comparison by at most one.
+
+The report's `ray_order` section records the umbilicus and input SHA-256s, every parameter, comparable-pair and inversion counts per frame, the largest radial inversions, and a **review queue** ranking points by how many comparable neighbours they disagree with — an isolated mis-numbered annotation surfaces as one point at the head of the queue, with VC3D XYZ coordinates. Inversions are warnings and passport review actions, never errors: a strongly folded region can legitimately make a ray cross windings out of order. A malformed or explicitly named but missing umbilicus fails closed.
+
+What it does not establish: patch attachment, CT support, relative-winding graph holonomy across collections, or held-out spiral-fit accuracy. Those remain the next Winding IQ / Spiral IQ layers.
+
+## Mesh IQ: native TIFXYZ audit
+
+`scroliq-mesh` audits one native Vesuvius TIFXYZ surface without rewriting it:
+
+```bash
+scroliq-mesh \
+  --tifxyz /path/to/surface.tifxyz \
+  --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
+  --selfcross-report out/PHerc0813.selfcross.json \
+  --out out/PHerc0813.mesh-audit.json
+```
+
+The audit follows the upstream TIFXYZ contract: `x.tif`, `y.tif`, `z.tif`, `meta.json`, reciprocal `scale`, the `Z <= 0` validity convention, and integer-multiple `mask.tif` semantics. It records exact file hashes and checks malformed/empty grids, disconnected valid-vertex components, enclosed invalid-grid components, stale metadata bounding boxes, scale-versus-measured spacing, abrupt local edge jumps, severe neighboring-normal reversals, symmetric quad-area distortion, and per-triangle Jacobian singular values for true local isometry. The singular-value check catches area-preserving anisotropic stretch/compression that an area-only metric cannot see.
+
+For nonlocal self-intersections, ScrolIQ does not duplicate VC3D's geometry kernel. Generate a deterministic upstream report with `vc_tifxyz_selfcross <surface.tifxyz> -o report.json --collection sites.json` and pass it with `--selfcross-report`. ScrolIQ validates the report against the exact local surface path and grid, blocks on transverse contacts, preserves coplanar/grazing contacts as non-crossings, and keeps a nominally clean census partial when upstream skipped long-edge quads under `maxedge`. The optional `sites.json` remains directly loadable in VC3D for inspection.
+
+A passing audit is deliberately **partial Mesh IQ**, not a proof that the traced sheet is correct. With a fully clean validated self-cross census it establishes freedom from the specific non-adjacent transverse contacts tested by VC3D under the recorded parameters; it still does not establish CT support or correct sheet/winding identity.
+
+## Ink IQ: leakage and falsification-evidence audit
+
+`scroliq-ink-audit` validates an experiment manifest before ink output is treated as evidence:
+
+```bash
+scroliq-ink-audit \
+  --manifest experiment/ink-evidence.json \
+  --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
+  --normal-offsets=-3,0,3 \
+  --out out/PHerc0813.ink-audit.json
+```
+
+The manifest declares exact checkpoint identity and SHA-256, seeds, half-open ZYX training/evaluation boxes, held-out split names, per-evaluation run provenance, and falsification controls. The audit fails on declared train/evaluation spatial overlap or malformed provenance, and stays partial when controls such as normal offsets, adjacent winding, geometry perturbation, or an independent checkpoint are missing.
+
+This is an **evidence-quality audit, not an ink classifier**. A pass means the declared experiment is spatially separated and the requested controls are present; it does not prove that a prediction is ink or that it generalizes across scrolls.
+
+### Held-out ink measurement
+
+`scroliq-ink-validate` complements that manifest audit with deterministic measurements over explicit 2D NPY/TIFF predictions, known binary labels, and a held-out mask. It reports confusion counts, balanced accuracy, false-positive rate, F1/IoU, probability separation, exact input hashes, and same-mask deltas for named falsification controls. The resulting JSON can be hash-pinned as a `held_out_validations[]` artifact in the Grand Prize provenance manifest.
+
+The command fails closed when the mask is empty or single-class, inputs are malformed, the split is not declared held out, training overlap is not declared absent, or no falsification control is supplied. Those checks make the output an auditable evidence artifact; they do not prove that a URL is public, independently establish the declared train/validation split, set a performance threshold, or claim readability. See the [held-out ink protocol](docs/ink-validation.md).
 
 ## Why this exists
 
 The Vesuvius pipeline has an allocation problem as well as an algorithm problem. Expert segmentation time, labeling effort, and GPU budgets are limited, while scan quality varies substantially across volumes.
 
-ScrollQ makes that hidden variable visible.
+ScrolIQ makes that hidden variable visible.
 
 Instead of treating every volume as equally promising, it answers three practical questions:
 
@@ -24,21 +136,21 @@ The result is a public, auditable ranking that can be challenged, re-weighted, o
 
 ## September 2026 evidence snapshot
 
-The repository includes the exact outputs behind the September 30, 2026 campaign in [`artifacts/2026-09-30-scrollq/`](artifacts/2026-09-30-scrollq/).
+The repository includes the exact outputs behind the September 30, 2026 campaign in [`artifacts/2026-09-30-scrollq-n24-dense/`](artifacts/2026-09-30-scrollq-n24-dense/) (24 samples/volume from a 5×5×5=125 candidate grid; supersedes the 12-sample `artifacts/2026-09-30-scrollq-n12/` and the 4-sample `artifacts/2026-09-30-scrollq/`).
 
 | Result | Evidence |
 |---|---|
-| **64 / 64** listed volcomp scroll volumes scored | [`volumes.json`](artifacts/2026-09-30-scrollq/volumes.json) |
-| Ranking remained stable under an independent deterministic resample | **Spearman ρ = 0.876**, mean **|Δscore| = 3.07**, top-10 overlap **8 / 10** |
+| **64 / 64** listed volcomp scroll volumes scored | [`volumes.json`](artifacts/2026-09-30-scrollq-n24-dense/volumes.json) |
+| Ranking is **representative**, honest about heterogeneity | Disjoint resample ([`stability-n24-dense.json`](artifacts/2026-09-30-resampling-stability/stability-n24-dense.json)): **Spearman ρ = 0.79**, mean **|Δscore| = 4.2**, top-10 overlap **7 / 10** — below our ρ ≥ 0.85 gate, because volumes are genuinely heterogeneous (swings up to 44 points between runs). We publish it because a representative ranking (mean 22.9 chunks decoded/volume) with honest uncertainty beats the earlier 3×3×3 ranking whose ρ = 0.99 we proved was inflated by shard re-reading. |
 | Acquisition dropout scan found no verified dead slices in the campaign | **0 hits across 64 volumes** |
-| Label coverage was highly concentrated in the open-data snapshot | **70 / 70** discovered ink-detection roots were on PHercParis4; the top 12 quality-ranked scrolls had none |
-| High-quality, unlabeled targets were made actionable | **16** top-quartile volumes were flagged **“label next”** |
+| Label coverage was highly concentrated in the open-data snapshot | **70 / 70** discovered ink-detection roots were on PHercParis4; the top quality-ranked scrolls had none |
+| High-quality, unlabeled targets were made actionable | **14** top-quartile volumes were flagged **“label next”** |
 
 The point is not that one heuristic ranking is final. The point is that **data quality and label coverage can be measured together**, turning an implicit resource-allocation decision into an inspectable one.
 
-## How ScrollQ works
+## How ScrolIQ works
 
-For each volume, ScrollQ samples up to four **128³** chunks from the full-resolution level and decodes them through the real volcomp decoder provided by [zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit), which vendors MIT-licensed `libvolcomp`.
+For each volume, ScrolIQ samples up to four **128³** chunks from the full-resolution level and decodes them through the real volcomp decoder provided by [zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit), which vendors MIT-licensed `libvolcomp`.
 
 Sampling is deterministic and spread across the three-dimensional shard grid. Masked background is skipped rather than misclassified as bad data, and every result records whether the requested sampling budget was actually achieved.
 
@@ -95,28 +207,34 @@ The calibration and weights are deliberately visible in [`src/scrollq/score.py`]
 
 ## Sampling provenance is part of the result
 
-A quality score should not quietly look authoritative when the requested data could not be read. ScrollQ therefore emits sampling provenance alongside every score:
+A quality score should not quietly look authoritative when the requested data could not be read. ScrolIQ therefore emits sampling provenance alongside every score:
 
 ```json
 {
-  "requested": 4,
-  "decoded": 4,
+  "requested": 12,
+  "decoded": 12,
   "complete": true,
   "rotate": 0,
+  "spread": 3,
   "shard_candidates": 27,
   "missing_shards": 0,
-  "shard_read_failures": 0
+  "shard_read_failures": 0,
+  "shard_index_invalid": 0,
+  "chunk_read_failures": 0,
+  "chunk_decode_failures": 0
 }
 ```
 
-Missing shards and transport/read failures are tracked separately, and partial sampling is explicitly marked incomplete.
+Missing shards and transport/read failures are tracked separately, and partial sampling is explicitly marked incomplete. Failures below the shard level are counted too: a structurally invalid shard index (`shard_index_invalid`), a failed chunk range read (`chunk_read_failures`), and a chunk the decoder rejected or whose shape cannot be interpreted (`chunk_decode_failures`). `complete: true` only means the sampling budget was met, so check these counters before treating a score as failure-free. Artifacts produced before these counters existed simply lack the keys; they were not re-run and their scores are unaffected.
+
+The `spread` parameter controls the per-dimension shard-candidate count (`spread³` candidates; default 3 → 27). A denser spread (e.g., 5 → 125) finds more present shards on sparse volumes — PHerc0813 goes from 2 to 12 decoded chunks — but costs more candidate probes. Denser is not automatically better: our diagnostic showed that when different shards are actually read, heterogeneous volumes produce noisier scores, so choose the spread that matches how much of the volume you need to cover.
 
 ## The data-quality suite
 
-ScrollQ is the prioritization half of a two-part data-quality suite:
+ScrolIQ is the prioritization half of a two-part data-quality suite:
 
 - **[zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit)** — integrity: *don’t train on lies*
-- **ScrollQ** — quality prioritization: *train on the best first*
+- **ScrolIQ** — quality prioritization: *train on the best first*
 
 `scrollq-health` combines both into one volume-level report:
 
@@ -125,6 +243,12 @@ ScrollQ is the prioritization half of a two-part data-quality suite:
 - **DO NOT TRAIN** — high-severity integrity findings
 
 This creates a practical gate before expensive downstream work begins.
+
+Both verdict paths are proven against live data
+(`artifacts/2026-09-30-health-verdicts/`): **TRAIN** on the healthy PHerc0813
+dl volume (integrity PASS, quality 76.2); **DO NOT TRAIN** on the defective
+PHerc0814 S3 pyramid (6 high-severity integrity findings — quality honestly
+unscorable, verdict from the audit alone).
 
 ## Quick start
 
@@ -145,8 +269,8 @@ Score the repository’s 64-volume list and build a local leaderboard:
 ```bash
 scrollq-score \
   --volumes volumes.txt \
-  --samples 4 \
-  --workers 4 \
+  --samples 12 \
+  --workers 8 \
   --out-dir out/
 
 scrollq-leaderboard \
@@ -171,7 +295,7 @@ python -m pytest tests/ -q
 
 ## Label-coverage analysis
 
-ScrollQ can join quality scores with discovered ink-detection and surface-volume roots from the open-data audit:
+ScrolIQ can join quality scores with discovered ink-detection and surface-volume roots from the open-data audit:
 
 ```bash
 scrollq-coverage \
@@ -192,7 +316,7 @@ Volumes in the top quality quartile with no discovered ink labels are flagged **
 
 `scrollq-grand-prize` narrows the 13 current Grand Prize volumes without
 pretending that scan quality predicts readability. It joins the exact
-prize-eligible volume IDs to ScrollQ scores and compares candidates on a
+prize-eligible volume IDs to ScrolIQ scores and compares candidates on a
 **Pareto frontier** over two auditable axes: scan-quality score and the number
 of existing public segments. Released surface and lasagna predictions are
 treated as bootstrap requirements rather than arbitrary weighted bonuses.
@@ -210,14 +334,14 @@ higher-resolution 2.403 µm scan is recorded as excluded rather than silently
 substituted for the eligible 9.362 µm volume.
 
 With the September 30 campaign scores and current public segment counts, the
-weight-free frontier contains **PHerc0813** (highest ScrollQ quality among the
+weight-free frontier contains **PHerc0813** (highest ScrolIQ quality among the
 13) and **PHerc1447** (15 existing segments). PHerc0800 remains useful as a
 geometry testbed because it has six segments, but it is dominated by PHerc1447
 on both current qualifier axes. This is campaign triage only, not an
 ink-presence or Grand Prize success prediction.
 
 An optional sensitivity pass can add externally measured **surface-prediction
-CT support** without changing the primary ScrollQ score or frontier:
+CT support** without changing the primary ScrolIQ score or frontier:
 
 ```bash
 scrollq-grand-prize \
@@ -238,6 +362,38 @@ three-axis frontier is **PHerc0191, PHerc0211, PHerc0268, PHerc0800,
 PHerc0813, and PHerc1447**. The larger frontier is a useful warning: this
 external geometry proxy creates real trade-offs and should drive focused
 held-out geometry tests, not an opaque weighted winner score.
+
+
+## 2027 Grand Prize recto-coverage ledger
+
+`scroliq-recto-coverage` turns the full-recto requirement into an explicit accounting gate. A frozen reference inventory declares the total recto surface area and decomposes it into the main sheet plus attached, detached, or disconnected outer patches. Every in-scope component must be unrolled and linked to submitted mesh IDs; the only permitted exclusion is a `disconnected-outer-patch`, and the sum of excluded area must remain **strictly below 10%** of the declared total surface.
+
+```bash
+scroliq-recto-coverage \
+  --manifest submission/recto-coverage.json \
+  --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
+  --out submission/recto-coverage.audit.json
+```
+
+The audit also catches reference/component area imbalance and mesh IDs reused across multiple components, which would otherwise allow accidental double-counting. A pass means **100% of the declared in-scope reference inventory is accounted for**. It deliberately does not claim that the reference inventory itself discovered every papyrus fragment; that upstream completeness proof remains separate evidence.
+
+See [the example coverage manifest](examples/grand-prize-recto-coverage.example.json).
+
+## 2027 Grand Prize provenance gate
+
+`scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. Schema v3 pins the exact eligible CT volume and zarr-pyramid-audit run, validates the nested full-recto coverage ledger, and then links each declared coverage component → numbered tifxyz mesh → render → checkpoint → training datasets/regions → stochastic seeds → public training/inference experiment runs → public held-out validation against known ground truth.
+
+```bash
+scroliq-provenance \
+  --manifest submission/provenance.json \
+  --root-dir submission \
+  --format github \
+  --out submission/provenance.validation.json
+```
+
+The gate fails closed on wrong-volume lineage, a failing/mismatched recto ledger, coverage mesh IDs that differ from the submitted mesh set, training/prediction overlap, non-public or incorrectly licensed training data, prohibited higher-resolution same-scroll training sources, missing stochastic seeds or experiment runs, missing public held-out validation, same-volume training/validation overlap, broken mesh/render column traceability, package SHA mismatches, missing 1 cm scale-bar declarations, and incomplete banner coverage. It also records a canonical graph SHA-256, emits a complete provenance chain for every submitted render, and records held-out exclusion proofs. It deliberately does not set a performance threshold or claim papyrological legibility.
+
+See [the provenance-manifest specification](docs/grand-prize-provenance.md) and [example manifest](examples/grand-prize-provenance.example.json).
 
 ## Evaluation path
 

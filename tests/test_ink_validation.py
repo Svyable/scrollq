@@ -1,0 +1,225 @@
+import numpy as np
+import pytest
+
+from scrollq.ink_validation import (
+    _normalize_prediction,
+    build_report,
+    evaluate_prediction,
+    main,
+)
+
+
+def _arrays():
+    labels = np.array(
+        [
+            [1, 0, 1, 0],
+            [1, 0, 1, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+        ],
+        dtype=np.uint8,
+    )
+    prediction = np.array(
+        [
+            [0.9, 0.1, 0.8, 0.2],
+            [0.8, 0.2, 0.7, 0.1],
+            [0.1, 0.2, 0.3, 0.4],
+            [0.2, 0.1, 0.2, 0.1],
+        ],
+        dtype=np.float32,
+    )
+    mask = np.ones_like(labels)
+    return prediction, labels, mask
+
+
+def test_perfect_held_out_metrics():
+    prediction, labels, mask = _arrays()
+    metrics = evaluate_prediction(prediction, labels, mask, threshold=0.5)
+
+    assert metrics["confusion"] == {"tp": 4, "tn": 12, "fp": 0, "fn": 0}
+    assert metrics["balanced_accuracy"] == 1.0
+    assert metrics["false_positive_rate"] == 0.0
+    assert metrics["both_classes_present"] is True
+
+
+def test_report_requires_falsification_control_for_prize_readiness():
+    prediction, labels, mask = _arrays()
+    report = build_report(
+        prediction=prediction,
+        labels=labels,
+        validation_mask=mask,
+        threshold=0.5,
+        split_id="fold-1",
+        held_out=True,
+        training_overlap="none",
+        ground_truth_source_url="https://example.org/public-ground-truth",
+        model_checkpoint_sha256="a" * 64,
+        model_window_voxels=(17, 64, 64),
+        controls={},
+    )
+
+    assert report["prize_evidence_ready"] is False
+    assert "no falsification-control prediction" in " ".join(
+        report["readiness_reasons"]
+    )
+
+
+def test_control_delta_records_correct_surface_advantage():
+    prediction, labels, mask = _arrays()
+    control = np.full_like(prediction, 0.5)
+    report = build_report(
+        prediction=prediction,
+        labels=labels,
+        validation_mask=mask,
+        threshold=0.5,
+        split_id="fold-1",
+        held_out=True,
+        training_overlap="none",
+        ground_truth_source_url="https://example.org/public-ground-truth",
+        model_checkpoint_sha256="b" * 64,
+        model_window_voxels=(17, 64, 64),
+        controls={"normal+3": control},
+    )
+
+    assert report["prize_evidence_ready"] is True
+    row = report["controls"][0]
+    assert row["name"] == "normal+3"
+    assert row["primary_minus_control_balanced_accuracy"] == pytest.approx(0.5)
+
+
+def test_training_overlap_prevents_prize_readiness():
+    prediction, labels, mask = _arrays()
+    report = build_report(
+        prediction=prediction,
+        labels=labels,
+        validation_mask=mask,
+        threshold=0.5,
+        split_id="fold-1",
+        held_out=True,
+        training_overlap="present",
+        ground_truth_source_url="https://example.org/public-ground-truth",
+        model_checkpoint_sha256="c" * 64,
+        model_window_voxels=(17, 64, 64),
+        controls={"normal+3": np.full_like(prediction, 0.5)},
+    )
+
+    assert report["prize_evidence_ready"] is False
+    assert any("overlap" in reason for reason in report["readiness_reasons"])
+
+
+def test_uint8_prediction_normalization():
+    arr = np.array([[0, 255], [128, 64]], dtype=np.uint8)
+    out = _normalize_prediction(arr, "auto")
+    assert out.dtype == np.float32
+    assert out[0, 0] == 0.0
+    assert out[0, 1] == 1.0
+
+
+def test_float_outside_unit_range_requires_explicit_encoding():
+    arr = np.array([[0.0, 2.0]], dtype=np.float32)
+    with pytest.raises(ValueError, match="outside"):
+        _normalize_prediction(arr, "auto")
+
+
+def test_empty_mask_and_nonbinary_inputs_fail_explicitly():
+    prediction, labels, mask = _arrays()
+    with pytest.raises(ValueError, match="zero pixels"):
+        evaluate_prediction(prediction, labels, np.zeros_like(mask))
+    labels[0, 0] = 2
+    with pytest.raises(ValueError, match="labels must be binary"):
+        evaluate_prediction(prediction, labels, mask)
+    labels[0, 0] = 1
+    mask[0, 0] = 2
+    with pytest.raises(ValueError, match="mask must be binary"):
+        evaluate_prediction(prediction, labels, mask)
+
+
+def test_shape_mismatch_and_nonfinite_prediction_fail():
+    prediction, labels, mask = _arrays()
+    with pytest.raises(ValueError, match="shape mismatch"):
+        evaluate_prediction(prediction[:-1], labels, mask)
+    prediction[0, 0] = np.nan
+    with pytest.raises(ValueError, match="finite probabilities"):
+        evaluate_prediction(prediction, labels, mask)
+
+
+def test_single_class_mask_is_measured_but_not_ready():
+    prediction, labels, mask = _arrays()
+    mask[labels == 0] = 0
+    report = build_report(
+        prediction=prediction,
+        labels=labels,
+        validation_mask=mask,
+        threshold=0.5,
+        split_id="fold-1",
+        held_out=True,
+        training_overlap="none",
+        ground_truth_source_url="https://example.org/public-ground-truth",
+        model_checkpoint_sha256="d" * 64,
+        model_window_voxels=(17, 64, 64),
+        controls={"normal+3": prediction},
+    )
+
+    assert report["evaluation"]["both_classes_present"] is False
+    assert report["prize_evidence_ready"] is False
+
+
+def test_digest_changes_when_a_control_changes():
+    prediction, labels, mask = _arrays()
+    kwargs = dict(
+        prediction=prediction,
+        labels=labels,
+        validation_mask=mask,
+        threshold=0.5,
+        split_id="fold-1",
+        held_out=True,
+        training_overlap="none",
+        ground_truth_source_url="https://example.org/public-ground-truth",
+        model_checkpoint_sha256="e" * 64,
+        model_window_voxels=(17, 64, 64),
+    )
+    first = build_report(**kwargs, controls={"offset": np.zeros_like(prediction)})
+    second = build_report(**kwargs, controls={"offset": np.ones_like(prediction)})
+
+    assert first["evaluated_arrays_sha256"] != second["evaluated_arrays_sha256"]
+
+
+def test_cli_writes_report_and_returns_fail_closed_status(tmp_path):
+    prediction, labels, mask = _arrays()
+    prediction_path = tmp_path / "prediction.npy"
+    labels_path = tmp_path / "labels.npy"
+    mask_path = tmp_path / "mask.npy"
+    out_path = tmp_path / "report.json"
+    np.save(prediction_path, prediction)
+    np.save(labels_path, labels)
+    np.save(mask_path, mask)
+
+    status = main(
+        [
+            "--prediction",
+            str(prediction_path),
+            "--labels",
+            str(labels_path),
+            "--validation-mask",
+            str(mask_path),
+            "--split-id",
+            "fold-1",
+            "--held-out",
+            "--training-overlap",
+            "none",
+            "--ground-truth-source-url",
+            "https://example.org/public-ground-truth",
+            "--model-checkpoint-sha256",
+            "f" * 64,
+            "--model-window",
+            "17x64x64",
+            "--out",
+            str(out_path),
+            "--format",
+            "json",
+        ]
+    )
+
+    assert status == 1
+    assert out_path.is_file()
+    assert '"prize_evidence_ready": false' in out_path.read_text()

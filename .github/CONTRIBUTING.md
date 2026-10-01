@@ -1,6 +1,6 @@
-# Contributing to ScrollQ
+# Contributing to ScrolIQ
 
-Thanks for stopping by. ScrollQ exists so nobody trains a scroll-reading
+Thanks for stopping by. ScrolIQ exists so nobody trains a scroll-reading
 model on the worst data in the corpus by accident. Contributions that make
 the triage signal sharper — or the evidence behind it more honest — are
 welcome.
@@ -62,7 +62,7 @@ that pins its behavior on a fixed input (determinism is a feature here).
 
 ## The accuracy policy (read this)
 
-ScrollQ's whole value is trust. Every claim in a PR, issue, or doc change
+ScrolIQ's whole value is trust. Every claim in a PR, issue, or doc change
 must be backed by something a reviewer can re-run:
 
 - Numbers come from a command in this repo, with the artifact committed
@@ -72,13 +72,13 @@ must be backed by something a reviewer can re-run:
   empty chunks.
 - Score changes: report the resampling-stability numbers (Spearman ρ,
   mean |Δ|, top-10 overlap) before and after, using
-  deterministic rotation (`scrollq-score --rotate N`, then compare the two
-  `volumes.json` files as in `artifacts/2026-09-30-scrollq/`). The current
-  bar: ρ ≥ 0.85.
+  deterministic rotation (`scrollq-score --rotate N`, or `bin/stability.py`
+  as in `artifacts/2026-09-30-resampling-stability/`). The current bar:
+  ρ ≥ 0.85.
 - Grand Prize comparisons use the exact prize-listed volume ID only. A
   different scan of the same scroll is never substituted, and unverifiable
   evidence is excluded rather than assumed.
-- Do not claim ScrollQ predicts readability. It is a triage signal; the
+- Do not claim ScrolIQ predicts readability. It is a triage signal; the
   weights are published so people can audit them, not worship the ranking.
 
 ## Pull requests

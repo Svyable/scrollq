@@ -1,0 +1,2067 @@
+{
+  "schema_version": 1,
+  "created": "2026-09-30",
+  "purpose": "Locked geometry candidate pool before visual/ink screening.",
+  "selection_policy": {
+    "atlas": "For PHerc0800 and PHerc0813, choose 12 approximately equally spaced available window_z values and take w020 and w100 from each. Existing eye/gate verdicts are not read for selection.",
+    "PHerc1447": "Use all 15 official published segments; extract tifxyz centroids/bounds before fit/held-out assignment.",
+    "split": "Assign fit versus held-out only from geometry/proximity after bounds are complete; never use ink output or visual quality verdicts."
+  },
+  "sources": {
+    "atlas": {
+      "repository": "pscamillo/vesuvius-eligible-meshes",
+      "url": "https://github.com/pscamillo/vesuvius-eligible-meshes",
+      "index_path": "data/index.csv",
+      "index_sha": "ccc4f4c88f96e608f75cc7cf2f1a184489c13014",
+      "license": "MIT; Vesuvius-derived data retain CC BY-NC 4.0 terms documented by source."
+    },
+    "official_inventory": {
+      "repository": "Svyable/zarr-pyramid-audit",
+      "path": "artifacts/2026-09-29-s3/audit_pyramid.pyramids.jsonl",
+      "sha": "7a3595d3db72cd9f02bc1842d57ceac68c05886e"
+    }
+  },
+  "targets": {
+    "PHerc0800": {
+      "prize_volume_id": "20250521135224",
+      "base_shape_zyx": [
+        24298,
+        9867,
+        9867
+      ],
+      "atlas_total_meshes": 95,
+      "locked_candidates": [
+        {
+          "scroll": "PHerc0800",
+          "window_z": 5664,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z5664_w020",
+          "area_cm2": 1.74,
+          "bounds_status": "complete",
+          "meta_sha": "cd11ffae6a0d0b8d8cdd9348991a412d94aca6c8",
+          "uuid": "PHerc0800_z5664_w020",
+          "bbox": [
+            [
+              5992.14990234375,
+              3312.139892578125,
+              5666.97021484375
+            ],
+            [
+              6686.7255859375,
+              4564.03662109375,
+              6462.13916015625
+            ]
+          ],
+          "area_vx2": 2326400,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            5936,
+            6192
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 5664,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z5664_w100",
+          "area_cm2": 8.48,
+          "bounds_status": "complete",
+          "meta_sha": "8eead26cac77c9fb4c1d3bfc4cda68d190a82c71",
+          "uuid": "PHerc0800_z5664_w100",
+          "bbox": [
+            [
+              4208.14453125,
+              1907.033447265625,
+              5664.56787109375
+            ],
+            [
+              7979.09716796875,
+              6181.9375,
+              6463.6103515625
+            ]
+          ],
+          "area_vx2": 11364800,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            5936,
+            6192
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 6864,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z6864_w020",
+          "area_cm2": 1.78,
+          "bounds_status": "complete",
+          "meta_sha": "50568cdf8b953a83639f879d831296d68681133f",
+          "uuid": "PHerc0800_z6864_w020",
+          "bbox": [
+            [
+              5440.0048828125,
+              3854.5048828125,
+              6865.150390625
+            ],
+            [
+              6646.3203125,
+              4853.390625,
+              7661.85107421875
+            ]
+          ],
+          "area_vx2": 2389600,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            7136,
+            7392
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 6864,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z6864_w100",
+          "area_cm2": 8.53,
+          "bounds_status": "complete",
+          "meta_sha": "c7dd69c7b2561784d0537785277e930aa20b095b",
+          "uuid": "PHerc0800_z6864_w100",
+          "bbox": [
+            [
+              3918.75439453125,
+              2032.422119140625,
+              6864.9873046875
+            ],
+            [
+              7929.68212890625,
+              6439.5986328125,
+              7663.447265625
+            ]
+          ],
+          "area_vx2": 11423600,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            7136,
+            7392
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 7472,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z7472_w020",
+          "area_cm2": 1.66,
+          "bounds_status": "complete",
+          "meta_sha": "60d2c8239b28cdb9b681eea67e0f665d389013d7",
+          "uuid": "PHerc0800_z7472_w020",
+          "bbox": [
+            [
+              5322.146484375,
+              4129.5341796875,
+              7473.56494140625
+            ],
+            [
+              6388.45947265625,
+              5163.1025390625,
+              8271.107421875
+            ]
+          ],
+          "area_vx2": 2222800,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "held_out",
+          "evaluation_core_z_half_open": [
+            7744,
+            8000
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 7472,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z7472_w100",
+          "area_cm2": 8.36,
+          "bounds_status": "complete",
+          "meta_sha": "8e07827e69f3334002f270e83c5440482c081385",
+          "uuid": "PHerc0800_z7472_w100",
+          "bbox": [
+            [
+              3723.927978515625,
+              2509.562255859375,
+              7473.20947265625
+            ],
+            [
+              7666.96435546875,
+              6723.6083984375,
+              8270.185546875
+            ]
+          ],
+          "area_vx2": 11198800,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "held_out",
+          "evaluation_core_z_half_open": [
+            7744,
+            8000
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 8672,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z8672_w020",
+          "area_cm2": 2.04,
+          "bounds_status": "complete",
+          "meta_sha": "946b9c89825c7746c9d6ed7e78ee264074522f7b",
+          "uuid": "PHerc0800_z8672_w020",
+          "bbox": [
+            [
+              4501.26220703125,
+              4235.0517578125,
+              8674.109375
+            ],
+            [
+              5700.51171875,
+              5698.28076171875,
+              9468.93359375
+            ]
+          ],
+          "area_vx2": 2728400,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            8944,
+            9200
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 8672,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z8672_w100",
+          "area_cm2": 8.04,
+          "bounds_status": "complete",
+          "meta_sha": "e57d2fabd1af8c239131644262c6c31da92f1ff0",
+          "uuid": "PHerc0800_z8672_w100",
+          "bbox": [
+            [
+              3284.388916015625,
+              2337.9599609375,
+              8673.7216796875
+            ],
+            [
+              6936.14306640625,
+              7193.75,
+              9470.1708984375
+            ]
+          ],
+          "area_vx2": 10767200,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            8944,
+            9200
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 9872,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z9872_w020",
+          "area_cm2": 1.88,
+          "bounds_status": "complete",
+          "meta_sha": "06ced38fc16752df68d6ca8924ceacadf934c236",
+          "uuid": "PHerc0800_z9872_w020",
+          "bbox": [
+            [
+              4092.859375,
+              4528.73046875,
+              9874.5703125
+            ],
+            [
+              5153.0830078125,
+              5872.46630859375,
+              10668.88671875
+            ]
+          ],
+          "area_vx2": 2514800,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            10144,
+            10400
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 9872,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z9872_w100",
+          "area_cm2": 8.69,
+          "bounds_status": "complete",
+          "meta_sha": "bc765aa8222b9c91e0e4a7f98ed639918df67c15",
+          "uuid": "PHerc0800_z9872_w100",
+          "bbox": [
+            [
+              2691.832763671875,
+              1988.8114013671875,
+              9873.013671875
+            ],
+            [
+              6548.6357421875,
+              7668.94775390625,
+              10671.2646484375
+            ]
+          ],
+          "area_vx2": 11640800,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            10144,
+            10400
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 10464,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z10464_w020",
+          "area_cm2": 1.93,
+          "bounds_status": "complete",
+          "meta_sha": "6710bc3f78beea723dbb99d3f3154e1dbd9e5317",
+          "uuid": "PHerc0800_z10464_w020",
+          "bbox": [
+            [
+              3971.951904296875,
+              4554.97216796875,
+              10466.455078125
+            ],
+            [
+              4980.63232421875,
+              5975.5771484375,
+              11262.732421875
+            ]
+          ],
+          "area_vx2": 2591600,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "held_out",
+          "evaluation_core_z_half_open": [
+            10736,
+            10992
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 10464,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z10464_w100",
+          "area_cm2": 8.76,
+          "bounds_status": "complete",
+          "meta_sha": "23ca7191424af6eced496bdcc482f26661a5926e",
+          "uuid": "PHerc0800_z10464_w100",
+          "bbox": [
+            [
+              2634.171630859375,
+              2014.9814453125,
+              10464.375
+            ],
+            [
+              6389.63720703125,
+              7709.1396484375,
+              11262.75
+            ]
+          ],
+          "area_vx2": 11739200,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "held_out",
+          "evaluation_core_z_half_open": [
+            10736,
+            10992
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 12272,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z12272_w020",
+          "area_cm2": 1.95,
+          "bounds_status": "complete",
+          "meta_sha": "aacabe210fa97e581d7cb7bb068a3672208f091b",
+          "uuid": "PHerc0800_z12272_w020",
+          "bbox": [
+            [
+              3436.500732421875,
+              4757.4677734375,
+              12274.376953125
+            ],
+            [
+              4311.36279296875,
+              6255.11279296875,
+              13070.2568359375
+            ]
+          ],
+          "area_vx2": 2616400,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            12544,
+            12800
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 12272,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z12272_w100",
+          "area_cm2": 8.84,
+          "bounds_status": "complete",
+          "meta_sha": "3525403ef36d0a1f184d05cf03ef5230c843dae2",
+          "uuid": "PHerc0800_z12272_w100",
+          "bbox": [
+            [
+              2302.934814453125,
+              2240.60498046875,
+              12272.5068359375
+            ],
+            [
+              5875.36865234375,
+              8164.0048828125,
+              13071.1806640625
+            ]
+          ],
+          "area_vx2": 11846400,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            12544,
+            12800
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 12864,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z12864_w020",
+          "area_cm2": 1.87,
+          "bounds_status": "complete",
+          "meta_sha": "f06959b0512ba9c1f4ebbfe230a3848ba7cea566",
+          "uuid": "PHerc0800_z12864_w020",
+          "bbox": [
+            [
+              3178.258544921875,
+              4740.072265625,
+              12868.6025390625
+            ],
+            [
+              4036.417724609375,
+              6284.78564453125,
+              13660.2705078125
+            ]
+          ],
+          "area_vx2": 2511200,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            13136,
+            13392
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 12864,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z12864_w100",
+          "area_cm2": 8.55,
+          "bounds_status": "complete",
+          "meta_sha": "a1fabb73bf81b5769097b5afbfa5de53b382a009",
+          "uuid": "PHerc0800_z12864_w100",
+          "bbox": [
+            [
+              2134.148193359375,
+              2435.03369140625,
+              12864.8935546875
+            ],
+            [
+              5441.5478515625,
+              8103.79736328125,
+              13662.724609375
+            ]
+          ],
+          "area_vx2": 11450400,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            13136,
+            13392
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 14064,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z14064_w020",
+          "area_cm2": 1.91,
+          "bounds_status": "complete",
+          "meta_sha": "813eda838412fde82190e5598752ae9be6272b8a",
+          "uuid": "PHerc0800_z14064_w020",
+          "bbox": [
+            [
+              2928.943359375,
+              4926.4189453125,
+              14065.4716796875
+            ],
+            [
+              3819.53759765625,
+              6469.7900390625,
+              14860.8388671875
+            ]
+          ],
+          "area_vx2": 2553600,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            14336,
+            14592
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 14064,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z14064_w100",
+          "area_cm2": 9.18,
+          "bounds_status": "complete",
+          "meta_sha": "b12b376ff3f5e05a07994fb3607e5070e4088323",
+          "uuid": "PHerc0800_z14064_w100",
+          "bbox": [
+            [
+              1604.5794677734375,
+              2871.6591796875,
+              14064.6943359375
+            ],
+            [
+              5416.8662109375,
+              8474.3359375,
+              14863.1240234375
+            ]
+          ],
+          "area_vx2": 12298400,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            14336,
+            14592
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 15264,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z15264_w020",
+          "area_cm2": 1.71,
+          "bounds_status": "complete",
+          "meta_sha": "33daffd7fb041097d8c538d7dae8a40a90c61922",
+          "uuid": "PHerc0800_z15264_w020",
+          "bbox": [
+            [
+              2827.494384765625,
+              5091.0341796875,
+              15266.607421875
+            ],
+            [
+              3725.56591796875,
+              6439.5029296875,
+              16057.7724609375
+            ]
+          ],
+          "area_vx2": 2288000,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            15535,
+            15791
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 15264,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z15264_w100",
+          "area_cm2": 8.93,
+          "bounds_status": "complete",
+          "meta_sha": "d0c02c367c0966c2ae64d8cd99e91d1053fb8c07",
+          "uuid": "PHerc0800_z15264_w100",
+          "bbox": [
+            [
+              1546.820556640625,
+              3010.6904296875,
+              15264.71875
+            ],
+            [
+              5317.73486328125,
+              8356.099609375,
+              16062.8955078125
+            ]
+          ],
+          "area_vx2": 11958800,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            15535,
+            15791
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 15872,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z15872_w020",
+          "area_cm2": 1.63,
+          "bounds_status": "complete",
+          "meta_sha": "fee7d3354403af44135d7659248521a922f3d336",
+          "uuid": "PHerc0800_z15872_w020",
+          "bbox": [
+            [
+              2840.196044921875,
+              5135.5478515625,
+              15877.01953125
+            ],
+            [
+              3660.065185546875,
+              6452.25634765625,
+              16669.2890625
+            ]
+          ],
+          "area_vx2": 2187600,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "held_out",
+          "evaluation_core_z_half_open": [
+            16145,
+            16401
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 15872,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z15872_w100",
+          "area_cm2": 9.08,
+          "bounds_status": "complete",
+          "meta_sha": "20831e2d292f3a9bbfb90ff3e0281d2dc9d9a0ce",
+          "uuid": "PHerc0800_z15872_w100",
+          "bbox": [
+            [
+              1565.727294921875,
+              3019.7451171875,
+              15873.6328125
+            ],
+            [
+              5237.59521484375,
+              8525.5810546875,
+              16670.927734375
+            ]
+          ],
+          "area_vx2": 12159600,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "held_out",
+          "evaluation_core_z_half_open": [
+            16145,
+            16401
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 17072,
+          "wrap": "w020",
+          "path": "meshes/PHerc0800/z17072_w020",
+          "area_cm2": 1.67,
+          "bounds_status": "complete",
+          "meta_sha": "e8be781ecebd376b916c1d21f79682208cdca583",
+          "uuid": "PHerc0800_z17072_w020",
+          "bbox": [
+            [
+              3133.817626953125,
+              5160.384765625,
+              17077.119140625
+            ],
+            [
+              4265.423828125,
+              6359.34228515625,
+              17869.689453125
+            ]
+          ],
+          "area_vx2": 2232800,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            17345,
+            17601
+          ]
+        },
+        {
+          "scroll": "PHerc0800",
+          "window_z": 17072,
+          "wrap": "w100",
+          "path": "meshes/PHerc0800/z17072_w100",
+          "area_cm2": 8.25,
+          "bounds_status": "complete",
+          "meta_sha": "bed3facc3057031307c4a05a872de530d0da1a2e",
+          "uuid": "PHerc0800_z17072_w100",
+          "bbox": [
+            [
+              1826.9012451171875,
+              2954.255615234375,
+              17072.873046875
+            ],
+            [
+              5931.8154296875,
+              7895.28076171875,
+              17871.4453125
+            ]
+          ],
+          "area_vx2": 11048400,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            17345,
+            17601
+          ]
+        }
+      ],
+      "bounds_complete": 24,
+      "split": {
+        "status": "frozen",
+        "method": "Sort the 12 locked axial windows by bbox-derived z center; partition into three equal-count bands of four; in each band hold out the window whose z center is nearest that band's mean (ties to lower z). Both w020 and w100 at that window share the held-out role. Use only the central 256 z-slice core of every candidate as a fit/evaluation unit.",
+        "uses_quality_or_ink": false,
+        "core_depth_slices": 256,
+        "fit_windows": [
+          5664,
+          6864,
+          8672,
+          9872,
+          12272,
+          12864,
+          14064,
+          15264,
+          17072
+        ],
+        "held_out_windows": [
+          7472,
+          10464,
+          15872
+        ],
+        "fit_candidates": 18,
+        "held_out_candidates": 6,
+        "bands": [
+          {
+            "band": 1,
+            "windows": [
+              {
+                "window_z": 5664,
+                "z_center": 6064.3218994140625
+              },
+              {
+                "window_z": 6864,
+                "z_center": 7263.8590087890625
+              },
+              {
+                "window_z": 7472,
+                "z_center": 7872.016845703125
+              },
+              {
+                "window_z": 8672,
+                "z_center": 9071.73388671875
+              }
+            ],
+            "mean_z_center": 7567.98291015625,
+            "held_out_window_z": 7472
+          },
+          {
+            "band": 2,
+            "windows": [
+              {
+                "window_z": 9872,
+                "z_center": 10271.933837890625
+              },
+              {
+                "window_z": 10464,
+                "z_center": 10864.078125
+              },
+              {
+                "window_z": 12272,
+                "z_center": 12672.080322265625
+              },
+              {
+                "window_z": 12864,
+                "z_center": 13264.122802734375
+              }
+            ],
+            "mean_z_center": 11768.053771972656,
+            "held_out_window_z": 10464
+          },
+          {
+            "band": 3,
+            "windows": [
+              {
+                "window_z": 14064,
+                "z_center": 14463.5322265625
+              },
+              {
+                "window_z": 15264,
+                "z_center": 15662.99853515625
+              },
+              {
+                "window_z": 15872,
+                "z_center": 16272.71728515625
+              },
+              {
+                "window_z": 17072,
+                "z_center": 17472.78173828125
+              }
+            ],
+            "mean_z_center": 15968.007446289062,
+            "held_out_window_z": 15872
+          }
+        ],
+        "window_roles": [
+          {
+            "window_z": 5664,
+            "z_center": 6064.3218994140625,
+            "role": "fit",
+            "core_z_half_open": [
+              5936,
+              6192
+            ]
+          },
+          {
+            "window_z": 6864,
+            "z_center": 7263.8590087890625,
+            "role": "fit",
+            "core_z_half_open": [
+              7136,
+              7392
+            ]
+          },
+          {
+            "window_z": 7472,
+            "z_center": 7872.016845703125,
+            "role": "held_out",
+            "core_z_half_open": [
+              7744,
+              8000
+            ]
+          },
+          {
+            "window_z": 8672,
+            "z_center": 9071.73388671875,
+            "role": "fit",
+            "core_z_half_open": [
+              8944,
+              9200
+            ]
+          },
+          {
+            "window_z": 9872,
+            "z_center": 10271.933837890625,
+            "role": "fit",
+            "core_z_half_open": [
+              10144,
+              10400
+            ]
+          },
+          {
+            "window_z": 10464,
+            "z_center": 10864.078125,
+            "role": "held_out",
+            "core_z_half_open": [
+              10736,
+              10992
+            ]
+          },
+          {
+            "window_z": 12272,
+            "z_center": 12672.080322265625,
+            "role": "fit",
+            "core_z_half_open": [
+              12544,
+              12800
+            ]
+          },
+          {
+            "window_z": 12864,
+            "z_center": 13264.122802734375,
+            "role": "fit",
+            "core_z_half_open": [
+              13136,
+              13392
+            ]
+          },
+          {
+            "window_z": 14064,
+            "z_center": 14463.5322265625,
+            "role": "fit",
+            "core_z_half_open": [
+              14336,
+              14592
+            ]
+          },
+          {
+            "window_z": 15264,
+            "z_center": 15662.99853515625,
+            "role": "fit",
+            "core_z_half_open": [
+              15535,
+              15791
+            ]
+          },
+          {
+            "window_z": 15872,
+            "z_center": 16272.71728515625,
+            "role": "held_out",
+            "core_z_half_open": [
+              16145,
+              16401
+            ]
+          },
+          {
+            "window_z": 17072,
+            "z_center": 17472.78173828125,
+            "role": "fit",
+            "core_z_half_open": [
+              17345,
+              17601
+            ]
+          }
+        ],
+        "core_overlap_check": "pass",
+        "minimum_axial_gap_between_any_locked_cores_slices": 336,
+        "minimum_gap_pair_window_z": [
+          9872,
+          10464
+        ]
+      },
+      "umbilicus_reference": {
+        "source_repository": "Jashann/vesuvius-scrolling",
+        "source_commit": "4f4997adcccaa9124ab5af02605233f7e3388c69",
+        "source_path": "data/umbilicus/umb_band_PHerc0800.json",
+        "source_sha": "8616bbc7c0c6fa671c2428c54e272f2c4e1f9132",
+        "method": "team objective on 11 Lasagna slices + Theil-Sen x(z), y(z)",
+        "estimation_band_z": [
+          12000,
+          13000
+        ],
+        "line_fit_residual_median_px": 156.544737447577,
+        "interpretation": "Centerline stability diagnostic only; not distance to a known true umbilicus."
+      }
+    },
+    "PHerc0813": {
+      "prize_volume_id": "20250821151723",
+      "base_shape_zyx": [
+        16993,
+        7947,
+        7947
+      ],
+      "atlas_total_meshes": 75,
+      "locked_candidates": [
+        {
+          "scroll": "PHerc0813",
+          "window_z": 4704,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z4704_w020",
+          "area_cm2": 1.5,
+          "bounds_status": "complete",
+          "meta_sha": "4abd1a8424c4a5049cc1976e5eefb76fb8583d23",
+          "uuid": "PHerc0813_z4704_w020",
+          "bbox": [
+            [
+              4428.4228515625,
+              4462.91357421875,
+              4706.10888671875
+            ],
+            [
+              5238.85107421875,
+              5472.234375,
+              5499.8330078125
+            ]
+          ],
+          "area_vx2": 1711600,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            4975,
+            5231
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 4704,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z4704_w100",
+          "area_cm2": 9.85,
+          "bounds_status": "complete",
+          "meta_sha": "1c1bdea276b5fe529cbee426094898c604a16211",
+          "uuid": "PHerc0813_z4704_w100",
+          "bbox": [
+            [
+              2164.69384765625,
+              2958.60302734375,
+              4705.1455078125
+            ],
+            [
+              6720.6171875,
+              6950.126953125,
+              5502.68310546875
+            ]
+          ],
+          "area_vx2": 11233200,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            4975,
+            5231
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 5296,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z5296_w020",
+          "area_cm2": 1.41,
+          "bounds_status": "complete",
+          "meta_sha": "cd2ccd67a45a7f37638ba1841daf72f1ca4bc1b1",
+          "uuid": "PHerc0813_z5296_w020",
+          "bbox": [
+            [
+              4564.75439453125,
+              4972.302734375,
+              5300.6279296875
+            ],
+            [
+              5471.08837890625,
+              5876.02099609375,
+              6092.00732421875
+            ]
+          ],
+          "area_vx2": 1603200,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            5568,
+            5824
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 5296,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z5296_w100",
+          "area_cm2": 9.64,
+          "bounds_status": "complete",
+          "meta_sha": "696e355b2e7521cff41975a4f0efe5ae349c7939",
+          "uuid": "PHerc0813_z5296_w100",
+          "bbox": [
+            [
+              2385.310791015625,
+              3477.607666015625,
+              5297.0078125
+            ],
+            [
+              6787.28759765625,
+              7011.69873046875,
+              6094.79931640625
+            ]
+          ],
+          "area_vx2": 10993200,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            5568,
+            5824
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 6496,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z6496_w020",
+          "area_cm2": 2.21,
+          "bounds_status": "complete",
+          "meta_sha": "8ccf14097e900305f6326df649227b523534ff43",
+          "uuid": "PHerc0813_z6496_w020",
+          "bbox": [
+            [
+              3977.994140625,
+              4974.2158203125,
+              6499.92919921875
+            ],
+            [
+              5660.40673828125,
+              5962.10205078125,
+              7294.43115234375
+            ]
+          ],
+          "area_vx2": 2525600,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "held_out",
+          "evaluation_core_z_half_open": [
+            6769,
+            7025
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 6496,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z6496_w100",
+          "area_cm2": 10.01,
+          "bounds_status": "complete",
+          "meta_sha": "401f5a8b007a8aded0493dad6d36e4066766bd76",
+          "uuid": "PHerc0813_z6496_w100",
+          "bbox": [
+            [
+              1791.8221435546875,
+              3412.1513671875,
+              6497.3291015625
+            ],
+            [
+              6901.44482421875,
+              7087.1904296875,
+              7294.732421875
+            ]
+          ],
+          "area_vx2": 11421600,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "held_out",
+          "evaluation_core_z_half_open": [
+            6769,
+            7025
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 7104,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z7104_w020",
+          "area_cm2": 2.27,
+          "bounds_status": "complete",
+          "meta_sha": "f445ca5da14f0f6360ce1c40939e74350e60760e",
+          "uuid": "PHerc0813_z7104_w020",
+          "bbox": [
+            [
+              4436.34814453125,
+              4351.79638671875,
+              7107.35302734375
+            ],
+            [
+              5849.19970703125,
+              5788.154296875,
+              7900.0224609375
+            ]
+          ],
+          "area_vx2": 2594000,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            7376,
+            7632
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 7104,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z7104_w100",
+          "area_cm2": 9.69,
+          "bounds_status": "complete",
+          "meta_sha": "d34bd501b48ef7a6edd831d51ecada707e0b01be",
+          "uuid": "PHerc0813_z7104_w100",
+          "bbox": [
+            [
+              2688.491943359375,
+              3050.853759765625,
+              7105.6962890625
+            ],
+            [
+              7138.24560546875,
+              6810.29443359375,
+              7903.5029296875
+            ]
+          ],
+          "area_vx2": 11054800,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            7376,
+            7632
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 7696,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z7696_w020",
+          "area_cm2": 1.81,
+          "bounds_status": "complete",
+          "meta_sha": "30989ba91eaf2859427ef98a542d91c8327c1610",
+          "uuid": "PHerc0813_z7696_w020",
+          "bbox": [
+            [
+              4901.97705078125,
+              3723.532958984375,
+              7698.603515625
+            ],
+            [
+              5835.140625,
+              5297.6689453125,
+              8490.6279296875
+            ]
+          ],
+          "area_vx2": 2061600,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            7967,
+            8223
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 7696,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z7696_w100",
+          "area_cm2": 9.29,
+          "bounds_status": "complete",
+          "meta_sha": "fa6af5b1f3008b9c223b259aff292efb5d368c4a",
+          "uuid": "PHerc0813_z7696_w100",
+          "bbox": [
+            [
+              3136.02685546875,
+              2321.256103515625,
+              7697.06298828125
+            ],
+            [
+              7053.52001953125,
+              6560.482421875,
+              8494.0712890625
+            ]
+          ],
+          "area_vx2": 10596400,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            7967,
+            8223
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 8288,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z8288_w020",
+          "area_cm2": 1.78,
+          "bounds_status": "complete",
+          "meta_sha": "949e6a6c8b5ebbabd11b1dfab38b18e7468df83e",
+          "uuid": "PHerc0813_z8288_w020",
+          "bbox": [
+            [
+              5205.0498046875,
+              3269.26123046875,
+              8291.212890625
+            ],
+            [
+              5881.0234375,
+              4814.162109375,
+              9083.2294921875
+            ]
+          ],
+          "area_vx2": 2036400,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            8559,
+            8815
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 8288,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z8288_w100",
+          "area_cm2": 9.32,
+          "bounds_status": "complete",
+          "meta_sha": "9720ddd91cd134f4baed38d7bdfcb99f5b70db41",
+          "uuid": "PHerc0813_z8288_w100",
+          "bbox": [
+            [
+              3572.241455078125,
+              1892.4385986328125,
+              8288.6484375
+            ],
+            [
+              7181.1923828125,
+              6257.09521484375,
+              9085.4267578125
+            ]
+          ],
+          "area_vx2": 10638400,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            8559,
+            8815
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 11296,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z11296_w020",
+          "area_cm2": 1.72,
+          "bounds_status": "complete",
+          "meta_sha": "0985de853f6c1cc85ac99b2259688b9b8da4b336",
+          "uuid": "PHerc0813_z11296_w020",
+          "bbox": [
+            [
+              3084.5947265625,
+              3041.5595703125,
+              11300.7607421875
+            ],
+            [
+              3820.182373046875,
+              4050.357666015625,
+              12093.4609375
+            ]
+          ],
+          "area_vx2": 1966800,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "held_out",
+          "evaluation_core_z_half_open": [
+            11569,
+            11825
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 11296,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z11296_w100",
+          "area_cm2": 10.15,
+          "bounds_status": "complete",
+          "meta_sha": "f12b43080810c42d9c3b64828b35fed824b9e061",
+          "uuid": "PHerc0813_z11296_w100",
+          "bbox": [
+            [
+              1640.5889892578125,
+              1484.6904296875,
+              11296.8798828125
+            ],
+            [
+              5767.76171875,
+              5783.78662109375,
+              12095.3359375
+            ]
+          ],
+          "area_vx2": 11584400,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "held_out",
+          "evaluation_core_z_half_open": [
+            11569,
+            11825
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 11904,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z11904_w020",
+          "area_cm2": 1.75,
+          "bounds_status": "complete",
+          "meta_sha": "540c509c2d4f59f45c1ea7e578d6719eff242b10",
+          "uuid": "PHerc0813_z11904_w020",
+          "bbox": [
+            [
+              3017.490234375,
+              3082.721923828125,
+              11908.1337890625
+            ],
+            [
+              3744.90576171875,
+              4165.818359375,
+              12701.830078125
+            ]
+          ],
+          "area_vx2": 2002000,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            12177,
+            12433
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 11904,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z11904_w100",
+          "area_cm2": 9.98,
+          "bounds_status": "complete",
+          "meta_sha": "f0de80dd14a5f39a21c4e9c3c11e08ae91b4bcfb",
+          "uuid": "PHerc0813_z11904_w100",
+          "bbox": [
+            [
+              1598.99365234375,
+              1303.8641357421875,
+              11906.044921875
+            ],
+            [
+              5280.81298828125,
+              5895.01953125,
+              12703.095703125
+            ]
+          ],
+          "area_vx2": 11390800,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            12177,
+            12433
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 12496,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z12496_w020",
+          "area_cm2": 1.73,
+          "bounds_status": "complete",
+          "meta_sha": "13d4c2922a275c29f8747e5aa05359738fd4ca29",
+          "uuid": "PHerc0813_z12496_w020",
+          "bbox": [
+            [
+              2955.15869140625,
+              3240.837158203125,
+              12498.8681640625
+            ],
+            [
+              3696.7646484375,
+              4205.828125,
+              13292.8642578125
+            ]
+          ],
+          "area_vx2": 1978400,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            12768,
+            13024
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 12496,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z12496_w100",
+          "area_cm2": 10.18,
+          "bounds_status": "complete",
+          "meta_sha": "31c13d32c5e195f4da2bb69fd3fd02ed2cc5ca95",
+          "uuid": "PHerc0813_z12496_w100",
+          "bbox": [
+            [
+              1476.5206298828125,
+              1436.1173095703125,
+              12496.6669921875
+            ],
+            [
+              5285.12646484375,
+              5930.662109375,
+              13294.203125
+            ]
+          ],
+          "area_vx2": 11614400,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            12768,
+            13024
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 13088,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z13088_w020",
+          "area_cm2": 1.73,
+          "bounds_status": "complete",
+          "meta_sha": "896350676cdbaa06738a4e7465e326443dc83990",
+          "uuid": "PHerc0813_z13088_w020",
+          "bbox": [
+            [
+              2893.135009765625,
+              3297.07275390625,
+              13090.5869140625
+            ],
+            [
+              3647.57373046875,
+              4314.06591796875,
+              13880.689453125
+            ]
+          ],
+          "area_vx2": 1974800,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            13359,
+            13615
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 13088,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z13088_w100",
+          "area_cm2": 9.93,
+          "bounds_status": "complete",
+          "meta_sha": "fec04cb48054b892a23256b4b841b7218c524df8",
+          "uuid": "PHerc0813_z13088_w100",
+          "bbox": [
+            [
+              1380.1407470703125,
+              1553.1724853515625,
+              13089.8837890625
+            ],
+            [
+              5176.14599609375,
+              5681.654296875,
+              13886.923828125
+            ]
+          ],
+          "area_vx2": 11334800,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            13359,
+            13615
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 14304,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z14304_w020",
+          "area_cm2": 2.02,
+          "bounds_status": "complete",
+          "meta_sha": "8e22eb2f95a3edba8a6be5207319f763cd3f3a1d",
+          "uuid": "PHerc0813_z14304_w020",
+          "bbox": [
+            [
+              2217.036376953125,
+              3070.141845703125,
+              14307.466796875
+            ],
+            [
+              3327.86865234375,
+              4222.42333984375,
+              15102.794921875
+            ]
+          ],
+          "area_vx2": 2303200,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "held_out",
+          "evaluation_core_z_half_open": [
+            14577,
+            14833
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 14304,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z14304_w100",
+          "area_cm2": 9.58,
+          "bounds_status": "complete",
+          "meta_sha": "3d67de773083577261406631e55d863f89865811",
+          "uuid": "PHerc0813_z14304_w100",
+          "bbox": [
+            [
+              924.2401733398438,
+              1592.2847900390625,
+              14304.8310546875
+            ],
+            [
+              4890.9716796875,
+              5508.58935546875,
+              15103.3818359375
+            ]
+          ],
+          "area_vx2": 10930000,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "held_out",
+          "evaluation_core_z_half_open": [
+            14577,
+            14833
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 14896,
+          "wrap": "w020",
+          "path": "meshes/PHerc0813/z14896_w020",
+          "area_cm2": 1.81,
+          "bounds_status": "complete",
+          "meta_sha": "e9ebb082f018cf5e831502689ae404cba1d2fc04",
+          "uuid": "PHerc0813_z14896_w020",
+          "bbox": [
+            [
+              1971.930908203125,
+              2903.344482421875,
+              14897.798828125
+            ],
+            [
+              3250.14501953125,
+              3729.027099609375,
+              15694.7158203125
+            ]
+          ],
+          "area_vx2": 2060800,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            15168,
+            15424
+          ]
+        },
+        {
+          "scroll": "PHerc0813",
+          "window_z": 14896,
+          "wrap": "w100",
+          "path": "meshes/PHerc0813/z14896_w100",
+          "area_cm2": 9.29,
+          "bounds_status": "complete",
+          "meta_sha": "73c410fb97419b645fa1f8aa3b82ecdb8016d826",
+          "uuid": "PHerc0813_z14896_w100",
+          "bbox": [
+            [
+              583.1719360351562,
+              1628.0831298828125,
+              14896.67578125
+            ],
+            [
+              4711.11376953125,
+              5109.40966796875,
+              15695.0673828125
+            ]
+          ],
+          "area_vx2": 10595200,
+          "scale": [
+            0.05,
+            0.05
+          ],
+          "split_role": "fit",
+          "evaluation_core_z_half_open": [
+            15168,
+            15424
+          ]
+        }
+      ],
+      "bounds_complete": 24,
+      "split": {
+        "status": "frozen",
+        "method": "Sort the 12 locked axial windows by bbox-derived z center; partition into three equal-count bands of four; in each band hold out the window whose z center is nearest that band's mean (ties to lower z). Both w020 and w100 at that window share the held-out role. Use only the central 256 z-slice core of every candidate as a fit/evaluation unit.",
+        "uses_quality_or_ink": false,
+        "core_depth_slices": 256,
+        "fit_windows": [
+          4704,
+          5296,
+          7104,
+          7696,
+          8288,
+          11904,
+          12496,
+          13088,
+          14896
+        ],
+        "held_out_windows": [
+          6496,
+          11296,
+          14304
+        ],
+        "fit_candidates": 18,
+        "held_out_candidates": 6,
+        "bands": [
+          {
+            "band": 1,
+            "windows": [
+              {
+                "window_z": 4704,
+                "z_center": 5103.442626953125
+              },
+              {
+                "window_z": 5296,
+                "z_center": 5696.110595703125
+              },
+              {
+                "window_z": 6496,
+                "z_center": 6896.60546875
+              },
+              {
+                "window_z": 7104,
+                "z_center": 7504.1436767578125
+              }
+            ],
+            "mean_z_center": 6300.075592041016,
+            "held_out_window_z": 6496
+          },
+          {
+            "band": 2,
+            "windows": [
+              {
+                "window_z": 7696,
+                "z_center": 8095.0914306640625
+              },
+              {
+                "window_z": 8288,
+                "z_center": 8687.12939453125
+              },
+              {
+                "window_z": 11296,
+                "z_center": 11696.609375
+              },
+              {
+                "window_z": 11904,
+                "z_center": 12304.776123046875
+              }
+            ],
+            "mean_z_center": 10195.901580810547,
+            "held_out_window_z": 11296
+          },
+          {
+            "band": 3,
+            "windows": [
+              {
+                "window_z": 12496,
+                "z_center": 12895.650634765625
+              },
+              {
+                "window_z": 13088,
+                "z_center": 13487.02099609375
+              },
+              {
+                "window_z": 14304,
+                "z_center": 14704.61865234375
+              },
+              {
+                "window_z": 14896,
+                "z_center": 15296.064453125
+              }
+            ],
+            "mean_z_center": 14095.838684082031,
+            "held_out_window_z": 14304
+          }
+        ],
+        "window_roles": [
+          {
+            "window_z": 4704,
+            "z_center": 5103.442626953125,
+            "role": "fit",
+            "core_z_half_open": [
+              4975,
+              5231
+            ]
+          },
+          {
+            "window_z": 5296,
+            "z_center": 5696.110595703125,
+            "role": "fit",
+            "core_z_half_open": [
+              5568,
+              5824
+            ]
+          },
+          {
+            "window_z": 6496,
+            "z_center": 6896.60546875,
+            "role": "held_out",
+            "core_z_half_open": [
+              6769,
+              7025
+            ]
+          },
+          {
+            "window_z": 7104,
+            "z_center": 7504.1436767578125,
+            "role": "fit",
+            "core_z_half_open": [
+              7376,
+              7632
+            ]
+          },
+          {
+            "window_z": 7696,
+            "z_center": 8095.0914306640625,
+            "role": "fit",
+            "core_z_half_open": [
+              7967,
+              8223
+            ]
+          },
+          {
+            "window_z": 8288,
+            "z_center": 8687.12939453125,
+            "role": "fit",
+            "core_z_half_open": [
+              8559,
+              8815
+            ]
+          },
+          {
+            "window_z": 11296,
+            "z_center": 11696.609375,
+            "role": "held_out",
+            "core_z_half_open": [
+              11569,
+              11825
+            ]
+          },
+          {
+            "window_z": 11904,
+            "z_center": 12304.776123046875,
+            "role": "fit",
+            "core_z_half_open": [
+              12177,
+              12433
+            ]
+          },
+          {
+            "window_z": 12496,
+            "z_center": 12895.650634765625,
+            "role": "fit",
+            "core_z_half_open": [
+              12768,
+              13024
+            ]
+          },
+          {
+            "window_z": 13088,
+            "z_center": 13487.02099609375,
+            "role": "fit",
+            "core_z_half_open": [
+              13359,
+              13615
+            ]
+          },
+          {
+            "window_z": 14304,
+            "z_center": 14704.61865234375,
+            "role": "held_out",
+            "core_z_half_open": [
+              14577,
+              14833
+            ]
+          },
+          {
+            "window_z": 14896,
+            "z_center": 15296.064453125,
+            "role": "fit",
+            "core_z_half_open": [
+              15168,
+              15424
+            ]
+          }
+        ],
+        "core_overlap_check": "pass",
+        "minimum_axial_gap_between_any_locked_cores_slices": 335,
+        "minimum_gap_pair_window_z": [
+          7104,
+          7696
+        ]
+      },
+      "umbilicus_reference": {
+        "source_repository": "Jashann/vesuvius-scrolling",
+        "source_commit": "4f4997adcccaa9124ab5af02605233f7e3388c69",
+        "source_path": "data/umbilicus/umb_band_PHerc0813.json",
+        "source_sha": "f69745b36cbba85463ab7f3b73a4234b5c005661",
+        "method": "team objective on 11 Lasagna slices + Theil-Sen x(z), y(z)",
+        "estimation_band_z": [
+          11300,
+          12300
+        ],
+        "line_fit_residual_median_px": 56.54346350645765,
+        "interpretation": "Centerline stability diagnostic only; not distance to a known true umbilicus."
+      }
+    },
+    "PHerc1447": {
+      "prize_volume_id": "20250521151220",
+      "base_shape_zyx": [
+        24297,
+        8343,
+        8343
+      ],
+      "official_segment_count": 15,
+      "official_segment_ids": [
+        "20250502180708-auto_grown_20250502160708188",
+        "20250502180748-auto_grown_20250502160748721",
+        "20250502182142-auto_grown_20250502161324419",
+        "20250502182456-auto_grown_20250502161202782",
+        "20250502183138-auto_grown_20250502162038685",
+        "20250502183421-auto_grown_20250502161744358",
+        "20250502184201-auto_grown_20250502163549332",
+        "20250502184658-auto_grown_20250502163923577",
+        "20250502184845-auto_grown_20250502164121265",
+        "20250502185519-auto_grown_20250502164303733",
+        "20250502205333-auto_grown_20250502181030065",
+        "20250702235910-auto_grown_20250702235910292",
+        "20250703025628-auto_grown_20250703025628283",
+        "20250703034159-auto_grown_20250703034159599",
+        "20251105093211-z_dbg_gen_00320"
+      ],
+      "bounds_status": "pending tifxyz centroid/bounds extraction"
+    }
+  },
+  "anti_cherrypick": [
+    "Do not remove candidates because a published eye verdict is poor.",
+    "Do not inspect ink maps before the geometry split is frozen.",
+    "Record failed candidates in the denominator.",
+    "Use exact prize-eligible CT volumes only."
+  ]
+}

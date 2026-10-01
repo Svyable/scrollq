@@ -1,25 +1,34 @@
-# AGENTS.md — ScrollQ
+# AGENTS.md — ScrolIQ
 
 Instructions for AI coding agents working in this repo. Humans: the
 contributing guide lives at `.github/CONTRIBUTING.md`.
 
 ## What this is
 
-ScrollQ scores Vesuvius scroll volumes 0–100 on *data quality* (signal
-presence, texture/gradient energy, dynamic range, saturation penalty,
-dead-slice scan) by decoding sampled 128³ volcomp chunks over HTTP.
+ScrolIQ is a Challenge-aligned diagnostic layer for Vesuvius scroll data and
+virtual unwrapping. The Python package and existing CLI names remain `scrollq`
+for compatibility.
+
+The current implemented core still scores sampled real level-0 voxels 0–100 on
+*scan health* (signal presence, texture/gradient energy, dynamic range,
+saturation penalty, dead-slice scan). That number is deliberately narrow: it
+must never be presented as readability, surface quality, ink quality, or Grand
+Prize readiness.
+
+`scroliq-passport` organizes current evidence around the Vesuvius Challenge
+2026 Open Problems and leaves unmeasured stages explicitly `unknown`.
 Companion: [zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit)
-("don't train on lies" — corruption detection). This is "train on the best
-first." `scrollq-health` unifies both into one TRAIN / CAUTION / DO NOT TRAIN
-verdict. `scrollq-grand-prize` applies the scores to the 13 Grand Prize
-volumes as a weight-free Pareto frontier (triage, not a readability claim).
+("don't train on lies" — corruption detection). `scrollq-health` unifies
+integrity and scan quality into TRAIN / CAUTION / DO NOT TRAIN.
+`scrollq-grand-prize` applies the scores to the 13 Grand Prize volumes as a
+weight-free Pareto frontier (triage, not a readability claim).
 
 ## Layout
 
 - `src/scrollq/` — the package; each module with a `main()` is a console
   script declared in `pyproject.toml`
-  - `score.py` — scoring core: `score_volume(base_url, root, samples, rotate)`,
-    weights, shard sampling → `scrollq-score` (via `cli.py`)
+  - `score.py` — scoring core: `score_volume(base_url, root, samples, rotate,
+    spread, exclude)`, weights, shard sampling → `scrollq-score` (via `cli.py`)
   - `metrics.py` — per-chunk metrics from a decoded uint8 chunk
   - `health.py` — unified health report (imports `zpa.*` from the companion)
     → `scrollq-health`
@@ -28,13 +37,18 @@ volumes as a weight-free Pareto frontier (triage, not a readability claim).
   - `grand_prize.py` → `scrollq-grand-prize`: dated target manifest
     (`DEFAULT_MANIFEST`, `as_of`), Pareto frontier, optional surface-support
     import
+  - evidence layers, each its own `scroliq-*` script: `passport.py`,
+    `scan_map.py`, `provenance.py`, `recto_coverage.py`, `tifxyz_audit.py`
+    (`scroliq-mesh`), `ink_audit.py`, `ink_validation.py`, `winding_audit.py`;
+    `geometry_probe.py` → `scrollq-geometry-probe`
 - `tests/` — pytest suite; keep it green
 - `artifacts/` — dated campaign outputs, the evidence behind every published
-  number: `2026-09-30-scrollq/` (volumes.json, volumes_rot9.json,
-  coverage.json) and `2026-09-30-grand-prize-qualifier/` (targets, probe plan,
-  imported surface-support evidence with source SHAs)
+  number. The published campaign is `2026-09-30-scrollq-n24-dense/` (stability:
+  `2026-09-30-resampling-stability/`, Grand Prize:
+  `2026-09-30-grand-prize-qualifier-n24-dense/`); the 4- and 12-sample
+  directories are superseded but kept frozen
 - `docs/` — GitHub Pages: leaderboard (`index.html`), September writeup,
-  `grand-prize-probe-protocol.md`
+  Grand Prize protocol/provenance specs, `ink-validation.md`
 - `volumes.txt` — 64 dl.ash2txt.org volcomp volume roots
 - `requirements-ci.txt` — pins the companion to an immutable commit, plus
   `pytest` and `build`
@@ -45,11 +59,11 @@ Use `.venv/bin/<tool>` or an activated venv. Setup:
 `pip install -r requirements-ci.txt && pip install -e .`
 
 ```bash
-scrollq-score --volumes volumes.txt --samples 4 --workers 4 [--rotate N] --out-dir out/
+scrollq-score --volumes volumes.txt --samples 24 --spread 5 --workers 8 [--rotate N] --out-dir out/
 scrollq-leaderboard --in out/volumes.json [--coverage out/coverage.json] --out out/index.html
 scrollq-coverage --s3-roots <roots.jsonl> --volumes out/volumes.json --out out/coverage.json
 scrollq-health --root <dl volume root>
-scrollq-grand-prize --volumes artifacts/2026-09-30-scrollq/volumes.json \
+scrollq-grand-prize --volumes artifacts/2026-09-30-scrollq-n24-dense/volumes.json \
   [--surface-support artifacts/2026-09-30-grand-prize-qualifier/surface_support_external.json] \
   --out out/grand-prize-targets.json
 python -m pytest tests/ -q
@@ -78,12 +92,23 @@ console script. A new entry point must therefore be declared in
    shard index — that is legitimate, not a defect. Never report them as empty.
 4. **Scores are sample-dependent by design.** Resampling stability is the
    quality gate: Spearman ρ ≥ 0.85, mean |Δ| small, top-10 overlap high.
-   Current: ρ = 0.876, mean |Δ| = 3.07, overlap 8/10, computed between
-   `artifacts/2026-09-30-scrollq/volumes.json` and `volumes_rot9.json`
-   (re-derivable offline from those two files). A second sample is
-   `scrollq-score --rotate N`. Those September artifacts predate the
-   `sampling` provenance field, so they do not record their rotation or
-   budget — new runs do; commit the full output.
+   Current published measurement 2026-09-30 (`artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json`,
+   `bin/stability.py`, 24 samples, 5×5×5 grid, rotate=0 vs 13 = disjoint *candidate order*):
+   ρ = 0.7944, mean |Δ| = 4.195, overlap 7/10 — **below the gate**, and an
+   upper bound (only 2/64 volumes read disjoint chunks). The earlier n=4 run
+   gave ρ = 0.76, mean |Δ| = 7.4, overlap 6/10. Present rankings as bands,
+   not precise orders. (A rotate=1 resample gives ρ = 0.99 — it re-uses 3 of 4 shards,
+   so it measures the resample, not the score. Don't cite it.)
+   **Disjoint candidate order ≠ disjoint chunks read**: the sampling loop
+   scans all candidates until N chunks decode, so on sparse volumes both
+   rotations re-read the same present shards. `score_volume()` now records
+   per-chunk provenance (`sample_provenance` with stable
+   `shard_key#inner_flat` identities) and `bin/stability.py` reports the
+   actual decoded-identity overlap per volume.
+   Earlier published numbers (ρ = 0.876, |Δ| = 3.07, 8/10) had no artifact
+   and do not reproduce — they were replaced 2026-09-30.
+   A second deterministic sample is `scrollq-score --rotate N`; commit the
+   full output, including its `sampling` provenance.
 5. **Weights are a judgment call, published with every score.** Changing them
    is fine; hiding them is not. Update the September page when they change.
 6. **Sampling provenance travels with the score.** Every result carries
@@ -107,13 +132,16 @@ console script. A new entry point must therefore be declared in
 - Every number in docs/PRs must trace to a command + artifact in this repo.
   Published numbers are repeated in `README.md`, `docs/`, and
   `artifacts/*/README.md` — change them together or not at all.
-- Do not claim readability prediction. Triage signal only.
+- Do not claim readability prediction. The 0–100 score is scan-health triage only.
+- Do not infer surface, mesh, spiral, fiber, label-localization, or ink state from the scan score; missing evidence stays `unknown`.
 - Opening PRs/issues upstream or publishing to PyPI needs the maintainer's
   explicit approval — prepare the branch, don't ship it.
 - For the tested development setup, install `requirements-ci.txt`, then
-  `pip install -e .`. CI pins the companion to a verified immutable commit
-  (update it deliberately, never to a branch). The public package keeps its
-  `zarr-pyramid-audit>=0.3.0` requirement.
+  `pip install -e .`. CI pins the companion to a verified immutable commit.
+  The public package declares
+  `zarr-pyramid-audit @ git+https://github.com/Svyable/zarr-pyramid-audit.git`
+  (PyPI publication is intentionally deprioritized — never assume the
+  companion is installable from PyPI).
 - Do not commit environments, caches, egg-info or build archives.
 - PRs follow `.github/pull_request_template.md`: What / Evidence / Stability
   check / Grand Prize + frozen data / Docs.

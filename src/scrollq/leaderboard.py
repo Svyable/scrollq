@@ -1,4 +1,4 @@
-"""Build the ScrollQ leaderboard site from volumes.json.
+"""Build the ScrolIQ leaderboard site from volumes.json.
 
 Generates a single self-contained HTML page: hero stats, score-distribution
 histogram, sortable/filterable leaderboard with expandable rows, methodology,
@@ -19,8 +19,15 @@ REPO = "https://github.com/Svyable/scrollq"
 PAGE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ScrollQ — Train on the best first</title>
-<meta name="description" content="Data-quality triage for Vesuvius scroll volumes. 64 volumes scored 0-100 on voxel health.">
+<title>ScrolIQ — Diagnostics for reading Herculaneum scrolls</title>
+<meta name="description" content="Challenge-aligned diagnostics for Vesuvius scrolls: scan health, surface/mesh readiness, label quality, ink reliability, held-out validation, and Grand Prize reproducibility.">
+<meta name="theme-color" content="#0d0b08">
+<meta name="color-scheme" content="dark">
+<link rel="canonical" href="https://svyable.github.io/scrollq/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ScrolIQ — Evidence for reading Herculaneum scrolls">
+<meta property="og:description" content="Reproducible scan diagnostics, exact-volume Grand Prize qualification, held-out geometry, and ink falsification controls.">
+<meta property="og:url" content="https://svyable.github.io/scrollq/">
 <style>
 :root{{
   --bg:#0d0b08; --panel:#161310; --panel2:#1c1813; --line:#2c251b;
@@ -29,11 +36,27 @@ PAGE = """<!doctype html>
   --good:#8fd694; --warn:#ff9e5e; --bad:#ff6b6b;
 }}
 *{{box-sizing:border-box}}
+html{{scroll-behavior:smooth}}
 body{{margin:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
   -webkit-font-smoothing:antialiased}}
 a{{color:var(--amber)}}
+a:focus-visible,button:focus-visible,input:focus-visible{{outline:2px solid var(--gold);outline-offset:3px}}
+.skip{{position:fixed;left:1rem;top:1rem;z-index:1000;transform:translateY(-180%);
+  background:var(--gold);color:#171008;padding:.55rem .8rem;border-radius:8px;font-weight:800;text-decoration:none}}
+.skip:focus{{transform:none}}
 .wrap{{max-width:1200px;margin:0 auto;padding:0 1.25rem}}
+.topbar{{position:sticky;top:0;z-index:50;background:rgba(13,11,8,.88);
+  backdrop-filter:blur(16px);border-bottom:1px solid rgba(44,37,27,.78)}}
+.navinner{{max-width:1200px;margin:0 auto;padding:.7rem 1.25rem;display:flex;align-items:center;gap:1rem}}
+.brand{{display:flex;align-items:center;gap:.6rem;color:var(--ink);text-decoration:none;font-weight:800}}
+.brandmark{{width:26px;height:26px;border-radius:7px;border:1px solid #6f3b18;display:grid;place-items:center;
+  color:var(--ember);font-family:Georgia,serif;background:#17110c;font-size:.72rem}}
+.navlinks{{display:flex;gap:.2rem;margin-left:auto;align-items:center;flex-wrap:wrap}}
+.navlinks a{{color:var(--muted);text-decoration:none;font-size:.82rem;padding:.38rem .58rem;border-radius:7px}}
+.navlinks a:hover{{color:var(--ink);background:var(--panel2)}}
+.navstatus{{font-size:.72rem;color:var(--good);border:1px solid rgba(143,214,148,.24);
+  background:rgba(143,214,148,.06);padding:.3rem .55rem;border-radius:999px;white-space:nowrap}}
 /* ---------- hero ---------- */
 .hero{{position:relative;overflow:hidden;padding:4.5rem 0 3rem;
   background:
@@ -64,6 +87,17 @@ a{{color:var(--amber)}}
 .card p{{margin:.35rem 0;color:var(--muted);line-height:1.6;font-size:.94rem}}
 .card p b{{color:var(--ink)}}
 .card .big{{font-size:1.5rem;font-weight:800;color:var(--gold)}}
+
+.problem-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.75rem}}
+.problem{{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:1rem}}
+.problem>div{{display:flex;justify-content:space-between;gap:.5rem;align-items:center}}
+.problem h3{{margin:0;font-size:.92rem;color:var(--ink)}}
+.problem p{{margin:.55rem 0 0;color:var(--muted);line-height:1.5;font-size:.84rem}}
+.state{{font-size:.62rem;font-weight:800;letter-spacing:.08em;border-radius:999px;padding:.18rem .45rem}}
+.state.live{{color:var(--good);border:1px solid rgba(143,214,148,.4)}}
+.state.next{{color:var(--gold);border:1px solid rgba(255,209,102,.4)}}
+.state.plan{{color:var(--muted);border:1px solid var(--line)}}
+.alignment-links{{color:var(--muted);font-size:.88rem;margin:.9rem 0 0}}
 /* ---------- panels ---------- */
 .panel{{background:var(--panel);border:1px solid var(--line);border-radius:14px;
   padding:1.5rem;margin:0 0 2rem}}
@@ -124,35 +158,107 @@ code{{font-size:.78rem;color:var(--amber)}}
 .wtable td:last-child{{text-align:right;font-variant-numeric:tabular-nums;color:var(--gold)}}
 .scope{{border-left:3px solid var(--ember);padding:.6rem 1rem;background:#171208;
   border-radius:0 8px 8px 0;color:var(--muted);line-height:1.65;font-size:.93rem}}
+.actiongrid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}}
+.actiongrid h3{{margin:.1rem 0 .5rem;font-size:.95rem;color:var(--ink)}}
+.actiongrid p{{color:var(--muted);line-height:1.6;font-size:.9rem}}
+.evidence-link{{font-size:.84rem}}
 /* ---------- suite strip / footer ---------- */
 .suite{{display:flex;gap:1rem;flex-wrap:wrap;align-items:stretch}}
 .suite .card{{flex:1;min-width:260px}}
 footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
   color:var(--dim);font-size:.82rem;line-height:1.7}}
 .hidden{{display:none!important}}
-@media(max-width:700px){{.compbar{{min-width:70px}}thead th:nth-child(5),tbody td:nth-child(5){{display:none}}}}
+@media(max-width:700px){{.compbar{{min-width:70px}}thead th:nth-child(5),tbody td:nth-child(5){{display:none}}
+  .navstatus{{display:none}}.navlinks a{{padding:.34rem .42rem}}}}
+/* ---------- analytics + creature comforts ---------- */
+.analytics{{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.7rem}}
+.metric{{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:.85rem 1rem;min-width:0}}
+.metric .n{{font-size:1.45rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap}}
+.metric .n.compact{{font-size:1.08rem}}
+.metric .l{{font-size:.73rem;color:var(--muted);margin-top:.25rem;line-height:1.35}}
+.actionbtn,.copybtn{{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:.45rem .75rem;font-size:.78rem;cursor:pointer}}
+.actionbtn:hover,.copybtn:hover{{border-color:var(--ember);color:var(--ink)}}
+.control-meta{{margin-left:auto;color:var(--dim);font-size:.78rem;font-variant-numeric:tabular-nums}}
+.candidate-note{{margin:-.2rem 0 1rem;color:var(--muted);font-size:.82rem;line-height:1.55}}
+.candidate-note b{{color:var(--ink)}}
+.copybtn{{margin-left:.6rem;padding:.3rem .55rem;vertical-align:middle}}
+.dist-meta{{color:var(--muted);font-size:.88rem;margin:.4rem 0 .8rem}}
+tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
+.detail-grid code{{overflow-wrap:anywhere}}
+@media(max-width:700px){{.control-meta{{width:100%;margin-left:0}}.actionbtn{{flex:1}}.analytics{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}
+
 </style></head><body>
+
+<a class="skip" href="#main">Skip to evidence</a>
+<nav class="topbar" aria-label="Primary"><div class="navinner">
+  <a class="brand" href="./"><span class="brandmark">IQ</span><span>ScrolIQ</span></a>
+  <div class="navlinks">
+    <a href="#grand-prize">Grand Prize</a><a href="#evidence">Evidence</a>
+    <a href="#leaderboard">Survey</a><a href="#method">Method</a>
+    <a href="./september-2026.html">Writeup</a><a href="{repo}">GitHub</a>
+  </div>
+  <span class="navstatus">● reproducible evidence</span>
+</div></nav>
 
 <header class="hero"><div class="wrap">
   <div class="eyebrow">VESUVIUS CHALLENGE · SEPTEMBER 2026</div>
-  <h1>Scroll<span class="q">Q</span></h1>
-  <p class="tagline">Data-quality triage for Vesuvius scroll volumes. <em>Train on the best first.</em></p>
-  <p class="lede">Every scroll volume's full-resolution level is sampled — four
-  128&sup3; chunks, decoded from volcomp over HTTP — and scored 0&ndash;100 on
-  signal presence, texture energy, dynamic range, and artifact penalties.
-  Click any row for the full breakdown. Method and weights are published in
-  the <a href="{repo}">repo</a>; re-weight it however you like.</p>
+  <h1>Scrol<span class="q">IQ</span></h1>
+  <p class="tagline">Diagnostics for reading Herculaneum scrolls. <em>Find the bottleneck.</em></p>
+  <p class="lede">ScrolIQ is evolving from a scan-quality survey into an observability layer for the Vesuvius Challenge pipeline. The current score still measures sampled CT health from real level-0 voxels, and downstream state is never inferred from that score. Volume-bound passports can now attach spatial scan evidence, winding-input audits, native TIFXYZ Mesh IQ, and ink leakage/provenance audits; CT surface support, fiber connectivity, spiral-fit accuracy, label localization, and biological ink identity remain unknown until direct evidence exists. See the <a href="https://scrollprize.org/2026_open_problems">official open problems</a>, the <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">alignment roadmap</a>, and the <a href="#grand-prize">2027 Grand Prize campaign →</a></p>
   <div class="stats">
     <div class="stat"><div class="n">{n}</div><div class="l">scroll volumes scored</div></div>
     <div class="stat"><div class="n">{lo}&ndash;{hi}</div><div class="l">score range (0&ndash;100)</div></div>
     <div class="stat"><div class="n">0</div><div class="l">dead slices found under the strict detector</div></div>
-    <div class="stat"><div class="n">{label_next_n} 🎯</div><div class="l">top-quartile volumes with zero ink labels — label next</div></div>
+    <div class="stat"><div class="n">{label_next_n}</div><div class="l">label-coverage candidates<br>top-quartile scan health · 0 published ink labels</div></div>
   </div>
 </div></header>
 
-<div class="wrap">
+<main id="main" class="wrap">
 
-<div class="insights">
+
+<div class="panel alignment" id="pipeline"><h2>Open-problem diagnostics<span class="sub">ScrolIQ maps evidence to the Vesuvius Challenge pipeline instead of treating one score as readiness.</span></h2>
+<div class="problem-grid">
+  <div class="problem"><div><h3>Scan diagnostics</h3><span class="state live">LIVE</span></div><p>Real-voxel health and coordinate-preserving spatial scan maps. Next: validated layer-separability and decohesion diagnostics.</p></div>
+  <div class="problem"><div><h3>Surface topology</h3><span class="state next">NEXT</span></div><p>CT support, competing sheets, topology risk, and surface-placement uncertainty.</p></div>
+  <div class="problem"><div><h3>Mesh connectivity</h3><span class="state live">LIVE</span></div><p><code>scroliq-mesh</code> audits native TIFXYZ validity, connected components, enclosed gaps, bbox/scale consistency, edge jumps, severe normal reversals, and flattening distortion. Next: CT support, sheet identity, and nonlocal self-intersections.</p></div>
+  <div class="problem"><div><h3>Fiber connectivity</h3><span class="state plan">PLANNED</span></div><p>Continuity and orientation confidence for long-range papyrus fiber traces.</p></div>
+  <div class="problem"><div><h3>Winding annotations</h3><span class="state live">LIVE</span></div><p><code>scroliq-winding</code> validates PointCollections structure, exact-file provenance, volume binding, winding semantics, and axial annotation coverage. Next: patch attachment, graph consistency, and holonomy.</p></div>
+  <div class="problem"><div><h3>Spiral fitting</h3><span class="state plan">PLANNED</span></div><p>Held-out constraint residuals, sensitivity, and under-constrained regions.</p></div>
+  <div class="problem"><div><h3>Label quality</h3><span class="state live">LIVE</span></div><p>Label–volume coverage join: all 70 published ink-detection labels sit on PHercParis4 while {label_next_n} top-quartile volumes have zero published ink labels and are flagged as <b>label-coverage candidates</b> for review. This is a coverage gap, not evidence of ink or surface readiness. Next: physical label offset, snapping candidates, review queues.</p></div>
+  <div class="problem"><div><h3>Ink reliability</h3><span class="state live">LIVE</span></div><p><code>scroliq-ink-audit</code> fails closed on declared train/evaluation overlap and audits checkpoint, seed, held-out-run, and falsification-control provenance. It is an evidence audit, not an ink verdict. Next: attach measured perturbation and cross-scroll results.</p></div>
+  <div class="problem"><div><h3>Data scale</h3><span class="state live">LIVE</span></div><p>Cloud-native partial reads, decode provenance, exact coordinate bindings, file hashes, and machine-readable artifacts keep evidence inspectable across stages.</p></div>
+  <div class="problem"><div><h3>Grand Prize</h3><span class="state plan">TARGET</span></div><p>One evidence trail from full recto coverage to TIFXYZ, renders, validation, and VC3D.</p></div>
+</div>
+<p class="alignment-links"><a href="https://scrollprize.org/2026_open_problems">Official 2026 Open Problems</a> · <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">ScrolIQ alignment roadmap</a></p>
+</div>
+
+<div class="panel" id="contracts"><h2>Evidence contracts<span class="sub">What a passing diagnostic proves — and what it deliberately leaves unknown.</span></h2>
+  <div class="actiongrid">
+    <div><h3>Mesh IQ</h3><p><b>Proves:</b> native TIFXYZ structure/provenance and selected grid-local geometry checks. <b>Does not prove:</b> CT support, correct sheet identity, or global self-intersection freedom.</p></div>
+    <div><h3>Winding IQ</h3><p><b>Proves:</b> volume-bound PointCollections input integrity and descriptive axial coverage. <b>Does not prove:</b> patch attachment, consistent cycles, or spiral-fit accuracy.</p></div>
+    <div><h3>Ink IQ</h3><p><b>Proves:</b> declared spatial separation, checkpoint/seed provenance, and falsification-control coverage. <b>Does not prove:</b> that a prediction is ink.</p></div>
+    <div><h3>Passport</h3><p>Cross-volume artifacts are excluded and failed audits block their stage. A passing component remains partial until the next direct evidence layer exists.</p></div>
+  </div>
+  <p class="alignment-links"><a href="https://github.com/Svyable/scrollq#mesh-iq-native-tifxyz-audit">Mesh IQ usage</a> · <a href="https://github.com/Svyable/scrollq#winding-annotation-audit">Winding IQ usage</a> · <a href="https://github.com/Svyable/scrollq#ink-iq-leakage-and-falsification-evidence-audit">Ink IQ usage</a></p>
+</div>
+
+<div class="panel" id="grand-prize"><h2>2027 Grand Prize campaign<span class="sub">Exact eligible inputs, held-out geometry, and ink falsification before whole-scroll commitment.</span></h2>
+  <div class="actiongrid">
+    <div><h3>Exact-volume eligibility</h3>
+      <p><b>13 prize targets</b> are matched by exact volume ID. Same-scroll higher-resolution scans are explicitly excluded rather than silently substituted.</p>
+      <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-grand-prize-qualifier">Frozen qualifier artifacts →</a></p></div>
+    <div><h3>Blind geometry first</h3>
+      <p>Each first-wave target gets the same deterministic <b>24-region</b> sample: 18 fit regions and <b>6 held-out</b> regions. Failed regions stay in the denominator.</p>
+      <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-probe-protocol.md">Blind probe protocol →</a></p></div>
+    <div><h3>Try to falsify the ink</h3>
+      <p>Promising signals are checked on the correct surface, <b>&plusmn;3 voxel</b> normal offsets, an adjacent winding, perturbed geometry, and an independent checkpoint/fold.</p></div>
+    <div><h3>Reproducibility ledger</h3>
+      <p>Exact inputs, hashes, fixed seeds, held-out splits, failure counts, experiment artifacts, and human-input time are part of the evidence trail — not cleanup work at submission time.</p></div>
+  </div>
+  <div class="scope"><b>No opaque winner score.</b> The frozen two-axis qualifier exposes a Pareto frontier rather than claiming readability. Its current frontier contains <b>PHerc0813</b> and <b>PHerc1447</b>; <b>PHerc0800</b> remains in the first-wave blind probe as a deliberately different geometry hypothesis.</div>
+</div>
+
+<div class="insights" id="evidence">
   <div class="card"><h3>Healthiest volume</h3>
     <p class="big">{top_id}</p>
     <p><b>{top_score}</b> / 100 · {top_spec}<br>Same scanner family
@@ -162,31 +268,56 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     <p>All <b>70</b> published ink-detection labels sit on
     <b>PHercParis4</b> — quality rank <b>13 of 39 scrolls</b> (each scroll
     ranked by its best volume). The healthiest volumes (<b>{top_id}</b> {top_score}, <b>PHerc0139</b> 75.9) have
-    <b>zero</b> ink labels. Labeling effort goes furthest at the 🎯 rows.</p></div>
-  <div class="card"><h3>Stable, not sacred</h3>
-    <p>An independent deterministic resample re-scored all 64 volumes:
-    rank correlation <b>&rho; = 0.876</b>, mean |&Delta;| <b>3.07</b>,
-    top-10 overlap <b>8/10</b>. The ranking is a triage signal — audit the
-    weights, don't worship it.</p></div>
+    <b>zero</b> ink labels. The published campaign exposes <b>{label_next_n}</b>
+    top-quartile zero-label volumes as <b>label-coverage candidates</b> for review.
+    This is a prioritization signal only: it does not claim that ink is present
+    or that surface geometry is ready for annotation.</p></div>
+  <div class="card"><h3>Failed the gate, fixed the experiment</h3>
+    <p>The first 4-sample resample missed our own stability gate
+    (<b>&rho; = 0.76</b>). We did not lower the threshold: we tripled the
+    sampling budget and re-ran all 64 volumes. The frozen 12-sample result is
+    <b>&rho; = 0.9948</b>, mean |&Delta;| <b>0.556</b>, top-10 overlap
+    <b>10/10</b> — above the &rho; &ge; 0.85 gate. Caveat: dense-grid
+    diagnostics show that sparse volumes can re-read shards, so achieved sample
+    counts remain visible rather than being hidden behind the headline metric.
+    <a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-09-30-resampling-stability/stability-n12.json">Frozen stability JSON →</a></p></div>
 </div>
 
-<div class="panel"><h2>Score distribution<span class="sub">64 volumes · 5-point bins</span></h2>
-  <div class="hist">{hist}</div>
-  <p style="color:var(--muted);font-size:.88rem">Tiers: <span class="tier S">S</span> ≥ 70 ·
+<div class="panel"><h2>Scan-quality distribution<span class="sub">64 volumes · 5-point bins</span></h2>
+  {hist}
+  <p class="dist-meta" id="distMeta"></p>
+  <p style="color:var(--muted);font-size:.88rem">Legacy triage bands: <span class="tier S">S</span> ≥ 70 ·
   <span class="tier A">A</span> 60&ndash;70 · <span class="tier B">B</span> 45&ndash;60 ·
   <span class="tier C">C</span> &lt; 45</p>
 </div>
 
-<div class="panel"><h2>Leaderboard<span class="sub">Click a column to sort · click a row for the full breakdown</span></h2>
+<div class="panel analytics-panel"><h2>Scan-quality analytics<span class="sub" id="analyticsSub">Updates with the current view</span></h2>
+  <div class="analytics">
+    <div class="metric"><div class="n" id="meanScore">—</div><div class="l">mean score</div></div>
+    <div class="metric"><div class="n" id="medianScore">—</div><div class="l">median score</div></div>
+    <div class="metric"><div class="n" id="topQuartile">—</div><div class="l">top-quartile cutoff</div></div>
+    <div class="metric"><div class="n" id="uniqueScrolls">—</div><div class="l">unique scrolls</div></div>
+    <div class="metric"><div class="n compact" id="tierMix">—</div><div class="l">S / A / B / C volumes</div></div>
+    <div class="metric"><div class="n compact" id="segmentCoverage">—</div><div class="l">with segment roots</div></div>
+  </div>
+</div>
+
+<div class="panel" id="leaderboard"><h2>Scan-quality survey<span class="sub">Click a column to sort · click a row for the full breakdown</span></h2>
   <div class="controls">
-    <input id="q" type="search" placeholder="Filter by scroll id, e.g. PHerc0139…" aria-label="filter">
+    <input id="q" type="search" placeholder="Filter by scroll id…  / to focus" aria-label="filter leaderboard">
     <button class="tierbtn on" data-t="">all</button>
     <button class="tierbtn" data-t="S">S</button>
     <button class="tierbtn" data-t="A">A</button>
     <button class="tierbtn" data-t="B">B</button>
     <button class="tierbtn" data-t="C">C</button>
-    <button class="tierbtn" data-t="label">🎯 label next</button>
+    <button class="tierbtn" data-t="label">label-coverage candidates</button>
+    <button class="tierbtn" data-t="unlabeled">0 labels</button>
+    <button class="tierbtn" data-t="segments">has segments</button>
+    <button class="actionbtn" id="reset" type="button">reset</button>
+    <button class="actionbtn" id="csv" type="button">export CSV</button>
+    <span class="control-meta" id="resultCount" aria-live="polite"></span>
   </div>
+  <p class="candidate-note"><b>Label-coverage candidate:</b> a volume in the top quartile of this scan-health survey with zero published ink-detection labels. It is a review-priority flag, not evidence that ink is present or that a usable surface is available.</p>
   <div style="overflow-x:auto"><table id="lb"><thead><tr>
     <th data-k="rank">#</th><th data-k="id">volume</th><th data-k="score">score</th>
     <th data-k="tier">tier</th><th>components</th>
@@ -195,7 +326,7 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
   </tr></thead><tbody>{rows}</tbody></table></div>
 </div>
 
-<div class="panel"><h2>How the score works</h2>
+<div class="panel" id="method"><h2>Scan-health score (one diagnostic)</h2>
 <div class="method">
   <div><table class="wtable">
     <tr><td>Signal presence (nonzero voxel fraction)</td><td>40</td></tr>
@@ -215,9 +346,10 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
   segmentation and labeling effort goes where the data is strongest. The
   weights are a judgment call, published with every score.</div>
   <p style="color:var(--muted);font-size:.88rem;line-height:1.65;margin-top:1rem">
-  Sampling: 4 &times; 128&sup3; chunks per volume, spread per-dimension across
-  the shard grid (flat-index spread degenerates to an edge line on non-cubic
-  grids). Decoded with the vendored libvolcomp via
+  Campaign request: up to <b>12 &times; 128&sup3;</b> chunks per volume,
+  spread across the shard grid. Sparse volumes may decode fewer; the achieved
+  count and sampling provenance stay attached to every result. Decoded with the
+  vendored libvolcomp via
   <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>.</p></div>
 </div></div>
 
@@ -235,10 +367,10 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     <p><code>scrollq-health --root &lt;volume&gt;</code></p></div>
 </div></div>
 
-</div><!-- /wrap -->
+</main>
 
 <footer><div class="wrap">
-  Generated by <a href="{repo}">ScrollQ</a> from public dl.ash2txt.org volumes,
+  Generated by <a href="{repo}">ScrolIQ</a> from public dl.ash2txt.org volumes,
   {stamp}. Scores are heuristic and published with their components — audit the
   weights, don't worship the ranking. Companion:
   <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>.
@@ -246,15 +378,51 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
 </div></footer>
 
 <script>
-(function(){{
+(function dashboard(){{
   const tb = document.querySelector("#lb tbody");
   const rows = Array.from(tb.querySelectorAll("tr.vol"));
   rows.forEach(r => {{ r._detail = r.nextElementSibling; }});
-  let sortK = "rank", asc = true, tierF = "", qF = "";
+
+  const q = document.getElementById("q");
+  const resultCount = document.getElementById("resultCount");
+  let sortK = "score", asc = false, tierF = "", qF = "", currentRows = rows.slice();
+
   function tierOf(r){{ return r.dataset.tier; }}
+  function scoreStats(sample){{
+    const values = sample.map(r => Number(r.dataset.score)).filter(Number.isFinite).sort((a,b) => a-b);
+    if (!values.length) return null;
+    const mean = values.reduce((a,b) => a+b, 0) / values.length;
+    const mid = Math.floor(values.length / 2);
+    const median = values.length % 2 ? values[mid] : (values[mid - 1] + values[mid]) / 2;
+    const desc = values.slice().reverse();
+    const qIndex = Math.max(0, Math.ceil(desc.length * .25) - 1);
+    return {{ mean, median, topQ: desc[qIndex] }};
+  }}
+  function updateAnalytics(sample){{
+    const stats = scoreStats(sample);
+    const scrolls = new Set(sample.map(r => r.querySelector(".scrollid")?.textContent.trim()).filter(Boolean));
+    const tiers = {{S:0,A:0,B:0,C:0}};
+    sample.forEach(r => {{ if (tiers[r.dataset.tier] !== undefined) tiers[r.dataset.tier]++; }});
+    const segmented = sample.filter(r => Number(r.dataset.seg) > 0).length;
+    document.getElementById("analyticsSub").textContent =
+      sample.length ? `${{sample.length}} visible volumes · ${{scrolls.size}} scrolls` : "No rows match the current view";
+    document.getElementById("meanScore").textContent = stats ? stats.mean.toFixed(1) : "—";
+    document.getElementById("medianScore").textContent = stats ? stats.median.toFixed(1) : "—";
+    document.getElementById("topQuartile").textContent = stats ? `≥ ${{stats.topQ.toFixed(1)}}` : "—";
+    document.getElementById("uniqueScrolls").textContent = scrolls.size || "—";
+    document.getElementById("tierMix").textContent = `${{tiers.S}} / ${{tiers.A}} / ${{tiers.B}} / ${{tiers.C}}`;
+    document.getElementById("segmentCoverage").textContent = `${{segmented}} / ${{sample.length}}`;
+  }}
+  function matchesFilter(r){{
+    if (!tierF) return true;
+    if (tierF === "label") return r.dataset.label === "1";
+    if (tierF === "unlabeled") return Number(r.dataset.ink) === 0;
+    if (tierF === "segments") return Number(r.dataset.seg) > 0;
+    return tierOf(r) === tierF;
+  }}
   function apply(){{
     let vis = rows.filter(r =>
-      (!tierF || (tierF === "label" ? r.dataset.label === "1" : tierOf(r) === tierF)) &&
+      matchesFilter(r) &&
       (!qF || r.dataset.id.toLowerCase().includes(qF)));
     vis.sort((a, b) => {{
       const x = parseFloat(a.dataset[sortK] ?? a.dataset.rank),
@@ -268,11 +436,27 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     vis.forEach((r, i) => {{
       r.classList.remove("hidden");
       r._detail.classList.add("hidden");
+      r.setAttribute("aria-expanded", "false");
       r.querySelector(".rn").textContent = i + 1;
       frag.append(r, r._detail);
     }});
-    rows.forEach(r => {{ if (!vis.includes(r)) {{ r.classList.add("hidden"); r._detail.classList.add("hidden"); }} }});
+    rows.forEach(r => {{
+      if (!vis.includes(r)) {{
+        r.classList.add("hidden");
+        r._detail.classList.add("hidden");
+        r.setAttribute("aria-expanded", "false");
+      }}
+    }});
     tb.append(frag);
+    currentRows = vis;
+    resultCount.textContent = `${{vis.length}} of ${{rows.length}} shown`;
+    updateAnalytics(vis);
+  }}
+  function resetView(){{
+    sortK = "score"; asc = false; tierF = ""; qF = ""; q.value = "";
+    document.querySelectorAll(".tierbtn").forEach(x => x.classList.toggle("on", x.dataset.t === ""));
+    document.querySelectorAll("#lb thead th .arr").forEach(e => e.remove());
+    apply();
   }}
   document.querySelectorAll("#lb thead th[data-k]").forEach(th => {{
     th.addEventListener("click", () => {{
@@ -288,12 +472,85 @@ footer{{border-top:1px solid var(--line);margin-top:1rem;padding:1.6rem 0 3rem;
     document.querySelectorAll(".tierbtn").forEach(x => x.classList.remove("on"));
     b.classList.add("on"); tierF = b.dataset.t; apply();
   }}));
-  document.getElementById("q").addEventListener("input", e => {{
+  q.addEventListener("input", e => {{
     qF = e.target.value.trim().toLowerCase(); apply();
   }});
-  rows.forEach(r => r.addEventListener("click", () => {{
-    if (r._detail) r._detail.classList.toggle("hidden");
-  }}));
+  document.getElementById("reset").addEventListener("click", resetView);
+
+  function csvCell(value){{
+    const s = String(value ?? "").replace(/"/g, '""');
+    return '"' + s + '"';
+  }}
+  document.getElementById("csv").addEventListener("click", () => {{
+    const head = ["view_rank","volume","acquisition","score","tier","signal","texture","dynamic","penalty","ink_labels","segments","label_coverage_candidate","root"];
+    const lines = [head.map(csvCell).join(",")];
+    currentRows.forEach((r, i) => {{
+      const root = r._detail.querySelector("code")?.textContent.trim() || "";
+      const values = [
+        i + 1,
+        r.querySelector(".scrollid")?.textContent.trim() || "",
+        r.querySelector(".volsub")?.textContent.trim() || "",
+        r.dataset.score, r.dataset.tier, r.dataset.signal, r.dataset.tex,
+        r.dataset.dyn, r.dataset.pen, r.dataset.ink, r.dataset.seg,
+        r.dataset.label === "1" ? "yes" : "no", root
+      ];
+      lines.push(values.map(csvCell).join(","));
+    }});
+    const blob = new Blob([lines.join("\n")], {{type:"text/csv;charset=utf-8"}});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "scrollq-filtered.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }});
+
+  rows.forEach(r => {{
+    r.tabIndex = 0;
+    r.setAttribute("role", "button");
+    r.setAttribute("aria-expanded", "false");
+    const toggle = () => {{
+      if (!r._detail) return;
+      const opening = r._detail.classList.contains("hidden");
+      r._detail.classList.toggle("hidden");
+      r.setAttribute("aria-expanded", opening ? "true" : "false");
+    }};
+    r.addEventListener("click", toggle);
+    r.addEventListener("keydown", e => {{
+      if (e.key === "Enter" || e.key === " ") {{ e.preventDefault(); toggle(); }}
+    }});
+    const rootCode = r._detail?.querySelector("code");
+    if (rootCode) {{
+      const btn = document.createElement("button");
+      btn.type = "button"; btn.className = "copybtn"; btn.textContent = "copy root";
+      btn.addEventListener("click", async () => {{
+        try {{
+          await navigator.clipboard.writeText(rootCode.textContent.trim());
+          btn.textContent = "copied";
+          setTimeout(() => {{ btn.textContent = "copy root"; }}, 1200);
+        }} catch {{
+          btn.textContent = "copy failed";
+          setTimeout(() => {{ btn.textContent = "copy root"; }}, 1400);
+        }}
+      }});
+      rootCode.parentElement.appendChild(btn);
+    }}
+  }});
+
+  const full = scoreStats(rows);
+  if (full) {{
+    document.getElementById("distMeta").textContent =
+      `Full corpus: mean ${{full.mean.toFixed(1)}} · median ${{full.median.toFixed(1)}} · top quartile ≥ ${{full.topQ.toFixed(1)}}.`;
+  }}
+  document.addEventListener("keydown", e => {{
+    const tag = document.activeElement?.tagName;
+    if (e.key === "/" && tag !== "INPUT" && tag !== "TEXTAREA") {{
+      e.preventDefault(); q.focus();
+    }} else if (e.key === "Escape" && (qF || tierF)) {{
+      resetView(); q.blur();
+    }}
+  }});
+  const scoreTh = document.querySelector('#lb thead th[data-k="score"]');
+  if (scoreTh) {{ const s0 = document.createElement("span"); s0.className = "arr"; s0.textContent = " ▼"; scoreTh.appendChild(s0); }}
   apply();
 }})();
 </script>
@@ -354,11 +611,14 @@ def main() -> None:
     counts = [sum(1 for s in scores if b0 <= s < b1 or (b1 == 80 and s == b1))
               for b0, b1 in bins]
     cmax = max(counts) or 1
+    aria = "Score distribution, 5-point bins: " + ", ".join(
+        f"{b0}\u2013{b0 + 5}: {c}" for (b0, _), c in zip(bins, counts))
     hist = "".join(
         f'<div class="bar"><div class="bv">{c}</div>'
         f'<div class="fill" style="height:{100 * c / cmax:.0f}%"></div>'
-        f'<div class="bl">{b0}</div></div>'
+        f'<div class="bl" aria-hidden="false">{b0}</div></div>'
         for (b0, _), c in zip(bins, counts))
+    hist = f'<div class="hist" role="img" aria-label="{html.escape(aria)}">{hist}</div>'
 
     rows = []
     for i, v in enumerate(ok, 1):
@@ -370,7 +630,8 @@ def main() -> None:
         ink = cc.get("ink_labels", 0)
         seg = cc.get("segments", 0)
         is_label = bool(cc.get("label_next"))
-        flag = '<span class="flag">🎯 label next</span>' if is_label else ""
+        flag = ('<span class="flag" title="Top-quartile scan health with zero published ink-detection labels">'
+                'label-coverage candidate</span>') if is_label else ""
         dead = m.get("dead_slices", 0)
         pen = c.get("pen_sat", 0) + c.get("pen_dead", 0)
         s40, t30, d20 = c["signal_40"], c["texture_30"], c["dynamic_20"]
@@ -396,8 +657,9 @@ def main() -> None:
         if seg:
             bits.append(f"{seg} segment roots in open data")
         if is_label:
-            bits.append("🎯 top-quartile quality with zero ink labels — "
-                        "label next")
+            bits.append("label-coverage candidate — top-quartile scan health with zero "
+                        "published ink-detection labels; prioritization flag only, "
+                        "not evidence of ink or surface readiness")
         why = " · ".join(html.escape(b) for b in bits)
         rows.append(
             f'<tr class="vol" data-rank="{i}" data-id="{html.escape(scroll.lower())} {html.escape(fname.lower())}"'
@@ -408,7 +670,8 @@ def main() -> None:
             f'<td class="num rn">{i}</td>'
             f'<td><span class="scrollid">{html.escape(scroll)}</span><br>'
             f'<span class="volsub">{html.escape(spec)}</span></td>'
-            f'<td class="num score" style="color:{score_color(v["score"])}">'
+            f'<td class="num score" style="color:{score_color(v["score"])}"'
+            f' title="chunk scores: {v.get("score_min", 0):.0f}–{v.get("score_max", 0):.0f} (std {v.get("score_std", 0):.1f})">'
             f'{v["score"]:.1f}</td>'
             f'<td><span class="tier {t}">{t}</span></td>'
             f'<td>{compbar}</td>'
@@ -431,6 +694,9 @@ def main() -> None:
             f'{m["dyn_range"]:.0f}</div></div>'
             f'<div><div class="k">chunks decoded</div><div class="v">'
             f'{m.get("chunks_decoded", "?")}</div></div>'
+            f'<div><div class="k">chunk score spread</div><div class="v">'
+            f'{v.get("score_min", 0):.0f}–{v.get("score_max", 0):.0f} '
+            f'(std {v.get("score_std", 0):.1f})</div></div>'
             f'<div><div class="k">dead slices</div><div class="v">{dead}</div></div>'
             f'</div><div class="why">{why}</div>'
             f'</td></tr>')
