@@ -144,7 +144,7 @@ The repository includes the exact outputs behind the September 30, 2026 campaign
 | Ranking is **representative**, honest about heterogeneity | Disjoint resample ([`stability-n24-dense.json`](artifacts/2026-09-30-resampling-stability/stability-n24-dense.json)): **Spearman ρ = 0.79**, mean **|Δscore| = 4.2**, top-10 overlap **7 / 10** — below our ρ ≥ 0.85 gate, because volumes are genuinely heterogeneous (swings up to 44 points between runs). We publish it because a representative ranking (mean 22.9 chunks decoded/volume) with honest uncertainty beats the earlier 3×3×3 ranking whose ρ = 0.99 we proved was inflated by shard re-reading. |
 | Acquisition dropout scan found no verified dead slices in the campaign | **0 hits across 64 volumes** |
 | Label coverage was highly concentrated in the open-data snapshot | **70 / 70** discovered ink-detection roots were on PHercParis4; the top quality-ranked scrolls had none |
-| High-quality, unlabeled targets were made actionable | **16** top-quartile volumes were flagged **“label next”** |
+| High-quality, unlabeled targets were made actionable | **14** top-quartile volumes were flagged **“label next”** |
 
 The point is not that one heuristic ranking is final. The point is that **data quality and label coverage can be measured together**, turning an implicit resource-allocation decision into an inspectable one.
 
