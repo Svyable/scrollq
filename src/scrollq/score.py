@@ -25,19 +25,32 @@ def _spread(n: int, k: int) -> list[int]:
     return sorted({round(i * (n - 1) / (k - 1)) for i in range(k)})
 
 
+def score_components(m: dict) -> dict[str, float]:
+    """Unrounded additive terms of the documented 0-100 triage formula.
+
+    This is the single place the weights live: the score and the published
+    per-volume ``components`` breakdown are both derived from it, so they
+    cannot drift apart. Keys are the public JSON component names.
+    """
+    return {
+        "signal_40": 40.0 * min(1.0, m["nonzero_frac"] / 0.9),
+        "texture_30": 30.0 * min(1.0, m["grad_energy"] / 12.0),
+        "dynamic_20": 20.0 * min(1.0, m["dyn_range"] / 200.0),
+        "pen_sat": 25.0 * min(1.0, m["sat_frac"] / 0.05),
+        "pen_dead": min(30.0, 15.0 * m["dead_slices"]),
+    }
+
+
 def score_from_metrics(m: dict) -> float:
     """Apply the documented 0-100 triage formula to one chunk's metrics.
 
     Calibrated against the PHerc0009B reference volume; weights are a
     judgment call, published here so anyone can re-weight.
     """
-    s_signal = 40.0 * min(1.0, m["nonzero_frac"] / 0.9)
-    s_texture = 30.0 * min(1.0, m["grad_energy"] / 12.0)
-    s_dynamic = 20.0 * min(1.0, m["dyn_range"] / 200.0)
-    p_sat = 25.0 * min(1.0, m["sat_frac"] / 0.05)
-    p_dead = min(30.0, 15.0 * m["dead_slices"])
-    return max(0.0, min(100.0, s_signal + s_texture + s_dynamic
-                        - p_sat - p_dead))
+    c = score_components(m)
+    return max(0.0, min(100.0, c["signal_40"] + c["texture_30"]
+                        + c["dynamic_20"] - c["pen_sat"] - c["pen_dead"]))
+
 
 def score_volume(base_url: str, root: str, samples: int = 4,
                  rotate: int = 0, spread: int = 3) -> dict:
@@ -78,6 +91,9 @@ def score_volume(base_url: str, root: str, samples: int = 4,
     chunk_provenance = []  # parallel to chunk_results: where each chunk came from
     missing_shards = 0
     shard_read_failures = 0
+    shard_index_invalid = 0
+    chunk_read_failures = 0
+    chunk_decode_failures = 0
     sess = store._session()
     # Spread shard candidates per-dimension (flat-index spread degenerates
     # to an edge line on non-cubic grids). Skip shards that are nearly
@@ -113,6 +129,9 @@ def score_volume(base_url: str, root: str, samples: int = 4,
             continue
         entries = vc.parse_index(raw_index, n_inner, info.index_codecs)
         if not entries:
+            # parse_index returns None on a structurally invalid index.
+            # That is not "masked background": count it, don't drop it.
+            shard_index_invalid += 1
             continue
         present_frac = (sum(1 for o, _ in entries if o != vc.MISSING)
                         / n_inner)
@@ -139,13 +158,22 @@ def score_volume(base_url: str, root: str, samples: int = 4,
             try:
                 blob = store.get_range(skey, off, ln)
             except Exception:
+                chunk_read_failures += 1
                 continue
             raw = vc.decode_chunk(blob)
             if raw is None:
+                chunk_decode_failures += 1
                 continue
-            vox = np.frombuffer(raw, dtype=np.uint8).reshape(
-                (info.inner_chunks[0], info.inner_chunks[1],
-                 info.inner_chunks[2]))
+            try:
+                vox = np.frombuffer(raw, dtype=np.uint8).reshape(
+                    (info.inner_chunks[0], info.inner_chunks[1],
+                     info.inner_chunks[2]))
+            except ValueError:
+                # The decoder always yields 128^3 bytes; any other inner
+                # chunk shape cannot be interpreted. Same handling as
+                # scan_map: a decode failure, not a crash.
+                chunk_decode_failures += 1
+                continue
             # edge crop (same logic as the zpa probe)
             gic = tuple(sc[d] * (info.outer_chunks[d] //
                                  info.inner_chunks[d]) + ic[d]
@@ -176,6 +204,9 @@ def score_volume(base_url: str, root: str, samples: int = 4,
         "shard_candidates": len(cands),
         "missing_shards": missing_shards,
         "shard_read_failures": shard_read_failures,
+        "shard_index_invalid": shard_index_invalid,
+        "chunk_read_failures": chunk_read_failures,
+        "chunk_decode_failures": chunk_decode_failures,
     }
     result["sampling"] = sampling
     # Provenance: stable identity per decoded chunk. Enables verifying
@@ -185,7 +216,10 @@ def score_volume(base_url: str, root: str, samples: int = 4,
     if not chunk_results:
         result["error"] = (f"no chunks decoded "
                            f"({missing_shards} shards absent, "
-                           f"{shard_read_failures} shard read failures)")
+                           f"{shard_read_failures} shard read failures, "
+                           f"{shard_index_invalid} shard index invalid, "
+                           f"{chunk_read_failures} chunk read failures, "
+                           f"{chunk_decode_failures} chunk decode failures)")
         return result
 
     agg: dict[str, float] = {}
@@ -208,13 +242,8 @@ def score_volume(base_url: str, root: str, samples: int = 4,
         "score_std": round(float(np.std(cs)), 1),
         "score_min": round(float(np.min(cs)), 1),
         "score_max": round(float(np.max(cs)), 1),
-        "components": {
-            "signal_40": round(40.0 * min(1.0, agg["nonzero_frac"] / 0.9), 1),
-            "texture_30": round(30.0 * min(1.0, agg["grad_energy"] / 12.0), 1),
-            "dynamic_20": round(20.0 * min(1.0, agg["dyn_range"] / 200.0), 1),
-            "pen_sat": round(25.0 * min(1.0, agg["sat_frac"] / 0.05), 1),
-            "pen_dead": round(min(30.0, 15.0 * agg["dead_slices"]), 1),
-        },
+        "components": {k: round(v, 1)
+                       for k, v in score_components(agg).items()},
         "metrics": {k: round(v, 4) if isinstance(v, float) else v
                     for k, v in agg.items()},
     })
