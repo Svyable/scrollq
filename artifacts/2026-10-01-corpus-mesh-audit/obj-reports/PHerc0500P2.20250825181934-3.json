@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "diagnostic": "obj-mesh-audit",
+  "obj_path": "out/corpus-obj/PHerc0500P2.20250825181934-3.obj",
+  "status": "pass",
+  "provenance": {
+    "sha256": "286b99c063af569219005522df1935cbd6a4ebc5e565a0a9a9ca8f5caac001a7",
+    "bytes": 6143766
+  },
+  "mesh": {
+    "vertices": 30763,
+    "unreferenced_vertices": 0,
+    "polygons": 60592,
+    "triangles": 60592,
+    "degenerate_triangles": 0,
+    "surface_area": 12120016.502115577,
+    "bbox": [
+      [
+        992.940796,
+        1893.835205,
+        1302.55835
+      ],
+      [
+        4119.840332,
+        2997.490723,
+        7013.210938
+      ]
+    ]
+  },
+  "topology": {
+    "components": 1,
+    "largest_component_faces": 60592,
+    "edges": 91354,
+    "boundary_edges": 932,
+    "nonmanifold_edges": 0,
+    "boundary_loops": 1,
+    "holes": 0,
+    "inconsistent_winding_edges": 0
+  },
+  "edges": {
+    "length": {
+      "count": 91354,
+      "min": 16.636761284896693,
+      "p05": 19.49481455696737,
+      "median": 20.14358993782693,
+      "p95": 28.84388756504655,
+      "max": 38.55141270792521
+    },
+    "jump_ratio": 4.0,
+    "jump_edges": 0
+  },
+  "normals": {
+    "neighbor_dot": {
+      "count": 90422,
+      "min": 0.32062529444453763,
+      "p05": 0.9751679832025847,
+      "median": 0.9993529551694538,
+      "p95": 0.999999999961341,
+      "max": 1.0000000000000004
+    },
+    "flip_angle_deg": 120.0,
+    "reversal_pairs": 0
+  },
+  "isometry": {
+    "status": "measured",
+    "method": "per-triangle singular values of the UV-to-3D Jacobian, UVs rescaled by one global factor so total areas match",
+    "global_uv_scale": 1.0005400832775448,
+    "textured_triangles": 60592,
+    "untextured_triangles": 0,
+    "degenerate_uv_triangles": 0,
+    "flipped_uv_triangles": 0,
+    "symmetric_stretch_distortion": {
+      "count": 60592,
+      "min": 1.0001929074570606,
+      "p05": 1.005160923615111,
+      "median": 1.0174944656776548,
+      "p95": 1.0705738511478846,
+      "max": 1.4366943274247144
+    }
+  },
+  "error_count": 0,
+  "warning_count": 0,
+  "errors": [],
+  "warnings": [],
+  "findings": [],
+  "limitation": "Geometry and parameterization only. Says nothing about whether the surface follows the papyrus sheet in the CT; self-intersection is not checked."
+}

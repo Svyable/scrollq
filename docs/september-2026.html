@@ -83,6 +83,10 @@ provenance schema v4 binding held-out ink evidence to its exact report
 (<a href="https://github.com/Svyable/scrollq/pull/44">#44</a>).</li>
 <li>Mesh IQ run on all 21 published Grand Prize segment meshes (real data); one broken PHerc1447
 segment found.</li>
+<li>Mesh IQ run on every published segment mesh in the open bucket (843 of 903 TIFXYZ, all 200
+original OBJs); 77 of 307 segments flagged with three or more defect kinds. New <code>scroliq-obj</code>
+reads triangle meshes; new <a href="usage-by-format.md">usage guide by format</a>; comparison with
+existing tools added below.</li>
 </ul></div>
 
 <div class="stats">
@@ -196,7 +200,10 @@ area-preserving anisotropic stretch that an area check misses). It can also vali
 <code>vc_tifxyz_selfcross</code> census and a Villa <code>vesuvius.surface_preflight</code> CT-support
 report against the exact surface and volume being audited, failing closed on stale or mismatched
 evidence. None of these local checks proves sheet identity. First run on real data: all 21
-published Grand Prize segment meshes, which found one broken PHerc1447 segment (see the evidence table).</li>
+published Grand Prize segment meshes, which found one broken PHerc1447 segment. It has since run on
+every published segment mesh in the open bucket (see the evidence table). <code>scroliq-obj</code>
+applies the same checks to Wavefront OBJ triangle meshes, adding non-manifold edges, inconsistent
+winding and folded-over UV triangles.</li>
 <li><b>Ink falsification discipline.</b> <code>scroliq-ink-audit</code> checks exact-volume experiment
 binding, checkpoint identity, train/evaluation separation, held-out declarations, run provenance,
 and controls including normal offsets, adjacent winding, geometry perturbation, and an independent
@@ -294,6 +301,17 @@ Observed, cause unknown, not filed upstream</td>
 <code>run.sh</code> (bucket listing → download → <code>scroliq-mesh</code>), per-segment reports with
 file SHA-256s, <code>summary.json</code>.</td></tr>
 
+<tr><td><b>Corpus-wide mesh audit:</b> every published segment mesh in the open bucket, 307 segments on
+11 scrolls. 843 of 903 TIFXYZ meshes audited (60 of the largest ran out of memory and are listed with
+their reason) and all 200 published <code>_original.obj</code> meshes. 77 segments have three or more
+defect kinds on every registration (PHercParis4 27, PHerc0500P2 25, PHerc0814 12, PHerc0172 11,
+PHerc1447 1, PHerc1667 1). Controls: the known-broken PHerc1447 segment is flagged in both formats, and
+all 26 <code>z_dbg</code>-named segments are flagged. TIFXYZ and OBJ agree on 175 of 185 segments.
+Review candidates, not confirmed defects</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-corpus-mesh-audit"><code>artifacts/2026-10-01-corpus-mesh-audit/</code></a> —
+<code>run.sh</code>, per-mesh reports with SHA-256s, <code>summary.json</code>, <code>flagged.tsv</code>,
+<code>failed.tsv</code>.</td></tr>
+
 <tr><td>Combined integrity + quality verdict path proven on live data</td>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-health-verdicts"><code>artifacts/2026-09-30-health-verdicts/</code></a> —
 healthy TRAIN case and defective-data DO NOT TRAIN case.</td></tr>
@@ -342,6 +360,32 @@ ink evidence remain explicitly partial unless their own direct diagnostics pass.
 <div class="callout"><b>Design target:</b> ScrolIQ should eventually answer one practical question for
 each candidate scroll: <i>what specific, evidenced bottleneck prevents the next verified step toward a
 complete, low-distortion, legible, reproducible unrolling?</i></div></div>
+
+<div class="panel"><h2>How ScrolIQ compares with existing tools</h2>
+<p>ScrolIQ does not replace the community's tools; it reads their outputs and checks them against the
+exact data they claim to describe. Where a tool already does a job well, ScrolIQ consumes its report
+instead of reimplementing it.</p>
+<table>
+<tr><th>Job</th><th>Existing tool or practice</th><th>What ScrolIQ adds</th></tr>
+<tr><td>Non-local self-intersection of a TIFXYZ surface</td><td>VC3D <code>vc_tifxyz_selfcross</code></td>
+<td>Validates that report against the exact surface path and grid, fails closed on a stale or mismatched
+report, and adds the local checks selfcross does not make: components, enclosed holes, edge jumps,
+folds and Jacobian isometry</td></tr>
+<tr><td>CT support of a surface</td><td>Villa <code>vesuvius.surface_preflight</code></td>
+<td>Binds the report to the exact volume root and surface, and refuses a report made on a different
+scan of the same scroll</td></tr>
+<tr><td>Finding broken segments</td><td>Opening segments one at a time in a viewer</td>
+<td>One command over every published mesh, in TIFXYZ and OBJ, with a dated, reproducible flag list
+(903 + 200 meshes, 77 segments flagged on every registration)</td></tr>
+<tr><td>Zarr store integrity</td><td>Reading the volume and noticing errors downstream</td>
+<td><code>scrollq-health</code> runs zarr-pyramid-audit and refuses to call a corrupt volume trainable</td></tr>
+<tr><td>Choosing which volume to label or train on next</td><td>We found no published per-volume scan
+comparison</td><td>A scan-health survey of all 64 volcomp volumes with sampling provenance, published
+stability failure, and a weight-free Grand Prize frontier</td></tr>
+</table>
+<p>The same finding kinds in TIFXYZ and OBJ reports, one JSON report per input, and inputs never modified
+make each tool a drop-in check before or after an existing pipeline step. See
+<a href="usage-by-format.md">usage by format</a>.</p></div>
 
 <div class="panel"><h2>Honest scope</h2>
 <p><b>The 0–100 ScrolIQ score is scan-health triage only.</b> It is not readability, surface quality,

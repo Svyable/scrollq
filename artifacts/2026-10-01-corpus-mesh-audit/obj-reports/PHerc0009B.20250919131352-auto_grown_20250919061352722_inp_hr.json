@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "diagnostic": "obj-mesh-audit",
+  "obj_path": "out/corpus-obj/PHerc0009B.20250919131352-auto_grown_20250919061352722_inp_hr.obj",
+  "status": "partial",
+  "provenance": {
+    "sha256": "1db27b94c828c9f0eefca483e1b0bc07c4c4d6c846e7a8b5dcf07c10791865d7",
+    "bytes": 17412912
+  },
+  "mesh": {
+    "vertices": 85177,
+    "unreferenced_vertices": 0,
+    "polygons": 169056,
+    "triangles": 169056,
+    "degenerate_triangles": 0,
+    "surface_area": 33875226.40814473,
+    "bbox": [
+      [
+        2181.95459,
+        3601.793457,
+        1364.838257
+      ],
+      [
+        7366.61084,
+        5208.87207,
+        8586.260742
+      ]
+    ]
+  },
+  "topology": {
+    "components": 1,
+    "largest_component_faces": 169056,
+    "edges": 254232,
+    "boundary_edges": 1296,
+    "nonmanifold_edges": 0,
+    "boundary_loops": 1,
+    "holes": 0,
+    "inconsistent_winding_edges": 0
+  },
+  "edges": {
+    "length": {
+      "count": 254232,
+      "min": 7.047476633203451,
+      "p05": 17.646342362858416,
+      "median": 20.818669617721206,
+      "p95": 31.227500889402968,
+      "max": 97.41304648363825
+    },
+    "jump_ratio": 4.0,
+    "jump_edges": 10
+  },
+  "normals": {
+    "neighbor_dot": {
+      "count": 252936,
+      "min": 0.19260168791058868,
+      "p05": 0.9734401097944875,
+      "median": 0.9987698180714749,
+      "p95": 0.9999939408821876,
+      "max": 0.9999999999999999
+    },
+    "flip_angle_deg": 120.0,
+    "reversal_pairs": 0
+  },
+  "isometry": {
+    "status": "measured",
+    "method": "per-triangle singular values of the UV-to-3D Jacobian, UVs rescaled by one global factor so total areas match",
+    "global_uv_scale": 1.000946374662666,
+    "textured_triangles": 169056,
+    "untextured_triangles": 0,
+    "degenerate_uv_triangles": 0,
+    "flipped_uv_triangles": 0,
+    "symmetric_stretch_distortion": {
+      "count": 169056,
+      "min": 1.0008479460359383,
+      "p05": 1.0212526770090173,
+      "median": 1.0930153095771895,
+      "p95": 1.3990346247414478,
+      "max": 4.18273248098969
+    }
+  },
+  "error_count": 0,
+  "warning_count": 1,
+  "errors": [],
+  "warnings": [
+    "10 edge(s) exceed 4x the median edge length"
+  ],
+  "findings": [
+    {
+      "kind": "edge-jump",
+      "severity": "review",
+      "message": "10 edges exceed 4x median length"
+    }
+  ],
+  "limitation": "Geometry and parameterization only. Says nothing about whether the surface follows the papyrus sheet in the CT; self-intersection is not checked."
+}

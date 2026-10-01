@@ -147,6 +147,20 @@ This is an **evidence-quality audit, not an ink classifier**. A pass means the d
 
 The command fails closed when the mask is empty or single-class, inputs are malformed, the split is not declared held out, training overlap is not declared absent, or no falsification control is supplied. Those checks make the output an auditable evidence artifact; they do not prove that a URL is public, independently establish the declared train/validation split, set a performance threshold, or claim readability. See the [held-out ink protocol](docs/ink-validation.md).
 
+## How ScrolIQ compares with existing tools
+
+ScrolIQ reads the community's tool outputs and checks them against the exact data they claim to describe; where a tool already does a job, ScrolIQ consumes its report instead of reimplementing it.
+
+| Job | Existing tool or practice | What ScrolIQ adds |
+|---|---|---|
+| Non-local self-intersection of a TIFXYZ surface | VC3D `vc_tifxyz_selfcross` | Validates the report against the exact surface and grid; adds local checks (components, holes, edge jumps, folds, Jacobian isometry) |
+| CT support of a surface | Villa `vesuvius.surface_preflight` | Binds the report to the exact volume root and surface; a report from another scan of the same scroll fails |
+| Finding broken segments | Opening segments one at a time in a viewer | One command over every published mesh in TIFXYZ and OBJ, with a dated flag list ([corpus audit](artifacts/2026-10-01-corpus-mesh-audit/README.md): 77 of 307 segments flagged) |
+| Zarr store integrity | Noticing errors downstream | `scrollq-health` runs zarr-pyramid-audit before any quality verdict |
+| Choosing the next volume to label or train on | We found no published per-volume scan comparison | Scan-health survey of all 64 volcomp volumes with sampling provenance and a weight-free Grand Prize frontier |
+
+[Usage by format](docs/usage-by-format.md) maps each community format to the command that reads it.
+
 ## Why this exists
 
 The Vesuvius pipeline has an allocation problem as well as an algorithm problem. Expert segmentation time, labeling effort, and GPU budgets are limited, while scan quality varies substantially across volumes.
