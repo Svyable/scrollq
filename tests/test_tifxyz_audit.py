@@ -1,5 +1,7 @@
 import hashlib
 import json
+import subprocess
+import sys
 
 import numpy as np
 from PIL import Image
@@ -401,3 +403,24 @@ def test_empty_surface_fails_closed(tmp_path):
     assert result["status"] == "fail"
     assert result["grid"]["valid_vertices"] == 0
     assert any("no valid vertices" in message for message in result["errors"])
+
+
+def test_cli_fail_on_findings_is_opt_in(tmp_path):
+    surface = _write_tifxyz(tmp_path, hole=True)
+    out = tmp_path / "mesh.json"
+
+    advisory = subprocess.run(
+        [sys.executable, "-m", "scrollq.tifxyz_audit", "--tifxyz", str(surface),
+         "--out", str(out)],
+        capture_output=True, text=True,
+    )
+    assert advisory.returncode == 0
+    assert json.loads(out.read_text())["status"] == "partial"
+
+    gated = subprocess.run(
+        [sys.executable, "-m", "scrollq.tifxyz_audit", "--tifxyz", str(surface),
+         "--out", str(out), "--fail-on-findings"],
+        capture_output=True, text=True,
+    )
+    assert gated.returncode == 2
+    assert json.loads(out.read_text())["status"] == "partial"

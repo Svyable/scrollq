@@ -1070,6 +1070,10 @@ def main() -> None:
         ),
     )
     ap.add_argument("--out", required=True)
+    ap.add_argument(
+        "--fail-on-findings", action="store_true",
+        help="exit 2 when review findings are present, for CI/pipeline gating",
+    )
     args = ap.parse_args()
 
     result = audit_tifxyz(
@@ -1090,7 +1094,7 @@ def main() -> None:
         f"{result['status'].upper()} {args.tifxyz}: "
         f"{result.get('error_count', 0)} error(s), {result.get('warning_count', 0)} warning(s)"
     )
-    if result["status"] == "fail":
+    if result["status"] == "fail" or (args.fail_on_findings and result.get("findings")):
         raise SystemExit(2)
 
 
