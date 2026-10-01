@@ -36,7 +36,10 @@ integrity and scan quality into TRAIN / CAUTION / DO NOT TRAIN.
   - `prize_manifest.py` — `scroliq-manifest`: Grand Prize / First Letters
     manifests derived from pinned official eligibility + bucket index
   - `chunk_audit.py` — `scroliq-chunk-audit`: declared-vs-stored chunk sizes
-- `tests/` — pytest suite; keep it green
+- `tests/` — pytest suite; keep it green. `test_surface_independence.py` guards the
+  import graph: the October surfaces (bucket helpers, OME-Zarr reader +
+  registration, chunk audit, prize manifests, protocol pairs) must stay
+  independently revertable
 - `artifacts/` — dated campaign outputs (volumes.json, reports); the evidence
   behind every published number
 - `docs/` — GitHub Pages: leaderboard + September writeup
