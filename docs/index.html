@@ -206,7 +206,7 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
   <div class="problem"><div><h3>Fiber connectivity</h3><span class="state plan">PLANNED</span></div><p>Continuity and orientation confidence for long-range papyrus fiber traces.</p></div>
   <div class="problem"><div><h3>Spiral fitting</h3><span class="state plan">PLANNED</span></div><p>Held-out constraint residuals, sensitivity, and under-constrained regions.</p></div>
   <div class="problem"><div><h3>Label quality</h3><span class="state live">LIVE</span></div><p>Label–volume coverage join: all 70 published ink-detection labels sit on PHercParis4 while 16 top-quartile volumes have zero published ink labels and are flagged as <b>label-coverage candidates</b> for review. This is a coverage gap, not evidence of ink or surface readiness. Next: physical label offset, snapping candidates, review queues.</p></div>
-  <div class="problem"><div><h3>Ink reliability</h3><span class="state plan">PLANNED</span></div><p>Leakage checks, held-out validation, perturbation stability, cross-scroll evidence.</p></div>
+  <div class="problem"><div><h3>Ink reliability</h3><span class="state live">LIVE</span></div><p><code>scroliq-ink-validate</code> measures held-out known-ground-truth performance, pins the exact checkpoint and evaluated arrays, checks explicit no-overlap, and compares falsification controls.</p></div>
   <div class="problem"><div><h3>Grand Prize</h3><span class="state plan">TARGET</span></div><p>One evidence trail from full recto coverage to tifxyz, renders, validation, and VC3D.</p></div>
 </div>
 <p class="alignment-links"><a href="https://scrollprize.org/2026_open_problems">Official 2026 Open Problems</a> · <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">ScrolIQ alignment roadmap</a></p>
@@ -221,9 +221,11 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
       <p>Each first-wave target gets the same deterministic <b>24-region</b> sample: 18 fit regions and <b>6 held-out</b> regions. Failed regions stay in the denominator.</p>
       <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-probe-protocol.md">Blind probe protocol →</a></p></div>
     <div><h3>Try to falsify the ink</h3>
-      <p>Promising signals are checked on the correct surface, <b>&plusmn;3 voxel</b> normal offsets, an adjacent winding, perturbed geometry, and an independent checkpoint/fold.</p></div>
+      <p>Promising signals are checked on the correct surface, <b>&plusmn;3 voxel</b> normal offsets, an adjacent winding, perturbed geometry, and an independent checkpoint/fold. <code>scroliq-ink-validate</code> turns those comparisons into a deterministic held-out evidence artifact.</p>
+      <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/blob/main/docs/ink-validation.md">Held-out ink validation →</a></p></div>
     <div><h3>Reproducibility ledger</h3>
-      <p>Exact inputs, hashes, fixed seeds, held-out splits, failure counts, experiment artifacts, and human-input time are part of the evidence trail — not cleanup work at submission time.</p></div>
+      <p>Exact inputs, hashes, fixed seeds, held-out splits, failure counts, experiment artifacts, and human-input time are part of the evidence trail — not cleanup work at submission time. Provenance schema 2 now requires a pinned held-out ink-validation artifact and cross-checks it against the submitted model.</p>
+      <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-provenance.md">Grand Prize provenance gate →</a></p></div>
   </div>
   <div class="scope"><b>No opaque winner score.</b> The frozen two-axis qualifier exposes a Pareto frontier rather than claiming readability. Its current frontier contains <b>PHerc0813</b> and <b>PHerc1447</b>; <b>PHerc0800</b> remains in the first-wave blind probe as a deliberately different geometry hypothesis.</div>
 </div>
