@@ -7,7 +7,7 @@ import json
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from .score import score_volume
+from .score import SCORE_POLICY_VERSION, score_volume
 
 
 def main() -> None:
@@ -42,6 +42,7 @@ def main() -> None:
             # volumes.json so one bad volume cannot discard a whole
             # campaign's results (ex.map re-raises on iteration).
             return {"root": root, "ok": False,
+                    "score_policy_version": SCORE_POLICY_VERSION,
                     "error": f"unhandled {type(exc).__name__}: {exc}"}
 
     results = []

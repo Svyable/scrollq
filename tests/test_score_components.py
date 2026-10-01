@@ -4,7 +4,7 @@ import itertools
 
 import pytest
 
-from scrollq.score import score_components, score_from_metrics
+from scrollq.score import SCORE_POLICY_VERSION, score_components, score_from_metrics
 
 
 def _reference_score(m: dict) -> float:
@@ -54,3 +54,7 @@ def test_components_use_the_published_keys_and_weight_caps():
     worst_penalties = {**best, "sat_frac": 1.0, "dead_slices": 99}
     c = score_components(worst_penalties)
     assert (c["pen_sat"], c["pen_dead"]) == (25, 30)
+
+
+def test_score_policy_has_a_stable_explicit_version():
+    assert SCORE_POLICY_VERSION == "scan-health-v1"

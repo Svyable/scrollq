@@ -304,6 +304,14 @@ The current documented heuristic is:
 
 The calibration and weights are deliberately visible in [`src/scrollq/score.py`](src/scrollq/score.py). They are a judgment call, not ground truth. Re-weight them if you disagree.
 
+New score results identify this exact formula as `scan-health-v1`. Its strict
+dead-slice detector is unchanged, but the aggregation has an important sampling
+property: continuous metrics are averaged while detected dead slices are
+summed. The network-free [controlled sensitivity analysis](artifacts/2026-10-01-dead-slice-sensitivity/README.md)
+shows that the dead-slice penalty therefore depends on decoded sample budget.
+It records the limitation without changing the frozen score or leaderboard;
+any replacement policy needs a separately pre-registered stability analysis.
+
 ## Sampling provenance is part of the result
 
 A quality score should not quietly look authoritative when the requested data could not be read. ScrolIQ therefore emits sampling provenance alongside every score:

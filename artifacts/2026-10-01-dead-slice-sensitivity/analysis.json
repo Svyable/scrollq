@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "score_policy_version": "scan-health-v1",
+  "scope": "synthetic sensitivity analysis; no corpus evidence",
+  "baseline_metrics": {
+    "nonzero_frac": 0.9,
+    "grad_energy": 12.0,
+    "dyn_range": 200.0,
+    "sat_frac": 0.0
+  },
+  "dead_slice_policy": {
+    "aggregation": "sum across decoded chunks",
+    "points_per_detected_slice": 15.0,
+    "penalty_cap": 30.0
+  },
+  "controlled_cases": {
+    "fixed_prevalence_one_slice_per_six_chunks": [
+      {
+        "decoded_chunks": 6,
+        "dead_slices": 1,
+        "dead_slice_prevalence_per_chunk": 0.166667,
+        "dead_slice_penalty": 15.0,
+        "score": 75.0
+      },
+      {
+        "decoded_chunks": 12,
+        "dead_slices": 2,
+        "dead_slice_prevalence_per_chunk": 0.166667,
+        "dead_slice_penalty": 30.0,
+        "score": 60.0
+      },
+      {
+        "decoded_chunks": 24,
+        "dead_slices": 4,
+        "dead_slice_prevalence_per_chunk": 0.166667,
+        "dead_slice_penalty": 30.0,
+        "score": 60.0
+      },
+      {
+        "decoded_chunks": 48,
+        "dead_slices": 8,
+        "dead_slice_prevalence_per_chunk": 0.166667,
+        "dead_slice_penalty": 30.0,
+        "score": 60.0
+      }
+    ],
+    "fixed_one_observed_slice": [
+      {
+        "decoded_chunks": 1,
+        "dead_slices": 1,
+        "dead_slice_prevalence_per_chunk": 1.0,
+        "dead_slice_penalty": 15.0,
+        "score": 75.0
+      },
+      {
+        "decoded_chunks": 3,
+        "dead_slices": 1,
+        "dead_slice_prevalence_per_chunk": 0.333333,
+        "dead_slice_penalty": 15.0,
+        "score": 75.0
+      },
+      {
+        "decoded_chunks": 6,
+        "dead_slices": 1,
+        "dead_slice_prevalence_per_chunk": 0.166667,
+        "dead_slice_penalty": 15.0,
+        "score": 75.0
+      },
+      {
+        "decoded_chunks": 12,
+        "dead_slices": 1,
+        "dead_slice_prevalence_per_chunk": 0.083333,
+        "dead_slice_penalty": 15.0,
+        "score": 75.0
+      },
+      {
+        "decoded_chunks": 24,
+        "dead_slices": 1,
+        "dead_slice_prevalence_per_chunk": 0.041667,
+        "dead_slice_penalty": 15.0,
+        "score": 75.0
+      },
+      {
+        "decoded_chunks": 48,
+        "dead_slices": 1,
+        "dead_slice_prevalence_per_chunk": 0.020833,
+        "dead_slice_penalty": 15.0,
+        "score": 75.0
+      }
+    ]
+  },
+  "finding": {
+    "budget_sensitive": true,
+    "reason": "At fixed one-per-six prevalence, the v1 summed penalty rises from 15 to its 30-point cap as the decoded budget grows. A single observed hit also remains a 15-point penalty as clean chunks are added, because v1 does not normalize by coverage.",
+    "policy_change": "none"
+  }
+}

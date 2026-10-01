@@ -31,6 +31,7 @@ def test_unhandled_exception_becomes_a_failed_record(monkeypatch, tmp_path):
     assert set(by_root) == {"a", "bad", "c"}
     assert by_root["a"]["ok"] and by_root["c"]["ok"]
     assert by_root["bad"]["ok"] is False
+    assert by_root["bad"]["score_policy_version"] == "scan-health-v1"
     assert "RuntimeError" in by_root["bad"]["error"]
     assert "boom" in by_root["bad"]["error"]
 
