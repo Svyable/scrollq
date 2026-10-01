@@ -47,8 +47,9 @@ A passport does **not** infer unmeasured stages from the scan-quality score. Tod
 - `labels`: partial when coverage data is supplied;
 - `winding`: partial when a structurally valid winding audit is explicitly bound to the exact selected volume; unbound/mismatched artifacts are excluded;
 - `mesh`: partial when a volume-bound native TIFXYZ audit is supplied;
+- `fibers`: partial when a structurally valid `scroliq-fiber` report is explicitly bound to the exact selected volume; unbound/mismatched artifacts are excluded;
 - `ink`: partial when a volume-bound leakage/provenance/control audit is supplied;
-- `surface`, `fibers`, `spiral`: `unknown` until direct evidence is supplied.
+- `surface`, `spiral`: `unknown` until direct evidence is supplied.
 
 That asymmetry is intentional. It makes missing evidence visible instead of disguising it as confidence.
 
@@ -89,10 +90,12 @@ remain advisory or become an explicit pipeline gate with
 `--fail-on-findings`.
 
 This is format/provenance/geometry infrastructure, not yet evidence that a
-specific trace follows one physical fiber or one sheet. The repository does not
-currently contain a reproducible public June 2026 VC3D fiber corpus run, so the
-next step is to pin one, then measure CT-conditioned orientation/support and
-cross-fiber connectivity.
+specific trace follows one physical fiber or one sheet. Reports can now bind to
+the exact CT root and enter the diagnostic passport; the passport fails closed
+on missing or cross-volume binding and still marks the stage partial. The
+repository does not currently contain a reproducible public June 2026 VC3D
+fiber corpus run, so the next step is to pin one, then measure CT-conditioned
+orientation/support and cross-fiber connectivity.
 
 ### 4. Label IQ
 
