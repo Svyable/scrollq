@@ -161,3 +161,24 @@ def test_cli_writes_report_and_exits_nonzero_on_fail(tmp_path):
     bad = subprocess.run([sys.executable, "-m", "scrollq.obj_audit", "--obj", str(empty),
                           "--out", str(out)], capture_output=True, text=True)
     assert bad.returncode == 2
+
+
+def test_cli_fail_on_findings_is_opt_in(tmp_path):
+    v, uv, f = _grid(drop={(2, 2)})
+    src = _write(tmp_path, v, f, uv)
+    out = tmp_path / "r.json"
+
+    advisory = subprocess.run(
+        [sys.executable, "-m", "scrollq.obj_audit", "--obj", str(src), "--out", str(out)],
+        capture_output=True, text=True,
+    )
+    assert advisory.returncode == 0
+    assert json.loads(out.read_text())["status"] == "partial"
+
+    gated = subprocess.run(
+        [sys.executable, "-m", "scrollq.obj_audit", "--obj", str(src), "--out", str(out),
+         "--fail-on-findings"],
+        capture_output=True, text=True,
+    )
+    assert gated.returncode == 2
+    assert json.loads(out.read_text())["status"] == "partial"
