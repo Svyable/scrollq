@@ -213,7 +213,7 @@ def _quad_metrics(
     normals = c1 + c2
     norm = np.linalg.norm(normals, axis=-1)
     ok = vq & np.isfinite(norm) & (norm > 1e-8)
-    unit = np.zeros_like(normals, dtype=np.float64)
+    unit = np.zeros_like(normals)
     unit[ok] = normals[ok] / norm[ok, None]
     horizontal = ok[:, :-1] & ok[:, 1:]
     vertical = ok[:-1] & ok[1:]
