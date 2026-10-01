@@ -80,22 +80,41 @@ The report's `ray_order` section records the umbilicus and input SHA-256s, every
 
 What it does not establish: patch attachment, CT support, relative-winding graph holonomy across collections, or held-out spiral-fit accuracy. Those remain the next Winding IQ / Spiral IQ layers.
 
-## Fiber IQ: trace continuity audit
+## Fiber IQ: native VC3D + trace continuity audit
 
-`scroliq-fiber` reads ordered fiber traces (CSV `trace_id,x,y,z`, rows in
-trace order) and lists trace-break candidates for review: *gaps* (a step
-longer than `--gap-factor`, default 4, times that trace's median step) and
-*sharp turns* (a direction change above `--turn-degrees`, default 60).
-Single-point traces are reported, not dropped; any parse error fails the
-audit; the input file's SHA-256 is recorded.
+`scroliq-fiber` now reads the community's native VC3D `vc3d_fiber` JSON
+versions 1, 3, and 4 as well as the original ordered CSV
+`trace_id,x,y,z` interchange format. Native JSON is schema-checked against
+the current persisted control-point/span contract, SHA-256 pinned, and
+summarized by interpolation goal/mode, native-trace versus fallback spans,
+meeting-error ratios, failure codes, and v4 span tags.
+
+The rendered line geometry is independently checked for *gaps* (a step longer
+than `--gap-factor`, default 4, times that trace's median step) and *sharp
+turns* (a direction change above `--turn-degrees`, default 60).
 
 ```bash
-scroliq-fiber traces.csv --out fiber-audit.json
+# Native VC3D fiber
+scroliq-fiber fiber.json --out fiber-audit.json
+
+# Existing CSV interchange
+scroliq-fiber traces.csv --out traces-audit.json
+
+# Optional CI/unwrapping gate for review findings
+scroliq-fiber fiber.json --fail-on-findings --out fiber-audit.json
 ```
 
-It is tested on synthetic traces only and has not yet been run on real
-community fiber traces. It does not prove that a trace follows one fiber or
-one sheet, so the passport's fiber stage stays `unknown`.
+Fallback interpolation is evidence, not automatically a defect: it is reported
+separately and does not by itself create a geometry finding. Parse/schema
+errors fail closed; geometry findings remain advisory unless
+`--fail-on-findings` is requested. See
+[`docs/fiber-audit.md`](docs/fiber-audit.md).
+
+The implementation has synthetic regression coverage for v1/v3/v4,
+schema drift, provenance, fallback accounting, geometry findings and CLI
+gating. A reproducible public run over the current June 2026 VC3D training
+fiber corpus is still missing, so the passport's fiber stage remains
+`unknown` until direct volume-bound evidence is supplied.
 
 ## Mesh IQ: native TIFXYZ audit
 

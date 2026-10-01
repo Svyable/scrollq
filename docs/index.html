@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ScrolIQ — Diagnostics for reading Herculaneum scrolls</title>
-<meta name="description" content="Challenge-aligned diagnostics for Vesuvius scrolls: scan health, surface/mesh readiness, label quality, ink reliability, held-out validation, and Grand Prize reproducibility.">
+<meta name="description" content="Challenge-aligned diagnostics for Vesuvius scrolls: scan health, TIFXYZ/OBJ mesh QA, native VC3D fiber auditing, label quality, ink reliability, held-out validation, and reproducibility.">
 <meta name="theme-color" content="#0d0b08">
 <meta name="color-scheme" content="dark">
 <link rel="canonical" href="https://svyable.github.io/scrollq/">
@@ -183,10 +183,10 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
 </div></nav>
 
 <header class="hero"><div class="wrap">
-  <div class="eyebrow">VESUVIUS CHALLENGE · SEPTEMBER 2026</div>
+  <div class="eyebrow">VESUVIUS CHALLENGE · EVIDENCE THROUGH OCTOBER 1, 2026</div>
   <h1>Scrol<span class="q">IQ</span></h1>
   <p class="tagline">Diagnostics for reading Herculaneum scrolls. <em>Find the bottleneck.</em></p>
-  <p class="lede">ScrolIQ is evolving from a scan-quality survey into an observability layer for the Vesuvius Challenge pipeline. The current score still measures sampled CT health from real level-0 voxels, and downstream state is never inferred from that score. Volume-bound passports can now attach spatial scan evidence, winding-input audits, native TIFXYZ Mesh IQ, and ink leakage/provenance audits; CT surface support, fiber connectivity, spiral-fit accuracy, label localization, and biological ink identity remain unknown until direct evidence exists. See the <a href="https://scrollprize.org/2026_open_problems">official open problems</a>, the <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">alignment roadmap</a>, and the <a href="#grand-prize">2027 Grand Prize campaign →</a></p>
+  <p class="lede">ScrolIQ is evolving from a scan-quality survey into an observability layer for the Vesuvius Challenge pipeline. The current score still measures sampled CT health from real level-0 voxels, and downstream state is never inferred from that score. Volume-bound passports can now attach spatial scan evidence, winding-input audits, native TIFXYZ Mesh IQ, and ink leakage/provenance audits. Fiber IQ now reads native VC3D fiber JSON and audits persisted trace/fallback provenance plus line continuity; physical fiber/sheet identity, spiral-fit accuracy, label localization, and biological ink identity remain unknown until direct evidence exists. See the <a href="https://scrollprize.org/2026_open_problems">official open problems</a>, the <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">alignment roadmap</a>, and the <a href="#grand-prize">2027 Grand Prize campaign →</a></p>
   <div class="stats">
     <div class="stat"><div class="n">64</div><div class="l">scroll volumes scored</div></div>
     <div class="stat"><div class="n">13.5&ndash;78.3</div><div class="l">score range (0&ndash;100)</div></div>
@@ -202,8 +202,8 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
 <div class="problem-grid">
   <div class="problem"><div><h3>Scan diagnostics</h3><span class="state live">LIVE</span></div><p>Real-voxel health and coordinate-preserving spatial scan maps. Next: validated layer-separability and decohesion diagnostics.</p></div>
   <div class="problem"><div><h3>Surface topology</h3><span class="state next">NEXT</span></div><p>CT support, competing sheets, topology risk, and surface-placement uncertainty.</p></div>
-  <div class="problem"><div><h3>Mesh connectivity</h3><span class="state live">LIVE</span></div><p><code>scroliq-mesh</code> audits native TIFXYZ validity, connected components, enclosed gaps, bbox/scale consistency, edge jumps, severe normal reversals, and flattening distortion. Next: CT support, sheet identity, and nonlocal self-intersections.</p></div>
-  <div class="problem"><div><h3>Fiber connectivity</h3><span class="state plan">PLANNED</span></div><p>Continuity and orientation confidence for long-range papyrus fiber traces.</p></div>
+  <div class="problem"><div><h3>Mesh connectivity</h3><span class="state live">LIVE</span></div><p><code>scroliq-mesh</code> audits native TIFXYZ and can bind official Villa CT-support and VC3D self-intersection reports to the exact surface; <code>scroliq-obj</code> covers triangular meshes. Both expose advisory findings or explicit <code>--fail-on-findings</code> CI gates. Sheet identity remains unproven.</p></div>
+  <div class="problem"><div><h3>Fiber connectivity</h3><span class="state live">LIVE</span></div><p><code>scroliq-fiber</code> reads VC3D <code>vc3d_fiber</code> JSON v1/v3/v4 or CSV, hashes the exact input, validates persisted span/tracer metadata, summarizes native-trace vs fallback coverage, and flags line gaps/sharp turns. Tested on fixtures; next: pin a public current fiber corpus and add CT-conditioned orientation/support.</p></div>
   <div class="problem"><div><h3>Winding annotations</h3><span class="state live">LIVE</span></div><p><code>scroliq-winding</code> validates PointCollections structure, exact-file provenance, volume binding, winding semantics, and axial annotation coverage. Next: patch attachment, graph consistency, and holonomy.</p></div>
   <div class="problem"><div><h3>Spiral fitting</h3><span class="state plan">PLANNED</span></div><p>Held-out constraint residuals, sensitivity, and under-constrained regions.</p></div>
   <div class="problem"><div><h3>Label quality</h3><span class="state live">LIVE</span></div><p>Label–volume coverage join: all 70 published ink-detection labels sit on PHercParis4 while 14 top-quartile volumes have zero published ink labels and are flagged as <b>label-coverage candidates</b> for review. This is a coverage gap, not evidence of ink or surface readiness. Next: physical label offset, snapping candidates, review queues.</p></div>

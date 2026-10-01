@@ -20,7 +20,7 @@ pip install -r requirements-ci.txt && pip install -e .
 | a traced surface | TIFXYZ (`x/y/z.tif` + `meta.json`) | `scroliq-mesh` | Is the mesh connected, hole-free, fold-free and near-isometric? |
 | a traced surface | Wavefront OBJ triangle mesh | `scroliq-obj` | The same, plus non-manifold edges, winding and UV fold-overs |
 | winding annotations | VC3D PointCollections JSON | `scroliq-winding` | Are the annotations well-formed, covering, and in radial order? |
-| fiber traces | CSV `trace_id,x,y,z` | `scroliq-fiber` | Do the traces have gaps or sharp turns? |
+| fiber traces | VC3D `vc3d_fiber` JSON v1/v3/v4 or CSV `trace_id,x,y,z` | `scroliq-fiber` | Is the persisted fiber structurally valid, what trace/fallback modes produced it, and does its line geometry have gaps or sharp turns? |
 | an ink prediction | `.npy` / `.tif` arrays + labels + mask | `scroliq-ink-validate` | Does it beat falsification controls on held-out ground truth? |
 | several of the above | the reports | `scroliq-passport` | What is measured, and what is still `unknown`, per Open Problems stage? |
 
@@ -64,11 +64,10 @@ published mesh in the open bucket.
 
 ```bash
 scroliq-winding --dataset <dir with abs_winding.json etc.> --umbilicus <umbilicus file> --out out/winding.json
-scroliq-fiber traces.csv --out out/fibers.json
+scroliq-fiber fiber.json --out out/fiber.json\nscroliq-fiber fiber.json --fail-on-findings --out out/fiber.gated.json\n# CSV remains supported:\nscroliq-fiber traces.csv --out out/fibers.csv-audit.json
 ```
 
-## Ink
-
+Native VC3D JSON preserves interpolation mode, tracer acceptance diagnostics, fallback/failure codes, v4 span tags, and exact-file SHA-256. See `docs/fiber-audit.md`.\n\n## Ink\n
 ```bash
 scroliq-ink-validate --prediction pred.tif --labels labels.tif --validation-mask mask.tif \
   --split-id my-split --held-out --training-overlap none \

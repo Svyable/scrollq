@@ -20,7 +20,7 @@ The existing ScrolIQ score remains useful, but it means one narrow thing: sample
 | Surface topology | Surface IQ | Partial: exact-scan surface-prediction CT support with bootstrap intervals via `scroliq-support` (all 22 First Letters scans) | Competing-surface ambiguity, topology-risk map, passport integration |
 | Full recto submission coverage | Grand Prize coverage | Partial: declared reference-area accounting via `scroliq-recto-coverage`, plus provenance schema v3+ exact CT-root/commit binding and exact equality between ledger mesh IDs and submitted package mesh IDs | Independently validate that the frozen reference inventory itself contains the complete recto surface |
 | Mesh connectivity | Mesh IQ | Partial: native TIFXYZ structure/provenance, mask-aware connected components and enclosed gaps, bbox/scale consistency, local edge jumps, severe normal reversals, quad-area distortion, per-triangle Jacobian singular-value isometry diagnostics, and optional fail-closed validation of the official VC3D `vc_tifxyz_selfcross` census via `scroliq-mesh` | CT support, sheet identity, merger/sheet-switch localization |
-| Fiber connectivity | Fiber IQ | Started: ordered-trace gap and sharp-turn candidates via `scroliq-fiber` (synthetic tests only) | Orientation confidence from CT, cross-trace connectivity, run on real community fiber traces |
+| Fiber connectivity | Fiber IQ | Implemented, not yet real-data validated: native VC3D `vc3d_fiber` JSON v1/v3/v4 plus CSV, strict persisted-span/config validation, SHA-256 provenance, native-trace/fallback/meeting-error summaries, and gap/sharp-turn review candidates via `scroliq-fiber`; opt-in CI gating | Pin and audit a public current fiber corpus; add CT-conditioned orientation/support evidence and cross-fiber connectivity |
 | Winding annotations | Winding IQ | Partial: PointCollections v1 role/schema/numeric/provenance audit, collection-center axial coverage, and pre-fit umbilicus ray-order inversion review queue via `scroliq-winding` | Real-dataset ray-order run, patch attachment, cross-collection graph/holonomy consistency, held-out constraint residuals, annotation-leverage map |
 | Spiral fitting | Spiral IQ | Planned | Held-out constraint residuals, sensitivity, under-constrained regions |
 | Label quality | Label IQ | Partial: label/segment coverage and `label_next` triage | Normal-direction label offset, snapping candidates, active-learning queue |
@@ -75,27 +75,46 @@ The implemented `scroliq-mesh` layer consumes the Challenge's native TIFXYZ surf
 
 Next, bind mesh vertices to local CT support and localize suspected mergers or sheet switches into reviewable VC3D coordinates.
 
-### 3. Label IQ
+### 3. Fiber IQ
+
+The implemented `scroliq-fiber` layer now consumes the VC3D-native persisted
+fiber format directly (versions 1, 3 and 4), alongside the earlier CSV
+interchange path. It validates control-point/span structure, current native
+tracer metadata, persisted numeric configuration, exact input SHA-256,
+interpolation goals/modes, native-trace acceptance errors, fallback/failure
+codes and v4 span tags. Separately, it audits rendered line geometry for
+relative gaps and abrupt turns. Fallback interpolation is reported as evidence
+rather than automatically classified as a geometry defect. Review findings can
+remain advisory or become an explicit pipeline gate with
+`--fail-on-findings`.
+
+This is format/provenance/geometry infrastructure, not yet evidence that a
+specific trace follows one physical fiber or one sheet. The repository does not
+currently contain a reproducible public June 2026 VC3D fiber corpus run, so the
+next step is to pin one, then measure CT-conditioned orientation/support and
+cross-fiber connectivity.
+
+### 4. Label IQ
 
 Measure whether surface/fiber labels are physically localized on the feature they claim to annotate. Sample along local normals, estimate likely offsets, identify ambiguous regions, and emit a review queue ranked by uncertainty and downstream leverage.
 
-### 4. Winding IQ
+### 5. Winding IQ
 
 Audit the winding constraints before fitting. The implemented `scroliq-winding` layer can bind its report to the exact CT volume root so passports fail closed on cross-volume evidence. It checks the conventional VC3D PointCollections documents for parseability, exact-file SHA-256 provenance, role-consistent `wind_a` semantics, numeric sanity, and collection-center axial coverage. For a declared fit window it exposes empty z bands and the largest gap between collection centers as annotation-prioritization evidence, without pretending that structurally valid or axially present annotations are geometrically correct. Given the dataset umbilicus, it also ranks annotated points whose winding numbers are out of radial order along rays from the scroll axis (winding gap ≥ 2, so the branch-cut convention cannot manufacture or hide an inversion); this is a review queue for likely mis-numbered annotations, not a verdict, because folding can legitimately break ray order.
 
 Next, attach those constraints to verified patches and the fitted coordinate system, reuse the upstream winding-graph machinery to detect inconsistent cycles / holonomy, and measure which regions remain under-constrained or high-leverage for another annotation.
 
-### 5. Spiral IQ
+### 6. Spiral IQ
 
 Evaluate candidate spiral fits rather than merely producing them. Use held-out winding constraints, residual distributions, constraint sensitivity, deformation pathologies, and uncertainty in sparsely constrained regions.
 
-### 6. Ink IQ
+### 7. Ink IQ
 
 The implemented `scroliq-ink-audit` makes the first validation layer fail closed. A manifest names the exact CT root, checkpoint plus SHA-256, seeds, train/evaluation ZYX boxes, held-out splits, run provenance, and falsification controls. Declared train/evaluation overlap fails the audit; missing controls remain visibly partial instead of being inferred.
 
 Next, attach the actual measured outputs for normal-offset, adjacent-winding, geometry-perturbation, independent-checkpoint, and cross-scroll tests. A clean manifest is necessary evidence discipline, not proof that the model output is ink.
 
-### 7. VC3D integration
+### 8. VC3D integration
 
 The end state is not a standalone dashboard. A ScrolIQ diagnostic should point to a region that can be opened directly in VC3D for inspection or correction, and corrections should be able to flow back into a new diagnostic pass.
 

@@ -78,7 +78,7 @@ label-coverage join corrected (16 → 14 <code>label_next</code> entries).</li>
 (<a href="https://github.com/Svyable/scrollq/pull/43">#43</a>).</li>
 <li>OME-Zarr v2 reader and whole-bucket chunk audit, pre-registered protocol-pair test (negative result),
 and prize manifests derived from pinned official sources (<a href="https://github.com/Svyable/scrollq/pull/33">#33</a>).</li>
-<li>Fiber IQ trace-continuity audit, <code>scroliq-fiber</code> (<a href="https://github.com/Svyable/scrollq/pull/45">#45</a>), and
+<li>Fiber IQ now reads native VC3D <code>vc3d_fiber</code> JSON v1/v3/v4 as well as CSV, validates persisted tracer/fallback provenance, and supports opt-in CI gating; its current regression coverage is synthetic. Earlier trace-continuity work began in <a href="https://github.com/Svyable/scrollq/pull/45">#45</a>, and
 provenance schema v4 binding held-out ink evidence to its exact report
 (<a href="https://github.com/Svyable/scrollq/pull/44">#44</a>).</li>
 <li>Mesh IQ run on all 21 published Grand Prize segment meshes (real data); one broken PHerc1447
@@ -181,10 +181,7 @@ hypothesis and decision rule were committed before any real-data metric was comp
 <li><b>Prize manifests derived, not hand-copied.</b> <code>scroliq-manifest</code> derives the Grand Prize
 and First Letters target lists from the pinned official eligibility list and bucket index, and tests fail
 if the hand-entered manifests drift from them.</li>
-<li><b>Fiber trace continuity.</b> <code>scroliq-fiber</code> lists trace-break candidates in ordered
-fiber traces (gaps relative to each trace's median step, sharp turns), records the input's SHA-256, and
-fails on any parse error. It does not prove fiber or sheet identity, so the passport's fiber stage stays
-<code>unknown</code>.</li>
+<li><b>VC3D-native Fiber IQ.</b> <code>scroliq-fiber</code> reads native <code>vc3d_fiber</code> JSON versions 1, 3 and 4 as well as CSV; validates persisted control-point/span and tracer configuration, records exact SHA-256 provenance, summarizes native-trace versus fallback spans and meeting-error ratios, and independently lists line gaps/sharp turns. Review findings can remain advisory or become an explicit CI gate with <code>--fail-on-findings</code>. It still does not prove physical fiber or sheet identity, and no reproducible public current-fiber corpus run is claimed.</li>
 <li><b>Evidence passports instead of synthetic readiness scores.</b> <code>scroliq-passport</code>
 organizes data, scan, label, winding, native TIFXYZ mesh, and ink-validation evidence around the
 Challenge bottlenecks and leaves unmeasured stages unknown.</li>
@@ -318,10 +315,7 @@ Review candidates, not confirmed defects</td>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-health-verdicts"><code>artifacts/2026-09-30-health-verdicts/</code></a> —
 healthy TRAIN case and defective-data DO NOT TRAIN case.</td></tr>
 
-<tr><td>Native TIFXYZ mesh checks, ink falsification controls, held-out ink validation, fiber trace
-continuity, and the fit/held-out geometry gap certificate are implemented and tested. Mesh IQ has now run on
-real segments (row above); the ink, fiber and geometry-probe checks are still tested on synthetic
-fixtures only</td>
+<tr><td>Native TIFXYZ/OBJ mesh checks, ink falsification controls, held-out ink validation, VC3D-native fiber auditing, and the fit/held-out geometry gap certificate are implemented and tested. Mesh IQ has now run on real segments (row above); ink, fiber and geometry-probe evidence remains fixture/synthetic-only where stated. Fiber IQ additionally validates current v1/v3/v4 persisted VC3D span/tracer metadata and can gate review findings in CI</td>
 <td><a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/tifxyz_audit.py"><code>scroliq-mesh</code></a>,
 <a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_audit.py"><code>scroliq-ink-audit</code></a>,
 <a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_validation.py"><code>scroliq-ink-validate</code></a>,
