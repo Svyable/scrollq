@@ -314,7 +314,7 @@ held-out geometry tests, not an opaque weighted winner score.
 
 ## 2027 Grand Prize provenance gate
 
-`scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. One manifest pins the exact eligible CT volume and zarr-pyramid-audit run, then links each surface → numbered tifxyz mesh → render → checkpoint → training datasets/regions → stochastic seeds → public training/inference experiment runs.
+`scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. Schema v2 pins the exact eligible CT volume and zarr-pyramid-audit run, then links each surface → numbered tifxyz mesh → render → checkpoint → training datasets/regions → stochastic seeds → public training/inference experiment runs → public held-out validation against known ground truth.
 
 ```bash
 scroliq-provenance \
@@ -324,7 +324,7 @@ scroliq-provenance \
   --out submission/provenance.validation.json
 ```
 
-The gate fails closed on wrong-volume lineage, training/prediction overlap, non-public or incorrectly licensed training data, prohibited higher-resolution same-scroll training sources, missing stochastic seeds or experiment runs, broken mesh/render column traceability, package SHA mismatches, missing 1 cm scale-bar declarations, and incomplete banner coverage. It also records a canonical graph SHA-256 and emits a complete provenance chain for every submitted render.
+The gate fails closed on wrong-volume lineage, training/prediction overlap, non-public or incorrectly licensed training data, prohibited higher-resolution same-scroll training sources, missing stochastic seeds or experiment runs, missing public held-out validation, same-volume training/validation overlap, broken mesh/render column traceability, package SHA mismatches, missing 1 cm scale-bar declarations, and incomplete banner coverage. It also records a canonical graph SHA-256, emits a complete provenance chain for every submitted render, and records held-out exclusion proofs. It deliberately does not set a performance threshold or claim papyrological legibility.
 
 See [the provenance-manifest specification](docs/grand-prize-provenance.md) and [example manifest](examples/grand-prize-provenance.example.json).
 
