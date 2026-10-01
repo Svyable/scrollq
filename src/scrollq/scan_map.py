@@ -19,7 +19,7 @@ from zpa.httpstore import open_store
 from zpa import volcomp as vc
 
 from .metrics import chunk_metrics
-from .score import _spread
+from .score import _read_shard_index, _spread
 
 SCHEMA_VERSION = "1.0"
 OPEN_PROBLEM = "scan-diagnostics"
@@ -121,8 +121,6 @@ def scan_volume_map(
 
     records: list[dict[str, Any]] = []
     decoded_chunks: list[dict[str, Any]] = []
-    sess = store._session()
-
     for shard_coord in candidates:
         shard_start = [
             shard_coord[d] * info.outer_chunks[d]
@@ -145,21 +143,25 @@ def scan_volume_map(
 
         try:
             index_size = vc.index_encoded_size(n_inner, info.index_codecs)
-            response = sess.get(
-                f"{base_url}/{shard_key}",
-                headers={"Range": f"bytes=-{index_size}"},
-                timeout=60,
-            )
-            if response.status_code == 404:
-                record["status"] = "unstored-shard"
-                records.append(record)
-                continue
-            response.raise_for_status()
-            raw_index = (
-                response.content[-index_size:]
-                if response.status_code == 200
-                else response.content
-            )
+        except Exception as exc:
+            record["status"] = "read-failure"
+            record["error"] = str(exc)
+            records.append(record)
+            continue
+
+        raw_index, index_state, index_error = _read_shard_index(
+            store, shard_key, index_size
+        )
+        if index_state == "missing":
+            record["status"] = "unstored-shard"
+            records.append(record)
+            continue
+        if index_state == "read-failure" or raw_index is None:
+            record["status"] = "read-failure"
+            record["error"] = index_error or "shard index unavailable"
+            records.append(record)
+            continue
+        try:
             entries = vc.parse_index(raw_index, n_inner, info.index_codecs)
         except Exception as exc:
             record["status"] = "read-failure"

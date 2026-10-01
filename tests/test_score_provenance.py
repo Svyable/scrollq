@@ -17,23 +17,15 @@ def _install(monkeypatch, *, inner=(128, 128, 128), get_range=None,
              decode=None, parse_index=None):
     """One 1-shard, 1-chunk volume; each stage is overridable."""
 
-    class Response:
-        status_code = 206
-        content = b"index"
-
-        def raise_for_status(self):
-            return None
-
-    class Session:
-        def get(self, *args, **kwargs):
-            return Response()
-
     class Store:
         def get_json(self, path):
             return {}
 
-        def _session(self):
-            return Session()
+        def get_suffix(self, path, length):
+            return b"index"
+
+        def head(self, path):
+            return SimpleNamespace(exists=True, status=200)
 
         def get_range(self, path, start, length):
             return b"blob"
