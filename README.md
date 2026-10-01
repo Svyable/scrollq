@@ -105,6 +105,12 @@ The manifest declares exact checkpoint identity and SHA-256, seeds, half-open ZY
 
 This is an **evidence-quality audit, not an ink classifier**. A pass means the declared experiment is spatially separated and the requested controls are present; it does not prove that a prediction is ink or that it generalizes across scrolls.
 
+### Held-out ink measurement
+
+`scroliq-ink-validate` complements that manifest audit with deterministic measurements over explicit 2D NPY/TIFF predictions, known binary labels, and a held-out mask. It reports confusion counts, balanced accuracy, false-positive rate, F1/IoU, probability separation, exact input hashes, and same-mask deltas for named falsification controls. The resulting JSON can be hash-pinned as a `held_out_validations[]` artifact in the Grand Prize provenance manifest.
+
+The command fails closed when the mask is empty or single-class, inputs are malformed, the split is not declared held out, training overlap is not declared absent, or no falsification control is supplied. Those checks make the output an auditable evidence artifact; they do not prove that a URL is public, independently establish the declared train/validation split, set a performance threshold, or claim readability. See the [held-out ink protocol](docs/ink-validation.md).
+
 ## Why this exists
 
 The Vesuvius pipeline has an allocation problem as well as an algorithm problem. Expert segmentation time, labeling effort, and GPU budgets are limited, while scan quality varies substantially across volumes.
