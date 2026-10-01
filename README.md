@@ -121,9 +121,12 @@ A passing audit is deliberately **partial Mesh IQ**, not a proof that the traced
 
 ```bash
 scroliq-obj --obj /path/to/segment_original.obj --out out/segment.obj-audit.json
+
+# Optional CI gate: review findings become a non-zero exit.
+scroliq-obj --obj /path/to/segment_original.obj --out out/segment.obj-audit.json --fail-on-findings
 ```
 
-It accepts `v`, `vt` and `f` records (`v`, `v/vt`, `v/vt/vn`, `v//vn`, negative indices; polygons are fan-triangulated). With no grid, adjacency comes from shared edges, so the report covers edge-connected components, interior boundary loops (holes), edge jumps against the median edge length, and neighbouring-normal reversals. It also covers defects only a free-form mesh can have: non-manifold edges, inconsistent face winding (kept separate from real folds), and zero-area faces. When faces carry texture coordinates, it measures per-triangle UV-to-3D Jacobian singular values (UVs rescaled by one global factor) and counts folded-over UV triangles; without UVs, isometry stays `unknown`. An OBJ with no faces fails rather than passing.
+It accepts `v`, `vt` and `f` records (`v`, `v/vt`, `v/vt/vn`, `v//vn`, negative indices; polygons are fan-triangulated). With no grid, adjacency comes from shared edges, so the report covers edge-connected components, interior boundary loops (holes), edge jumps against the median edge length, and neighbouring-normal reversals. It also covers defects only a free-form mesh can have: non-manifold edges, inconsistent face winding (kept separate from real folds), and zero-area faces. When faces carry texture coordinates, it measures per-triangle UV-to-3D Jacobian singular values (UVs rescaled by one global factor) and counts folded-over UV triangles; without UVs, isometry stays `unknown`. An OBJ with no faces fails rather than passing. By default, review findings remain advisory (`partial`, exit 0) so exploratory audits are non-disruptive; `--fail-on-findings` preserves the JSON status but exits 2 when any finding is present, making the same diagnostic usable as an explicit CI/pipeline quality gate.
 
 ## Ink IQ: leakage and falsification-evidence audit
 
