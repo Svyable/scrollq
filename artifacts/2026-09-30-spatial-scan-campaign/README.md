@@ -11,6 +11,15 @@ scroliq-scan-map --root community-uploads/forrest/volcomp/PHerc0813/volumes/2025
 scroliq-scan-map --root community-uploads/forrest/volcomp/PHerc1447/volumes/20250521151220-8.640um-1.2m-116keV-masked.zarr --grid 6 --chunks-per-shard 1 --out PHerc1447.scan-map.json
 ```
 
+Passports (rebuilt 2026-10-01 from the published n24-dense campaign and its
+corrected coverage join; the first versions used the retired 4-sample
+campaign, e.g. PHerc0813 scored 77.4 from 2 chunks instead of 76.2 from 24):
+
+```bash
+scroliq-passport --volumes artifacts/2026-09-30-scrollq-n24-dense/volumes.json --coverage artifacts/2026-09-30-scrollq-n24-dense/coverage.json --root 20250821151723 --scan-map PHerc0813.scan-map.json --out PHerc0813.passport.json
+scroliq-passport --volumes artifacts/2026-09-30-scrollq-n24-dense/volumes.json --coverage artifacts/2026-09-30-scrollq-n24-dense/coverage.json --root 20250521151220 --scan-map PHerc1447.scan-map.json --out PHerc1447.passport.json
+```
+
 Base URL: `https://dl.ash2txt.org`. Level: full-resolution L0.
 Source commit: `430a77394fb17fc284f51fd11661efa82dbfbd02`.
 
