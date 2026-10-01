@@ -1023,12 +1023,12 @@ def audit_tifxyz(
         "limitation": (
             "This audit combines local TIFXYZ geometry"
             + (
-                ", a validated Villa surface preflight against the declared CT volume"
+                ", a validated upstream Villa surface preflight against the declared CT volume"
                 if ct_preflight.get("status") == "pass"
                 else ""
             )
             + (
-                ", and a validated VC3D transverse self-intersection census"
+                ", and a validated upstream VC3D transverse self-intersection census"
                 if self_intersection.get("status") == "pass"
                 else ""
             )
