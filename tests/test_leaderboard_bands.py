@@ -17,13 +17,14 @@ def _vol(root, score):
             "sampling": {"requested": 24, "decoded": 24}}
 
 
-def _render(tmp_path, bands=None, monkeypatch=None):
+def _render(tmp_path, bands=None, verdict="FAIL", rho=0.75):
     roots = [f"community-uploads/x/volcomp/PHerc000{i}/volumes/2025-9.0um-1m-100keV-masked.zarr" for i in range(3)]
     vols = tmp_path / "v.json"
     vols.write_text(json.dumps([_vol(r, 70 - i) for i, r in enumerate(roots)]))
     cmd = ["scrollq-leaderboard", "--in", str(vols), "--out", str(tmp_path / "i.html")]
     if bands is not None:
-        data = {"decision": {"verdict": "FAIL", "rho": 0.75, "gate_rho": 0.85},
+        data = {"generated_at": "2026-10-01T07:37:57.704829+00:00",
+                "decision": {"verdict": verdict, "rho": rho, "gate_rho": 0.85},
                 "rank_bands": {roots[0]: {"best": 1, "worst": 2}, roots[1]: {"best": 2, "worst": 2}},
                 "pooled_scores": {roots[0]: 68.0, roots[1]: 69.0}}
         (tmp_path / "b.json").write_text(json.dumps(data))
@@ -51,6 +52,19 @@ def test_with_bands_each_volume_shows_its_band_or_a_dash(tmp_path):
     assert "not ranked\">—</td>" in page
     assert "Ranks are bands." in page and "FAIL" in page
     assert "by 1.0 points on average" in page  # mean of |68-70| and |69-69|
+    assert "2026-10-01 07:37 UTC" in page
+
+
+def test_insufficient_verdict_with_undefined_rho_still_renders(tmp_path):
+    page, _ = _render(tmp_path, bands=True, verdict="INSUFFICIENT", rho=None)
+    assert "returned <b>INSUFFICIENT</b>" in page
+    assert "Spearman \u03c1 = undefined" in page
+
+
+def test_pass_verdict_cannot_be_rendered_as_rank_bands(tmp_path):
+    import pytest
+    with pytest.raises(SystemExit, match="2"):
+        _render(tmp_path, bands=True, verdict="PASS")
 
 
 def test_committed_page_reflects_the_committed_verdict():
@@ -58,5 +72,7 @@ def test_committed_page_reflects_the_committed_verdict():
     page = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
     assert f"returned <b>{summary['decision']['verdict']}</b>" in page
     assert f"ρ = {summary['decision']['rho']:.3f}" in page
-    bands = json.loads((V2 / "stability-v2.json").read_text())["rank_bands"]
+    evidence = json.loads((V2 / "stability-v2.json").read_text())
+    bands = evidence["rank_bands"]
     assert page.count('title="best–worst rank of') == len(bands)
+    assert evidence["generated_at"][:16].replace("T", " ") + " UTC" in page

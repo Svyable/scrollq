@@ -594,6 +594,7 @@ def score_color(score: float) -> str:
 def _band_note(data: dict, ranked: int, published: dict[str, float]) -> str:
     d = data["decision"]
     rho = d.get("rho")
+    rho_text = "undefined" if rho is None else f"{rho:.3f}"
     pooled = data.get("pooled_scores", {})
     common = [r for r in pooled if r in published]
     mad = (sum(abs(pooled[r] - published[r]) for r in common) / len(common)
@@ -607,7 +608,7 @@ def _band_note(data: dict, ranked: int, published: dict[str, float]) -> str:
         '<p class="candidate-note"><b>Ranks are bands.</b> The pre-registered '
         f'stability test (<a href="./stability-v2-protocol.md">protocol</a>) '
         f'returned <b>{html.escape(d["verdict"])}</b>: Spearman \u03c1 = '
-        f'{rho:.3f} between two disjoint 48-chunk samples, against a gate of '
+        f'{rho_text} between two disjoint 48-chunk samples, against a gate of '
         f'{d["gate_rho"]}. So each volume shows the best\u2013worst rank it takes '
         f'across the two runs and their pool, among the {ranked} volumes dense '
         'enough for the test; \u2014 marks a volume too sparse to rank. Scores '
@@ -626,6 +627,10 @@ def main() -> None:
     args = ap.parse_args()
     bands_data = (json.load(open(args.rank_bands, encoding="utf-8"))
                   if args.rank_bands else None)
+    if (bands_data is not None
+            and bands_data.get("decision", {}).get("verdict")
+            not in {"FAIL", "INSUFFICIENT"}):
+        ap.error("--rank-bands requires a FAIL or INSUFFICIENT stability verdict")
     bands = bands_data["rank_bands"] if bands_data else None
     vols = json.load(open(args.inp, encoding="utf-8"))
     cov = json.load(open(args.coverage, encoding="utf-8")) if args.coverage else {}
@@ -748,8 +753,14 @@ def main() -> None:
             f'<div><div class="k">dead slices</div><div class="v">{dead}</div></div>'
             f'</div><div class="why">{why}</div>'
             f'</td></tr>')
-    stamp = datetime.datetime.now(datetime.timezone.utc).strftime(
-        "%Y-%m-%d %H:%M UTC")
+    if bands_data and bands_data.get("generated_at"):
+        generated = datetime.datetime.fromisoformat(
+            bands_data["generated_at"].replace("Z", "+00:00"))
+        stamp = generated.astimezone(datetime.timezone.utc).strftime(
+            "%Y-%m-%d %H:%M UTC")
+    else:
+        stamp = datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%d %H:%M UTC")
     page = PAGE.format(
         repo=REPO, n=len(ok), lo=f"{lo:.1f}", hi=f"{hi:.1f}",
         label_next_n=len(label_next),
