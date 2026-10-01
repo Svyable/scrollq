@@ -82,12 +82,15 @@ This is intentionally a **constraint-input audit, not a geometry verdict**. It d
 scroliq-mesh \
   --tifxyz /path/to/surface.tifxyz \
   --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
+  --selfcross-report out/PHerc0813.selfcross.json \
   --out out/PHerc0813.mesh-audit.json
 ```
 
-The audit follows the upstream TIFXYZ contract: `x.tif`, `y.tif`, `z.tif`, `meta.json`, reciprocal `scale`, the `Z <= 0` validity convention, and integer-multiple `mask.tif` semantics. It records exact file hashes and checks malformed/empty grids, disconnected valid-vertex components, enclosed invalid-grid components, stale metadata bounding boxes, scale-versus-measured spacing, abrupt local edge jumps, severe neighboring-normal reversals, and symmetric quad-area distortion relative to the nominal 2D parameterization.
+The audit follows the upstream TIFXYZ contract: `x.tif`, `y.tif`, `z.tif`, `meta.json`, reciprocal `scale`, the `Z <= 0` validity convention, and integer-multiple `mask.tif` semantics. It records exact file hashes and checks malformed/empty grids, disconnected valid-vertex components, enclosed invalid-grid components, stale metadata bounding boxes, scale-versus-measured spacing, abrupt local edge jumps, severe neighboring-normal reversals, symmetric quad-area distortion, and per-triangle Jacobian singular values for true local isometry. The singular-value check catches area-preserving anisotropic stretch/compression that an area-only metric cannot see.
 
-A passing audit is deliberately **partial Mesh IQ**, not a proof that the traced sheet is correct. It does not establish CT support, sheet/winding identity, or freedom from nonlocal self-intersections. Those require direct volume support and complementary geometry tools.
+For nonlocal self-intersections, ScrolIQ does not duplicate VC3D's geometry kernel. Generate a deterministic upstream report with `vc_tifxyz_selfcross <surface.tifxyz> -o report.json --collection sites.json` and pass it with `--selfcross-report`. ScrolIQ validates the report against the exact local surface path and grid, blocks on transverse contacts, preserves coplanar/grazing contacts as non-crossings, and keeps a nominally clean census partial when upstream skipped long-edge quads under `maxedge`. The optional `sites.json` remains directly loadable in VC3D for inspection.
+
+A passing audit is deliberately **partial Mesh IQ**, not a proof that the traced sheet is correct. With a fully clean validated self-cross census it establishes freedom from the specific non-adjacent transverse contacts tested by VC3D under the recorded parameters; it still does not establish CT support or correct sheet/winding identity.
 
 ## Ink IQ: leakage and falsification-evidence audit
 
