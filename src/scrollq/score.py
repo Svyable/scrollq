@@ -25,6 +25,20 @@ def _spread(n: int, k: int) -> list[int]:
     return sorted({round(i * (n - 1) / (k - 1)) for i in range(k)})
 
 
+def score_from_metrics(m: dict) -> float:
+    """Apply the documented 0-100 triage formula to one chunk's metrics.
+
+    Calibrated against the PHerc0009B reference volume; weights are a
+    judgment call, published here so anyone can re-weight.
+    """
+    s_signal = 40.0 * min(1.0, m["nonzero_frac"] / 0.9)
+    s_texture = 30.0 * min(1.0, m["grad_energy"] / 12.0)
+    s_dynamic = 20.0 * min(1.0, m["dyn_range"] / 200.0)
+    p_sat = 25.0 * min(1.0, m["sat_frac"] / 0.05)
+    p_dead = min(30.0, 15.0 * m["dead_slices"])
+    return max(0.0, min(100.0, s_signal + s_texture + s_dynamic
+                        - p_sat - p_dead))
+
 def score_volume(base_url: str, root: str, samples: int = 4,
                  rotate: int = 0, spread: int = 3) -> dict:
     """Score one volcomp scroll volume. Returns a result dict.
@@ -167,24 +181,24 @@ def score_volume(base_url: str, root: str, samples: int = 4,
     agg["chunks_decoded"] = len(chunk_results)
 
     # --- documented heuristic triage score (0-100) ---
-    # Calibrated against the PHerc0009B reference volume; weights are a
-    # judgment call, published here so anyone can re-weight.
-    s_signal = 40.0 * min(1.0, agg["nonzero_frac"] / 0.9)
-    s_texture = 30.0 * min(1.0, agg["grad_energy"] / 12.0)
-    s_dynamic = 20.0 * min(1.0, agg["dyn_range"] / 200.0)
-    p_sat = 25.0 * min(1.0, agg["sat_frac"] / 0.05)
-    p_dead = min(30.0, 15.0 * agg["dead_slices"])
-    score = max(0.0, min(100.0, s_signal + s_texture + s_dynamic
-                         - p_sat - p_dead))
+    score = score_from_metrics(agg)
+    # Per-chunk score distribution: quantifies within-volume heterogeneity.
+    # A high mean with high std means "good on average but inconsistent" —
+    # the ranking's uncertainty, not just its level.
+    chunk_scores = [score_from_metrics(c) for c in chunk_results]
+    cs = np.array(chunk_scores)
     result.update({
         "ok": True,
         "score": round(score, 1),
+        "score_std": round(float(np.std(cs)), 1),
+        "score_min": round(float(np.min(cs)), 1),
+        "score_max": round(float(np.max(cs)), 1),
         "components": {
-            "signal_40": round(s_signal, 1),
-            "texture_30": round(s_texture, 1),
-            "dynamic_20": round(s_dynamic, 1),
-            "pen_sat": round(p_sat, 1),
-            "pen_dead": round(p_dead, 1),
+            "signal_40": round(40.0 * min(1.0, agg["nonzero_frac"] / 0.9), 1),
+            "texture_30": round(30.0 * min(1.0, agg["grad_energy"] / 12.0), 1),
+            "dynamic_20": round(20.0 * min(1.0, agg["dyn_range"] / 200.0), 1),
+            "pen_sat": round(25.0 * min(1.0, agg["sat_frac"] / 0.05), 1),
+            "pen_dead": round(min(30.0, 15.0 * agg["dead_slices"]), 1),
         },
         "metrics": {k: round(v, 4) if isinstance(v, float) else v
                     for k, v in agg.items()},
