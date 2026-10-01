@@ -248,16 +248,37 @@ def _winding_stage(
         "error_count": int(audit.get("error_count") or 0),
         "warning_count": int(audit.get("warning_count") or 0),
         "axial_coverage": dict(audit.get("axial_coverage") or {}),
+        "ray_order": _ray_order_summary(audit.get("ray_order")),
         "limitation": (
-            "A passing input audit establishes file/schema/role/provenance checks "
-            "and descriptive axial coverage only. It does not establish CT support, "
-            "patch attachment, winding-graph consistency, or spiral-fit accuracy."
+            "A passing input audit establishes file/schema/role/provenance checks, "
+            "descriptive axial coverage, and umbilicus ray-order review candidates "
+            "only. It does not establish CT support, patch attachment, "
+            "winding-graph consistency, or spiral-fit accuracy."
         ),
     }
     if audit_status == "fail":
         result["reason"] = "winding annotation inputs failed the structural audit"
     return result
 
+
+
+def _ray_order_summary(section: Any) -> dict[str, Any]:
+    if not isinstance(section, dict):
+        return {"status": "not-evaluated"}
+    summary = {
+        key: section[key]
+        for key in (
+            "status",
+            "reason",
+            "comparable_pairs",
+            "inversion_candidates",
+            "inversion_fraction",
+            "parameters",
+        )
+        if key in section
+    }
+    summary["review_queue_head"] = list(section.get("review_queue") or [])[:10]
+    return summary
 
 
 def _mesh_stage(
@@ -477,6 +498,31 @@ def build_passport(
             }
         )
     else:
+        ray_order = stages["winding"].get("ray_order") or {}
+        if ray_order.get("inversion_candidates"):
+            actions.append(
+                {
+                    "priority": "high",
+                    "action": (
+                        f"review {ray_order['inversion_candidates']} umbilicus ray-order "
+                        "inversion candidates before spiral fitting, starting with the "
+                        "points that disagree with the most neighbours; candidates are "
+                        "review cues, not verdicts"
+                    ),
+                    "open_problem": "winding-annotations",
+                }
+            )
+        elif ray_order.get("status") == "not-evaluated":
+            actions.append(
+                {
+                    "priority": "next-evidence",
+                    "action": (
+                        "rerun scroliq-winding with --umbilicus to check annotated "
+                        "winding numbers for radial-order inversions"
+                    ),
+                    "open_problem": "winding-annotations",
+                }
+            )
         fit_window = stages["winding"].get("axial_coverage", {}).get("fit_window")
         empty_bins = list((fit_window or {}).get("empty_bins") or [])
         if empty_bins:

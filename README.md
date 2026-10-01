@@ -72,7 +72,13 @@ It checks `abs_winding.json`, `relative_windings.json`, and `same_windings.json`
 
 When the artifact will be attached to a passport, `--volume-root` binds it to the exact CT root; the passport rejects unbound or mismatched winding artifacts. When a fit/evaluation z-window is supplied, ScrolIQ also reports **annotation-center axial coverage**: one median-z center per collection, the largest gap between collection centers, and empty equal-width z bands. Counting collections rather than raw points prevents a densely sampled line from looking like broad coverage. Empty bins are prioritization cues for where another verified constraint may have leverage; they do **not** make the audit fail or prove that a nonempty bin is geometrically constrained.
 
-This is intentionally a **constraint-input audit, not a geometry verdict**. It does not yet establish CT support, patch attachment, relative-winding graph consistency, loop holonomy, or held-out spiral-fit accuracy. Those are the next Winding IQ / Spiral IQ layers.
+### Umbilicus ray-order review queue
+
+When the dataset contains the spiral fitter's `umbilicus.json` (or `--umbilicus PATH` is given), `scroliq-winding` also checks annotated winding numbers against the scroll axis **before any GPU fit is run**. Along a ray leaving the umbilicus, a sheet two or more windings further out should be crossed after the inner one. For every pair of annotated points in the same frame — all absolute-winding points share one frame; each relative-winding collection is its own frame — that lies in the same angular sector (`--ray-sector-degrees`, default 10) and z band (`--ray-z-tolerance`, default 64 voxels) with a winding difference of at least `--ray-min-winding-gap` (default and minimum 2), the higher-numbered point must not be closer to the axis. The two-winding minimum makes the test independent of where the winding number increments (the fitter's theta=0 branch cut), which can shift any comparison by at most one.
+
+The report's `ray_order` section records the umbilicus and input SHA-256s, every parameter, comparable-pair and inversion counts per frame, the largest radial inversions, and a **review queue** ranking points by how many comparable neighbours they disagree with — an isolated mis-numbered annotation surfaces as one point at the head of the queue, with VC3D XYZ coordinates. Inversions are warnings and passport review actions, never errors: a strongly folded region can legitimately make a ray cross windings out of order. A malformed or explicitly named but missing umbilicus fails closed.
+
+What it does not establish: patch attachment, CT support, relative-winding graph holonomy across collections, or held-out spiral-fit accuracy. Those remain the next Winding IQ / Spiral IQ layers.
 
 ## Mesh IQ: native TIFXYZ audit
 
