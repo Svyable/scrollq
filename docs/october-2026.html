@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>October 2026 goals — ScrolIQ</title>
+<meta name="description" content="ScrolIQ October 2026 goals: turn September's real-data diagnostics into measured, reviewed, and used evidence for the Vesuvius Challenge open problems.">
+<style>
+:root{--bg:#0d0b08;--panel:#161310;--panel2:#1c1813;--line:#2c251b;
+--ink:#ece3d2;--muted:#a89880;--dim:#6f6350;
+--ember:#ff7a1a;--gold:#ffd166;--amber:#ffb347;
+--good:#8fd694;--warn:#ff9e5e;--bad:#ff6b6b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+-webkit-font-smoothing:antialiased;line-height:1.65}
+a{color:var(--amber)}
+.wrap{max-width:960px;margin:0 auto;padding:0 1.25rem}
+.hero{padding:4rem 0 2.5rem;
+background:radial-gradient(1200px 500px at 70% -10%,rgba(255,122,26,.14),transparent 60%),
+radial-gradient(800px 400px at 15% 110%,rgba(255,209,102,.08),transparent 60%),var(--bg)}
+.eyebrow{letter-spacing:.28em;font-size:.72rem;color:var(--ember);font-weight:700}
+.hero h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2rem,5vw,3.2rem);
+margin:.4rem 0 .2rem;font-weight:700;letter-spacing:-.02em}
+.tagline{font-size:1.2rem;margin:.2rem 0 1rem}
+.tagline em{color:var(--amber);font-style:normal;font-weight:600}
+.byline{color:var(--muted);font-size:.92rem}
+.statusbox{background:rgba(22,19,16,.85);border:1px solid var(--line);border-radius:12px;
+padding:1rem 1.25rem;margin-top:1.5rem;font-size:.9rem;color:var(--muted)}
+.statusbox b{color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-top:2rem}
+.stat{background:rgba(22,19,16,.85);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem}
+.stat .n{font-size:1.8rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.stat .n.good{color:var(--good)} .stat .n.warn{color:var(--warn)}
+.stat .l{font-size:.78rem;color:var(--muted);margin-top:.25rem;line-height:1.4}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.5rem;margin:0 0 1.5rem}
+.panel h2{margin:.1rem 0 1rem;font-family:Georgia,serif;font-size:1.5rem}
+.panel h2 .q{color:var(--ember)}
+.panel p{color:var(--muted);font-size:.95rem}
+.panel p b,.panel li b{color:var(--ink)}
+.panel ul{color:var(--muted);font-size:.95rem}
+.panel li{margin:.5rem 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;margin:.8rem 0}
+thead th{text-align:left;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;
+color:var(--muted);padding:.6rem .5rem;border-bottom:1px solid var(--line)}
+tbody td{padding:.6rem .5rem;border-bottom:1px solid #211c14;vertical-align:top;color:var(--muted)}
+tbody td b{color:var(--ink)}
+tbody tr:hover td{background:#1e1913}
+code{font-size:.8rem;color:var(--amber)}
+.callout{border-left:3px solid var(--ember);padding:.6rem 1rem;background:#171208;
+border-radius:0 8px 8px 0;color:var(--muted);font-size:.93rem;margin-top:1rem}
+.callout.warn{border-left-color:var(--gold)}
+.meta{color:var(--dim);font-size:.85rem}
+.suite{display:flex;gap:1rem;flex-wrap:wrap}
+.suite .card{flex:1;min-width:250px;background:var(--panel2);border:1px solid var(--line);
+border-radius:12px;padding:1.1rem 1.25rem}
+.suite .card h3{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.14em;color:var(--ember);text-transform:uppercase}
+.suite .card p{margin:.3rem 0;font-size:.9rem}
+footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.4rem 0 3rem;color:var(--dim);font-size:.82rem}
+footer a{color:var(--muted)}
+
+.goals{display:grid;gap:1rem}
+.goal{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.25rem}
+.goal h3{margin:0 0 .35rem;font-size:1.05rem}
+.goal h3 .id{color:var(--ember);font-variant-numeric:tabular-nums;margin-right:.4rem}
+.goal p{margin:.35rem 0;font-size:.92rem;color:var(--muted)}
+.goal p b{color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem;margin:.2rem 0 .5rem}
+.chip{font-size:.7rem;letter-spacing:.04em;padding:.12rem .5rem;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.chip.crit{border-color:#5a3a1a;color:var(--amber)}
+.chip.state{border-color:#3a3a24;color:var(--gold)}
+.chip.gate{border-color:#5a2a2a;color:var(--bad)}
+.weeks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.75rem}
+.week{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:.9rem 1rem}
+.week h3{margin:0 0 .3rem;font-size:.8rem;letter-spacing:.12em;color:var(--ember);text-transform:uppercase}
+.week ul{margin:.2rem 0 0 1rem;padding:0;font-size:.88rem}
+@media (max-width:520px){.panel{padding:1.1rem}.goal{padding:.95rem 1rem}}
+</style></head><body>
+
+<header class="hero"><div class="wrap">
+<div class="eyebrow">VESUVIUS CHALLENGE · OCTOBER 2026 PROGRESS PRIZE · GOALS</div>
+<h1>ScrolIQ in October</h1>
+<p class="tagline">September showed what ScrolIQ can flag. October has to show how often it is right, and that people use it. <em>Measure the bottleneck, then prove the measurement.</em></p>
+<p class="byline">Plan by <b><a href="https://github.com/Svyable">Sven</a></b> (+ Muse, AI assistant) · set 2026-10-01</p>
+
+<div class="statusbox"><b>Status: goals, not results.</b> Nothing on this page is a finding yet. Each goal names the
+artifact it must produce and the condition that ends it. Results will be published as they land, with the same
+evidence rules as the <a href="./september-2026.html">September submission</a>: every number traced to a command and an
+artifact in the repo, and missing evidence left <code>unknown</code>.<br>
+Working deadline: end of October, following the monthly progress-prize cadence. The exact date is whatever the
+<a href="https://scrollprize.org/prizes#progress-prizes">prize page</a> states once it is updated.</div>
+
+<div class="stats">
+<div class="stat"><div class="n">6</div><div class="l">October goals<br>each with an exit criterion</div></div>
+<div class="stat"><div class="n warn">0.63</div><div class="l">scan-score stability ρ<br>gate 0.85 · to fix or retire (O5)</div></div>
+<div class="stat"><div class="n">77</div><div class="l">flagged mesh segments<br>precision unmeasured (O1)</div></div>
+<div class="stat"><div class="n good">2 / 13,700</div><div class="l">winding pairs out of order<br>next: cross-collection (O2)</div></div>
+</div>
+</div></header>
+
+<main class="wrap">
+
+<div class="panel"><h2>What the prize rewards, and what that means for us</h2>
+<p>The <a href="https://scrollprize.org/prizes#progress-prizes">progress prize criteria</a> favour work that is
+<b>released early</b>, <b>actually gets used</b>, is measured on <b>real data</b>, fixes <b>bugs in tools people
+use</b>, reveals <b>insightful, actionable</b> information (for analytic tools: shown to have helped unwrapping or
+ink detection, for example by finding failure cases of existing methods on real scroll data), is <b>well
+documented</b>, and works with <b>standard community formats</b>.</p>
+<p>September covered real data, documentation and formats. The gap is evidence that the flags are
+<b>correct</b> and that they <b>change what someone does</b>. October therefore prioritises measured precision,
+the next open-problem layers, and getting the review queues into reviewers' hands. Each goal is merged as soon
+as it is done rather than held for month end.</p>
+</div>
+
+<div class="panel"><h2>Goals</h2>
+<div class="goals">
+<div class="goal" id="o1"><h3><span class="id">O1</span>Measure how often Mesh IQ flags are real defects</h3>
+<div class="chips"><span class="chip crit">real data</span><span class="chip crit">failure cases of existing methods</span><span class="chip state">planned</span></div>
+<p><b>Why.</b> A flag list is only actionable if reviewers can trust it. September found failure candidates on real segments; October must say how many of them are true.</p>
+<p><b>Starting point.</b> 77 of 307 segments flagged with three or more defect kinds; one broken PHerc1447 segment confirmed (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-corpus-mesh-audit">corpus-mesh-audit</a>).</p>
+<p><b>Deliverable.</b> A stratified sample of the flagged segments, reviewed in VC3D and labelled <i>defect / not a defect / unclear</i> by someone who did not see the finding kind, plus a same-size sample of unflagged segments as the negative control. Publish precision and the false-negative rate with intervals.</p>
+<p><b>Done when.</b> Per-segment verdicts, the review protocol and the precision and false-negative rate with 95% intervals are committed, and the flag list on Pages shows measured precision for each finding kind.</p></div>
+<div class="goal" id="o2"><h3><span class="id">O2</span>Winding IQ: patch attachment and cross-collection consistency</h3>
+<div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: winding annotations</span><span class="chip state">planned</span></div>
+<p><b>Why.</b> Within-collection ray order is clean on PHercParis4. The next errors to catch are chains of relative-winding links that disagree when they meet through shared patches. That is what the spiral fitter's own debugging tool does after a fit; ScrolIQ should do it before one.</p>
+<p><b>Starting point.</b> 2 / 13,700 comparable pairs inverted, both sub-voxel; injection-control recall 89.5% (±3) and 85.5% (±5); ±2 undetectable by design (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-paris4-winding-ray-order">paris4-winding-ray-order</a>).</p>
+<p><b>Deliverable.</b> Attach annotation points to verified patches, build the winding graph, and report inconsistent cycles with VC3D coordinates. Include the same kind of injection control as the ray-order check, so the error rate it can detect is measured, not assumed.</p>
+<p><b>Done when.</b> A PHercParis4 run with input hashes, a cycle-consistency count, and a measured detection rate for injected inconsistencies.</p></div>
+<div class="goal" id="o3"><h3><span class="id">O3</span>Spiral IQ: score a fit on constraints it never saw</h3>
+<div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: spiral fitting</span><span class="chip crit">insightful, actionable</span><span class="chip state">planned</span><span class="chip gate">needs a GPU fit run</span></div>
+<p><b>Why.</b> The fitter reports how well it satisfies the evidence it was given. A held-out score asks the harder question: does the fit predict annotations that were withheld?</p>
+<p><b>Starting point.</b> Spiral IQ is planned only; the held-out geometry split certificate (<code>scrollq-geometry-probe</code>) exists.</p>
+<p><b>Deliverable.</b> Withhold a declared set of winding collections from a fit, then measure the fit against them with the upstream satisfaction tolerances. The provenance gate checks that withheld collections never entered the fit.</p>
+<p><b>Done when.</b> One real held-out evaluation, with the withheld set, fit config and checkpoint hashes committed.</p></div>
+<div class="goal" id="o4"><h3><span class="id">O4</span>Fiber IQ: whole public corpus, then CT support</h3>
+<div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: fiber connectivity</span><span class="chip state">planned</span></div>
+<p><b>Why.</b> Eight fibers showed that the checks work on real files. To be useful, every published fiber needs auditing, and then a check that a fiber follows real papyrus in the CT.</p>
+<p><b>Starting point.</b> 8 SHA-256-pinned PHercParis4 fibers: 11 gap and 26 sharp-turn candidates, 0 control-line offsets or inversions (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-public-fiber-audit">public-fiber-audit</a>).</p>
+<p><b>Deliverable.</b> A hash-pinned audit of every public PHercParis4 fiber, then a CT-conditioned orientation and support check with a positive control: a fiber deliberately shifted off the sheet must be flagged.</p>
+<p><b>Done when.</b> The full-corpus artifact is committed, and the CT check catches its positive control without flagging the unshifted fibers it was calibrated on.</p></div>
+<div class="goal" id="o5"><h3><span class="id">O5</span>Scan-health score: pass the stability gate, or retire the ranking</h3>
+<div class="chips"><span class="chip crit">insightful, actionable</span><span class="chip crit">honest negative results</span><span class="chip state">planned</span></div>
+<p><b>Why.</b> The published ranking failed our own stability gate. A ranking that reorders on resampling should not be read as an order.</p>
+<p><b>Starting point.</b> Truly-disjoint resample: Spearman ρ = 0.63, mean |Δ| = 7.95, top-10 overlap 4 / 10, against a gate of ρ ≥ 0.85 (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-truly-disjoint">truly-disjoint</a>).</p>
+<p><b>Deliverable.</b> Pre-register a sampling design (more chunks, stratified by depth and radius) and its decision rule before any new data is read. Run it truly disjoint. If the gate passes, publish it; if not, replace the rank column on the leaderboard with uncertainty bands.</p>
+<p><b>Done when.</b> The decision rule is applied as written and the leaderboard reflects the result either way.</p></div>
+<div class="goal" id="o6"><h3><span class="id">O6</span>Get the review queues into reviewers' hands</h3>
+<div class="chips"><span class="chip crit">gets used</span><span class="chip crit">released early</span><span class="chip crit">standard formats</span><span class="chip state">planned</span><span class="chip gate">needs maintainer approval</span></div>
+<p><b>Why.</b> The prize favours tools that get used. Every ScrolIQ queue (mesh flags, ray-order candidates, fiber gaps) already carries VC3D coordinates but lives in JSON.</p>
+<p><b>Starting point.</b> Review queues exist as JSON reports with segment IDs and XYZ coordinates.</p>
+<p><b>Deliverable.</b> A short how-to for each queue, VC3D-ready lists, and upstream bug reports drafted for the confirmed defects: the defective PHerc0814 pyramid, the broken PHerc1447 segment <code>20251105093211-z_dbg_gen_00320</code>, and the PHerc0343P chunk-size mismatch. Nothing is filed upstream without the maintainer's explicit approval.</p>
+<p><b>Done when.</b> The guides are published and the drafts are reviewed. Any external feedback, such as an issue, comment or bug report, is linked from this page.</p></div>
+</div>
+</div>
+
+<div class="panel"><h2>Sequence</h2>
+<div class="weeks">
+<div class="week"><h3>Week 1 · Oct 1–7</h3><ul>
+<li>O5: pre-register the sampling design and decision rule</li>
+<li>O1: draw the stratified review sample and negative control</li>
+<li>O6: draft the upstream bug reports for approval</li></ul></div>
+<div class="week"><h3>Week 2 · Oct 8–14</h3><ul>
+<li>O1: VC3D review and precision published</li>
+<li>O2: attach points to patches; build the winding graph</li></ul></div>
+<div class="week"><h3>Week 3 · Oct 15–21</h3><ul>
+<li>O2: cycle-consistency run and its injection control</li>
+<li>O4: full fiber corpus; CT check with positive control</li>
+<li>O5: run the pre-registered resample</li></ul></div>
+<div class="week"><h3>Week 4 · Oct 22–31</h3><ul>
+<li>O3: held-out spiral evaluation (when a GPU fit run is available)</li>
+<li>O6: review-queue guides published</li>
+<li>October results page and submission</li></ul></div>
+</div>
+<p class="meta" style="margin-top:.9rem">The order puts the cheapest high-trust evidence (O1, O5) first and the
+work with an external dependency (O3's GPU fit, O6's approval) last, so a blocked dependency cannot hold up the rest.</p>
+</div>
+
+<div class="panel"><h2>Ground rules carried from September</h2>
+<ul>
+<li><b>Every number traces to a command and a committed artifact.</b> Published numbers appear in the README,
+<code>docs/</code> and the artifact READMEs, and change together or not at all.</li>
+<li><b>Every checker gets a positive control</b> and reports <code>unverified</code>, not <code>ok</code>, when it
+inspected nothing. A clean audit that checked nothing is a vacuous audit.</li>
+<li><b>Pre-register, then log every deviation.</b> Decision rules are frozen before real data is read, and failed
+gates are published, not rounded away.</li>
+<li><b>No readability claims.</b> The 0–100 score is scan-health triage. Surface, mesh, winding, spiral, fiber,
+label and ink state are never inferred from it.</li>
+<li><b>Dated data is frozen data.</b> September artifacts are not edited. October evidence goes in new dated
+directories.</li>
+<li><b>Upstream issues and PyPI releases need the maintainer's explicit approval.</b> Branches are prepared, not shipped.</li>
+</ul>
+</div>
+
+<div class="panel"><h2>Where things stand on 1 October</h2>
+<p>The evidence each goal starts from, all on <code>main</code>:</p>
+<table><thead><tr><th>layer</th><th>status</th><th>artifact</th></tr></thead><tbody>
+<tr><td><b>Scan health</b></td><td>64 / 64 volumes scored; stability gate failed (ρ = 0.63)</td><td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-truly-disjoint"><code>2026-10-01-truly-disjoint/</code></a></td></tr>
+<tr><td><b>Data integrity</b></td><td><code>scrollq-health</code> fails closed on missing evidence; live negative control passes</td><td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-health-verdicts-fail-closed"><code>2026-10-01-health-verdicts-fail-closed/</code></a></td></tr>
+<tr><td><b>Mesh IQ</b></td><td>Every published segment mesh audited; 77 / 307 segments flagged</td><td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-corpus-mesh-audit"><code>2026-10-01-corpus-mesh-audit/</code></a></td></tr>
+<tr><td><b>Winding IQ</b></td><td>PHercParis4 ray order clean; recall measured</td><td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-paris4-winding-ray-order"><code>2026-10-01-paris4-winding-ray-order/</code></a></td></tr>
+<tr><td><b>Fiber IQ</b></td><td>8 public fibers audited, hash-pinned</td><td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-public-fiber-audit"><code>2026-10-01-public-fiber-audit/</code></a></td></tr>
+<tr><td><b>Spiral IQ</b></td><td>Planned; held-out split certificate exists</td><td><a href="grand-prize-probe-protocol.md"><code>grand-prize-probe-protocol.md</code></a></td></tr>
+</tbody></table>
+</div>
+
+</main>
+<footer><div class="wrap">
+<a href="./">← live evaluator dashboard</a> · <a href="./september-2026.html">September 2026 submission</a> ·
+<a href="https://github.com/Svyable/scrollq">source</a> · Built by Sven + Muse · October 2026
+</div></footer>
+</body></html>
