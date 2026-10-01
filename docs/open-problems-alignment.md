@@ -20,6 +20,7 @@ The existing ScrollQ score remains useful, but it means one narrow thing: sample
 | Surface topology | Surface IQ | Planned | CT support, competing-surface ambiguity, topology-risk map |
 | Mesh connectivity | Mesh IQ | Planned | Holes, mergers, self-intersections, sheet-switch risk, local distortion |
 | Fiber connectivity | Fiber IQ | Planned | Continuity/orientation confidence and trace-break candidates |
+| Winding annotations | Winding IQ | Partial: PointCollections v1 role/schema/numeric/provenance audit via `scroliq-winding` | Patch attachment, graph/holonomy consistency, held-out constraint residuals, annotation-leverage map |
 | Spiral fitting | Spiral IQ | Planned | Held-out constraint residuals, sensitivity, under-constrained regions |
 | Label quality | Label IQ | Partial: label/segment coverage and `label_next` triage | Normal-direction label offset, snapping candidates, active-learning queue |
 | Ink generalization and false positives | Ink IQ | Planned | Leakage audit, held-out validation, depth/perturbation stability, cross-scroll checks |
@@ -67,15 +68,21 @@ The success criterion is not a prettier score. It is evidence that the diagnosti
 
 Measure whether surface/fiber labels are physically localized on the feature they claim to annotate. Sample along local normals, estimate likely offsets, identify ambiguous regions, and emit a review queue ranked by uncertainty and downstream leverage.
 
-### 3. Spiral IQ
+### 3. Winding IQ
+
+Audit the winding constraints before fitting. The first implemented layer, `scroliq-winding`, checks the conventional VC3D PointCollections documents for parseability, exact-file SHA-256 provenance, role-consistent `wind_a` semantics, numeric sanity, and basic coverage statistics without pretending that structurally valid annotations are geometrically correct.
+
+Next, attach those constraints to verified patches and the fitted coordinate system, reuse the upstream winding-graph machinery to detect inconsistent cycles / holonomy, and measure which regions remain under-constrained or high-leverage for another annotation.
+
+### 4. Spiral IQ
 
 Evaluate candidate spiral fits rather than merely producing them. Use held-out winding constraints, residual distributions, constraint sensitivity, deformation pathologies, and uncertainty in sparsely constrained regions.
 
-### 4. Ink IQ
+### 5. Ink IQ
 
 Make validation and false-positive mitigation reproducible. Check train/prediction overlap, checkpoint and pseudo-label lineage, random seeds, held-out performance, depth stability, local perturbation stability, and cross-scroll generalization.
 
-### 5. VC3D integration
+### 6. VC3D integration
 
 The end state is not a standalone dashboard. A ScrolIQ diagnostic should point to a region that can be opened directly in VC3D for inspection or correction, and corrections should be able to flow back into a new diagnostic pass.
 
