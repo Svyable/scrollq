@@ -159,6 +159,227 @@ def _mask(path: Path, shape: tuple[int, int]) -> tuple[np.ndarray | None, dict[s
     }
 
 
+def _nonnegative_int(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def _selfcross_evidence(
+    report_path: str | Path | None,
+    surface_root: Path,
+    shape: tuple[int, int],
+) -> tuple[dict[str, Any], list[str], list[str], list[dict[str, str]]]:
+    """Validate and summarize an upstream vc_tifxyz_selfcross report.
+
+    ScrolIQ deliberately does not reimplement triangle/triangle intersection.
+    When supplied, this evidence is accepted only when the upstream report is
+    structurally self-consistent and bound to the exact local TIFXYZ path and
+    grid being audited.
+    """
+    if report_path is None:
+        return (
+            {
+                "status": "unknown",
+                "tool": "vc_tifxyz_selfcross",
+                "reason": "no upstream vc_tifxyz_selfcross report supplied",
+            },
+            [],
+            [],
+            [],
+        )
+
+    path = Path(report_path)
+    errors: list[str] = []
+    warnings: list[str] = []
+    findings: list[dict[str, str]] = []
+    evidence: dict[str, Any] = {
+        "status": "fail",
+        "tool": "vc_tifxyz_selfcross",
+        "report_path": str(path),
+    }
+
+    if not path.is_file():
+        errors.append(f"selfcross report does not exist: {path}")
+        return evidence, errors, warnings, findings
+
+    evidence["report_sha256"] = _sha256(path)
+    evidence["report_bytes"] = path.stat().st_size
+    try:
+        report = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        errors.append(f"selfcross report could not be parsed: {exc}")
+        return evidence, errors, warnings, findings
+    if not isinstance(report, dict):
+        errors.append("selfcross report must contain a JSON object")
+        return evidence, errors, warnings, findings
+
+    if report.get("tool") != "vc_tifxyz_selfcross":
+        errors.append('selfcross report tool must equal "vc_tifxyz_selfcross"')
+    if report.get("report_only") is not True:
+        errors.append("selfcross report must declare report_only=true")
+
+    declared_surface = report.get("surface")
+    path_match = False
+    if isinstance(declared_surface, str) and declared_surface:
+        try:
+            path_match = Path(declared_surface).expanduser().resolve() == surface_root.expanduser().resolve()
+        except OSError:
+            path_match = False
+    else:
+        errors.append("selfcross report must name its input surface")
+    evidence["declared_surface"] = declared_surface
+    evidence["surface_path_matches"] = path_match
+    if isinstance(declared_surface, str) and declared_surface and not path_match:
+        errors.append("selfcross report names a different TIFXYZ surface path")
+
+    rows, cols = shape
+    evidence["grid_shape_yx"] = [int(rows), int(cols)]
+    if report.get("grid_rows") != rows or report.get("grid_cols") != cols:
+        errors.append(
+            "selfcross report grid shape does not match the audited TIFXYZ grid"
+        )
+
+    params = report.get("parameters")
+    parameters: dict[str, Any] = {}
+    if not isinstance(params, dict):
+        errors.append("selfcross report parameters must be an object")
+    else:
+        parameters = {
+            key: params.get(key)
+            for key in ("exclude", "maxedge", "cell", "touch_tolerance", "diagonals")
+        }
+        diagonals = params.get("diagonals")
+        if diagonals != [0, 1]:
+            errors.append("selfcross report must census both triangulations [0, 1]")
+        if not _nonnegative_int(params.get("exclude")):
+            errors.append("selfcross exclude must be a non-negative integer")
+        maxedge = params.get("maxedge")
+        if not isinstance(maxedge, (int, float)) or isinstance(maxedge, bool) or not math.isfinite(float(maxedge)) or float(maxedge) < 0:
+            errors.append("selfcross maxedge must be a finite number >= 0")
+        for key in ("cell", "touch_tolerance"):
+            value = params.get(key)
+            if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(float(value)) or float(value) <= 0:
+                errors.append(f"selfcross {key} must be a finite positive number")
+    evidence["parameters"] = parameters
+
+    census = report.get("census")
+    per_diagonal: list[dict[str, int]] = []
+    seen_diagonals: set[int] = set()
+    transverse_total = 0
+    coplanar_total = 0
+    grazing_total = 0
+    dropped_total = 0
+    malformed_contacts = 0
+
+    if not isinstance(census, list) or len(census) != 2:
+        errors.append("selfcross census must contain exactly two diagonal reports")
+    else:
+        for item in census:
+            if not isinstance(item, dict):
+                errors.append("selfcross census entries must be objects")
+                continue
+            diagonal = item.get("diagonal")
+            if diagonal not in (0, 1) or diagonal in seen_diagonals:
+                errors.append("selfcross census diagonal IDs must be unique 0 and 1")
+                continue
+            seen_diagonals.add(int(diagonal))
+
+            counts: dict[str, int] = {}
+            for key in (
+                "triangles",
+                "quads_dropped_for_edge_length",
+                "pairs_tested",
+                "transverse",
+                "coplanar",
+                "grazing",
+            ):
+                value = item.get(key)
+                if not _nonnegative_int(value):
+                    errors.append(f"selfcross diagonal {diagonal} {key} must be a non-negative integer")
+                    value = 0
+                counts[key] = int(value)
+
+            contacts = item.get("transverse_contacts")
+            if not isinstance(contacts, list):
+                errors.append(f"selfcross diagonal {diagonal} transverse_contacts must be a list")
+                contacts = []
+            if len(contacts) != counts["transverse"]:
+                errors.append(
+                    f"selfcross diagonal {diagonal} transverse count does not match contact rows"
+                )
+
+            for contact in contacts:
+                ok = isinstance(contact, dict)
+                if ok:
+                    for key in ("quad1", "quad2"):
+                        q = contact.get(key)
+                        ok = ok and isinstance(q, list) and len(q) == 2 and all(_nonnegative_int(v) for v in q)
+                    site = contact.get("site")
+                    ok = ok and isinstance(site, list) and len(site) == 3 and all(
+                        isinstance(v, (int, float))
+                        and not isinstance(v, bool)
+                        and math.isfinite(float(v))
+                        for v in site
+                    )
+                    for key in ("penetration_vx", "angle_deg"):
+                        value = contact.get(key)
+                        ok = ok and isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(float(value))
+                if not ok:
+                    malformed_contacts += 1
+
+            transverse_total += counts["transverse"]
+            coplanar_total += counts["coplanar"]
+            grazing_total += counts["grazing"]
+            dropped_total += counts["quads_dropped_for_edge_length"]
+            per_diagonal.append({"diagonal": int(diagonal), **counts})
+
+        if seen_diagonals != {0, 1}:
+            errors.append("selfcross census must contain diagonal IDs 0 and 1")
+
+    if malformed_contacts:
+        errors.append(f"{malformed_contacts} selfcross transverse contact row(s) are malformed")
+
+    declared_clean = report.get("clean_of_transverse_self_intersection")
+    computed_clean = transverse_total == 0
+    if not isinstance(declared_clean, bool):
+        errors.append("selfcross report must declare clean_of_transverse_self_intersection")
+    elif declared_clean != computed_clean:
+        errors.append("selfcross clean verdict contradicts the transverse contact counts")
+
+    evidence.update(
+        {
+            "clean_of_transverse_self_intersection": computed_clean,
+            "transverse_contacts": transverse_total,
+            "coplanar_contacts": coplanar_total,
+            "grazing_contacts": grazing_total,
+            "quads_dropped_for_edge_length": dropped_total,
+            "census": sorted(per_diagonal, key=lambda item: item["diagonal"]),
+        }
+    )
+
+    if transverse_total:
+        errors.append(
+            f"vc_tifxyz_selfcross found {transverse_total} non-adjacent transverse contact(s)"
+        )
+        findings.append(
+            {
+                "kind": "self-intersection",
+                "severity": "block",
+                "message": (
+                    f"official VC3D census found {transverse_total} non-adjacent "
+                    "transverse triangle contact(s)"
+                ),
+            }
+        )
+    if dropped_total:
+        warnings.append(
+            f"vc_tifxyz_selfcross dropped {dropped_total} quad(s) for exceeding maxedge; "
+            "its clean verdict does not cover those quads"
+        )
+
+    evidence["status"] = "fail" if errors else ("partial" if warnings else "pass")
+    return evidence, errors, warnings, findings
+
+
 def _edge_metrics(
     xyz: np.ndarray,
     valid: np.ndarray,
@@ -287,6 +508,7 @@ def audit_tifxyz(
     distortion_p95_threshold: float = 2.0,
     isometry_p95_threshold: float = 2.0,
     normal_flip_angle_deg: float = 120.0,
+    selfcross_report: str | Path | None = None,
 ) -> dict[str, Any]:
     root = Path(path)
     errors: list[str] = []
@@ -503,6 +725,13 @@ def audit_tifxyz(
             ),
         })
 
+    self_intersection, selfcross_errors, selfcross_warnings, selfcross_findings = (
+        _selfcross_evidence(selfcross_report, root, z.shape)
+    )
+    errors.extend(selfcross_errors)
+    warnings.extend(selfcross_warnings)
+    findings.extend(selfcross_findings)
+
     status = "fail" if errors else ("partial" if warnings else "pass")
     return {
         "schema_version": SCHEMA_VERSION,
@@ -530,14 +759,23 @@ def audit_tifxyz(
         "spacing": spacing,
         "edges": edges,
         "quads": quads,
+        "self_intersection": self_intersection,
         "error_count": len(errors),
         "warning_count": len(warnings),
         "errors": errors,
         "warnings": warnings,
         "findings": findings,
         "limitation": (
-            "This is a mesh-format and mesh-geometry audit. It does not establish CT support, "
-            "correct winding identity, absence of nonlocal self-intersections, or readable ink."
+            (
+                "This is a mesh-format and mesh-geometry audit with a validated upstream "
+                "VC3D transverse self-intersection census under its recorded parameters. "
+                "It does not establish CT support, correct winding identity, or readable ink."
+            )
+            if self_intersection.get("status") == "pass"
+            else (
+                "This is a mesh-format and mesh-geometry audit. It does not establish CT support, "
+                "correct winding identity, absence of nonlocal self-intersections, or readable ink."
+            )
         ),
     }
 
@@ -551,6 +789,11 @@ def main() -> None:
     ap.add_argument("--distortion-p95-threshold", type=float, default=2.0)
     ap.add_argument("--isometry-p95-threshold", type=float, default=2.0)
     ap.add_argument("--normal-flip-angle", type=float, default=120.0)
+    ap.add_argument(
+        "--selfcross-report",
+        default=None,
+        help="optional report.json produced by VC3D vc_tifxyz_selfcross for this exact surface",
+    )
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -562,6 +805,7 @@ def main() -> None:
         distortion_p95_threshold=args.distortion_p95_threshold,
         isometry_p95_threshold=args.isometry_p95_threshold,
         normal_flip_angle_deg=args.normal_flip_angle,
+        selfcross_report=args.selfcross_report,
     )
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
