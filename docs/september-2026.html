@@ -70,13 +70,14 @@ Live evaluator dashboard: <a href="./">svyable.github.io/scrollq</a><br>
 Challenge alignment: <a href="open-problems-alignment.md">ScrolIQ × Vesuvius Challenge open problems</a><br>
 Companion integrity gate: <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a><br>
 <span class="meta">Updated 2026-10-01: section (3) and the evidence table now describe mesh, ink-validation, and
-held-out geometry work merged on 2026-09-30; no published number changed.</span></div>
+held-out geometry work merged on 2026-09-30, and the label-coverage join is corrected (16 → 14
+<code>label_next</code> entries; see the evidence table). No scan-health score changed.</span></div>
 
 <div class="stats">
 <div class="stat"><div class="n good">64 / 64</div><div class="l">listed volcomp scroll volumes scored<br>real L0 voxels decoded</div></div>
 <div class="stat"><div class="n">22.9</div><div class="l">mean chunks decoded / volume<br>24-sample, 5×5×5 campaign</div></div>
 <div class="stat"><div class="n warn">0.7944</div><div class="l">Spearman ρ vs resample<br>below our 0.85 gate; provenance shows<br>only 2/64 truly disjoint (mean 63% re-read)</div></div>
-<div class="stat"><div class="n">16</div><div class="l">top-quartile exact-volume entries<br>flagged “label next”</div></div>
+<div class="stat"><div class="n">14</div><div class="l">top-quartile exact-volume entries<br>flagged “label next”</div></div>
 </div>
 </div></header>
 
@@ -90,7 +91,7 @@ held-out geometry work merged on 2026-09-30; no published number changed.</span>
 24 requested L0 chunks per volume from a 5×5×5 candidate grid.</li>
 <li><b>Open-data label and segment coverage</b> joined from the companion S3 inventory. The September
 inventory found 70 ink-detection roots associated with PHercParis4; the exact-volume join leaves
-16 top-quartile campaign entries with no matched ink labels and marks them <code>label_next</code>.</li>
+14 top-quartile campaign entries with no matched ink labels and marks them <code>label_next</code>.</li>
 <li><b>All 13 then-current 2027 Grand Prize target volumes</b>, matched by exact prize-listed volume ID.
 The qualifier explicitly excludes same-scroll higher-resolution substitutes; for PHerc1203, the
 2.403 µm scan is recorded as excluded while the prize-listed 9.362 µm volume is used.</li>
@@ -178,9 +179,12 @@ were truly disjoint (mean 63% chunk re-read) — ρ is inflated by re-reading</t
 <td><a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json"><code>artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json</code></a> —
 rotate 0 vs 13, 64 volumes, 24 samples, spread 5, per-volume Jaccard overlap.</td></tr>
 
-<tr><td><b>16</b> top-quartile campaign entries flagged <code>label_next</code></td>
+<tr><td><b>14</b> top-quartile campaign entries flagged <code>label_next</code> (corrected 2026-10-01 from 16; see below)</td>
 <td><a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-09-30-scrollq-n24-dense/coverage.json"><code>artifacts/2026-09-30-scrollq-n24-dense/coverage.json</code></a> —
-exact-volume label/segment join used by the published leaderboard.</td></tr>
+exact-volume label/segment join used by the published leaderboard. The first published version of this
+file was joined against an empty inventory, so every volume showed zero labels and PHercParis4 (70 ink labels)
+was wrongly flagged. It was rebuilt from the same 2026-09-30 inventory recorded in the n=4 and n=12 campaigns,
+and <code>scrollq-coverage</code> now refuses an empty inventory.</td></tr>
 
 <tr><td>Known-success control does not justify calling ordinary target metric values failures</td>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-pherc1667-scan-control"><code>artifacts/2026-09-30-pherc1667-scan-control/</code></a> —

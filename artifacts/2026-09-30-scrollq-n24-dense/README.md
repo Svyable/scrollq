@@ -45,9 +45,35 @@ triage than a stable measurement built on re-read shards.
 - **Grand Prize Pareto frontier unchanged**: PHerc0813 + PHerc1447
   (`artifacts/2026-09-30-grand-prize-qualifier-n24-dense/targets.json`).
 - **Label coverage still concentrated**: all 70 published ink-detection
-  labels on PHercParis4 (now quality rank 2); **16** top-quartile
+  labels on PHercParis4 (now quality rank 2); **14** top-quartile
   zero-label volumes flagged 🎯 label-next (q75 = 67.7)
   (`coverage.json`).
+
+## Correction 2026-10-01: coverage join
+
+The first committed `coverage.json` for this campaign was joined against an
+empty S3 inventory: every volume showed 0 ink labels and 0 segments, and
+16 volumes were flagged label-next, including both PHercParis4 entries that
+carry all 70 published ink labels. The README text above already described
+the real inventory, so the file contradicted it.
+
+`coverage.json`, `index.html` and `docs/index.html` were rebuilt from the
+same 2026-09-30 inventory that the n=4 and n=12 campaigns recorded (their
+per-scroll counts are identical):
+
+```bash
+scrollq-coverage --inventory-from artifacts/2026-09-30-scrollq-n12/coverage.json \
+  --volumes artifacts/2026-09-30-scrollq-n24-dense/volumes.json \
+  --out artifacts/2026-09-30-scrollq-n24-dense/coverage.json
+scrollq-leaderboard --in artifacts/2026-09-30-scrollq-n24-dense/volumes.json \
+  --coverage artifacts/2026-09-30-scrollq-n24-dense/coverage.json \
+  --out artifacts/2026-09-30-scrollq-n24-dense/index.html
+```
+
+Using `artifacts/2026-09-30-scrollq/coverage.json` as the source gives a
+byte-identical result. `scrollq-coverage` now exits non-zero on an inventory
+with no ink-detection or surface-volume roots. Scan-health scores are
+unchanged.
 
 ## Files
 
