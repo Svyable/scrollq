@@ -84,9 +84,12 @@ interchange path. It validates control-point/span structure, current native
 tracer metadata, persisted numeric configuration, exact input SHA-256,
 interpolation goals/modes, native-trace acceptance errors, fallback/failure
 codes and v4 span tags. Separately, it audits rendered line geometry for
-relative gaps and abrupt turns. Fallback interpolation is reported as evidence
-rather than automatically classified as a geometry defect. Review findings can
-remain advisory or become an explicit pipeline gate with
+relative gaps and abrupt turns, then compares persisted control points with the
+rendered `line_points`: large offsets are measured in units of the fiber's own
+median rendered step, and backward nearest-line index changes are review
+candidates for control/render order inconsistency. Fallback interpolation is
+reported as evidence rather than automatically classified as a geometry defect.
+Review findings can remain advisory or become an explicit pipeline gate with
 `--fail-on-findings`.
 
 This is format/provenance/geometry infrastructure, not yet evidence that a
