@@ -10,7 +10,7 @@ The central rule is simple:
 
 > Diagnose the limiting stage with explicit evidence. Do not collapse unknown downstream state into one synthetic readiness score.
 
-The existing ScrollQ score remains useful, but it means one narrow thing: sampled CT health. It is not a surface, mesh, ink, or Grand Prize readiness score.
+The existing ScrolIQ score remains useful, but it means one narrow thing: sampled CT health. It is not a surface, mesh, ink, or Grand Prize readiness score.
 
 ## Alignment map
 
@@ -19,9 +19,9 @@ The existing ScrollQ score remains useful, but it means one narrow thing: sample
 | Local scan degradation / compressed regions | Scan diagnostics | Implemented: deterministic coordinate-preserving spatial sampling, real-voxel metrics, explicit missing/masked/read-failure states | Validate on real scrolls; add local layer-separability/decohesion proxies |
 | Surface topology | Surface IQ | Planned | CT support, competing-surface ambiguity, topology-risk map |
 | Full recto submission coverage | Grand Prize coverage | Partial: declared reference-area accounting via `scroliq-recto-coverage`, plus provenance schema v3 exact CT-root/commit binding and exact equality between ledger mesh IDs and submitted package mesh IDs | Independently validate that the frozen reference inventory itself contains the complete recto surface |
-| Mesh connectivity | Mesh IQ | Partial: native TIFXYZ structure/provenance, mask-aware connected components and enclosed gaps, bbox/scale consistency, local edge jumps, severe normal reversals, quad-area distortion via `scroliq-mesh` | CT support, sheet identity, nonlocal self-intersections, merger/sheet-switch localization |
+| Mesh connectivity | Mesh IQ | Partial: native TIFXYZ structure/provenance, mask-aware connected components and enclosed gaps, bbox/scale consistency, local edge jumps, severe normal reversals, quad-area distortion, per-triangle Jacobian singular-value isometry diagnostics, and optional fail-closed validation of the official VC3D `vc_tifxyz_selfcross` census via `scroliq-mesh` | CT support, sheet identity, merger/sheet-switch localization |
 | Fiber connectivity | Fiber IQ | Planned | Continuity/orientation confidence and trace-break candidates |
-| Winding annotations | Winding IQ | Partial: PointCollections v1 role/schema/numeric/provenance audit plus collection-center axial coverage via `scroliq-winding` | Patch attachment, graph/holonomy consistency, held-out constraint residuals, annotation-leverage map |
+| Winding annotations | Winding IQ | Partial: PointCollections v1 role/schema/numeric/provenance audit, collection-center axial coverage, and pre-fit umbilicus ray-order inversion review queue via `scroliq-winding` | Real-dataset ray-order run, patch attachment, cross-collection graph/holonomy consistency, held-out constraint residuals, annotation-leverage map |
 | Spiral fitting | Spiral IQ | Planned | Held-out constraint residuals, sensitivity, under-constrained regions |
 | Label quality | Label IQ | Partial: label/segment coverage and `label_next` triage | Normal-direction label offset, snapping candidates, active-learning queue |
 | Ink generalization and false positives | Ink IQ | Partial: exact-volume experiment manifest, train/evaluation spatial-overlap gate, checkpoint/seed provenance, held-out/run declarations, falsification-control coverage via `scroliq-ink-audit` | Attach measured offset/perturbation results, independent-checkpoint agreement, cross-scroll generalization |
@@ -70,9 +70,9 @@ The success criterion is not a prettier score. It is evidence that the diagnosti
 
 ### 2. Mesh IQ
 
-The implemented `scroliq-mesh` layer consumes the Challenge's native TIFXYZ surface format directly. It preserves file hashes, applies upstream validity and mask conventions, and reports disconnected valid-grid components, enclosed invalid-grid components, stale bbox metadata, reciprocal-scale mismatches, abrupt edge-length jumps, severe neighboring-normal reversals, and symmetric quad-area distortion. Passing evidence is still partial because grid-local geometry cannot prove CT support, sheet identity, or the absence of nonlocal self-intersections.
+The implemented `scroliq-mesh` layer consumes the Challenge's native TIFXYZ surface format directly. It preserves file hashes, applies upstream validity and mask conventions, and reports disconnected valid-grid components, enclosed invalid-grid components, stale bbox metadata, reciprocal-scale mismatches, abrupt edge-length jumps, severe neighboring-normal reversals, symmetric quad-area distortion, and local isometry from the singular values of each flat-to-3D triangle Jacobian. The latter catches area-preserving anisotropic stretch/compression that an area-only check cannot see. When supplied with `--selfcross-report`, the same audit validates the official VC3D census against the exact local TIFXYZ path/grid, blocks on non-adjacent transverse contacts, and preserves upstream coplanar/grazing semantics; long-edge quads skipped by `maxedge` remain partial evidence. Passing evidence is still partial because these checks do not prove CT support or correct winding identity.
 
-Next, bind mesh vertices to local CT support, consume/compare upstream self-intersection evidence, and localize suspected mergers or sheet switches into reviewable VC3D coordinates.
+Next, bind mesh vertices to local CT support and localize suspected mergers or sheet switches into reviewable VC3D coordinates.
 
 ### 3. Label IQ
 
@@ -80,7 +80,7 @@ Measure whether surface/fiber labels are physically localized on the feature the
 
 ### 4. Winding IQ
 
-Audit the winding constraints before fitting. The implemented `scroliq-winding` layer can bind its report to the exact CT volume root so passports fail closed on cross-volume evidence. It checks the conventional VC3D PointCollections documents for parseability, exact-file SHA-256 provenance, role-consistent `wind_a` semantics, numeric sanity, and collection-center axial coverage. For a declared fit window it exposes empty z bands and the largest gap between collection centers as annotation-prioritization evidence, without pretending that structurally valid or axially present annotations are geometrically correct.
+Audit the winding constraints before fitting. The implemented `scroliq-winding` layer can bind its report to the exact CT volume root so passports fail closed on cross-volume evidence. It checks the conventional VC3D PointCollections documents for parseability, exact-file SHA-256 provenance, role-consistent `wind_a` semantics, numeric sanity, and collection-center axial coverage. For a declared fit window it exposes empty z bands and the largest gap between collection centers as annotation-prioritization evidence, without pretending that structurally valid or axially present annotations are geometrically correct. Given the dataset umbilicus, it also ranks annotated points whose winding numbers are out of radial order along rays from the scroll axis (winding gap ≥ 2, so the branch-cut convention cannot manufacture or hide an inversion); this is a review queue for likely mis-numbered annotations, not a verdict, because folding can legitimately break ray order.
 
 Next, attach those constraints to verified patches and the fitted coordinate system, reuse the upstream winding-graph machinery to detect inconsistent cycles / holonomy, and measure which regions remain under-constrained or high-leverage for another annotation.
 

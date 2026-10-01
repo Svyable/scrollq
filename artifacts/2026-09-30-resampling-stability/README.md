@@ -5,6 +5,20 @@ the sampled shards change. Replaces the earlier published numbers
 (ρ = 0.876, mean |Δ| = 3.07, top-10 8/10), which had no artifact behind
 them and do not reproduce — they are retired, not defended.
 
+## Current status (read this first)
+
+The published stability measurement is the n=24 dense-grid run with
+per-chunk provenance (`stability-n24-dense-prov.json`, last section below):
+ρ = **0.7944**, mean |Δ| = **4.195**, top-10 overlap **7/10**. The
+ρ ≥ 0.85 gate **fails**. That ρ is also an upper bound rather than an
+estimate: only **2/64** volumes read truly disjoint chunks (mean Jaccard
+0.628), so the true disjoint-sample stability is lower and not yet
+measured. Rankings should be read as triage bands.
+
+The n=4 and n=12 sections below are kept as history. Their conclusions,
+including the n=12 "clears the gate" result, are **superseded**: both
+re-read the same present shards on sparse volumes.
+
 ## Method
 
 `bin/stability.py` scores all 64 volumes twice via `score_volume(...,
@@ -22,7 +36,7 @@ list before the first N are taken.
   top-10 overlap 6/10. This is the honest measurement: ≈ ±5 points of
   sampling noise, below our ρ ≥ 0.85 gate.
 
-### At 12 samples/volume (`stability-n12.json`) — current
+### At 12 samples/volume (`stability-n12.json`) — superseded
 
 - **rotate=0 vs 13**: candidates [0..11] vs [13..24] — fully disjoint
   shard sets (verified: zero shared candidates). ρ = **0.9948**,
@@ -41,8 +55,9 @@ list before the first N are taken.
 
 ## Reading
 
-- At 12 samples/volume the leaderboard is a real ranking with ~±1 point
-  of sampling noise — the n=4 triage-band caveat is retired.
+- *(Superseded; see Current status.)* At the time, the n=12 result was read
+  as a real ranking with ~±1 point of sampling noise. The dense-grid check
+  below showed that was inflated by shard re-reading.
 - Robust across both campaigns: PHerc0813 is #1 (77.4) everywhere;
   the Grand Prize Pareto frontier (PHerc0813 + PHerc1447) is unchanged.
 - The n=4 campaign's sample-sensitive findings (PHerc1447's 67.3 → 53.2
@@ -79,8 +94,33 @@ significant runtime cost.
 ## Reproduce
 
 ```bash
-# n=12 disjoint resample (the current measurement; ~3 min)
+# n=12 resample (superseded; ~3 min)
 .venv/bin/python bin/stability.py artifacts/2026-09-30-resampling-stability/stability-n12.json 12
 # n=4 (the retired campaign's noise measurement; ~4 min)
 .venv/bin/python bin/stability.py artifacts/2026-09-30-resampling-stability/stability.json
+```
+
+## Provenance: "disjoint" resamples are not disjoint (2026-09-30)
+
+`stability-n24-dense-prov.json` adds per-chunk provenance (`sample_provenance`
+with stable `shard_key#inner_flat` identities) and per-volume decoded-identity
+overlap between the two runs. Results:
+
+- **2/64** volumes had zero chunk overlap (truly disjoint samples).
+- Mean Jaccard = 0.63 — on average, 63% of chunks were re-read.
+- 5 volumes had Jaccard = 1.0 (identical chunk sets despite rotated candidate order).
+
+The sampling loop scans all candidates until N chunks decode; on sparse
+volumes both rotations re-read the same present shards. **Disjoint candidate
+order does not imply disjoint chunks read.** The published ρ = 0.79 is
+therefore inflated by re-reading — true disjoint-sample stability is lower,
+and we do not claim otherwise. This is why `score_volume()` records provenance
+and `bin/stability.py` reports identity overlap: so no future claim of
+disjointness rests on candidate order alone.
+
+## Reproduce
+
+```bash
+# n=24 provenance stability check (~12 min)
+.venv/bin/python bin/stability.py artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json 24 13 5
 ```

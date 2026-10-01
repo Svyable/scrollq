@@ -1,6 +1,27 @@
 # 2027 Grand Prize target qualifier — 2026-09-30
 
-Frozen output from the first ScrollQ Grand Prize qualification pass.
+Frozen output from the first ScrolIQ Grand Prize qualification pass.
+
+> **Current result.** The September write-up cites the dense 24-sample
+> qualifier, not this first pass. It reproduces byte-for-byte from the
+> n24-dense campaign:
+>
+> ```bash
+> scrollq-grand-prize \
+>   --volumes artifacts/2026-09-30-scrollq-n24-dense/volumes.json \
+>   --out /tmp/targets.json
+> diff <(python -m json.tool /tmp/targets.json) \
+>      <(python -m json.tool artifacts/2026-09-30-grand-prize-qualifier-n24-dense/targets.json)
+> ```
+>
+> Primary frontier: **PHerc0813**, **PHerc1447** (same as this first pass).
+> Adding `--surface-support` to the n24-dense run gives the sensitivity
+> frontier **PHerc0268, PHerc0800, PHerc0813, PHerc1447**. That output is not
+> committed. The six-scroll sensitivity frontier below comes from the retired
+> 4-sample campaign and is kept for history.
+>
+> The rest of this README documents that first pass, which used the retired
+> 4-sample campaign (`artifacts/2026-09-30-scrollq/volumes.json`).
 
 Primary reproduction:
 
@@ -10,7 +31,7 @@ scrollq-grand-prize \
   --out /tmp/grand-prize-targets.json
 ```
 
-Primary method: a weight-free Pareto frontier over the existing ScrollQ
+Primary method: a weight-free Pareto frontier over the existing ScrolIQ
 scan-quality score and current public segment count. Surface and lasagna
 predictions are required bootstrap assets. This is campaign triage, not a
 readability or ink prediction.
