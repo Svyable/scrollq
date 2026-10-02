@@ -360,6 +360,11 @@ cannot authorize TRAIN. Scoring exceptions produce an unscorable quality
 record while preserving the integrity verdict. These decision paths are
 covered by `python -m pytest tests/test_health.py -q`.
 
+Success must be the boolean `true`; malformed scorer output is unscorable.
+Both `--samples` and `--spread` require positive integers, checked before
+network access. The CLI displays decoded/requested chunks and completion,
+and tolerates missing optional component details.
+
 This creates a practical gate before expensive downstream work begins.
 
 The earlier integrity verdict paths were exercised against live data
