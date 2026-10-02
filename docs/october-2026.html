@@ -98,6 +98,16 @@ Working deadline: end of October, following the monthly progress-prize cadence. 
 
 <main class="wrap">
 
+<div class="panel" id="impact"><h2>October priority: one diagnostic-to-action loop</h2>
+<p><b>Plan update · 2026-10-02 UTC.</b> O1 and O6 are the primary track: independently review the frozen mesh sample,
+then document what a confirmed finding caused someone to correct, exclude, or inspect. O2–O4 remain exploratory;
+they must not delay that evidence. Test counts and generated reports are not adoption.</p>
+<p>The <a href="october-impact-plan.md">impact plan and runnable handoff</a> now provide a deterministic, key-free reviewer
+packet and separate-sheet scoring. Returned labels are checked against the exact surface identities and pinned key.
+<b>Independent review and downstream benefit remain unmeasured.</b></p>
+<p>Internal evidence-freeze target: October 25. The official prize page still listed September 30 when checked on
+October 2 UTC; October’s deadline is unconfirmed. No external outreach or submission has been made by this update.</p></div>
+
 <div class="panel"><h2>What the prize rewards, and what that means for us</h2>
 <p>The <a href="https://scrollprize.org/prizes#progress-prizes">progress prize criteria</a> favour work that is
 <b>released early</b>, <b>actually gets used</b>, is measured on <b>real data</b>, fixes <b>bugs in tools people
@@ -116,8 +126,8 @@ as it is done rather than held for month end.</p>
 <div class="chips"><span class="chip crit">real data</span><span class="chip crit">failure cases of existing methods</span><span class="chip state">pre-registered · sample drawn</span></div>
 <p><b>Why.</b> A flag list is only actionable if reviewers can trust it. September found failure candidates on real segments; October must say how many of them are true.</p>
 <p><b>Starting point.</b> 77 of 307 segments flagged with three or more defect kinds; one broken PHerc1447 segment confirmed (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-corpus-mesh-audit">corpus-mesh-audit</a>).</p>
-<p><b>Deliverable.</b> A stratified sample of the flagged segments, reviewed in VC3D and labelled <i>defect / not a defect / unclear</i> by someone who did not see the finding kind, plus a same-size sample of unflagged segments as the negative control. Publish precision and the false-negative rate with intervals.</p>
-<p><b>Done when.</b> Per-segment verdicts, the review protocol and the precision and false-negative rate with 95% intervals are committed, and the flag list on Pages shows measured precision for each finding kind.</p>
+<p><b>Deliverable.</b> The frozen sample of 30 flagged, 4 debugging-control and 20 clean segments, reviewed in VC3D and labelled <i>defect / not a defect / unclear</i> without seeing finding kinds. Publish flag precision and the clean-segment defect rate with intervals.</p>
+<p><b>Done when.</b> Per-segment verdicts, calibration and both rates with 95% intervals are committed. Per-finding-kind rates remain descriptive. <b>Correction, 2026-10-02 UTC:</b> this design does not measure whole-corpus false-negative rate or recall; mixed segments are excluded.</p>
 <p><b>Progress.</b> Protocol frozen in <a href="mesh-review-protocol.md"><code>mesh-review-protocol.md</code></a>. Blinded sample of 54 segments (30 flagged, 4 debug controls, 20 clean) drawn in <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-mesh-review-sample"><code>2026-10-01-mesh-review-sample/</code></a>. Awaiting VC3D review; no precision exists yet.</p></div>
 <div class="goal" id="o2"><h3><span class="id">O2</span>Winding IQ: patch attachment and cross-collection consistency</h3>
 <div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: winding annotations</span><span class="chip state">planned</span></div>

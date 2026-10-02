@@ -10,6 +10,11 @@ ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](h
 
 ## Diagnostic passport
 
+**October priority:** complete the existing blinded mesh review, then document
+an actual diagnostic-to-action outcome. The [impact plan](docs/october-impact-plan.md)
+includes a runnable key-free reviewer packet, scoring commands, claim limits,
+and stop rules. Independent review and downstream benefit remain unmeasured.
+
 The first ScrolIQ interface organizes the evidence for one volume around the Challenge's actual pipeline bottlenecks:
 
 ```bash
