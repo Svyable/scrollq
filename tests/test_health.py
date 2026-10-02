@@ -10,7 +10,8 @@ import pytest
 
 import scrollq.health as health
 
-GOOD_QUALITY = {"ok": True, "score": 80.0, "components": {}}
+GOOD_QUALITY = {"ok": True, "score": 80.0, "components": {},
+                "sampling": {"requested": 24, "decoded": 24, "complete": True}}
 
 
 def _audit(integrity, findings=(), evidence=None):
@@ -105,3 +106,39 @@ def test_clean_integrity_defers_to_quality(monkeypatch, quality, reason):
 def test_medium_finding_cautions(monkeypatch):
     report = _run(monkeypatch, _audit("WARN", [("EMPTY_LEVEL", "medium", "PRESENT")]))
     assert report["verdict"] == "CAUTION"
+
+
+@pytest.mark.parametrize("sampling", [
+    None, {}, {"requested": 24, "decoded": 1, "complete": False},
+    {"requested": 24, "decoded": 1, "complete": True},
+    {"requested": 1, "decoded": 1, "complete": True},
+    {"requested": 24, "decoded": 24, "complete": "true"},
+])
+def test_incomplete_or_unverified_sampling_never_trains(monkeypatch, sampling):
+    quality = {**GOOD_QUALITY, "sampling": sampling}
+    report = _run(monkeypatch, _audit("PASS"), quality)
+    assert report["verdict"] == "CAUTION"
+    assert "sampling" in report["verdict_reason"]
+    assert report["quality"] == quality
+
+
+@pytest.mark.parametrize("score", [None, float("nan"), float("inf"), -1, 101, "80", True])
+def test_invalid_quality_score_never_trains(monkeypatch, score):
+    report = _run(monkeypatch, _audit("PASS"), {**GOOD_QUALITY, "score": score})
+    assert report["verdict"] == "CAUTION"
+    assert "invalid" in report["verdict_reason"]
+
+
+@pytest.mark.parametrize("integrity, verdict", [("PASS", "CAUTION"), ("FAIL", "DO NOT TRAIN"),
+                                               ("UNKNOWN", "DO NOT TRAIN")])
+def test_quality_exception_preserves_integrity_result(monkeypatch, integrity, verdict):
+    monkeypatch.setattr(health, "audit_root", lambda *a: _audit(integrity))
+
+    def broken(*a, **k):
+        raise OSError("chunk transport failed")
+
+    report = health.health_report("https://example.invalid", "v.zarr",
+                                  store=object(), scorer=broken)
+    assert report["verdict"] == verdict
+    assert report["integrity"]["verdict"] == integrity
+    assert "chunk transport failed" in report["quality"]["error"]

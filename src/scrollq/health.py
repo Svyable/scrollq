@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
+from numbers import Real
 
 from zpa.httpstore import open_store
 from zpa.report import RECOMMENDED_CONSUMER_VERDICT, audit_root
@@ -67,8 +69,15 @@ def health_report(base_url: str, root: str, samples: int = 24,
     }
 
     # --- quality: sampled voxel decode (24 samples, 5x5x5 grid: the campaign standard) ---
-    q = scorer(base_url, root, samples=samples, spread=spread)
+    try:
+        q = scorer(base_url, root, samples=samples, spread=spread)
+    except Exception as exc:
+        # A failed decode must not discard an already measured integrity
+        # failure or prevent the caller from receiving a health verdict.
+        q = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
     report["quality"] = q
+    score = q.get("score")
+    sampling = q.get("sampling")
 
     # --- combined verdict ---
     if integrity == "FAIL":
@@ -85,9 +94,20 @@ def health_report(base_url: str, root: str, samples: int = 24,
     elif not q.get("ok"):
         verdict, reason = ("CAUTION",
                            f"quality unscorable: {q.get('error', '?')}")
+    elif (isinstance(score, bool) or not isinstance(score, Real)
+          or not math.isfinite(score) or not 0 <= score <= 100):
+        verdict, reason = ("CAUTION", "quality score is invalid; expected finite 0–100")
     elif q["score"] < 40:
         verdict, reason = ("CAUTION",
                            f"quality score {q['score']} below 40")
+    elif (not isinstance(sampling, dict)
+          or sampling.get("complete") is not True
+          or type(sampling.get("requested")) is not int
+          or type(sampling.get("decoded")) is not int
+          or samples <= 0
+          or sampling["requested"] != samples
+          or sampling["decoded"] != samples):
+        verdict, reason = ("CAUTION", "quality sampling is incomplete or unverified")
     else:
         verdict, reason = ("TRAIN",
                            f"integrity {integrity}, quality {q['score']}")

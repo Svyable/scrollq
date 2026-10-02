@@ -347,15 +347,22 @@ ScrolIQ is the prioritization half of a two-part data-quality suite:
 
 `scrollq-health` combines both into one volume-level report:
 
-- **TRAIN** — integrity passes and quality is usable
-- **CAUTION** — integrity warns, quality is low, or quality cannot be scored
+- **TRAIN** — integrity passes, quality is finite and at least 40/100, and sampling provenance confirms that every requested chunk was decoded
+- **CAUTION** — integrity warns, quality is low or invalid, sampling is incomplete/unverified, or quality cannot be scored
 - **DO NOT TRAIN** — integrity FAIL (a high-severity finding, or an audit that crashed) **or integrity UNKNOWN** (an unreadable level, an absent root, nothing auditable)
 
 Integrity comes from the companion's versioned report (`zpa.report.audit_root`, which never raises) and follows its `RECOMMENDED_CONSUMER_VERDICT`: missing evidence fails closed and is never read as a clean result. Every finding is kept with its code and evidence state. Until 2026-10-01, `scrollq-health` counted only high/medium findings, so UNKNOWN evidence or an audit exception left integrity at PASS — the divergence the companion's [`docs/INTEGRATION.md`](https://github.com/Svyable/zarr-pyramid-audit/blob/main/docs/INTEGRATION.md#scroliq-integration-surface) recorded.
 
+The quality check requires `sampling.complete` to be true and both
+`sampling.requested` and `sampling.decoded` to match the requested sample
+budget. A partial score remains attached to the report for inspection; it
+cannot authorize TRAIN. Scoring exceptions produce an unscorable quality
+record while preserving the integrity verdict. These decision paths are
+covered by `python -m pytest tests/test_health.py -q`.
+
 This creates a practical gate before expensive downstream work begins.
 
-All verdict paths are proven against live data with the fail-closed code
+The earlier integrity verdict paths were exercised against live data
 (`artifacts/2026-10-01-health-verdicts-fail-closed/`, workflow
 `health-verdicts.yml`): **TRAIN** on the healthy PHerc0813 dl volume
 (integrity PASS, quality 76.2); **DO NOT TRAIN** on the defective PHerc0814 S3
