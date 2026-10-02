@@ -6,11 +6,15 @@ or an audit exception used to leave integrity at PASS, so a readable sampled
 level could still produce TRAIN.
 """
 
+import json
+import sys
+
 import pytest
 
 import scrollq.health as health
 
-GOOD_QUALITY = {"ok": True, "score": 80.0, "components": {}}
+GOOD_QUALITY = {"ok": True, "score": 80.0, "components": {},
+                "sampling": {"requested": 24, "decoded": 24, "complete": True}}
 
 
 def _audit(integrity, findings=(), evidence=None):
@@ -105,3 +109,92 @@ def test_clean_integrity_defers_to_quality(monkeypatch, quality, reason):
 def test_medium_finding_cautions(monkeypatch):
     report = _run(monkeypatch, _audit("WARN", [("EMPTY_LEVEL", "medium", "PRESENT")]))
     assert report["verdict"] == "CAUTION"
+
+
+@pytest.mark.parametrize("sampling", [
+    None, {}, {"requested": 24, "decoded": 1, "complete": False},
+    {"requested": 24, "decoded": 1, "complete": True},
+    {"requested": 1, "decoded": 1, "complete": True},
+    {"requested": 24, "decoded": 24, "complete": "true"},
+])
+def test_incomplete_or_unverified_sampling_never_trains(monkeypatch, sampling):
+    quality = {**GOOD_QUALITY, "sampling": sampling}
+    report = _run(monkeypatch, _audit("PASS"), quality)
+    assert report["verdict"] == "CAUTION"
+    assert "sampling" in report["verdict_reason"]
+    assert report["quality"] == quality
+
+
+@pytest.mark.parametrize("score", [None, float("nan"), float("inf"), -1, 101, "80", True, 10**1000])
+def test_invalid_quality_score_never_trains(monkeypatch, score):
+    report = _run(monkeypatch, _audit("PASS"), {**GOOD_QUALITY, "score": score})
+    assert report["verdict"] == "CAUTION"
+    assert "invalid" in report["verdict_reason"]
+
+
+@pytest.mark.parametrize("integrity, verdict", [("PASS", "CAUTION"), ("FAIL", "DO NOT TRAIN"),
+                                               ("UNKNOWN", "DO NOT TRAIN")])
+def test_quality_exception_preserves_integrity_result(monkeypatch, integrity, verdict):
+    monkeypatch.setattr(health, "audit_root", lambda *a: _audit(integrity))
+
+    def broken(*a, **k):
+        raise OSError("chunk transport failed")
+
+    report = health.health_report("https://example.invalid", "v.zarr",
+                                  store=object(), scorer=broken)
+    assert report["verdict"] == verdict
+    assert report["integrity"]["verdict"] == integrity
+    assert "chunk transport failed" in report["quality"]["error"]
+
+
+@pytest.mark.parametrize("ok", ["false", "true", 1, [], None])
+def test_success_flag_must_be_boolean_true(monkeypatch, ok):
+    report = _run(monkeypatch, _audit("PASS"), {**GOOD_QUALITY, "ok": ok})
+    assert report["verdict"] == "CAUTION"
+
+
+@pytest.mark.parametrize("quality", [None, [], "error", 80])
+@pytest.mark.parametrize("integrity", ["PASS", "FAIL", "UNKNOWN"])
+def test_malformed_scorer_result_preserves_verdict(monkeypatch, quality, integrity):
+    monkeypatch.setattr(health, "audit_root", lambda *a: _audit(integrity))
+    report = health.health_report("https://example.invalid", "v.zarr", store=object(),
+                                  scorer=lambda *a, **k: quality)
+    assert report["verdict"] == ("CAUTION" if integrity == "PASS" else "DO NOT TRAIN")
+    assert report["quality"]["ok"] is False
+    assert "dictionary" in report["quality"]["error"]
+
+
+@pytest.mark.parametrize("parameter", ["samples", "spread"])
+@pytest.mark.parametrize("value", [0, -1, True, 1.5, "24", None])
+def test_invalid_sampling_parameters_rejected_before_io(monkeypatch, parameter, value):
+    def unexpected(*a, **k):
+        pytest.fail("invalid arguments must not initiate I/O")
+
+    monkeypatch.setattr(health, "open_store", unexpected)
+    with pytest.raises(ValueError, match=parameter):
+        health.health_report("https://example.invalid", "v.zarr", **{parameter: value})
+
+
+@pytest.mark.parametrize("score", [40, 100])
+def test_score_boundaries_and_custom_sample_budget(monkeypatch, score):
+    monkeypatch.setattr(health, "audit_root", lambda *a: _audit("PASS"))
+    quality = {**GOOD_QUALITY, "score": score,
+               "sampling": {"requested": 3, "decoded": 3, "complete": True}}
+    report = health.health_report("https://example.invalid", "v.zarr", samples=3,
+                                  store=object(), scorer=lambda *a, **k: quality)
+    assert report["verdict"] == "TRAIN"
+
+
+def test_cli_reports_partial_sample_without_component_details(monkeypatch, tmp_path, capsys):
+    quality = {"ok": True, "score": 80,
+               "sampling": {"requested": 24, "decoded": 1, "complete": False}}
+    report = _run(monkeypatch, _audit("PASS"), quality)
+    monkeypatch.setattr(health, "health_report", lambda *a, **k: report)
+    out = tmp_path / "health.json"
+    monkeypatch.setattr(sys, "argv", ["scrollq-health", "--root", "v.zarr", "--out", str(out)])
+    health.main()
+    output = capsys.readouterr().out
+    assert "CAUTION" in output
+    assert "1/24" in output
+    assert "complete=False" in output
+    assert json.loads(out.read_text())["quality"] == quality

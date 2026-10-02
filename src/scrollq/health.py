@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
+from numbers import Real
 
 from zpa.httpstore import open_store
 from zpa.report import RECOMMENDED_CONSUMER_VERDICT, audit_root
@@ -35,6 +37,9 @@ def _finding_row(f: dict) -> dict:
 
 def health_report(base_url: str, root: str, samples: int = 24,
                  spread: int = 5, *, store=None, scorer=score_volume) -> dict:
+    for name, value in (("samples", samples), ("spread", spread)):
+        if type(value) is not int or value <= 0:
+            raise ValueError(f"{name} must be a positive integer")
     report: dict = {"root": root, "base_url": base_url,
                    "quality_samples": samples, "quality_spread": spread}
 
@@ -67,8 +72,17 @@ def health_report(base_url: str, root: str, samples: int = 24,
     }
 
     # --- quality: sampled voxel decode (24 samples, 5x5x5 grid: the campaign standard) ---
-    q = scorer(base_url, root, samples=samples, spread=spread)
+    try:
+        q = scorer(base_url, root, samples=samples, spread=spread)
+    except Exception as exc:
+        # A failed decode must not discard an already measured integrity
+        # failure or prevent the caller from receiving a health verdict.
+        q = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+    if not isinstance(q, dict):
+        q = {"ok": False, "error": "scorer must return a quality dictionary"}
     report["quality"] = q
+    score = q.get("score")
+    sampling = q.get("sampling")
 
     # --- combined verdict ---
     if integrity == "FAIL":
@@ -82,12 +96,23 @@ def health_report(base_url: str, root: str, samples: int = 24,
     elif integrity == "WARN":
         verdict, reason = ("CAUTION",
                            f"{len(med)} medium-severity integrity finding(s)")
-    elif not q.get("ok"):
+    elif q.get("ok") is not True:
         verdict, reason = ("CAUTION",
                            f"quality unscorable: {q.get('error', '?')}")
+    elif (isinstance(score, bool) or not isinstance(score, Real)
+          or not 0 <= score <= 100 or not math.isfinite(score)):
+        verdict, reason = ("CAUTION", "quality score is invalid; expected finite 0–100")
     elif q["score"] < 40:
         verdict, reason = ("CAUTION",
                            f"quality score {q['score']} below 40")
+    elif (not isinstance(sampling, dict)
+          or sampling.get("complete") is not True
+          or type(sampling.get("requested")) is not int
+          or type(sampling.get("decoded")) is not int
+          or samples <= 0
+          or sampling["requested"] != samples
+          or sampling["decoded"] != samples):
+        verdict, reason = ("CAUTION", "quality sampling is incomplete or unverified")
     else:
         verdict, reason = ("TRAIN",
                            f"integrity {integrity}, quality {q['score']}")
@@ -96,15 +121,22 @@ def health_report(base_url: str, root: str, samples: int = 24,
     return report
 
 
+def _positive_int(text: str) -> int:
+    value = int(text)
+    if value <= 0:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return value
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description="Unified data-health report: integrity + quality")
     ap.add_argument("--root", required=True,
                     help="volume root, e.g. community-uploads/forrest/volcomp/PHerc0009B/volumes/....zarr")
     ap.add_argument("--base", default="https://dl.ash2txt.org")
-    ap.add_argument("--samples", type=int, default=24,
+    ap.add_argument("--samples", type=_positive_int, default=24,
                     help="quality samples per volume (campaign standard: 24)")
-    ap.add_argument("--spread", type=int, default=5,
+    ap.add_argument("--spread", type=_positive_int, default=5,
                     help="per-dimension candidate spread (campaign standard: 5)")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
@@ -121,11 +153,20 @@ def main() -> None:
           f"({rep['integrity']['n_levels']} levels, "
           f"{rep['integrity']['n_findings']} findings)")
     q = rep["quality"]
-    if q.get("ok"):
-        print(f"quality: {q['score']}/100 "
-              f"(signal {q['components']['signal_40']}, "
-              f"texture {q['components']['texture_30']}, "
-              f"dynamic {q['components']['dynamic_20']})")
+    if q.get("ok") is True:
+        print(f"quality: {q.get('score', 'unknown')}/100")
+        components = q.get("components")
+        if isinstance(components, dict):
+            print(f"components: signal {components.get('signal_40', 'unknown')}, "
+                  f"texture {components.get('texture_30', 'unknown')}, "
+                  f"dynamic {components.get('dynamic_20', 'unknown')}")
+        sampling = q.get("sampling")
+        if isinstance(sampling, dict):
+            print(f"sampling: {sampling.get('decoded', 'unknown')}/"
+                  f"{sampling.get('requested', 'unknown')} chunks, "
+                  f"complete={sampling.get('complete', 'unknown')}")
+        else:
+            print("sampling: unverified")
     else:
         print(f"quality: unscorable ({q.get('error')})")
 
