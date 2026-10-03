@@ -251,6 +251,8 @@ def render_column(
     if not COMMIT_RE.fullmatch(vc_commit):
         raise VC3DError("--vc-commit must be an exact 40-hex Git commit")
     vc_commit = vc_commit.lower()
+    if not isinstance(volume, str) or not volume:
+        raise VC3DError("--volume is required")
     if not volume_id:
         raise VC3DError("--volume-id is required")
     if isinstance(column, bool) or not isinstance(column, int) or column < 1:
@@ -288,8 +290,10 @@ def render_column(
         out_dir = root / out_dir
     out_rel = _relative_under(root, out_dir, label="TIFF output directory")
     if out_dir.exists():
-        if not out_dir.is_dir() or any(out_dir.iterdir()):
-            raise VC3DError("--tif-output-dir must not exist or must be empty")
+        if out_dir.is_symlink() or not out_dir.is_dir() or any(out_dir.iterdir()):
+            raise VC3DError(
+                "--tif-output-dir must be a new/empty real directory, not a symlink"
+            )
     else:
         out_dir.parent.mkdir(parents=True, exist_ok=True)
 
@@ -297,6 +301,11 @@ def render_column(
     if not receipt.is_absolute():
         receipt = root / receipt
     receipt_rel = _relative_under(root, receipt, label="receipt")
+    if (
+        PurePosixPath(receipt_rel) == PurePosixPath(out_rel)
+        or PurePosixPath(out_rel) in PurePosixPath(receipt_rel).parents
+    ):
+        raise VC3DError("receipt may not live inside --tif-output-dir")
     if receipt.exists():
         raise VC3DError("refusing to overwrite existing receipt")
     receipt.parent.mkdir(parents=True, exist_ok=True)
@@ -305,6 +314,11 @@ def render_column(
     if not log.is_absolute():
         log = root / log
     log_rel = _relative_under(root, log, label="log")
+    if (
+        PurePosixPath(log_rel) == PurePosixPath(out_rel)
+        or PurePosixPath(out_rel) in PurePosixPath(log_rel).parents
+    ):
+        raise VC3DError("log may not live inside --tif-output-dir")
     if log.exists():
         raise VC3DError("refusing to overwrite existing log")
     log.parent.mkdir(parents=True, exist_ok=True)
@@ -446,6 +460,13 @@ def verify_receipt(
         errors.append("receipt tool is not scroliq-vc3d")
     if document.get("operation") != "render-column":
         errors.append("receipt operation is not render-column")
+    try:
+        actual_receipt_rel = _relative_under(root, receipt, label="receipt")
+    except VC3DError as exc:
+        errors.append(str(exc))
+    else:
+        if document.get("receipt_path") != actual_receipt_rel:
+            errors.append("receipt_path does not identify this receipt file")
 
     column = document.get("column")
     if isinstance(column, bool) or not isinstance(column, int) or column < 1:
@@ -561,6 +582,13 @@ def verify_receipt(
         errors.append("output section is missing")
         output = {}
     output_rel = output.get("path")
+    tif_output_rel = render.get("tif_output_dir")
+    if (
+        isinstance(output_rel, str)
+        and isinstance(tif_output_rel, str)
+        and output_rel != (PurePosixPath(tif_output_rel) / "00.tif").as_posix()
+    ):
+        errors.append("raw render path is not tif_output_dir/00.tif")
     if isinstance(output_rel, str):
         try:
             output_path = _resolve_under(root, output_rel, label="raw render")
