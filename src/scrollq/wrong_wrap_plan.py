@@ -244,7 +244,7 @@ def freeze_spec(
             raise WrongWrapError(f"{name} must be an integer >= {lower}")
     if max_distance_voxels < min_distance_voxels + min_run_voxels - 1:
         raise WrongWrapError("max_distance_voxels is too small for the frozen run")
-    if not 0 <= threshold <= 254:
+    if type(threshold) is not int or not 0 <= threshold <= 254:
         raise WrongWrapError("threshold must be an integer from 0 through 254")
 
     max_offset = max(abs(float(v)) for v in plan["protocol"]["offsets_voxels"])
@@ -494,11 +494,38 @@ def _load_spec(path: str | Path) -> tuple[dict[str, Any], str]:
     geometry = spec.get("geometry_source")
     if not isinstance(geometry, dict):
         raise WrongWrapError("wrong-wrap spec geometry_source is required")
+    if geometry.get("kind") != "published-surface-prediction":
+        raise WrongWrapError("wrong-wrap spec geometry-source kind mismatch")
+    if geometry.get("level") != 0 or geometry.get("published_threshold") != 0.2:
+        raise WrongWrapError("wrong-wrap spec must use the frozen m7 L0 th0.2 artifact")
+    threshold = geometry.get("stored_value_threshold")
+    if type(threshold) is not int or not 0 <= threshold <= 254:
+        raise WrongWrapError("wrong-wrap spec stored threshold must be integer 0..254")
+
     algorithm = spec.get("algorithm")
     if not isinstance(algorithm, dict) or algorithm.get("name") != METHOD:
         raise WrongWrapError("wrong-wrap spec algorithm mismatch")
     if algorithm.get("uses_sheetness_response") is not False:
         raise WrongWrapError("wrong-wrap spec must forbid sheetness-response use")
+    if algorithm.get("stochastic") is not False or algorithm.get("seed") is not None:
+        raise WrongWrapError("wrong-wrap spec must remain deterministic")
+    if algorithm.get("ray_step_voxels") != 1:
+        raise WrongWrapError("wrong-wrap spec ray step must remain exactly one voxel")
+    for name in (
+        "min_distance_voxels",
+        "max_distance_voxels",
+        "min_gap_voxels",
+        "min_run_voxels",
+    ):
+        value = algorithm.get(name)
+        if type(value) is not int or value < 1:
+            raise WrongWrapError(f"wrong-wrap spec {name} must be an integer >= 1")
+    if algorithm["max_distance_voxels"] < (
+        algorithm["min_distance_voxels"] + algorithm["min_run_voxels"] - 1
+    ):
+        raise WrongWrapError("wrong-wrap spec max distance cannot contain its frozen run")
+    if algorithm["min_distance_voxels"] <= algorithm["min_gap_voxels"]:
+        raise WrongWrapError("wrong-wrap spec min distance must exceed its frozen gap")
     return spec, sha256_file(path)
 
 
