@@ -122,6 +122,30 @@ def validate_model_card(document: Mapping[str, Any]) -> dict[str, Any]:
     inference_script = _relative_path(
         document.get("inference_script"), "model.inference_script"
     )
+
+    inference_config_value = document.get("inference_config")
+    if inference_config_value is None:
+        inference_config = None
+        inference_config_sha256 = None
+    else:
+        if not isinstance(inference_config_value, dict) or not inference_config_value:
+            raise ValidationError("model.inference_config must be a non-empty JSON object")
+        try:
+            encoded_config = json.dumps(
+                inference_config_value,
+                sort_keys=True,
+                separators=(",", ":"),
+                allow_nan=False,
+            )
+        except (TypeError, ValueError) as exc:
+            raise ValidationError(
+                "model.inference_config must contain only finite JSON values"
+            ) from exc
+        inference_config = json.loads(encoded_config)
+        inference_config_sha256 = hashlib.sha256(
+            encoded_config.encode("utf-8")
+        ).hexdigest()
+
     license_name = _nonempty_string(document.get("license"), "model.license")
 
     checkpoint_path = document.get("checkpoint_path")
@@ -165,6 +189,8 @@ def validate_model_card(document: Mapping[str, Any]) -> dict[str, Any]:
         "training_data": training_data,
         "held_out_excluded": document["held_out_excluded"],
         "inference_script": inference_script,
+        "inference_config": inference_config,
+        "inference_config_sha256": inference_config_sha256,
         "license": license_name,
         "tasks": normalized_tasks,
         "stochastic": stochastic,
@@ -354,6 +380,21 @@ def build_preflight(
         inference_sha = None
         check("inference_script", False, f"missing inference script: {inference}")
 
+    inference_config_sha = model.get("inference_config_sha256")
+    if inference_config_sha is None:
+        check(
+            "inference_configuration",
+            False,
+            "model does not bind output-affecting inference configuration",
+        )
+    else:
+        check(
+            "inference_configuration",
+            True,
+            "model binds output-affecting inference configuration",
+            sha256=inference_config_sha,
+        )
+
     checkpoint_path: Path | None = None
     if checkpoint_override is not None:
         checkpoint_path = checkpoint_override.resolve()
@@ -406,6 +447,7 @@ def build_preflight(
         "rank_eligible": eligible,
         "checks": checks,
         "inference_script_sha256": inference_sha,
+        "inference_config_sha256": inference_config_sha,
         "checkpoint_sha256_observed": observed_checkpoint_sha,
     }
 
@@ -463,6 +505,7 @@ def build_report(
             "author": model["author"],
             "license": model["license"],
             "checkpoint_sha256": model["checkpoint_sha256"],
+            "inference_config_sha256": model["inference_config_sha256"],
         },
         "dataset": {
             "id": dataset["id"],
@@ -480,6 +523,7 @@ def build_report(
             "dataset_manifest_file_sha256": _file_sha256(dataset_path),
             "evaluator_sha256": _file_sha256(Path(__file__)),
             "inference_script_sha256": preflight["inference_script_sha256"],
+            "inference_config_sha256": preflight["inference_config_sha256"],
             "checkpoint_sha256": preflight["checkpoint_sha256_observed"],
         },
     }
