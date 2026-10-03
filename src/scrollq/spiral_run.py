@@ -26,6 +26,15 @@ from .spiral_preflight import SpiralPreflightError, audit_spiral_dataset
 
 SCHEMA_VERSION = 1
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
+TRACKS_IN_ROI_RE = re.compile(
+    r"^loaded (?P<count>[0-9][0-9,]*) tracks within z-roi "
+    r"\\[(?P<z_begin>[^,]+), (?P<z_end>[^)]+)\\)$",
+    re.MULTILINE,
+)
+FITTING_PATCHES_RE = re.compile(
+    r"^fitting (?P<count>[0-9][0-9,]*) patches$",
+    re.MULTILINE,
+)
 
 
 class SpiralRunError(ValueError):
@@ -183,6 +192,185 @@ def _run_and_tee(
         return return_code
 
 
+def _parse_count_token(value: str) -> int:
+    return int(value.replace(",", ""))
+
+
+def _audit_supervision_stdout(
+    stdout_path: Path,
+    recipe: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Verify that the recorded fit actually consumed the frozen supervision.
+
+    The PHerc0826 baseline intentionally disables patches and relies on the
+    published track DBM. Villa prints the post-ROI track count and fitted patch
+    count to stdout. Those lines are part of the reproducibility contract: a
+    checkpoint is not a successful baseline if the intended supervision was
+    absent or drifted.
+    """
+    checks: list[dict[str, Any]] = []
+
+    def check(name: str, ok: bool, detail: str, **extra: Any) -> None:
+        checks.append({"name": name, "ok": bool(ok), "detail": detail, **extra})
+
+    if not stdout_path.is_file():
+        check("stdout_present", False, "fit stdout log is missing")
+        return {
+            "status": "failed",
+            "ok": False,
+            "checks": checks,
+            "tracks": {"observations": []},
+            "patches": {"observations": []},
+        }
+
+    try:
+        text = stdout_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        check("stdout_readable", False, f"cannot read fit stdout log: {exc}")
+        return {
+            "status": "failed",
+            "ok": False,
+            "checks": checks,
+            "tracks": {"observations": []},
+            "patches": {"observations": []},
+        }
+
+    check("stdout_present", True, "fit stdout log is present and readable")
+
+    bounded = recipe.get("bounded_reproduction")
+    if not isinstance(bounded, dict):
+        check("recipe_bounded_reproduction", False, "recipe bounded_reproduction is missing")
+        bounded = {}
+    overrides = bounded.get("config_overrides")
+    if not isinstance(overrides, dict):
+        check("recipe_config_overrides", False, "recipe config_overrides is missing")
+        overrides = {}
+
+    z_range = bounded.get("z_range_half_open")
+    expected_z: tuple[float, float] | None = None
+    if (
+        isinstance(z_range, list)
+        and len(z_range) == 2
+        and all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in z_range)
+    ):
+        expected_z = (float(z_range[0]), float(z_range[1]))
+
+    track_observations: list[dict[str, Any]] = []
+    for match in TRACKS_IN_ROI_RE.finditer(text):
+        try:
+            z_begin = float(match.group("z_begin").strip())
+            z_end = float(match.group("z_end").strip())
+        except ValueError:
+            continue
+        track_observations.append(
+            {
+                "count": _parse_count_token(match.group("count")),
+                "z_range_half_open": [z_begin, z_end],
+            }
+        )
+
+    patch_observations = [
+        _parse_count_token(match.group("count"))
+        for match in FITTING_PATCHES_RE.finditer(text)
+    ]
+
+    tracks_required = overrides.get("input_use_tracks") is True
+    patches_disabled = overrides.get("input_disable_patches") is True
+
+    unique_track_counts = sorted({row["count"] for row in track_observations})
+    unique_track_ranges = sorted(
+        {tuple(row["z_range_half_open"]) for row in track_observations}
+    )
+    unique_patch_counts = sorted(set(patch_observations))
+
+    if tracks_required:
+        check(
+            "tracks_logged",
+            bool(track_observations),
+            "Villa reported post-ROI track supervision",
+            observations=len(track_observations),
+        )
+        check(
+            "tracks_unique_count",
+            len(unique_track_counts) == 1,
+            "all Villa track-count observations agree",
+            unique_counts=unique_track_counts,
+        )
+        track_count = unique_track_counts[0] if len(unique_track_counts) == 1 else None
+        check(
+            "tracks_positive",
+            track_count is not None and track_count > 0,
+            "frozen baseline consumed at least one track in the fit ROI",
+            actual=track_count,
+        )
+        if expected_z is not None:
+            check(
+                "tracks_z_range",
+                unique_track_ranges == [expected_z],
+                "Villa track supervision used the frozen half-open z range",
+                expected=list(expected_z),
+                actual=[list(row) for row in unique_track_ranges],
+            )
+    else:
+        track_count = unique_track_counts[0] if len(unique_track_counts) == 1 else None
+
+    reference = bounded.get("expected_reference_context")
+    reference_count = (
+        reference.get("documented_tracks_loaded_with_input_use_tracks_true")
+        if isinstance(reference, dict)
+        else None
+    )
+    if tracks_required and isinstance(reference_count, int) and not isinstance(reference_count, bool):
+        check(
+            "tracks_reference_count",
+            track_count == reference_count,
+            "post-ROI track count matches the frozen reproduction reference",
+            expected=reference_count,
+            actual=track_count,
+        )
+
+    if patches_disabled:
+        check(
+            "patches_logged",
+            bool(patch_observations),
+            "Villa reported fitted patch supervision",
+            observations=len(patch_observations),
+        )
+        check(
+            "patches_disabled_effective",
+            unique_patch_counts == [0],
+            "frozen baseline fitted zero patches because input_disable_patches=true",
+            actual=unique_patch_counts,
+        )
+
+    ok = all(row["ok"] for row in checks)
+    return {
+        "status": "pass" if ok else "failed",
+        "ok": ok,
+        "checks": checks,
+        "tracks": {
+            "required": tracks_required,
+            "observations": track_observations,
+            "unique_counts": unique_track_counts,
+            "unique_z_ranges_half_open": [list(row) for row in unique_track_ranges],
+            "expected_z_range_half_open": list(expected_z) if expected_z is not None else None,
+            "reference_count": reference_count,
+            "reference_count_match": (
+                track_count == reference_count
+                if isinstance(reference_count, int)
+                and not isinstance(reference_count, bool)
+                and track_count is not None
+                else None
+            ),
+        },
+        "patches": {
+            "disabled_by_recipe": patches_disabled,
+            "observations": patch_observations,
+            "unique_counts": unique_patch_counts,
+        },
+    }
+
+
 def _inventory(run_dir: Path) -> list[dict[str, Any]]:
     runner_owned = {
         "spiral-run.preflight.json",
@@ -332,9 +520,15 @@ def run_baseline(
         outputs = []
         launch_error = launch_error or str(exc)
 
+    supervision = _audit_supervision_stdout(stdout_path, plan["recipe"])
     checkpoint = run_dir / "checkpoint_fitted.ckpt"
     checkpoint_ok = checkpoint.is_file() and not checkpoint.is_symlink()
-    success = return_code == 0 and launch_error is None and checkpoint_ok
+    success = (
+        return_code == 0
+        and launch_error is None
+        and checkpoint_ok
+        and supervision["ok"]
+    )
     receipt = {
         "schema_version": SCHEMA_VERSION,
         "tool": "scroliq-spiral-run",
@@ -365,6 +559,7 @@ def run_baseline(
         "command": plan["command"],
         "working_directory": plan["working_directory"],
         "environment": safe_env,
+        "supervision": supervision,
         "logs": {
             "stdout": {
                 "path": stdout_path.name,
@@ -433,6 +628,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     print(
         f"Spiral baseline {receipt['status']}: return_code={receipt['return_code']} "
         f"checkpoint={receipt['checkpoint']['present']} "
+        f"supervision={receipt['supervision']['status']} "
         f"receipt={Path(args.run_dir) / 'spiral-run.receipt.json'}"
     )
     return 0 if receipt["success"] else 1
