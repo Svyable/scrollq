@@ -469,6 +469,198 @@ def _verify_local_file(
             )
 
 
+def _verify_zpa_evidence(
+    *,
+    zarr_audit: dict[str, Any],
+    root_dir: Path | None,
+    volume_id: str,
+    errors: list[dict[str, str]],
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Validate the declared ZPA artifact and return report plus attestation.
+
+    Without a local package root the manifest declarations are checked. With
+    a package root, the exact artifact is hash-checked, parsed, validated
+    against ZPA's bundled schema, and matched back to those declarations.
+    """
+
+    p = "ct_volume.zarr_audit"
+    if zarr_audit.get("tool") != "zarr-pyramid-audit":
+        _error(errors, "GP_CT_AUDIT", f"{p}.tool", "tool must be 'zarr-pyramid-audit'")
+
+    rel = zarr_audit.get("path")
+    if not isinstance(rel, str) or not rel:
+        _error(
+            errors,
+            "GP_CT_AUDIT_PATH",
+            f"{p}.path",
+            "package-relative ZPA report path is required",
+        )
+    _check_sha(zarr_audit, p, errors)
+
+    report_root = zarr_audit.get("root")
+    if not isinstance(report_root, str) or volume_id not in report_root:
+        _error(
+            errors,
+            "GP_CT_AUDIT_ROOT",
+            f"{p}.root",
+            "ZPA report root must identify the exact eligible volume",
+        )
+
+    if zarr_audit.get("integrity") != "PASS":
+        _error(
+            errors,
+            "GP_CT_AUDIT_INTEGRITY",
+            f"{p}.integrity",
+            "Grand Prize source CT requires a ZPA integrity PASS",
+        )
+
+    declared = zarr_audit.get("source_attestation")
+    if not isinstance(declared, dict):
+        declared = {}
+        _error(
+            errors,
+            "GP_CT_SOURCE_ATTESTATION",
+            f"{p}.source_attestation",
+            "ZPA metadata source attestation is required",
+        )
+    if declared.get("algorithm") != "zpa-metadata-semantics-v1":
+        _error(
+            errors,
+            "GP_CT_SOURCE_ATTESTATION",
+            f"{p}.source_attestation.algorithm",
+            "source attestation must use zpa-metadata-semantics-v1",
+        )
+    if declared.get("state") != "PRESENT":
+        _error(
+            errors,
+            "GP_CT_SOURCE_ATTESTATION",
+            f"{p}.source_attestation.state",
+            "eligible CT metadata must have PRESENT source evidence",
+        )
+    metadata_sha = declared.get("metadata_semantics_sha256")
+    if not isinstance(metadata_sha, str) or not SHA256_RE.fullmatch(metadata_sha):
+        _error(
+            errors,
+            "GP_CT_SOURCE_ATTESTATION",
+            f"{p}.source_attestation.metadata_semantics_sha256",
+            "lowercase 64-hex audited metadata semantics digest is required",
+        )
+    axes = declared.get("axes")
+    if (
+        not isinstance(axes, list)
+        or not axes
+        or not all(isinstance(v, str) and v for v in axes)
+        or len(set(axes)) != len(axes)
+    ):
+        _error(
+            errors,
+            "GP_CT_SOURCE_AXES",
+            f"{p}.source_attestation.axes",
+            "non-empty unique source axis names are required",
+        )
+
+    if root_dir is None:
+        return None, declared
+
+    _verify_local_file(zarr_audit, p, root_dir, errors)
+    if not isinstance(rel, str) or not rel:
+        return None, declared
+    target = (root_dir / rel).resolve()
+    try:
+        target.relative_to(root_dir.resolve())
+    except ValueError:
+        return None, declared
+    if not target.is_file():
+        return None, declared
+
+    try:
+        payload = json.loads(target.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        _error(
+            errors,
+            "GP_CT_AUDIT_REPORT",
+            f"{p}.path",
+            f"cannot parse ZPA report artifact: {exc}",
+        )
+        return None, declared
+
+    report: dict[str, Any] | None = None
+    if isinstance(payload, dict) and payload.get("tool") == "zarr-pyramid-audit":
+        report = payload
+    elif isinstance(payload, dict) and isinstance(payload.get("results"), list):
+        matches = [
+            row.get("report")
+            for row in payload["results"]
+            if isinstance(row, dict)
+            and isinstance(row.get("report"), dict)
+            and row["report"].get("root") == report_root
+        ]
+        if len(matches) == 1:
+            report = matches[0]
+        else:
+            _error(
+                errors,
+                "GP_CT_AUDIT_REPORT",
+                f"{p}.path",
+                "ZPA gate artifact must contain exactly one report for the declared root",
+            )
+            return None, declared
+    else:
+        _error(
+            errors,
+            "GP_CT_AUDIT_REPORT",
+            f"{p}.path",
+            "artifact is neither a ZPA audit report nor a ZPA gate report",
+        )
+        return None, declared
+
+    schema_errors = validate_zpa_report(report)
+    if schema_errors:
+        _error(
+            errors,
+            "GP_CT_AUDIT_REPORT",
+            f"{p}.path",
+            "ZPA report fails its bundled schema: " + "; ".join(schema_errors[:3]),
+        )
+        return report, declared
+
+    if report.get("root") != report_root:
+        _error(
+            errors,
+            "GP_CT_AUDIT_ROOT",
+            f"{p}.root",
+            "declared root does not match the ZPA report root",
+        )
+    if report.get("integrity") != "PASS":
+        _error(
+            errors,
+            "GP_CT_AUDIT_INTEGRITY",
+            f"{p}.integrity",
+            f"embedded ZPA report integrity is {report.get('integrity')!r}, not PASS",
+        )
+
+    actual = report.get("source_attestation")
+    if not isinstance(actual, dict):
+        _error(
+            errors,
+            "GP_CT_SOURCE_ATTESTATION",
+            f"{p}.path",
+            "validated ZPA report has no source_attestation block",
+        )
+        return report, declared
+
+    for key in ("algorithm", "state", "metadata_semantics_sha256", "axes"):
+        if actual.get(key) != declared.get(key):
+            _error(
+                errors,
+                "GP_CT_SOURCE_ATTESTATION_MISMATCH",
+                f"{p}.source_attestation.{key}",
+                "manifest declaration does not match the validated ZPA report",
+            )
+
+    return report, actual
+
+
 def _verify_ink_evidence(
     *,
     validation_id: str,
