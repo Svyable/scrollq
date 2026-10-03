@@ -93,7 +93,8 @@ def test_multiscale_is_deterministic_and_records_winning_scale():
 
     np.testing.assert_array_equal(a[0], b[0])
     np.testing.assert_array_equal(a[1], b[1])
-    assert set(np.unique(a[1])).issubset({0.8, 1.2, 1.8})
+    observed = np.unique(a[1]).astype(float)
+    assert all(any(np.isclose(v, s) for s in (0.8, 1.2, 1.8)) for v in observed)
     assert a[3]["method"] == sheetness.METHOD
 
 
