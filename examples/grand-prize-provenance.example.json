@@ -1,5 +1,5 @@
 {
-  "schema_version": 5,
+  "schema_version": 6,
   "rules": {
     "url": "https://scrollprize.org/prizes",
     "as_of": "2026-09-30"
@@ -191,6 +191,16 @@
       "generated_by": {
         "command": "python -m pipeline.render --column 1",
         "code_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "scale_proof": {
+        "tool": "scroliq-submission-image",
+        "path": "evidence/column_01.scale.json",
+        "sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+        "base_voxel_size_um": 9.362,
+        "group_idx": 0,
+        "render_scale": 1,
+        "micrometers_per_output_pixel": 9.362,
+        "scale_bar_pixels": 1068
       }
     }
   ],
@@ -200,7 +210,12 @@
     "render_ids": [
       "render:column-01"
     ],
-    "column_numbers_overlaid": true
+    "column_numbers_overlaid": true,
+    "proof": {
+      "tool": "scroliq-submission-image",
+      "path": "evidence/banner.json",
+      "sha256": "8888888888888888888888888888888888888888888888888888888888888888"
+    }
   },
   "held_out_validations": [
     {
