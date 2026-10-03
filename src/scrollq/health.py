@@ -5,7 +5,8 @@ Combines the two halves of the suite:
 - **integrity** (zarr-pyramid-audit): header-only pyramid audit —
   missing levels, chunkless levels, metadata drift. "Don't train on lies."
 - **quality** (scrollq): sampled voxel decode scored 0-100 —
-  signal, texture, dynamic range, dead slices. "Train on the best first."
+  signal, texture, dynamic range, dead slices. Scan-health triage only:
+  "measure the bottleneck before you train."
 
 One command answers: should anyone train on this volume?
 """

@@ -1,0 +1,224 @@
+{
+  "configuration": {
+    "bbox_tolerance": 0.01,
+    "block_rows": 256,
+    "margin_voxels": 0.0,
+    "max_support_samples": 1024,
+    "minimum_support_fraction": 0.95,
+    "scale_tolerance": 2.0,
+    "support_sampling": "evenly ranked valid vertices; nearest CT voxel",
+    "support_threshold": 0.0
+  },
+  "gates": [
+    {
+      "message": "required TIFXYZ files are present",
+      "name": "tifxyz_required_files",
+      "observed": {
+        "missing": []
+      },
+      "passed": true,
+      "required": true,
+      "threshold": {
+        "missing": []
+      }
+    },
+    {
+      "message": "metadata is valid",
+      "name": "tifxyz_metadata",
+      "observed": {
+        "scale_xy": [
+          0.05,
+          0.05
+        ]
+      },
+      "passed": true,
+      "required": true,
+      "threshold": null
+    },
+    {
+      "message": "coordinate arrays match",
+      "name": "tifxyz_coordinate_shapes",
+      "observed": {
+        "x": [
+          179,
+          111
+        ],
+        "y": [
+          179,
+          111
+        ],
+        "z": [
+          179,
+          111
+        ]
+      },
+      "passed": true,
+      "required": true,
+      "threshold": "matching 2D arrays"
+    },
+    {
+      "message": "surface has valid vertices",
+      "name": "valid_surface_vertices",
+      "observed": 14600,
+      "passed": true,
+      "required": true,
+      "threshold": "> 0"
+    },
+    {
+      "message": "surface has connected quads",
+      "name": "valid_surface_quads",
+      "observed": 14081,
+      "passed": true,
+      "required": true,
+      "threshold": "> 0"
+    },
+    {
+      "message": "selected coordinates are finite",
+      "name": "finite_selected_coordinates",
+      "observed": 0,
+      "passed": true,
+      "required": true,
+      "threshold": 0
+    },
+    {
+      "message": "metadata scale agrees with the emitted grid spacing",
+      "name": "tifxyz_scale_consistency",
+      "observed": {
+        "columns": {
+          "expected_spacing_voxels": 20.0,
+          "implied_scale": 0.05005602361508416,
+          "median_spacing_bounds_voxels": [
+            19.869724993175744,
+            20.086092112395058
+          ],
+          "median_spacing_voxels": 19.977615635027277,
+          "pair_count": 14321,
+          "ratio": 0.9988807817513639,
+          "ratio_range": [
+            0.9934862496587873,
+            1.0043046056197529
+          ]
+        },
+        "rows": {
+          "expected_spacing_voxels": 20.0,
+          "implied_scale": 0.05005602361508416,
+          "median_spacing_bounds_voxels": [
+            19.869724993175744,
+            20.086092112395058
+          ],
+          "median_spacing_voxels": 19.977615635027277,
+          "pair_count": 14376,
+          "ratio": 0.9988807817513639,
+          "ratio_range": [
+            0.9934862496587873,
+            1.0043046056197529
+          ]
+        }
+      },
+      "passed": true,
+      "required": true,
+      "threshold": {
+        "ratio_within": [
+          0.5,
+          2.0
+        ]
+      }
+    },
+    {
+      "message": "metadata bbox covers the valid vertices",
+      "name": "tifxyz_bbox_consistency",
+      "observed": {
+        "bbox": [
+          [
+            4430.794921875,
+            2673.358642578125,
+            21530.642578125
+          ],
+          [
+            5574.6796875,
+            4620.16650390625,
+            24960.978515625
+          ]
+        ],
+        "coordinate_bounds_xyz": {
+          "x": [
+            4430.794921875,
+            5574.6796875
+          ],
+          "y": [
+            2673.358642578125,
+            4620.16650390625
+          ],
+          "z": [
+            21530.642578125,
+            24960.978515625
+          ]
+        },
+        "max_excess_voxels": 0.0
+      },
+      "passed": true,
+      "required": true,
+      "threshold": {
+        "bbox_tolerance_voxels": 0.01
+      }
+    }
+  ],
+  "schema_version": 2,
+  "status": "PASS",
+  "summary": {
+    "passed_required_gates": 8,
+    "required_gate_count": 8
+  },
+  "surface": {
+    "coordinate_bounds_xyz": {
+      "x": [
+        4430.794921875,
+        5574.6796875
+      ],
+      "y": [
+        2673.358642578125,
+        4620.16650390625
+      ],
+      "z": [
+        21530.642578125,
+        24960.978515625
+      ]
+    },
+    "grid_spacing_voxels": {
+      "columns": {
+        "median_spacing_bounds_voxels": [
+          19.869724993175744,
+          20.086092112395058
+        ],
+        "median_spacing_voxels": 19.977615635027277,
+        "pair_count": 14321,
+        "zero_length_pair_count": 0
+      },
+      "rows": {
+        "median_spacing_bounds_voxels": [
+          19.869724993175744,
+          20.086092112395058
+        ],
+        "median_spacing_voxels": 19.977615635027277,
+        "pair_count": 14376,
+        "zero_length_pair_count": 0
+      }
+    },
+    "meta_sha256": "417289fa897a60c50554d37f72e7e5bb1eff557b22f14714d83b3f579b6da2fd",
+    "out_of_bounds_count": null,
+    "path": "out/s3/PHerc1447/segments/20250502184201-auto_grown_20250502163549332/mesh/20250502184201-on-20250521151220-8.64um.tifxyz",
+    "scale_xy": [
+      0.05,
+      0.05
+    ],
+    "selected_nonfinite_count": 0,
+    "stored_shape_yx": [
+      179,
+      111
+    ],
+    "uuid": "output_tifxyz",
+    "valid_quad_count": 14081,
+    "valid_vertex_count": 14600
+  },
+  "volume": null
+}

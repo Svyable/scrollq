@@ -439,7 +439,7 @@ The `spread` parameter controls the per-dimension shard-candidate count (`spread
 ScrolIQ is the prioritization half of a two-part data-quality suite:
 
 - **[zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit)** — integrity: *don’t train on lies*
-- **ScrolIQ** — quality prioritization: *train on the best first*
+- **ScrolIQ** — scan-health triage: *measure the bottleneck before you train* (rank bands, not a best-first order; see stability above)
 
 `scrollq-health` combines both into one volume-level report:
 

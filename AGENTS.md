@@ -114,10 +114,16 @@ console script. A new entry point must therefore be declared in
    shard index — that is legitimate, not a defect. Never report them as empty.
 4. **Scores are sample-dependent by design.** Resampling stability is the
    quality gate: Spearman ρ ≥ 0.85, mean |Δ| small, top-10 overlap high.
-   Current published measurement 2026-09-30 (`artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json`,
-   `bin/stability.py`, 24 samples, 5×5×5 grid, rotate=0 vs 13 = disjoint *candidate order*):
-   ρ = 0.7944, mean |Δ| = 4.195, overlap 7/10 — **below the gate**, and an
-   upper bound (only 2/64 volumes read disjoint chunks). The earlier n=4 run
+   Current measurements (October): truly-disjoint resample (64/64 zero chunk
+   overlap, `artifacts/2026-10-01-truly-disjoint/`) ρ = 0.63, mean |Δ| = 7.95,
+   top-10 overlap 4/10; pre-registered stability v2
+   (`artifacts/2026-10-stability-v2/`, 48 eligible volumes) ρ = 0.750 →
+   `decide()` **FAIL**, so the leaderboard shows rank bands, not ranks.
+   The September submission's 2026-09-30 figure
+   (`artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json`,
+   rotate=0 vs 13 = disjoint *candidate order*: ρ = 0.7944, mean |Δ| = 4.195,
+   overlap 7/10) is inflated by chunk re-reading (only 2/64 volumes read
+   disjoint chunks); cite it only as the frozen September number. The earlier n=4 run
    gave ρ = 0.76, mean |Δ| = 7.4, overlap 6/10. Present rankings as bands,
    not precise orders. (A rotate=1 resample gives ρ = 0.99 — it re-uses 3 of 4 shards,
    so it measures the resample, not the score. Don't cite it.)
