@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "status": "preflight_blocked_pending_outward_sense_confirmation_and_data_download",
+  "as_of": "2026-10-03",
+  "scroll": "PHerc0826",
+  "prize_volume_id": "20250821151701",
+  "software": {
+    "villa_commit": "5a4388f08cc547e6a1a037f949173e731a3e7aa2",
+    "dataset_assembler_commit": "96d4f61da958ca79a7be970c5cd1a726964dfc69"
+  },
+  "scroll_spec_expected": {
+    "schema_version": 1,
+    "name": "PHerc0826",
+    "voxel_size_um": 9.362,
+    "spiral_outward_sense_candidate": "CW",
+    "spiral_outward_sense_status": "candidate_from_published_PHerc0826_assembler_example; independently confirm in VC3D/catalog before execution",
+    "normal_zarr_group": "2",
+    "lasagna_scale": 4
+  },
+  "dataset_assembly": {
+    "command_template": "python make_eligible_spiral_dataset.py --scroll PHerc0826 --outward-sense CW --out ds0826 --fetch",
+    "precondition": "Do not run until outward sense is independently confirmed.",
+    "notes": [
+      "Assembler writes spiral-scroll.json, published umbilicus and track provenance and repairs the published crossings-cache DBM mtime signature.",
+      "Assembler does not download/assemble lasagna_inputs; do that separately."
+    ]
+  },
+  "lasagna_preflight": {
+    "normal_zarr_group": "2",
+    "lasagna_scale": 4,
+    "evidence": "Pinned villa README gives PHerc0826 specifically as the example where group 2 is a 4x downsample.",
+    "resident_pool_command_template": "python pack_resident_pools.py ds0826/lasagna_inputs --what normals,grad_mag --normal-group 2"
+  },
+  "bounded_reproduction": {
+    "z_range_half_open": [11000, 12000],
+    "optimizer_num_training_steps": 30000,
+    "optimizer_random_seed": 1,
+    "config_overrides": {
+      "z_begin": 11000,
+      "z_end": 12000,
+      "optimizer_num_training_steps": 30000,
+      "optimizer_random_seed": 1,
+      "input_use_tracks": true,
+      "input_disable_patches": true,
+      "loss_weight_shell_outer": 0,
+      "loss_weight_shell_patch_radius": 0,
+      "dense_spacing_mode": "grad_mag",
+      "loss_weight_dense_spacing": 0
+    },
+    "shell_template": "FIT_SPIRAL_CONFIG_OVERRIDES='{"z_begin":11000,"z_end":12000,"optimizer_num_training_steps":30000,"optimizer_random_seed":1,"input_use_tracks":true,"input_disable_patches":true,"loss_weight_shell_outer":0,"loss_weight_shell_patch_radius":0,"dense_spacing_mode":"grad_mag","loss_weight_dense_spacing":0}' python fit_spiral.py --dataset ds0826",
+    "expected_reference_context": {
+      "documented_gpu": "RTX 3090",
+      "documented_tracks_loaded_with_input_use_tracks_true": 480117,
+      "comparison_only_not_correctness_metrics": {
+        "dr_per_winding_voxels": 14.8851,
+        "satisfied_tracks_percent": 12.6,
+        "satisfied_track_points_percent": 41.6
+      }
+    }
+  },
+  "export": {
+    "command_template": "python flatten_spiral_checkpoint.py /path/to/checkpoint_fitted.ckpt /path/to/output.tifxyz",
+    "must_bind_output_to_checkpoint_sha256": true
+  },
+  "promotion_policy": {
+    "reference_metrics_are_reproduction_sanity_checks_not_quality_targets": true,
+    "ink_may_select_geometry": false,
+    "published_tracks_replaced_before_baseline": false,
+    "failure_or_missing_surface_stays_in_denominator": true
+  }
+}
