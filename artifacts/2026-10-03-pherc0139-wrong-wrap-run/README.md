@@ -71,6 +71,32 @@ The workflow commits:
 - `inputs.sha256` — byte hashes of the frozen spec/reference inputs;
 - `environment.txt` — Python/package environment.
 
+## Observed result
+
+The frozen campaign completed without changing its rule:
+
+- **32 / 32** groups produced an independent-geometry control;
+- **0** prediction chunks and **0** CT chunks were missing;
+- both normal directions contained at least one qualifying candidate in
+  **32 / 32** groups;
+- selected direction: 18 negative-normal, 14 positive-normal;
+- selected absolute normal distance: 13–29 voxels, median 18 voxels,
+  p95 28.45 voxels;
+- selected prediction-run length: 2–5 voxels, median 3 voxels;
+- `sheetness_response_consulted` is `false`.
+
+Frozen identities retained by the result:
+
+- wrong-wrap spec file SHA-256:
+  `4e7cefffb59665c7b9551daf615ac5d68c26295f42ac0524ad1b865b0593db06`;
+- wrong-wrap spec canonical SHA-256:
+  `dc82520b8081acd4c5ea3361648d684824d1a2e97052e7a457fe3d668fa157ef`;
+- reference-plan SHA-256:
+  `8cc043205a72b9e8a285ed81ac46b09f6d2808e1483634b9030cb9dcfc12309d`.
+
+These summaries were computed **after** the create-only result was committed.
+They are descriptive and were not acceptance criteria.
+
 ## Claim boundary
 
 A found control is a CT-supported location nominated by an independently
