@@ -8,7 +8,7 @@ from scrollq.provenance import validate_manifest
 
 def _manifest():
     return {
-        "schema_version": 4,
+        "schema_version": 5,
         "rules": {
             "url": "https://scrollprize.org/prizes",
             "as_of": "2026-09-30",
@@ -33,11 +33,16 @@ def _manifest():
             "uri": "s3://vesuvius/PHerc0813/volumes/20250821151723.zarr",
             "zarr_audit": {
                 "tool": "zarr-pyramid-audit",
-                "manifest_sha256": "c" * 64,
-                "root": (
-                    "s3://vesuvius/PHerc0813/volumes/"
-                    "20250821151723.zarr"
-                ),
+                "path": "zpa-report.json",
+                "sha256": "c" * 64,
+                "root": "PHerc0813/volumes/20250821151723.zarr",
+                "integrity": "PASS",
+                "source_attestation": {
+                    "algorithm": "zpa-metadata-semantics-v1",
+                    "state": "PRESENT",
+                    "metadata_semantics_sha256": "5" * 64,
+                    "axes": ["z", "y", "x"],
+                },
             },
         },
         "region_sets": [
@@ -99,6 +104,17 @@ def _manifest():
                 "sha256": "d" * 64,
                 "checkpoint_license": "MIT",
                 "training_dataset_ids": ["dataset:ink-v1"],
+                "input_contract": {
+                    "axes": ["z", "y", "x"],
+                    "source_voxel_size_um": 9.362,
+                    "model_voxel_size_um": 9.362,
+                    "resampling": "none",
+                    "window_voxels_zyx": [17, 64, 64],
+                    "preprocessing_profile": {
+                        "public_url": "https://example.org/models/ink-v1/preprocessing.json",
+                        "sha256": "6" * 64,
+                    },
+                },
                 "stochastic": {
                     "training": True,
                     "inference": True,
@@ -268,6 +284,70 @@ def _ink_report(manifest):
         "prize_evidence_ready": True,
         "readiness_reasons": [],
     }
+
+
+def _zpa_report(manifest):
+    audit = manifest["ct_volume"]["zarr_audit"]
+    attestation = audit["source_attestation"]
+    return {
+        "schema_version": "1.3.0",
+        "tool": "zarr-pyramid-audit",
+        "tool_version": "0.4.0",
+        "root": audit["root"],
+        "kind": "pyramid",
+        "zarr_format": 3,
+        "evidence": {"state": "PRESENT", "reason": None},
+        "source_attestation": {
+            "algorithm": attestation["algorithm"],
+            "state": attestation["state"],
+            "metadata_semantics_sha256": attestation[
+                "metadata_semantics_sha256"
+            ],
+            "axes": list(attestation["axes"]),
+            "base_declared_scale": [9.362, 9.362, 9.362],
+            "absolute_scale_state": "unspecified",
+            "spatial_axes": [
+                {"index": 0, "name": "z", "unit": "micrometer"},
+                {"index": 1, "name": "y", "unit": "micrometer"},
+                {"index": 2, "name": "x", "unit": "micrometer"},
+            ],
+        },
+        "integrity": "PASS",
+        "max_severity": "none",
+        "coverage": {
+            "levels_declared": 1,
+            "levels_present": 1,
+            "levels_unknown": 0,
+            "chunk_presence": {"PRESENT": 1, "ABSENT": 0, "UNKNOWN": 0},
+        },
+        "levels": [
+            {
+                "path": "0",
+                "index": 0,
+                "present": True,
+                "evidence_state": "PRESENT",
+                "evidence_reason": None,
+                "shape": [10, 10, 10],
+                "chunks": [5, 5, 5],
+                "dtype": "uint16",
+                "declared_scale": [9.362, 9.362, 9.362],
+                "zarr_format": 3,
+                "has_chunks": True,
+                "chunk_evidence_state": "PRESENT",
+                "chunk_evidence_reason": None,
+            }
+        ],
+        "findings": [],
+    }
+
+
+def _write_zpa_report(tmp_path, manifest):
+    payload = json.dumps(_zpa_report(manifest), sort_keys=True).encode("utf-8")
+    (tmp_path / "zpa-report.json").write_bytes(payload)
+    manifest["ct_volume"]["zarr_audit"]["sha256"] = hashlib.sha256(
+        payload
+    ).hexdigest()
+    return payload
 
 
 def test_valid_manifest_builds_a_complete_render_chain():
