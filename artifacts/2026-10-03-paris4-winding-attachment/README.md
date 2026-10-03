@@ -63,13 +63,27 @@ distance limit rather than branch-cut effects. The 8-voxel threshold sits below 
 windings are reached. A threshold between 4 and 8 voxels would be cleaner. Any future run must pre-register it
 as a new arm, not swap it in here.
 
+## Post-hoc reading of the review queue (descriptive, not part of the decision)
+
+`review-context.json` comes from `bin/winding_attach_review.py`, run by the workflow on the same input hashes. It lists every attachment of each of the 5 flagged points; the 6 flagged constraints include two patches for one point.
+
+| point | attachments | agreeing (r = 0) | flagged | reading |
+|---|---:|---:|---:|---|
+| relative:166/2024 | 11 | 9 | 2 | closer patches agree: the two flagged patches (7.8–7.9 voxels away) are likely on a neighbouring winding |
+| relative:227/2445 | 5 | 4 | 1 | patch-level conflict: one patch at similar distance disagrees by 5 windings |
+| relative:242/2549 | 2 | 1 | 1 | patch-level conflict: two patches about 1 voxel away disagree with each other |
+| relative:198/2233 | 9 | 0 | 1 | no attachment agrees exactly (the others are at \|r\| = 1): review the annotation |
+| relative:280/2860 | 1 | 0 | 1 | single attachment: review the annotation and the patch |
+
+So 3 of the 5 points look like patch-side issues: a neighbouring-winding attachment or two disagreeing patches. Only 2 point at the annotation itself. These readings come from a rule written after the result, and only a person in VC3D can confirm them.
+
 ## Files
 
 - `result.json`: decision, summary, control, sense and cut table, distance arms, review queue, input counts and hashes, and constants.
 - `attachments.json`: every attachment within 12 voxels (point, patch piece, distance, unwrapped angle), enough to recompute any arm offline.
 - `review-queue.csv`: the six flagged attachments with VC3D XYZ.
 - `run.log`: the workflow output.
-- `review-context.json` (post-hoc, descriptive, `bin/winding_attach_review.py`): for each flagged point, all its attachments and their residuals. It is added by the workflow after this run and is not part of the decision.
+- `review-context.json` (post-hoc, descriptive, `bin/winding_attach_review.py`): for each flagged point, all its attachments and their residuals. It was added by the workflow after this run and is not part of the decision.
 
 ## Scope
 
