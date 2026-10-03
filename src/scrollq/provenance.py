@@ -1410,6 +1410,14 @@ def validate_manifest(
                     f"unknown dataset {dataset_id!r}",
                 )
 
+        _validate_model_input_contract(
+            model_id=model_id,
+            model=model,
+            target=target,
+            source_attestation=source_attestation,
+            errors=errors,
+        )
+
         stochastic = model.get("stochastic")
         if not isinstance(stochastic, dict):
             stochastic = {}
@@ -1887,6 +1895,16 @@ def validate_manifest(
                     if isinstance(model_id, str)
                     else None
                 ),
+                "input_contract": (
+                    models.get(model_id, {}).get("input_contract")
+                    if isinstance(model_id, str)
+                    else None
+                ),
+                "source_metadata_semantics_sha256": (
+                    source_attestation.get("metadata_semantics_sha256")
+                    if isinstance(source_attestation, dict)
+                    else None
+                ),
                 "region_exclusion": proof,
             }
         )
@@ -1951,6 +1969,13 @@ def validate_manifest(
         "warnings": warnings,
         "render_chains": chains,
         "held_out_validation_proofs": held_out_proofs,
+        "zarr_audit_proof": {
+            "root": zpa_report.get("root") if isinstance(zpa_report, dict) else None,
+            "integrity": (
+                zpa_report.get("integrity") if isinstance(zpa_report, dict) else None
+            ),
+            "source_attestation": source_attestation,
+        },
         "recto_coverage_proof": recto_coverage_proof,
     }
 
