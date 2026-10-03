@@ -27,6 +27,8 @@ def _villa(tmp_path):
         "import os, pathlib, sys\n"
         "run=pathlib.Path(os.environ['FIT_SPIRAL_RUN_DIR'])\n"
         "print('fake official fitter')\n"
+        "print('loaded 480117 tracks within z-roi [11000, 12000)')\n"
+        "print('fitting 0 patches')\n"
         "print(os.environ['FIT_SPIRAL_CONFIG_OVERRIDES'], file=sys.stderr)\n"
         "(run/'checkpoint_fitted.ckpt').write_bytes(b'checkpoint')\n"
         "(run/'satisfaction_metrics_fitted.json').write_text('{}')\n"
@@ -94,6 +96,9 @@ def _dataset(tmp_path, villa_commit):
             "z_range_half_open": [11000, 12000],
             "optimizer_num_training_steps": 30000,
             "optimizer_random_seed": 1,
+            "expected_reference_context": {
+                "documented_tracks_loaded_with_input_use_tracks_true": 480117,
+            },
             "config_overrides": {
                 "z_begin": 11000,
                 "z_end": 12000,
@@ -144,6 +149,10 @@ def test_runner_executes_and_receipts_outputs(tmp_path):
     assert receipt["return_code"] == 0
     assert receipt["villa"]["commit"] == commit
     assert receipt["checkpoint"]["present"] is True
+    assert receipt["supervision"]["ok"] is True
+    assert receipt["supervision"]["tracks"]["unique_counts"] == [480117]
+    assert receipt["supervision"]["tracks"]["reference_count_match"] is True
+    assert receipt["supervision"]["patches"]["unique_counts"] == [0]
     assert json.loads((run_dir / "spiral-run.receipt.json").read_text())["success"] is True
     assert {"checkpoint_fitted.ckpt", "satisfaction_metrics_fitted.json"} <= {
         row["path"] for row in receipt["outputs"]
@@ -164,6 +173,89 @@ def test_zero_exit_without_checkpoint_is_failure(tmp_path):
     assert receipt["return_code"] == 0
     assert receipt["success"] is False
     assert receipt["checkpoint"]["present"] is False
+
+
+def test_missing_frozen_track_reference_is_failure(tmp_path):
+    villa, commit = _villa(tmp_path)
+    dataset, recipe = _dataset(tmp_path, commit)
+    document = json.loads(recipe.read_text())
+    document["bounded_reproduction"].pop("expected_reference_context")
+    recipe.write_text(json.dumps(document))
+
+    receipt = run_baseline(
+        dataset=dataset, recipe_path=recipe, villa_root=villa,
+        run_dir=tmp_path / "run", python_executable=sys.executable
+    )
+
+    assert receipt["return_code"] == 0
+    assert receipt["checkpoint"]["present"] is True
+    assert receipt["success"] is False
+    assert receipt["supervision"]["tracks"]["reference_count"] is None
+    assert receipt["supervision"]["tracks"]["reference_count_match"] is False
+    assert any(
+        row["name"] == "tracks_reference_count_declared" and row["ok"] is False
+        for row in receipt["supervision"]["checks"]
+    )
+
+
+def test_checkpoint_with_zero_track_supervision_is_failure(tmp_path):
+    villa, _ = _villa(tmp_path)
+    (villa / "spiral-fitting" / "fit_spiral.py").write_text(
+        "import os, pathlib\n"
+        "run=pathlib.Path(os.environ['FIT_SPIRAL_RUN_DIR'])\n"
+        "print('loaded 0 tracks within z-roi [11000, 12000)')\n"
+        "print('fitting 0 patches')\n"
+        "(run/'checkpoint_fitted.ckpt').write_bytes(b'checkpoint')\n"
+    )
+    _git(villa, "add", ".")
+    _git(villa, "commit", "-m", "zero track supervision")
+    commit = _git(villa, "rev-parse", "HEAD")
+    dataset, recipe = _dataset(tmp_path, commit)
+
+    receipt = run_baseline(
+        dataset=dataset, recipe_path=recipe, villa_root=villa,
+        run_dir=tmp_path / "run", python_executable=sys.executable
+    )
+
+    assert receipt["return_code"] == 0
+    assert receipt["checkpoint"]["present"] is True
+    assert receipt["success"] is False
+    assert receipt["supervision"]["ok"] is False
+    assert receipt["supervision"]["tracks"]["unique_counts"] == [0]
+    assert any(
+        row["name"] == "tracks_positive" and row["ok"] is False
+        for row in receipt["supervision"]["checks"]
+    )
+
+
+def test_checkpoint_with_unexpected_patch_supervision_is_failure(tmp_path):
+    villa, _ = _villa(tmp_path)
+    (villa / "spiral-fitting" / "fit_spiral.py").write_text(
+        "import os, pathlib\n"
+        "run=pathlib.Path(os.environ['FIT_SPIRAL_RUN_DIR'])\n"
+        "print('loaded 480117 tracks within z-roi [11000, 12000)')\n"
+        "print('fitting 1 patches')\n"
+        "(run/'checkpoint_fitted.ckpt').write_bytes(b'checkpoint')\n"
+    )
+    _git(villa, "add", ".")
+    _git(villa, "commit", "-m", "unexpected patch supervision")
+    commit = _git(villa, "rev-parse", "HEAD")
+    dataset, recipe = _dataset(tmp_path, commit)
+
+    receipt = run_baseline(
+        dataset=dataset, recipe_path=recipe, villa_root=villa,
+        run_dir=tmp_path / "run", python_executable=sys.executable
+    )
+
+    assert receipt["return_code"] == 0
+    assert receipt["checkpoint"]["present"] is True
+    assert receipt["success"] is False
+    assert receipt["supervision"]["tracks"]["reference_count_match"] is True
+    assert receipt["supervision"]["patches"]["unique_counts"] == [1]
+    assert any(
+        row["name"] == "patches_disabled_effective" and row["ok"] is False
+        for row in receipt["supervision"]["checks"]
+    )
 
 
 def test_preflight_failure_prevents_run_directory_creation(tmp_path):
