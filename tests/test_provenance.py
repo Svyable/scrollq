@@ -2,13 +2,15 @@ import copy
 import hashlib
 import json
 
+from PIL import Image
+
 from scrollq.package_hash import sha256_path
 from scrollq.provenance import validate_manifest
 
 
 def _manifest():
     return {
-        "schema_version": 6,
+        "schema_version": 7,
         "rules": {
             "url": "https://scrollprize.org/prizes",
             "as_of": "2026-09-30",
@@ -160,6 +162,11 @@ def _manifest():
                 "prediction_region_set_id": "regions:column-01",
                 "column": 1,
                 "scale_bar_cm": 1,
+                "vc3d_receipt": {
+                    "tool": "scroliq-vc3d",
+                    "path": "evidence/column_01.vc3d.json",
+                    "sha256": "9" * 64,
+                },
                 "scale_proof": {
                     "tool": "scroliq-submission-image",
                     "path": "column_01.scale.json",
@@ -359,14 +366,21 @@ def _zpa_report(manifest):
 def _write_submission_image_proofs(tmp_path, manifest):
     render = manifest["renders"][0]
     scale = render["scale_proof"]
+    receipt_decl = render["vc3d_receipt"]
+    raw_dir = tmp_path / "raw" / "column_01"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    raw_path = raw_dir / "00.tif"
+    Image.new("L", (1200, 100), 73).save(raw_path)
+    raw_sha = hashlib.sha256(raw_path.read_bytes()).hexdigest()
+
     scale_payload = {
         "schema_version": 1,
         "tool": "scroliq-submission-image",
         "operation": "column",
         "column": render["column"],
         "input": {
-            "path": "column_01.raw.tif",
-            "sha256": "0" * 64,
+            "path": "00.tif",
+            "sha256": raw_sha,
             "size_xy": [1200, 100],
         },
         "output": {
@@ -400,6 +414,97 @@ def _write_submission_image_proofs(tmp_path, manifest):
     (tmp_path / scale["path"]).write_bytes(scale_bytes)
     scale["sha256"] = hashlib.sha256(scale_bytes).hexdigest()
 
+    mesh_dir = tmp_path / manifest["meshes"][0]["path"]
+    meta_raw = (mesh_dir / "meta.json").read_bytes()
+    meta = json.loads(meta_raw)
+    log_path = tmp_path / "evidence" / "column_01.vc3d.log"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    log_path.write_text(
+        "Rendering: column_01.tifxyz from eligible CT\n",
+        encoding="utf-8",
+    )
+    log_raw = log_path.read_bytes()
+    volume_uri = manifest["ct_volume"]["uri"]
+    receipt_payload = {
+        "schema_version": 1,
+        "tool": "scroliq-vc3d",
+        "operation": "render-column",
+        "column": render["column"],
+        "vc3d": {
+            "repository": "https://github.com/ScrollPrize/villa",
+            "commit": "1" * 40,
+            "binary": {
+                "name": "vc_render_tifxyz",
+                "size": 123456,
+                "sha256": "a" * 64,
+                "help_sha256": "b" * 64,
+                "help_headline": (
+                    "vc_render_tifxyz: Render volume data using segmentation surfaces"
+                ),
+            },
+        },
+        "inputs": {
+            "volume": {
+                "path": volume_uri,
+                "volume_id": manifest["submission"]["eligible_volume_id"],
+                "base_voxel_size_um": scale["base_voxel_size_um"],
+            },
+            "mesh": {
+                "path": manifest["meshes"][0]["path"],
+                "sha256": manifest["meshes"][0]["sha256"],
+                "meta_sha256": hashlib.sha256(meta_raw).hexdigest(),
+                "target_volume": meta["target_volume"],
+                "scale": meta["scale"],
+            },
+        },
+        "render": {
+            "group_idx": scale["group_idx"],
+            "scale": scale["render_scale"],
+            "num_slices": 1,
+            "tif_output_dir": "raw/column_01",
+            "argv": [
+                "vc_render_tifxyz",
+                "--volume",
+                volume_uri,
+                "--segmentation",
+                manifest["meshes"][0]["path"],
+                "--scale",
+                str(scale["render_scale"]),
+                "--group-idx",
+                str(scale["group_idx"]),
+                "--num-slices",
+                "1",
+                "--tif-output",
+                "raw/column_01",
+                "--voxel-size",
+                str(scale["base_voxel_size_um"]),
+                "--voxel-unit",
+                "micrometer",
+            ],
+            "extra_args": [],
+            "exit_code": 0,
+        },
+        "output": {
+            "path": "raw/column_01/00.tif",
+            "size": raw_path.stat().st_size,
+            "sha256": raw_sha,
+            "width": 1200,
+            "height": 100,
+            "mode": "L",
+        },
+        "log": {
+            "path": "evidence/column_01.vc3d.log",
+            "size": len(log_raw),
+            "sha256": hashlib.sha256(log_raw).hexdigest(),
+        },
+        "receipt_path": receipt_decl["path"],
+    }
+    receipt_path = tmp_path / receipt_decl["path"]
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_bytes = json.dumps(receipt_payload, sort_keys=True).encode("utf-8")
+    receipt_path.write_bytes(receipt_bytes)
+    receipt_decl["sha256"] = hashlib.sha256(receipt_bytes).hexdigest()
+
     banner = manifest["banner"]
     banner_payload = {
         "schema_version": 1,
@@ -428,7 +533,6 @@ def _write_submission_image_proofs(tmp_path, manifest):
     banner_bytes = json.dumps(banner_payload, sort_keys=True).encode("utf-8")
     (tmp_path / banner["proof"]["path"]).write_bytes(banner_bytes)
     banner["proof"]["sha256"] = hashlib.sha256(banner_bytes).hexdigest()
-
 
 def _write_zpa_report(tmp_path, manifest):
     payload = json.dumps(_zpa_report(manifest), sort_keys=True).encode("utf-8")
@@ -487,6 +591,18 @@ def test_valid_manifest_builds_a_complete_render_chain():
     assert report["held_out_validation_proofs"][0]["overlaps"] == []
     assert report["recto_coverage_proof"]["status"] == "pass"
     assert report["recto_coverage_proof"]["mesh_ids"] == ["mesh:column-01"]
+    assert report["vc3d_render_proofs"][0]["path"] == (
+        "evidence/column_01.vc3d.json"
+    )
+
+
+def test_vc3d_receipt_is_required_for_every_render():
+    manifest = _manifest()
+    del manifest["renders"][0]["vc3d_receipt"]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_VC3D_RECEIPT" in _codes(report)
 
 
 def test_scale_proof_must_match_eligible_voxel_and_true_bar_length():
@@ -705,6 +821,11 @@ def test_local_submission_image_proofs_bind_exact_render_and_banner(tmp_path):
 
     assert report["eligible"] is True
     assert report["scale_proofs"][0]["artifact_checked"] is True
+    assert report["vc3d_render_proofs"][0]["artifact_checked"] is True
+    assert report["vc3d_render_proofs"][0]["receipt_verified"] is True
+    assert report["vc3d_render_proofs"][0]["raw_render_sha256"] == (
+        report["scale_proofs"][0]["input_sha256"]
+    )
     assert report["banner_proof"]["artifact_checked"] is True
 
 
@@ -739,6 +860,74 @@ def test_local_scale_proof_rejects_render_substitution(tmp_path):
     report = validate_manifest(manifest, root_dir=tmp_path)
 
     assert "GP_SCALE_PROOF_MISMATCH" in _codes(report)
+
+
+def test_local_vc3d_receipt_rejects_raw_render_substitution(tmp_path):
+    manifest = _manifest()
+    payloads = {
+        "column_01.tif": b"render",
+        "banner.tif": b"banner",
+        "held_out_validation.json": (
+            json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
+        ),
+    }
+    for name, payload in payloads.items():
+        (tmp_path / name).write_bytes(payload)
+    _write_local_mesh(tmp_path, manifest)
+    manifest["renders"][0]["sha256"] = hashlib.sha256(b"render").hexdigest()
+    manifest["banner"]["sha256"] = hashlib.sha256(b"banner").hexdigest()
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        payloads["held_out_validation.json"]
+    ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
+
+    scale_path = tmp_path / manifest["renders"][0]["scale_proof"]["path"]
+    payload = json.loads(scale_path.read_text(encoding="utf-8"))
+    payload["input"]["sha256"] = "4" * 64
+    tampered = json.dumps(payload, sort_keys=True).encode("utf-8")
+    scale_path.write_bytes(tampered)
+    manifest["renders"][0]["scale_proof"]["sha256"] = hashlib.sha256(
+        tampered
+    ).hexdigest()
+
+    report = validate_manifest(manifest, root_dir=tmp_path)
+
+    assert "GP_VC3D_RECEIPT_MISMATCH" in _codes(report)
+
+
+def test_local_vc3d_receipt_rejects_scale_parameter_drift(tmp_path):
+    manifest = _manifest()
+    payloads = {
+        "column_01.tif": b"render",
+        "banner.tif": b"banner",
+        "held_out_validation.json": (
+            json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
+        ),
+    }
+    for name, payload in payloads.items():
+        (tmp_path / name).write_bytes(payload)
+    _write_local_mesh(tmp_path, manifest)
+    manifest["renders"][0]["sha256"] = hashlib.sha256(b"render").hexdigest()
+    manifest["banner"]["sha256"] = hashlib.sha256(b"banner").hexdigest()
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        payloads["held_out_validation.json"]
+    ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
+
+    receipt_decl = manifest["renders"][0]["vc3d_receipt"]
+    receipt_path = tmp_path / receipt_decl["path"]
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    receipt["render"]["scale"] = 2.0
+    scale_index = receipt["render"]["argv"].index("--scale") + 1
+    receipt["render"]["argv"][scale_index] = "2.0"
+    changed = json.dumps(receipt, sort_keys=True).encode("utf-8")
+    receipt_path.write_bytes(changed)
+    receipt_decl["sha256"] = hashlib.sha256(changed).hexdigest()
+
+    report = validate_manifest(manifest, root_dir=tmp_path)
+
+    assert "GP_VC3D_RECEIPT_MISMATCH" in _codes(report)
+    assert report["vc3d_render_proofs"][0]["receipt_verified"] is True
 
 
 def test_local_banner_proof_rejects_wrong_render_set(tmp_path):

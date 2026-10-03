@@ -1,6 +1,6 @@
 # Grand Prize provenance manifest
 
-`scroliq-provenance` validates one machine-readable provenance graph for a 2027 Grand Prize submission. Schema v6 (current) binds every final column image to a hash-pinned physical scale-bar proof and binds the full-scroll banner to the exact frozen render set. It retains v5's validated ZPA 1.3 source attestation and explicit model input contract; v4 added deterministic held-out ink evidence, v3 bound the recto-coverage ledger, and held-out validation introduced in v2 remains required. Manifests with an older `schema_version` are rejected. It is intentionally strict about facts that can be checked mechanically; it does **not** claim that text is legible, that the recto surface is complete, or that a reported metric is sufficient for the prize.
+`scroliq-provenance` validates one machine-readable provenance graph for a 2027 Grand Prize submission. Schema v7 (current) adds a required hash-pinned `scroliq-vc3d` execution receipt for every final column and binds that receipt to the exact eligible CT, complete TIFXYZ tree, raw VC3D TIFF, physical render parameters, scale-proof input, and final reviewer image. It retains v6's physical scale-bar and frozen-banner proofs, v5's validated ZPA 1.3 source attestation and explicit model input contract; v4 added deterministic held-out ink evidence, v3 bound the recto-coverage ledger, and held-out validation introduced in v2 remains required. Manifests with an older `schema_version` are rejected. It is intentionally strict about facts that can be checked mechanically; it does **not** claim that text is legible, that the recto surface is complete, or that a reported metric is sufficient for the prize.
 
 The graph ties each submitted render back through the exact eligible CT volume, a hash-pinned and schema-validated ZPA source attestation, declared full-recto coverage inventory, surface, numbered tifxyz mesh, the model's physical input/preprocessing contract, ink checkpoint, training datasets, training/prediction regions, stochastic seeds, and public experiment runs. Each trained model must also carry public held-out validation evidence: public input and known-ground-truth URLs, an explicit validation region, a public evaluation run, numeric metrics, a hashed results artifact, and a machine-checkable training/validation exclusion proof. The graph also pins the code commit, Docker image digest, Zarr audit manifest digest, package file digests, documented human-input hours, and the full-scroll banner.
 
@@ -26,7 +26,10 @@ Each render also gets a `render_chains` record in the validation report so a rev
 eligible CT
   -> surface
   -> column_NN.tifxyz
-  -> column_NN render
+  -> scroliq-vc3d execution receipt
+  -> raw VC3D 00.tif
+  -> scroliq-submission-image scale proof
+  -> final column_NN render
   -> checkpoint
   -> training datasets
   -> training-region exclusion proof
@@ -52,14 +55,34 @@ The current validator rejects a manifest when any of these conditions is not pro
 - surfaces, meshes, or renders break lineage to `ct:eligible`;
 - a mesh is not named `column_NN.tifxyz`, lacks the low-distortion-isometric flattening declaration, duplicates a column, or—when `--root-dir` is supplied—is not an unpacked TIFXYZ directory whose `meta.json` `target_volume` identifies the exact eligible CT;
 - a render does not match its mesh filename stem/column, lacks a 1 cm scale-bar declaration, lacks a hash-pinned `scroliq-submission-image` proof, uses the wrong eligible-volume voxel size, reports physical pixel spacing inconsistent with VC3D, or has the wrong computed 1 cm pixel length;
+- a render lacks a hash-pinned `scroliq-vc3d` receipt, the receipt fails its own artifact verification, names another eligible volume or mesh/hash, or its raw TIFF SHA / base voxel size / group index / render scale do not match the `scroliq-submission-image` proof;
 - training and prediction regions overlap on the same eligible volume;
 - the full-scroll banner does not enumerate all submitted renders with column numbers overlaid, or its hash-pinned banner proof does not bind the exact render filenames and SHA-256 digests;
 - `--root-dir` is supplied and any package file is missing, escapes the package root, or has the wrong SHA-256.
 
-## Reviewer-image proof binding (schema v6)
+## VC3D execution + reviewer-image proof binding (schema v7)
 
-Each render keeps the human-readable `scale_bar_cm: 1` declaration, but it now
-also carries a machine-checkable summary of the JSON sidecar emitted by
+Each render now carries two hash-pinned execution/proof records. The first is
+the receipt emitted by `scroliq-vc3d render`:
+
+```json
+{
+  "vc3d_receipt": {
+    "tool": "scroliq-vc3d",
+    "path": "evidence/column_01.vc3d.json",
+    "sha256": "<receipt sha256>"
+  }
+}
+```
+
+With `--root-dir`, the validator runs the receipt verifier against the local
+TIFXYZ tree, raw TIFF and renderer log. It then requires the receipt's eligible
+volume ID and base voxel size to match the prize target, the receipt mesh path
+and tree SHA-256 to match the submitted mesh, and the receipt's group index and
+render scale to match the physical scale proof.
+
+Each render also keeps the human-readable `scale_bar_cm: 1` declaration and
+the machine-checkable summary of the JSON sidecar emitted by
 `scroliq-submission-image column`:
 
 ```json
@@ -84,6 +107,12 @@ The validator recomputes the current VC3D relation
 opens the hash-pinned sidecar and verifies that its output filename/SHA bind
 the exact submitted render and that its column, physical inputs, pixel size,
 and bar geometry agree with the manifest.
+
+The two proof layers are cross-bound: the VC3D receipt's raw output SHA-256 must
+equal the submission-image sidecar's input SHA-256, the raw output basename must
+equal the sidecar input name, and base voxel size, group index and render scale
+must agree. This is the machine-checkable CT → TIFXYZ → VC3D raw TIFF → final
+reviewer-image handoff.
 
 The banner similarly carries:
 

@@ -26,8 +26,13 @@ from .submission_image import (
     TOOL as SUBMISSION_IMAGE_TOOL,
     vc_render_um_per_pixel,
 )
+from .vc3d_replay import (
+    VC3D_RECEIPT_SCHEMA_VERSION,
+    VC3D_RECEIPT_TOOL,
+    verify_receipt as verify_vc3d_receipt,
+)
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 RULES_URL = "https://scrollprize.org/prizes"
 CC_BY_NC_4 = {"CC-BY-NC-4.0", "CC BY-NC 4.0"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -529,6 +534,9 @@ def _check_render_scale_proof(
         "render_scale": None,
         "micrometers_per_output_pixel": None,
         "scale_bar_pixels": None,
+        "input_path": None,
+        "input_sha256": None,
+        "input_size_xy": None,
         "artifact_checked": False,
     }
     if not isinstance(proof, dict):
@@ -680,6 +688,11 @@ def _check_render_scale_proof(
     if artifact is None:
         return summary
     summary["artifact_checked"] = True
+    input_artifact = artifact.get("input")
+    if isinstance(input_artifact, dict):
+        summary["input_path"] = input_artifact.get("path")
+        summary["input_sha256"] = input_artifact.get("sha256")
+        summary["input_size_xy"] = input_artifact.get("size_xy")
 
     mismatches: list[str] = []
     if artifact.get("schema_version") != SUBMISSION_IMAGE_SCHEMA_VERSION:
@@ -738,6 +751,227 @@ def _check_render_scale_proof(
             "GP_SCALE_PROOF_MISMATCH",
             p,
             "manifest/proof mismatch: " + ", ".join(sorted(set(mismatches))),
+        )
+    return summary
+
+
+def _vc3d_numbers_equal(left: Any, right: Any, *, abs_tol: float = 1e-9) -> bool:
+    if (
+        isinstance(left, bool)
+        or isinstance(right, bool)
+        or not isinstance(left, (int, float))
+        or not isinstance(right, (int, float))
+    ):
+        return left == right
+    return math.isclose(
+        float(left),
+        float(right),
+        rel_tol=1e-9,
+        abs_tol=abs_tol,
+    )
+
+
+def _check_vc3d_receipt(
+    *,
+    render_id: str,
+    render: dict[str, Any],
+    mesh: dict[str, Any] | None,
+    eligible_volume_id: str,
+    target: dict[str, Any] | None,
+    scale_proof: dict[str, Any],
+    root_dir: Path | None,
+    errors: list[dict[str, str]],
+) -> dict[str, Any]:
+    """Bind an executed vc_render_tifxyz run into the final column-image chain."""
+
+    p = f"renders[{render_id}].vc3d_receipt"
+    declared = render.get("vc3d_receipt")
+    summary: dict[str, Any] = {
+        "render_id": render_id,
+        "path": None,
+        "sha256": None,
+        "artifact_checked": False,
+        "receipt_verified": False,
+        "villa_commit": None,
+        "binary_sha256": None,
+        "mesh_path": None,
+        "mesh_sha256": None,
+        "raw_render_path": None,
+        "raw_render_sha256": None,
+        "log_path": None,
+        "log_sha256": None,
+        "base_voxel_size_um": None,
+        "group_idx": None,
+        "render_scale": None,
+    }
+    if not isinstance(declared, dict):
+        _error(
+            errors,
+            "GP_VC3D_RECEIPT",
+            p,
+            "hash-pinned scroliq-vc3d render receipt is required",
+        )
+        return summary
+
+    summary["path"] = declared.get("path")
+    summary["sha256"] = declared.get("sha256")
+    if declared.get("tool") != VC3D_RECEIPT_TOOL:
+        _error(
+            errors,
+            "GP_VC3D_RECEIPT",
+            f"{p}.tool",
+            f"tool must be {VC3D_RECEIPT_TOOL!r}",
+        )
+    if not isinstance(declared.get("path"), str) or not declared.get("path"):
+        _error(
+            errors,
+            "GP_VC3D_RECEIPT",
+            f"{p}.path",
+            "package-relative VC3D receipt path is required",
+        )
+    _check_sha(declared, p, errors)
+    _verify_local_file(declared, p, root_dir, errors)
+    artifact = _load_local_json_artifact(
+        declared,
+        p,
+        root_dir,
+        errors,
+        code="GP_VC3D_RECEIPT_MISMATCH",
+    )
+    if artifact is None:
+        return summary
+    summary["artifact_checked"] = True
+
+    mismatches: list[str] = []
+    if artifact.get("schema_version") != VC3D_RECEIPT_SCHEMA_VERSION:
+        mismatches.append("schema_version")
+    if artifact.get("tool") != VC3D_RECEIPT_TOOL:
+        mismatches.append("tool")
+    if artifact.get("operation") != "render-column":
+        mismatches.append("operation")
+    if artifact.get("column") != render.get("column"):
+        mismatches.append("column")
+
+    vc3d = artifact.get("vc3d")
+    if not isinstance(vc3d, dict):
+        mismatches.append("vc3d")
+        vc3d = {}
+    summary["villa_commit"] = vc3d.get("commit")
+    binary = vc3d.get("binary")
+    if isinstance(binary, dict):
+        summary["binary_sha256"] = binary.get("sha256")
+    else:
+        mismatches.append("vc3d.binary")
+
+    inputs = artifact.get("inputs")
+    if not isinstance(inputs, dict):
+        mismatches.append("inputs")
+        inputs = {}
+    volume = inputs.get("volume")
+    if not isinstance(volume, dict):
+        mismatches.append("inputs.volume")
+        volume = {}
+    summary["base_voxel_size_um"] = volume.get("base_voxel_size_um")
+    if volume.get("volume_id") != eligible_volume_id:
+        mismatches.append("inputs.volume.volume_id")
+    eligible_voxel = (
+        target.get("voxel_size_um") if isinstance(target, dict) else None
+    )
+    if not _vc3d_numbers_equal(
+        volume.get("base_voxel_size_um"),
+        eligible_voxel,
+        abs_tol=1e-6,
+    ):
+        mismatches.append("inputs.volume.base_voxel_size_um")
+    if not _vc3d_numbers_equal(
+        volume.get("base_voxel_size_um"),
+        scale_proof.get("base_voxel_size_um"),
+        abs_tol=1e-6,
+    ):
+        mismatches.append("scale_proof.base_voxel_size_um")
+
+    receipt_mesh = inputs.get("mesh")
+    if not isinstance(receipt_mesh, dict):
+        mismatches.append("inputs.mesh")
+        receipt_mesh = {}
+    summary["mesh_path"] = receipt_mesh.get("path")
+    summary["mesh_sha256"] = receipt_mesh.get("sha256")
+    if not isinstance(mesh, dict):
+        mismatches.append("manifest.mesh")
+    else:
+        if receipt_mesh.get("path") != mesh.get("path"):
+            mismatches.append("inputs.mesh.path")
+        if receipt_mesh.get("sha256") != mesh.get("sha256"):
+            mismatches.append("inputs.mesh.sha256")
+
+    render_call = artifact.get("render")
+    if not isinstance(render_call, dict):
+        mismatches.append("render")
+        render_call = {}
+    summary["group_idx"] = render_call.get("group_idx")
+    summary["render_scale"] = render_call.get("scale")
+    if render_call.get("num_slices") != 1:
+        mismatches.append("render.num_slices")
+    if render_call.get("exit_code") != 0:
+        mismatches.append("render.exit_code")
+    if not _vc3d_numbers_equal(
+        render_call.get("group_idx"),
+        scale_proof.get("group_idx"),
+    ):
+        mismatches.append("scale_proof.group_idx")
+    if not _vc3d_numbers_equal(
+        render_call.get("scale"),
+        scale_proof.get("render_scale"),
+    ):
+        mismatches.append("scale_proof.render_scale")
+
+    raw_output = artifact.get("output")
+    if not isinstance(raw_output, dict):
+        mismatches.append("output")
+        raw_output = {}
+    summary["raw_render_path"] = raw_output.get("path")
+    summary["raw_render_sha256"] = raw_output.get("sha256")
+    if raw_output.get("sha256") != scale_proof.get("input_sha256"):
+        mismatches.append("scale_proof.input.sha256")
+    scale_input_path = scale_proof.get("input_path")
+    raw_path = raw_output.get("path")
+    if (
+        not isinstance(scale_input_path, str)
+        or not isinstance(raw_path, str)
+        or Path(raw_path).name != scale_input_path
+    ):
+        mismatches.append("scale_proof.input.path")
+
+    log = artifact.get("log")
+    if not isinstance(log, dict):
+        mismatches.append("log")
+        log = {}
+    summary["log_path"] = log.get("path")
+    summary["log_sha256"] = log.get("sha256")
+
+    if root_dir is not None and isinstance(declared.get("path"), str):
+        receipt_report = verify_vc3d_receipt(
+            root_dir / declared["path"],
+            root_dir=root_dir,
+        )
+        summary["receipt_verified"] = receipt_report.get("valid") is True
+        if receipt_report.get("valid") is not True:
+            detail = "; ".join(str(v) for v in receipt_report.get("errors", [])[:4])
+            _error(
+                errors,
+                "GP_VC3D_RECEIPT_INVALID",
+                p,
+                "VC3D receipt/artifact verification failed"
+                + (f": {detail}" if detail else ""),
+            )
+
+    if mismatches:
+        _error(
+            errors,
+            "GP_VC3D_RECEIPT_MISMATCH",
+            p,
+            "manifest/receipt/scale-proof mismatch: "
+            + ", ".join(sorted(set(mismatches))),
         )
     return summary
 
@@ -1633,6 +1867,7 @@ def validate_manifest(
     held_out_proofs: list[dict[str, Any]] = []
     mesh_context_proofs: list[dict[str, Any]] = []
     scale_proofs: list[dict[str, Any]] = []
+    vc3d_render_proofs: list[dict[str, Any]] = []
     banner_proof: dict[str, Any] | None = None
 
     if manifest.get("schema_version") != SCHEMA_VERSION:
@@ -2362,15 +2597,25 @@ def validate_manifest(
                 f"{p}.scale_bar_cm",
                 "submission render must include a 1 cm scale bar",
             )
-        scale_proofs.append(
-            _check_render_scale_proof(
-                render_id=render_id,
-                render=render,
-                target=target,
-                root_dir=root_dir,
-                errors=errors,
-            )
+        scale_proof_summary = _check_render_scale_proof(
+            render_id=render_id,
+            render=render,
+            target=target,
+            root_dir=root_dir,
+            errors=errors,
         )
+        scale_proofs.append(scale_proof_summary)
+        vc3d_proof = _check_vc3d_receipt(
+            render_id=render_id,
+            render=render,
+            mesh=meshes.get(mesh_id) if isinstance(mesh_id, str) else None,
+            eligible_volume_id=str(volume_id),
+            target=target,
+            scale_proof=scale_proof_summary,
+            root_dir=root_dir,
+            errors=errors,
+        )
+        vc3d_render_proofs.append(vc3d_proof)
 
         generated_by = render.get("generated_by")
         if not isinstance(generated_by, dict) or not generated_by.get("command"):
@@ -2466,6 +2711,7 @@ def validate_manifest(
                     else None
                 ),
                 "region_exclusion": proof,
+                "vc3d_receipt": vc3d_proof,
             }
         )
 
@@ -2537,6 +2783,7 @@ def validate_manifest(
         "held_out_validation_proofs": held_out_proofs,
         "mesh_context_proofs": mesh_context_proofs,
         "scale_proofs": scale_proofs,
+        "vc3d_render_proofs": vc3d_render_proofs,
         "banner_proof": banner_proof,
         "zarr_audit_proof": {
             "root": zpa_report.get("root") if isinstance(zpa_report, dict) else None,
