@@ -66,6 +66,18 @@ def _fixture(tmp_path):
     return root, model, dataset, model_path, dataset_path
 
 
+def _result_provenance(root, model):
+    return {
+        "checkpoint_sha256": model["checkpoint_sha256"],
+        "inference_script_sha256": hashlib.sha256(
+            (root / model["inference_script"]).read_bytes()
+        ).hexdigest(),
+        "inference_config_sha256": validate_model_card(model)[
+            "inference_config_sha256"
+        ],
+    }
+
+
 def test_model_and_dataset_contracts(tmp_path):
     _, model, dataset, *_ = _fixture(tmp_path)
     assert validate_model_card(model)["random_seed"] == 7
@@ -189,6 +201,7 @@ def test_complete_results_get_ci_and_rank(tmp_path):
         "model": model["name"],
         "dataset": dataset["id"],
         "task": "ink",
+        "provenance": _result_provenance(root, model),
         "regions": [
             {"id": "r1", "status": "ok", "metrics": {"balanced_accuracy": 0.8}},
             {"id": "r2", "status": "ok", "metrics": {"balanced_accuracy": 0.9}},
@@ -214,6 +227,72 @@ def test_complete_results_get_ci_and_rank(tmp_path):
     assert report["evaluation"]["failures"] == []
 
 
+def test_missing_result_run_identity_blocks_ranking(tmp_path):
+    root, model, dataset, model_path, dataset_path = _fixture(tmp_path)
+    results = {
+        "schema_version": 1,
+        "model": model["name"],
+        "dataset": dataset["id"],
+        "task": "ink",
+        "regions": [
+            {"id": "r1", "status": "ok", "metrics": {"balanced_accuracy": 0.8}},
+            {"id": "r2", "status": "ok", "metrics": {"balanced_accuracy": 0.9}},
+            {"id": "r3", "status": "ok", "metrics": {"balanced_accuracy": 1.0}},
+        ],
+    }
+    report = build_report(
+        model_document=model,
+        dataset_document=dataset,
+        model_path=model_path,
+        dataset_path=dataset_path,
+        root=root,
+        results_document=results,
+        bootstrap_samples=1000,
+    )
+    assert report["evaluation"]["status"] == "measured"
+    assert report["rank_eligible"] is False
+    assert report["evaluation"]["run_identity"]["status"] == "blocked"
+    assert all(
+        check["ok"] is False
+        for check in report["evaluation"]["run_identity"]["checks"]
+    )
+
+
+def test_mismatched_result_inference_config_blocks_ranking(tmp_path):
+    root, model, dataset, model_path, dataset_path = _fixture(tmp_path)
+    provenance = _result_provenance(root, model)
+    provenance["inference_config_sha256"] = "a" * 64
+    results = {
+        "schema_version": 1,
+        "model": model["name"],
+        "dataset": dataset["id"],
+        "task": "ink",
+        "provenance": provenance,
+        "regions": [
+            {"id": "r1", "status": "ok", "metrics": {"balanced_accuracy": 0.8}},
+            {"id": "r2", "status": "ok", "metrics": {"balanced_accuracy": 0.9}},
+            {"id": "r3", "status": "ok", "metrics": {"balanced_accuracy": 1.0}},
+        ],
+    }
+    report = build_report(
+        model_document=model,
+        dataset_document=dataset,
+        model_path=model_path,
+        dataset_path=dataset_path,
+        root=root,
+        results_document=results,
+        bootstrap_samples=1000,
+    )
+    assert report["rank_eligible"] is False
+    check = next(
+        check
+        for check in report["evaluation"]["run_identity"]["checks"]
+        if check["name"] == "inference_config_sha256"
+    )
+    assert check["ok"] is False
+    assert check["observed_sha256"] == "a" * 64
+
+
 def test_failed_or_missing_region_is_scored_fail_closed_and_not_ranked(tmp_path):
     root, model, dataset, model_path, dataset_path = _fixture(tmp_path)
     results = {
@@ -221,6 +300,7 @@ def test_failed_or_missing_region_is_scored_fail_closed_and_not_ranked(tmp_path)
         "model": model["name"],
         "dataset": dataset["id"],
         "task": "ink",
+        "provenance": _result_provenance(root, model),
         "regions": [
             {"id": "r1", "status": "ok", "metrics": {"balanced_accuracy": 0.9}},
             {"id": "r2", "status": "failed", "reason": "inference crashed"},
@@ -249,6 +329,7 @@ def test_unknown_region_rejected(tmp_path):
         "model": model["name"],
         "dataset": dataset["id"],
         "task": "ink",
+        "provenance": _result_provenance(root, model),
         "regions": [{"id": "other", "status": "ok", "metrics": {"balanced_accuracy": 1.0}}],
     }
     with pytest.raises(ValidationError, match="unknown region"):

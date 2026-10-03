@@ -10,6 +10,21 @@
     "model": {"type": "string", "minLength": 1},
     "dataset": {"type": "string", "minLength": 1},
     "task": {"enum": ["ink", "geometry", "segmentation"]},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpoint_sha256",
+        "inference_script_sha256",
+        "inference_config_sha256"
+      ],
+      "properties": {
+        "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "inference_script_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "inference_config_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "description": "Verified inference-run identity. Optional for schema migration, but scroliq-eval requires exact matches for rank eligibility."
+    },
     "regions": {
       "type": "array",
       "items": {

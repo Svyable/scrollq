@@ -281,6 +281,25 @@ def validate_region_results(
     if document.get("task") != dataset["task"]:
         raise ValidationError("results.task does not match dataset task")
 
+    provenance_value = document.get("provenance")
+    if provenance_value is None:
+        provenance = None
+    else:
+        if not isinstance(provenance_value, dict):
+            raise ValidationError("results.provenance must be an object")
+        provenance = {}
+        for field in (
+            "checkpoint_sha256",
+            "inference_script_sha256",
+            "inference_config_sha256",
+        ):
+            value = provenance_value.get(field)
+            if not isinstance(value, str) or not SHA256_RE.fullmatch(value):
+                raise ValidationError(
+                    f"results.provenance.{field} must be lowercase 64-hex"
+                )
+            provenance[field] = value
+
     rows = document.get("regions")
     if not isinstance(rows, list):
         raise ValidationError("results.regions must be a list")
@@ -321,6 +340,7 @@ def validate_region_results(
         "model": model["name"],
         "dataset": dataset["id"],
         "task": dataset["task"],
+        "provenance": provenance,
         "regions": normalized,
     }
 
@@ -532,6 +552,52 @@ def build_report(
         return report
 
     results = validate_region_results(results_document, model=model, dataset=dataset)
+
+    result_identity_checks: list[dict[str, Any]] = []
+
+    def identity_check(name: str, observed: str | None, expected: str | None) -> None:
+        ok = observed is not None and expected is not None and observed == expected
+        if observed is None:
+            detail = "result file does not declare this run identity"
+        elif expected is None:
+            detail = "verified evaluator identity is unavailable"
+        elif ok:
+            detail = "result run identity matches verified evaluator identity"
+        else:
+            detail = "result run identity does not match verified evaluator identity"
+        result_identity_checks.append(
+            {
+                "name": name,
+                "ok": ok,
+                "detail": detail,
+                "observed_sha256": observed,
+                "expected_sha256": expected,
+            }
+        )
+
+    result_provenance = results.get("provenance")
+    if result_provenance is None:
+        identity_check("checkpoint_sha256", None, preflight["checkpoint_sha256_observed"])
+        identity_check("inference_script_sha256", None, preflight["inference_script_sha256"])
+        identity_check("inference_config_sha256", None, preflight["inference_config_sha256"])
+    else:
+        identity_check(
+            "checkpoint_sha256",
+            result_provenance["checkpoint_sha256"],
+            preflight["checkpoint_sha256_observed"],
+        )
+        identity_check(
+            "inference_script_sha256",
+            result_provenance["inference_script_sha256"],
+            preflight["inference_script_sha256"],
+        )
+        identity_check(
+            "inference_config_sha256",
+            result_provenance["inference_config_sha256"],
+            preflight["inference_config_sha256"],
+        )
+    result_identity_ok = all(check["ok"] for check in result_identity_checks)
+
     by_id = {row["id"]: row for row in results["regions"]}
     failure_value = dataset["primary_metric"]["failure_value"]
     metric_name = dataset["primary_metric"]["name"]
@@ -562,7 +628,7 @@ def build_report(
     ci_low, ci_high = bootstrap_mean_ci(
         values, seed=dataset["bootstrap_seed"], samples=bootstrap_samples
     )
-    rank_eligible = preflight["rank_eligible"] and not failures
+    rank_eligible = preflight["rank_eligible"] and result_identity_ok and not failures
 
     report["evaluation"] = {
         "status": "measured" if not failures else "incomplete",
@@ -579,6 +645,11 @@ def build_report(
         "failure_value": failure_value,
         "failures": failures,
         "regions": region_rows,
+        "run_identity": {
+            "status": "bound" if result_identity_ok else "blocked",
+            "rank_eligible": result_identity_ok,
+            "checks": result_identity_checks,
+        },
     }
     report["rank_eligible"] = rank_eligible
     if results_path is not None:
