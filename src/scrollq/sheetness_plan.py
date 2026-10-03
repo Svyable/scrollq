@@ -223,6 +223,83 @@ def _selection_indices(count: int, requested: int) -> list[int]:
     return [min(count - 1, int((i + 0.5) * count / requested)) for i in range(requested)]
 
 
+def _eligible_row_candidates(
+    xyz: np.ndarray,
+    valid: np.ndarray,
+    y: int,
+    *,
+    offsets: tuple[float, ...],
+    halo: int,
+    source_shape: tuple[int, int, int],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return eligible x indices, surface XYZ and unit normals for one grid row.
+
+    Eligibility is exactly the scalar planner contract, evaluated with NumPy
+    across the row: center + four neighbours valid, finite non-degenerate
+    centered normal, and every frozen offset plus halo inside the audited CT.
+    The returned x indices are ascending, preserving lexicographic (y, x)
+    candidate order.
+    """
+    h, w = valid.shape
+    if y <= 0 or y >= h - 1 or w < 3:
+        return (
+            np.empty(0, dtype=np.int64),
+            np.empty((0, 3), dtype=np.float64),
+            np.empty((0, 3), dtype=np.float64),
+        )
+
+    neighbor_ok = (
+        valid[y, 1:-1]
+        & valid[y, :-2]
+        & valid[y, 2:]
+        & valid[y - 1, 1:-1]
+        & valid[y + 1, 1:-1]
+    )
+    xs = np.flatnonzero(neighbor_ok).astype(np.int64, copy=False) + 1
+    if xs.size == 0:
+        return (
+            xs,
+            np.empty((0, 3), dtype=np.float64),
+            np.empty((0, 3), dtype=np.float64),
+        )
+
+    surface_xyz = np.asarray(xyz[y, xs], dtype=np.float64)
+    col = np.asarray(xyz[y, xs + 1], dtype=np.float64) - np.asarray(
+        xyz[y, xs - 1], dtype=np.float64
+    )
+    row = np.asarray(xyz[y + 1, xs], dtype=np.float64) - np.asarray(
+        xyz[y - 1, xs], dtype=np.float64
+    )
+    normal_xyz = np.cross(col, row)
+    norms = np.linalg.norm(normal_xyz, axis=1)
+    normal_ok = (
+        np.isfinite(normal_xyz).all(axis=1)
+        & np.isfinite(norms)
+        & (norms > 1e-8)
+    )
+    xs = xs[normal_ok]
+    surface_xyz = surface_xyz[normal_ok]
+    normal_xyz = normal_xyz[normal_ok]
+    norms = norms[normal_ok]
+    if xs.size == 0:
+        return xs, surface_xyz, normal_xyz
+
+    normal_xyz = normal_xyz / norms[:, None]
+
+    distances = np.asarray((0.0, *offsets), dtype=np.float64)
+    points_xyz = (
+        surface_xyz[:, None, :]
+        + distances[None, :, None] * normal_xyz[:, None, :]
+    )
+    points_zyx = points_xyz[..., ::-1]
+    starts = np.floor(points_zyx.min(axis=1)).astype(np.int64) - halo
+    stops = np.ceil(points_zyx.max(axis=1)).astype(np.int64) + halo + 1
+    shape = np.asarray(source_shape, dtype=np.int64)
+    in_bounds = (starts >= 0).all(axis=1) & (stops <= shape).all(axis=1)
+
+    return xs[in_bounds], surface_xyz[in_bounds], normal_xyz[in_bounds]
+
+
 def build_plan(
     *,
     tifxyz: str | Path,
@@ -274,14 +351,56 @@ def build_plan(
         validate_report_fn=validate_report_fn,
     )
 
-    candidates: list[dict[str, Any]] = []
-    h, w = valid.shape
+    # First pass: count eligible candidates per row without materializing one
+    # Python dict per surface vertex. This keeps the frozen lexicographic
+    # selection rule practical on full-resolution multi-million-vertex TIFXYZ.
+    h, _w = valid.shape
+    row_counts = np.zeros(max(h - 2, 0), dtype=np.int64)
     for y in range(1, h - 1):
-        for x in range(1, w - 1):
-            normal_xyz = _normal_at_grid(xyz, valid, y, x)
-            if normal_xyz is None:
-                continue
-            surface_xyz = np.asarray(xyz[y, x], dtype=np.float64)
+        xs, _surface_xyz, _normal_xyz = _eligible_row_candidates(
+            xyz,
+            valid,
+            y,
+            offsets=offsets,
+            halo=halo,
+            source_shape=source_shape,
+        )
+        row_counts[y - 1] = xs.size
+
+    eligible_count = int(row_counts.sum())
+    selected_ranks = _selection_indices(eligible_count, samples)
+
+    # Map global lexicographic ranks to row-local ranks, then recompute only
+    # the rows containing selected probes. Semantics are identical to building
+    # the full candidate list and indexing it, but memory scales with image
+    # width instead of total eligible vertices.
+    cumulative = np.cumsum(row_counts)
+    selected_by_row: dict[int, list[tuple[int, int, int]]] = {}
+    for sample_index, rank in enumerate(selected_ranks, start=1):
+        row_index = int(np.searchsorted(cumulative, rank, side="right"))
+        before = int(cumulative[row_index - 1]) if row_index else 0
+        y = row_index + 1
+        local_rank = int(rank - before)
+        selected_by_row.setdefault(y, []).append(
+            (sample_index, int(rank), local_rank)
+        )
+
+    groups_by_index: dict[int, dict[str, Any]] = {}
+    for y in sorted(selected_by_row):
+        xs, surface_rows, normal_rows = _eligible_row_candidates(
+            xyz,
+            valid,
+            y,
+            offsets=offsets,
+            halo=halo,
+            source_shape=source_shape,
+        )
+        for sample_index, rank, local_rank in selected_by_row[y]:
+            if local_rank < 0 or local_rank >= xs.size:
+                raise PlanError("internal selected-rank mapping is inconsistent")
+            x = int(xs[local_rank])
+            surface_xyz = np.asarray(surface_rows[local_rank], dtype=np.float64)
+            normal_xyz = np.asarray(normal_rows[local_rank], dtype=np.float64)
             surface_zyx = _xyz_to_zyx(surface_xyz)
             offset_rows: list[dict[str, Any]] = []
             points = [surface_zyx]
@@ -298,34 +417,24 @@ def build_plan(
                 )
             bbox = _bbox_for_points(points, halo=halo, source_shape=source_shape)
             if bbox is None:
-                continue
-            candidates.append(
-                {
-                    "grid_yx": [int(y), int(x)],
-                    "surface_global_xyz": [float(v) for v in surface_xyz],
-                    "surface_global_zyx": [float(v) for v in surface_zyx],
-                    "reference_normal_xyz": [float(v) for v in normal_xyz],
-                    "reference_normal_zyx": [
-                        float(normal_xyz[2]),
-                        float(normal_xyz[1]),
-                        float(normal_xyz[0]),
-                    ],
-                    "normal_offsets": offset_rows,
-                    "cutout_bbox_zyx_half_open": {
-                        "start": bbox[0],
-                        "stop": bbox[1],
-                    },
-                }
-            )
-
-    selected_ranks = _selection_indices(len(candidates), samples)
-    groups: list[dict[str, Any]] = []
-    for i, rank in enumerate(selected_ranks, start=1):
-        row = dict(candidates[rank])
-        row.update(
-            {
-                "id": f"surface-{i:04d}",
-                "eligible_rank": int(rank),
+                raise PlanError("internal eligible candidate became out of bounds")
+            groups_by_index[sample_index] = {
+                "grid_yx": [int(y), x],
+                "surface_global_xyz": [float(v) for v in surface_xyz],
+                "surface_global_zyx": [float(v) for v in surface_zyx],
+                "reference_normal_xyz": [float(v) for v in normal_xyz],
+                "reference_normal_zyx": [
+                    float(normal_xyz[2]),
+                    float(normal_xyz[1]),
+                    float(normal_xyz[0]),
+                ],
+                "normal_offsets": offset_rows,
+                "cutout_bbox_zyx_half_open": {
+                    "start": bbox[0],
+                    "stop": bbox[1],
+                },
+                "id": f"surface-{sample_index:04d}",
+                "eligible_rank": rank,
                 "wrong_wrap": {
                     "status": "pending-independent-geometry",
                     "global_zyx": None,
@@ -335,8 +444,8 @@ def build_plan(
                     ),
                 },
             }
-        )
-        groups.append(row)
+
+    groups = [groups_by_index[i] for i in range(1, samples + 1)]
 
     binding_methods = []
     if surface_name_match:
@@ -379,7 +488,8 @@ def build_plan(
             "halo_voxels": int(halo),
             "sample_selection": {
                 "algorithm": "lexicographic-even-quantiles-v1",
-                "eligible_vertex_count": len(candidates),
+                "eligible_vertex_count": eligible_count,
+                "implementation": "row-vectorized-two-pass-v1",
                 "requested_samples": int(samples),
                 "selected_eligible_ranks": selected_ranks,
                 "uses_ct_intensity": False,
