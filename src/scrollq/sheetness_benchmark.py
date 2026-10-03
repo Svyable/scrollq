@@ -149,6 +149,15 @@ def _validate_cutout_manifest(
             raise ValueError(
                 f"cutout manifest source_attestation.{key} does not match frozen spec"
             )
+    if attestation.get("axes") != ["z", "y", "x"]:
+        raise ValueError("cutout manifest source_attestation.axes must be ['z', 'y', 'x']")
+
+    zpa_report = manifest.get("zpa_report")
+    if not isinstance(zpa_report, dict) or zpa_report.get("integrity") != "PASS":
+        raise ValueError("cutout manifest must retain a PASS ZPA report proof")
+    zpa_report_sha = _require_sha(
+        zpa_report.get("sha256"), "cutout manifest zpa_report.sha256"
+    )
 
     cutout = manifest.get("cutout")
     if not isinstance(cutout, dict):
@@ -186,6 +195,7 @@ def _validate_cutout_manifest(
         "bbox_zyx_half_open": {"start": list(start), "stop": list(stop)},
         "start_zyx": start,
         "shape_zyx": list(shape),
+        "zpa_report_sha256": zpa_report_sha,
     }
 
 
@@ -443,6 +453,7 @@ def evaluate(
             "cutout_sha256": expected_input_sha,
             "cutout_manifest_sha256": cutout_binding["file_sha256"],
             "global_bbox_zyx_half_open": cutout_binding["bbox_zyx_half_open"],
+            "zpa_report_sha256": cutout_binding["zpa_report_sha256"],
             "response_sha256": response_file_sha256,
             "normal_sha256": normal_file_sha256,
             "shape_zyx": [int(v) for v in response.shape],
