@@ -6,7 +6,7 @@ import pytest
 
 from scrollq.spiral_transfer import (
     TriangleSurface,
-    _git_blob_sha1,
+    _git_blob_sha1,\n    _midpoint_ranks,\n    _choose_offset,
     _load_predictions,
     _point_triangle_distance,
     _triangles,
@@ -86,3 +86,42 @@ def test_git_blob_hash_matches_git_object_definition():
     import hashlib
     expected = hashlib.sha1(b"blob 6\0hello\n").hexdigest()
     assert _git_blob_sha1(data) == expected
+
+
+def test_exact_1024_midpoint_rank_sampling():
+    ranks = _midpoint_ranks(10000)
+    assert len(ranks) == 1024
+    expected = np.floor((np.arange(1024) + 0.5) * 10000 / 1024).astype(np.int64)
+    assert np.array_equal(ranks, expected)
+    assert np.all(np.diff(ranks) > 0)
+
+
+def test_offset_tie_break_prefers_abs_then_signed():
+    rows = [
+        {"offset": 2, "eligible": True, "fit_mesh_median_of_medians": 1.0},
+        {"offset": -1, "eligible": True, "fit_mesh_median_of_medians": 1.0},
+        {"offset": 1, "eligible": True, "fit_mesh_median_of_medians": 1.0},
+        {"offset": 0, "eligible": False, "fit_mesh_median_of_medians": None},
+    ]
+    assert _choose_offset(rows)["offset"] == -1
+
+
+def test_offset_choice_has_no_held_out_input_surface():
+    # The chooser accepts only already-computed fit rows. There is deliberately
+    # no held-out argument that could alter the selected convention.
+    fit_rows = [
+        {"offset": 0, "eligible": True, "fit_mesh_median_of_medians": 4.0},
+        {"offset": 1, "eligible": True, "fit_mesh_median_of_medians": 2.0},
+    ]
+    assert _choose_offset(fit_rows)["offset"] == 1
+    held_out_catastrophe = {"offset": 1, "held_out_median": 999999.0}
+    assert _choose_offset(fit_rows)["offset"] == 1
+    assert "held_out_median" not in _choose_offset(fit_rows)
+
+
+def test_repeat_report_serialization_can_be_byte_identical():
+    report = {"b": [2, 1], "a": {"value": 3.5}}
+    one = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    two = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    assert one.encode() == two.encode()
+    assert "timestamp" not in one
