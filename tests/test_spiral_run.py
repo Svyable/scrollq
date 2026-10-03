@@ -175,6 +175,29 @@ def test_zero_exit_without_checkpoint_is_failure(tmp_path):
     assert receipt["checkpoint"]["present"] is False
 
 
+def test_missing_frozen_track_reference_is_failure(tmp_path):
+    villa, commit = _villa(tmp_path)
+    dataset, recipe = _dataset(tmp_path, commit)
+    document = json.loads(recipe.read_text())
+    document["bounded_reproduction"].pop("expected_reference_context")
+    recipe.write_text(json.dumps(document))
+
+    receipt = run_baseline(
+        dataset=dataset, recipe_path=recipe, villa_root=villa,
+        run_dir=tmp_path / "run", python_executable=sys.executable
+    )
+
+    assert receipt["return_code"] == 0
+    assert receipt["checkpoint"]["present"] is True
+    assert receipt["success"] is False
+    assert receipt["supervision"]["tracks"]["reference_count"] is None
+    assert receipt["supervision"]["tracks"]["reference_count_match"] is False
+    assert any(
+        row["name"] == "tracks_reference_count_declared" and row["ok"] is False
+        for row in receipt["supervision"]["checks"]
+    )
+
+
 def test_checkpoint_with_zero_track_supervision_is_failure(tmp_path):
     villa, _ = _villa(tmp_path)
     (villa / "spiral-fitting" / "fit_spiral.py").write_text(
