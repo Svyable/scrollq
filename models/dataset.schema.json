@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://svyable.github.io/scrollq/schemas/eval-dataset-v1.json",
+  "title": "ScrolIQ held-out evaluation dataset manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "task",
+    "held_out",
+    "evaluation_data",
+    "regions",
+    "primary_metric"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "task": {"enum": ["ink", "geometry", "segmentation"]},
+    "held_out": {"const": true},
+    "evaluation_data": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1},
+      "description": "Exact dataset/split identifiers forbidden from model training_data."
+    },
+    "regions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"}
+        }
+      }
+    },
+    "primary_metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "higher_is_better", "failure_value"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+        "higher_is_better": {"type": "boolean"},
+        "failure_value": {
+          "type": "number",
+          "description": "Score assigned to failed or missing regions so they cannot disappear from n."
+        }
+      }
+    },
+    "visibility": {"enum": ["public", "private_blind"], "default": "private_blind"},
+    "source_url": {"type": "string", "format": "uri"},
+    "bootstrap_seed": {"type": "integer", "default": 0}
+  }
+}
