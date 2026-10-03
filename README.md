@@ -806,9 +806,13 @@ Docker command uses the exact digest-pinned image, and the letter-by-letter
 legibility ledger passes every counted column at 70% or above.
 
 The builder generates provenance and legibility validation reports itself,
-SHA-256 indexes every archived member, writes a deterministic ZIP and sidecar
-digest, then immediately reopens and verifies the archive before returning
-PASS. See [the package contract](docs/grand-prize-package.md).
+automatically includes every schema-v7 VC3D receipt plus its raw `00.tif` and
+renderer log, SHA-256 indexes every archived member, writes a deterministic ZIP
+and sidecar digest, then immediately reopens and verifies the archive before
+returning PASS. Package-index schema v4 independently reconstructs the
+receipt/raw/log/mesh/scale-proof bindings from the ZIP, so reindexing forged raw
+bytes is not enough to make a tampered archive pass. See
+[the package contract](docs/grand-prize-package.md).
 
 ## First Letters target qualification
 

@@ -1,3 +1,4 @@
+import hashlib
 import json
 import shutil
 import zipfile
@@ -9,15 +10,17 @@ import scrollq.submission_package as pkg
 
 def _package_manifest():
     return {
-        "schema_version": 6,
+        "schema_version": 7,
         "submission": {
             "scroll_id": "PHerc0813",
+            "eligible_volume_id": "20250821151723",
             "human_input_hours": 1.5,
         },
         "code": {
             "docker_image": "ghcr.io/example/pipeline@sha256:" + "b" * 64,
         },
         "ct_volume": {
+            "volume_id": "20250821151723",
             "zarr_audit": {
                 "path": "evidence/zpa-report.json",
             }
@@ -38,7 +41,21 @@ def _package_manifest():
                 "column": 1,
                 "mesh_id": "mesh:column-01",
                 "sha256": "2" * 64,
-                "scale_proof": {"path": "evidence/column_01.scale.json"},
+                "vc3d_receipt": {
+                    "tool": "scroliq-vc3d",
+                    "path": "evidence/column_01.vc3d.json",
+                    "sha256": "9" * 64,
+                },
+                "scale_proof": {
+                    "tool": "scroliq-submission-image",
+                    "path": "evidence/column_01.scale.json",
+                    "sha256": "7" * 64,
+                    "base_voxel_size_um": 9.362,
+                    "group_idx": 0,
+                    "render_scale": 1.0,
+                    "micrometers_per_output_pixel": 9.362,
+                    "scale_bar_pixels": 1068,
+                },
             }
         ],
         "held_out_validations": [{"path": "validation/heldout.json"}],
@@ -54,7 +71,110 @@ def _write_tree(root):
     mesh.mkdir(parents=True)
 
     (root / "evidence" / "zpa-report.json").write_bytes(b"zpa")
-    (root / "evidence" / "column_01.scale.json").write_bytes(b"scale-proof")
+    raw_dir = root / "raw" / "column_01"
+    raw_dir.mkdir(parents=True)
+    raw_path = raw_dir / "00.tif"
+    raw_path.write_bytes(b"raw-ct-render")
+    raw_sha = hashlib.sha256(raw_path.read_bytes()).hexdigest()
+    log_path = root / "evidence" / "column_01.vc3d.log"
+    log_path.write_bytes(b"vc3d render log\n")
+    log_sha = hashlib.sha256(log_path.read_bytes()).hexdigest()
+
+    scale_payload = {
+        "schema_version": 1,
+        "tool": "scroliq-submission-image",
+        "operation": "column",
+        "column": 1,
+        "input": {
+            "path": "00.tif",
+            "sha256": raw_sha,
+            "size_xy": [1200, 100],
+        },
+        "output": {
+            "path": "column_01.tif",
+            "sha256": "2" * 64,
+            "size_xy": [1200, 148],
+        },
+        "vc_render_tifxyz": {
+            "base_voxel_size_um": 9.362,
+            "group_idx": 0,
+            "render_scale": 1.0,
+            "ds_scale": 1.0,
+            "micrometers_per_output_pixel": 9.362,
+            "formula": "base_voxel_size_um / (2**-group_idx) / render_scale",
+        },
+        "scale_bar": {
+            "centimeters": 1,
+            "micrometers": 10000,
+            "pixels": 1068,
+        },
+    }
+    scale_raw = json.dumps(scale_payload, sort_keys=True).encode("utf-8")
+    (root / "evidence" / "column_01.scale.json").write_bytes(scale_raw)
+    manifest["renders"][0]["scale_proof"]["sha256"] = hashlib.sha256(
+        scale_raw
+    ).hexdigest()
+
+    receipt_payload = {
+        "schema_version": 1,
+        "tool": "scroliq-vc3d",
+        "operation": "render-column",
+        "column": 1,
+        "vc3d": {
+            "repository": "https://github.com/ScrollPrize/villa",
+            "commit": "1" * 40,
+            "binary": {
+                "name": "vc_render_tifxyz",
+                "size": 123456,
+                "sha256": "a" * 64,
+                "help_sha256": "b" * 64,
+                "help_headline": "vc_render_tifxyz",
+            },
+        },
+        "inputs": {
+            "volume": {
+                "path": "/eligible/20250821151723.zarr",
+                "volume_id": "20250821151723",
+                "base_voxel_size_um": 9.362,
+            },
+            "mesh": {
+                "path": "column_01.tifxyz",
+                "sha256": "1" * 64,
+                "meta_sha256": "c" * 64,
+                "target_volume": "20250821151723.zarr",
+                "scale": [1.0, 1.0],
+            },
+        },
+        "render": {
+            "group_idx": 0,
+            "scale": 1.0,
+            "num_slices": 1,
+            "tif_output_dir": "raw/column_01",
+            "argv": [],
+            "extra_args": [],
+            "exit_code": 0,
+        },
+        "output": {
+            "path": "raw/column_01/00.tif",
+            "size": raw_path.stat().st_size,
+            "sha256": raw_sha,
+            "width": 1200,
+            "height": 100,
+            "mode": "L",
+        },
+        "log": {
+            "path": "evidence/column_01.vc3d.log",
+            "size": log_path.stat().st_size,
+            "sha256": log_sha,
+        },
+        "receipt_path": "evidence/column_01.vc3d.json",
+    }
+    receipt_raw = json.dumps(receipt_payload, sort_keys=True).encode("utf-8")
+    (root / "evidence" / "column_01.vc3d.json").write_bytes(receipt_raw)
+    manifest["renders"][0]["vc3d_receipt"]["sha256"] = hashlib.sha256(
+        receipt_raw
+    ).hexdigest()
+
     (root / "evidence" / "banner.json").write_bytes(b"banner-proof")
     (root / "validation" / "heldout.json").write_bytes(b"heldout")
     (root / "column_01.tif").write_bytes(b"render")
@@ -142,7 +262,7 @@ def _write_tree(root):
 def _passing_validation(manifest, *, root_dir=None, manifest_sha256=None):
     return {
         "validator": "scrollq.provenance",
-        "validator_schema_version": 6,
+        "validator_schema_version": 7,
         "manifest_sha256": manifest_sha256,
         "graph_sha256": "a" * 64,
         "eligible": True,
@@ -187,6 +307,9 @@ def test_package_is_deterministic_and_only_contains_declared_artifacts(
         assert "provenance.json" in names
         assert "evidence/zpa-report.json" in names
         assert "evidence/column_01.scale.json" in names
+        assert "evidence/column_01.vc3d.json" in names
+        assert "evidence/column_01.vc3d.log" in names
+        assert "raw/column_01/00.tif" in names
         assert "evidence/banner.json" in names
         assert "column_01.tifxyz/meta.json" in names
         assert "column_01.tifxyz/x.tif" in names
@@ -209,6 +332,11 @@ def test_package_is_deterministic_and_only_contains_declared_artifacts(
         assert legibility["passes_recorded_thresholds"] is True
         assert legibility["summary"]["legible_characters"] == 7
         assert legibility["summary"]["preserved_characters"] == 10
+        index = json.loads(zf.read(pkg.INDEX_PATH))
+        assert index["schema_version"] == 4
+        assert index["vc3d_receipts"][0]["column"] == 1
+        assert index["vc3d_receipts"][0]["raw_render_path"] == "raw/column_01/00.tif"
+        assert index["vc3d_receipts"][0]["log_path"] == "evidence/column_01.vc3d.log"
         reviewer = json.loads(zf.read(pkg.REVIEWER_CONTRACT_PATH))
         assert reviewer["columns"]["meshes"] == [1]
         assert reviewer["columns"]["renders"] == [1]
@@ -240,6 +368,52 @@ def test_package_verifier_rejects_extra_unindexed_member(tmp_path, monkeypatch):
     report = pkg.verify_package(archive)
     assert report["valid"] is False
     assert any("archive/index member mismatch" in error for error in report["errors"])
+
+
+def test_package_verifier_rejects_reindexed_raw_vc3d_tampering(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "submission"
+    root.mkdir()
+    manifest_path = _write_tree(root)
+    monkeypatch.setattr(pkg, "validate_manifest", _passing_validation)
+
+    archive = tmp_path / "submission.zip"
+    pkg.build_package(
+        manifest_path=manifest_path,
+        root_dir=root,
+        out_path=archive,
+    )
+
+    rewritten = tmp_path / "reindexed-tamper.zip"
+    with zipfile.ZipFile(archive, "r") as src:
+        payloads = {name: src.read(name) for name in src.namelist()}
+
+    forged = b"attacker-reindexed-raw-render"
+    raw_name = "raw/column_01/00.tif"
+    payloads[raw_name] = forged
+    index = json.loads(payloads[pkg.INDEX_PATH])
+    forged_sha = hashlib.sha256(forged).hexdigest()
+    for row in index["files"]:
+        if row["path"] == raw_name:
+            row["size"] = len(forged)
+            row["sha256"] = forged_sha
+    index["vc3d_receipts"][0]["raw_render_sha256"] = forged_sha
+    payloads[pkg.INDEX_PATH] = pkg._json_bytes(index)
+
+    with zipfile.ZipFile(
+        rewritten, "w", compression=zipfile.ZIP_STORED, allowZip64=True
+    ) as dst:
+        for name in sorted(payloads):
+            dst.writestr(pkg._zip_info(name), payloads[name])
+
+    report = pkg.verify_package(rewritten)
+
+    assert report["valid"] is False
+    assert any(
+        "raw VC3D render hash mismatch" in error
+        for error in report["errors"]
+    )
 
 
 def test_package_builder_refuses_failed_provenance(tmp_path, monkeypatch):
