@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-10-03",
+  "purpose": "Pre-register PHerc0800 Spiral-grid transfer evaluation before any PHerc0800 prediction is produced.",
+  "volume": {
+    "scroll": "PHerc0800",
+    "prize_volume_id": "20250521135224",
+    "coordinate_system": "base_voxel_xyz"
+  },
+  "reference_source": {
+    "repository": "https://github.com/pscamillo/vesuvius-eligible-meshes",
+    "commit": "620769e2e1e70d1e61b588092229cb76d3af4804",
+    "license": "MIT",
+    "frozen_split": "artifacts/2026-09-30-grand-prize-qualifier/pherc0800_geometry_split.json",
+    "caveat": "The atlas states these meshes sit within about 5 voxels of the sheet on a small checked sample and are not voxel-accurate surface labels. Treat residuals as comparison evidence, not exact ground truth."
+  },
+  "held_out_meshes": [
+    {
+      "path": "meshes/PHerc0800/z7472_w020",
+      "reference_winding": 20,
+      "core_z_half_open": [
+        7744,
+        8000
+      ],
+      "blobs": {
+        "meta": "60d2c8239b28cdb9b681eea67e0f665d389013d7",
+        "x": "f803956d579059ed894c01fdd451358ff5ac5a68",
+        "y": "3614816396ce1d20acf8a6cec8016818c067618c",
+        "z": "6d40546740939000ca77e78b957510805974cd38"
+      }
+    },
+    {
+      "path": "meshes/PHerc0800/z7472_w100",
+      "reference_winding": 100,
+      "core_z_half_open": [
+        7744,
+        8000
+      ],
+      "blobs": {
+        "meta": "8e07827e69f3334002f270e83c5440482c081385",
+        "x": "d588d2fc3bf6b569bad58599840a7d66e198e152",
+        "y": "ecb734b82c3809cf6e6d4f6b9e165f2213370f6a",
+        "z": "7b021d0b6b18b491a0026be732916fa028915377"
+      }
+    },
+    {
+      "path": "meshes/PHerc0800/z10464_w020",
+      "reference_winding": 20,
+      "core_z_half_open": [
+        10736,
+        10992
+      ],
+      "blobs": {
+        "meta": "6710bc3f78beea723dbb99d3f3154e1dbd9e5317",
+        "x": "285f5b529858a0f783c42865c8d19080a0fb293f",
+        "y": "83e173b306d3a166c2cb2ce1cc4d9ad8cc8e998d",
+        "z": "e5e18c845df2a3e57a4aa91d80ee06620ca639e9"
+      }
+    },
+    {
+      "path": "meshes/PHerc0800/z10464_w100",
+      "reference_winding": 100,
+      "core_z_half_open": [
+        10736,
+        10992
+      ],
+      "blobs": {
+        "meta": "23ca7191424af6eced496bdcc482f26661a5926e",
+        "x": "010fc82c7ad4e326a316bb52302b37047edfb893",
+        "y": "bcc6f520fcc7aceab9901a40bf56952eb9badaec",
+        "z": "4fd9e416d0d3cd3504019aef0e347521004bca8e"
+      }
+    },
+    {
+      "path": "meshes/PHerc0800/z15872_w020",
+      "reference_winding": 20,
+      "core_z_half_open": [
+        16145,
+        16401
+      ],
+      "blobs": {
+        "meta": "fee7d3354403af44135d7659248521a922f3d336",
+        "x": "a2403f3571dcb35fe98e00125ccfc78ee71f9322",
+        "y": "1d1d3cc1c9b56ce951302d89a208352e0852aa03",
+        "z": "a5a4a874c739681a6c1c6a4376b79d011a26e748"
+      }
+    },
+    {
+      "path": "meshes/PHerc0800/z15872_w100",
+      "reference_winding": 100,
+      "core_z_half_open": [
+        16145,
+        16401
+      ],
+      "blobs": {
+        "meta": "20831e2d292f3a9bbfb90ff3e0281d2dc9d9a0ce",
+        "x": "ff67b6c402ac3ff9a3935f456e96184b1ac948ab",
+        "y": "74a3ddfcfc8add40a7e3c21bb5d61668b9186a78",
+        "z": "25fdcea4e0109ae3a5ac96ad687eb69dea65eb01"
+      }
+    }
+  ],
+  "target_sampling": {
+    "validity_rule": "x/y/z are single-channel same-shape arrays; a vertex is valid when z > 0 and x,y,z are finite, matching ScrolIQ TIFXYZ validity.",
+    "core_rule": "Keep only valid reference vertices whose z coordinate is in that mesh's frozen half-open core.",
+    "order": "Flatten eligible grid indices in C row-major order.",
+    "max_points_per_mesh": 1024,
+    "selection": "Let N be eligible vertices and K=min(N,1024). Select ranks floor((i+0.5)*N/K) for i=0..K-1. Target ID is <mesh_uuid>:r<row>:c<col>.",
+    "uses_prediction_geometry": false,
+    "uses_ink": false
+  },
+  "predicted_surface_distance": {
+    "predicted_grid_format": "NPZ or equivalent per-winding grids with arrays shaped (3,H,W) in XYZ base voxels; invalid points have coordinate <=0 according to the producer's convention.",
+    "triangle_rule": "A quad is valid when all four vertices are finite and valid. Split each valid quad deterministically into triangles (00,01,11) and (00,11,10).",
+    "z_search_margin_voxels": 64,
+    "distance": "Exact Euclidean point-to-triangle distance to triangles whose z extent intersects [core_lo-64, core_hi+64].",
+    "neighbor_windings": [
+      -2,
+      -1,
+      0,
+      1,
+      2
+    ]
+  },
+  "winding_index_alignment": {
+    "uses_held_out_meshes": false,
+    "reference_data": "Only fit-role meshes in the frozen PHerc0800 split.",
+    "candidate_offsets": [
+      -8,
+      -7,
+      -6,
+      -5,
+      -4,
+      -3,
+      -2,
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "rule": "For each candidate offset, compare sampled fit-role mesh wNNN points to predicted winding w(NNN+offset). Choose the offset minimizing the median of per-mesh median distances. Candidate offsets missing a required predicted winding/core are ineligible. Tie break by smaller absolute offset, then smaller signed offset.",
+    "purpose": "Resolve only a constant global winding-number convention; no local or held-out-dependent remapping is allowed."
+  },
+  "held_out_metrics_per_mesh": [
+    "sample_count",
+    "expected_winding_median_distance_voxels",
+    "expected_winding_p95_distance_voxels",
+    "expected_winding_p99_distance_voxels",
+    "fraction_distance_le_5_voxels",
+    "fraction_distance_le_10_voxels",
+    "expected_winding_nearest_fraction_among_plus_minus_2",
+    "nearest_winding_delta_counts",
+    "missing_or_unscorable_samples"
+  ],
+  "reporting_policy": {
+    "equal_status_for_all_six_meshes": true,
+    "failures_remain_denominator": true,
+    "no_single_composite_score": true,
+    "report_each_axial_window_and_winding_separately": true,
+    "ink_may_not_select_variant": true,
+    "note": "Because the atlas meshes are approximate surfaces rather than voxel-accurate labels, absolute residual thresholds are descriptive. Method promotion must consider residuals, completeness and neighboring-winding behavior together."
+  }
+}
