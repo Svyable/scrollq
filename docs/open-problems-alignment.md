@@ -126,7 +126,7 @@ Next, attach the actual measured outputs for normal-offset, adjacent-winding, ge
 
 The first diagnostic-to-review bridge is implemented. `scroliq-vc3d-review` converts a ScrolIQ review queue into native VC3D PointCollections v1 JSON, hash-binds the file to the exact diagnostic source, and preserves machine context in collection tags. The frozen PHercParis4 winding-attachment result ships five deduplicated VC3D markers for six flagged constraints; they load through VC3D's standard point-collection path. See [VC3D-native review bundles](vc3d-review-bundles.md).
 
-The remaining half of the loop is correction provenance: a reviewer-confirmed edit should be exportable from VC3D, bound to the reviewed finding, and fed into a new diagnostic pass without losing the before/after evidence.
+Correction provenance is now implemented as a fail-closed round trip. A reviewer can tag each native VC3D review collection, optionally correct only its winding value, save the PointCollections file, and run `scroliq-vc3d-review-ingest`. The resulting ledger is bound to the exact diagnostic, original review bundle, returned VC3D file, upstream winding-input hashes, reviewer identity, review time, and documented human minutes. The next measurable step is deterministic application of confirmed annotation corrections to the hash-matched source PointCollections file, followed by a fresh winding-attachment run and before/after comparison.
 
 ## Grand Prize readiness
 

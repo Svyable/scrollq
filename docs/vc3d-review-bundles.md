@@ -61,6 +61,88 @@ The exported file preserves:
 - finding count and maximum absolute residual;
 - every flagged patch piece, residual and attachment distance.
 
-This closes a practical loop: ScrolIQ can detect a high-value inconsistency,
-hand the exact location to the standard VC3D review environment, and keep the
-diagnostic evidence attached to the marker a reviewer sees.
+The committed Paris4 bundle is regression-tested against a fresh deterministic
+export from the frozen `result.json`. This makes the review artifact itself
+part of the reproducible evidence chain.
+
+## Record the review in VC3D
+
+A reviewer records exactly one status and one note on every review collection.
+VC3D already exposes collection tags through its agent bridge, so no custom
+review format or UI is required.
+
+Allowed `scroliq_review_status` values are:
+
+- `annotation_corrected`: the annotation winding is wrong and the marker's
+  `wind_a` has been changed to the reviewed winding;
+- `patch_issue`: the annotation should remain unchanged and the conflicting
+  patch/attachment is the suspected problem;
+- `no_issue`: inspection does not support changing the annotation or blaming
+  the flagged patch;
+- `uncertain`: the evidence is insufficient for a correction.
+
+Every collection also requires a non-empty `scroliq_review_note`. For example:
+
+```text
+vc3d_set_point_collection_tag(
+  collection_id=3,
+  key="scroliq_review_status",
+  value="patch_issue"
+)
+vc3d_set_point_collection_tag(
+  collection_id=3,
+  key="scroliq_review_note",
+  value="Annotation follows the local sheet; flagged patch is on a different winding."
+)
+```
+
+For `annotation_corrected`, edit only the winding value on the existing marker:
+
+```text
+vc3d_update_point(point_id=3, collection_id=3, winding=2)
+```
+
+Do not move review markers, rename their collections, remove provenance tags, or
+add unrelated tags. Save the reviewed collection set through VC3D:
+
+```text
+vc3d_save_points_json(path="/tmp/paris4-winding-reviewed.points.json")
+```
+
+## Ingest reviewed decisions
+
+`scroliq-vc3d-review-ingest` verifies the returned VC3D file against both the
+original review bundle and the exact diagnostic `result.json`. It then emits a
+deterministic review ledger:
+
+```bash
+scroliq-vc3d-review-ingest \
+  --original artifacts/2026-10-03-paris4-winding-attachment/vc3d-review-points.json \
+  --reviewed /tmp/paris4-winding-reviewed.points.json \
+  --diagnostic-result artifacts/2026-10-03-paris4-winding-attachment/result.json \
+  --reviewer REVIEWER_ID \
+  --reviewed-at 2026-10-03T18:00:00-05:00 \
+  --review-minutes 25 \
+  --out /tmp/paris4-winding-review-ledger.json
+```
+
+The ingest fails closed if provenance tags change, collections or point ids
+change, a marker moves beyond the lossless VC3D float32 round trip, a winding
+changes without `annotation_corrected`, an annotation correction leaves the
+winding unchanged, any decision/note is missing, or the original bundle cannot
+be regenerated from the supplied diagnostic source.
+
+The ledger binds:
+
+- the exact diagnostic, original bundle and reviewed bundle SHA-256 hashes;
+- the original winding-input hashes carried by the diagnostic;
+- every review decision and note;
+- before/after winding values;
+- reviewer identity, timezone-aware completion time and documented human-review
+  minutes.
+
+That closes the provenance half of the review loop without pretending that a
+human classification is itself proof of CT support or downstream improvement.
+The next step is deterministic application of confirmed annotation corrections
+to the hash-matched source PointCollections file, followed by a fresh diagnostic
+and before/after comparison.
