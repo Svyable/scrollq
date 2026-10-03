@@ -60,8 +60,10 @@ scroliq-eval \
   --out out/nader-ink-v2.eval.json
 ```
 
-A ranked report requires every preflight check to pass and every expected
-region to return a valid score for the declared primary metric.
+A ranked report requires every preflight check to pass, the task-adapter result
+file to echo the exact verified checkpoint/script/config hashes for the
+inference run it scored, and every expected region to return a valid score for
+the declared primary metric.
 
 ### Inference configuration identity
 
@@ -77,6 +79,16 @@ should not be encoded here unless they themselves change model behavior.
 The goal is to make two materially different inference procedures
 cryptographically distinguishable without hard-coding one model family's CLI
 into the task-neutral evaluator.
+
+The trusted task adapter must also copy the verified
+`checkpoint_sha256`, `inference_script_sha256`, and
+`inference_config_sha256` into the result file's `provenance` object.
+`scroliq-eval` compares those values to the bytes/configuration verified in
+the current evaluation and blocks ranking on a missing or stale identity. This
+prevents a result JSON produced under one inference procedure from being
+silently scored as though it came from another. It does not by itself prove
+that arbitrary prediction files came from that run; runner-to-prediction
+artifact binding remains the responsibility of the task adapter.
 
 ## Blind evaluation boundary
 
