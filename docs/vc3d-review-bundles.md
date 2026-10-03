@@ -143,6 +143,39 @@ The ledger binds:
 
 That closes the provenance half of the review loop without pretending that a
 human classification is itself proof of CT support or downstream improvement.
-The next step is deterministic application of confirmed annotation corrections
-to the hash-matched source PointCollections file, followed by a fresh diagnostic
-and before/after comparison.
+
+## Apply confirmed annotation corrections
+
+`scroliq-winding-apply-review` consumes the review ledger and the exact
+`relative_windings.json` whose SHA-256 was carried through the diagnostic.
+It applies only decisions marked `annotation_corrected`, never edits the source
+in place, and writes both a new native PointCollections file and a deterministic
+application manifest.
+
+```bash
+scroliq-winding-apply-review \
+  --source INPUT/relative_windings.json \
+  --ledger /tmp/paris4-winding-review-ledger.json \
+  --out /tmp/relative_windings.corrected.json \
+  --manifest-out /tmp/relative_windings.application.json
+```
+
+The application fails closed if the source hash differs from the reviewed
+diagnostic input, the ledger summary disagrees with its decisions, a correction
+targets a missing collection or point, the source winding or XYZ no longer
+matches the reviewed point, two corrections target the same source point, or a
+supposed correction does not actually change `wind_a`. Non-correction decisions
+never change source data.
+
+The application manifest binds the source, review ledger, reviewed VC3D bundle,
+diagnostic, reviewer/time record, corrected output hash, and every before/after
+winding edit. The tool currently applies relative-winding corrections only.
+That is intentional: a `relative:<collection-id>` frame maps unambiguously back
+to the native source collection, while the shared `absolute` frame does not
+carry enough source-collection identity to edit safely.
+
+A corrected file is still only a reviewed hypothesis. The next evidence step is
+to construct a rerun dataset with the corrected relative file, leave every other
+input byte-identical, run the pre-registered winding-attachment diagnostic again,
+and compare its decision, residual distribution and positive-control performance
+against the frozen baseline.
