@@ -2,12 +2,13 @@ import copy
 import hashlib
 import json
 
+from scrollq.package_hash import sha256_path
 from scrollq.provenance import validate_manifest
 
 
 def _manifest():
     return {
-        "schema_version": 4,
+        "schema_version": 5,
         "rules": {
             "url": "https://scrollprize.org/prizes",
             "as_of": "2026-09-30",
@@ -32,11 +33,16 @@ def _manifest():
             "uri": "s3://vesuvius/PHerc0813/volumes/20250821151723.zarr",
             "zarr_audit": {
                 "tool": "zarr-pyramid-audit",
-                "manifest_sha256": "c" * 64,
-                "root": (
-                    "s3://vesuvius/PHerc0813/volumes/"
-                    "20250821151723.zarr"
-                ),
+                "path": "zpa-report.json",
+                "sha256": "c" * 64,
+                "root": "PHerc0813/volumes/20250821151723.zarr",
+                "integrity": "PASS",
+                "source_attestation": {
+                    "algorithm": "zpa-metadata-semantics-v1",
+                    "state": "PRESENT",
+                    "metadata_semantics_sha256": "5" * 64,
+                    "axes": ["z", "y", "x"],
+                },
             },
         },
         "region_sets": [
@@ -98,6 +104,17 @@ def _manifest():
                 "sha256": "d" * 64,
                 "checkpoint_license": "MIT",
                 "training_dataset_ids": ["dataset:ink-v1"],
+                "input_contract": {
+                    "axes": ["z", "y", "x"],
+                    "source_voxel_size_um": 9.362,
+                    "model_voxel_size_um": 9.362,
+                    "resampling": "none",
+                    "window_voxels_zyx": [17, 64, 64],
+                    "preprocessing_profile": {
+                        "public_url": "https://example.org/models/ink-v1/preprocessing.json",
+                        "sha256": "6" * 64,
+                    },
+                },
                 "stochastic": {
                     "training": True,
                     "inference": True,
@@ -269,6 +286,70 @@ def _ink_report(manifest):
     }
 
 
+def _zpa_report(manifest):
+    audit = manifest["ct_volume"]["zarr_audit"]
+    attestation = audit["source_attestation"]
+    return {
+        "schema_version": "1.3.0",
+        "tool": "zarr-pyramid-audit",
+        "tool_version": "0.4.0",
+        "root": audit["root"],
+        "kind": "pyramid",
+        "zarr_format": 3,
+        "evidence": {"state": "PRESENT", "reason": None},
+        "source_attestation": {
+            "algorithm": attestation["algorithm"],
+            "state": attestation["state"],
+            "metadata_semantics_sha256": attestation[
+                "metadata_semantics_sha256"
+            ],
+            "axes": list(attestation["axes"]),
+            "base_declared_scale": [9.362, 9.362, 9.362],
+            "absolute_scale_state": "unspecified",
+            "spatial_axes": [
+                {"index": 0, "name": "z", "unit": "micrometer"},
+                {"index": 1, "name": "y", "unit": "micrometer"},
+                {"index": 2, "name": "x", "unit": "micrometer"},
+            ],
+        },
+        "integrity": "PASS",
+        "max_severity": "none",
+        "coverage": {
+            "levels_declared": 1,
+            "levels_present": 1,
+            "levels_unknown": 0,
+            "chunk_presence": {"PRESENT": 1, "ABSENT": 0, "UNKNOWN": 0},
+        },
+        "levels": [
+            {
+                "path": "0",
+                "index": 0,
+                "present": True,
+                "evidence_state": "PRESENT",
+                "evidence_reason": None,
+                "shape": [10, 10, 10],
+                "chunks": [5, 5, 5],
+                "dtype": "uint16",
+                "declared_scale": [9.362, 9.362, 9.362],
+                "zarr_format": 3,
+                "has_chunks": True,
+                "chunk_evidence_state": "PRESENT",
+                "chunk_evidence_reason": None,
+            }
+        ],
+        "findings": [],
+    }
+
+
+def _write_zpa_report(tmp_path, manifest):
+    payload = json.dumps(_zpa_report(manifest), sort_keys=True).encode("utf-8")
+    (tmp_path / "zpa-report.json").write_bytes(payload)
+    manifest["ct_volume"]["zarr_audit"]["sha256"] = hashlib.sha256(
+        payload
+    ).hexdigest()
+    return payload
+
+
 def test_valid_manifest_builds_a_complete_render_chain():
     report = validate_manifest(_manifest())
 
@@ -379,6 +460,48 @@ def test_higher_resolution_same_scroll_training_source_is_rejected():
     assert "GP_HIGHER_RES_SAME_SCROLL_SOURCE" in _codes(report)
 
 
+def test_model_source_voxel_must_match_eligible_volume():
+    manifest = _manifest()
+    manifest["models"][0]["input_contract"]["source_voxel_size_um"] = 9.0
+
+    report = validate_manifest(manifest)
+
+    assert "GP_MODEL_SOURCE_VOXEL" in _codes(report)
+
+
+def test_model_axes_must_match_audited_source():
+    manifest = _manifest()
+    manifest["models"][0]["input_contract"]["axes"] = ["x", "y", "z"]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_MODEL_INPUT_AXES" in _codes(report)
+
+
+def test_held_out_window_must_match_model_contract():
+    manifest = _manifest()
+    manifest["models"][0]["input_contract"]["window_voxels_zyx"] = [9, 32, 32]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_INK_EVIDENCE_WINDOW" in _codes(report)
+
+
+def test_local_zpa_attestation_mismatch_fails_closed(tmp_path):
+    manifest = _manifest()
+    report_payload = _zpa_report(manifest)
+    report_payload["source_attestation"]["metadata_semantics_sha256"] = "9" * 64
+    payload = json.dumps(report_payload, sort_keys=True).encode("utf-8")
+    (tmp_path / "zpa-report.json").write_bytes(payload)
+    manifest["ct_volume"]["zarr_audit"]["sha256"] = hashlib.sha256(
+        payload
+    ).hexdigest()
+
+    result = validate_manifest(manifest, root_dir=tmp_path)
+
+    assert "GP_CT_SOURCE_ATTESTATION_MISMATCH" in _codes(result)
+
+
 def test_package_file_hashes_are_verified(tmp_path):
     manifest = _manifest()
     payloads = {
@@ -404,11 +527,50 @@ def test_package_file_hashes_are_verified(tmp_path):
     manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
         payloads["held_out_validation.json"]
     ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
 
     report = validate_manifest(manifest, root_dir=tmp_path)
     assert report["eligible"] is True
 
     (tmp_path / "column_01.tif").write_bytes(b"tampered")
+    report = validate_manifest(manifest, root_dir=tmp_path)
+    assert "GP_HASH_MISMATCH" in _codes(report)
+
+
+def test_tifxyz_directory_tree_hash_is_verified(tmp_path):
+    manifest = _manifest()
+    mesh_dir = tmp_path / "column_01.tifxyz"
+    mesh_dir.mkdir()
+    (mesh_dir / "meta.json").write_text('{"format":"tifxyz"}', encoding="utf-8")
+    (mesh_dir / "x.tif").write_bytes(b"x")
+    (mesh_dir / "y.tif").write_bytes(b"y")
+    (mesh_dir / "z.tif").write_bytes(b"z")
+
+    ink_payload = json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
+    payloads = {
+        "column_01.tif": b"render",
+        "banner.tif": b"banner",
+        "held_out_validation.json": ink_payload,
+    }
+    for name, payload in payloads.items():
+        (tmp_path / name).write_bytes(payload)
+
+    manifest["meshes"][0]["sha256"] = sha256_path(mesh_dir)
+    manifest["renders"][0]["sha256"] = hashlib.sha256(
+        payloads["column_01.tif"]
+    ).hexdigest()
+    manifest["banner"]["sha256"] = hashlib.sha256(
+        payloads["banner.tif"]
+    ).hexdigest()
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        ink_payload
+    ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
+
+    report = validate_manifest(manifest, root_dir=tmp_path)
+    assert report["eligible"] is True
+
+    (mesh_dir / "x.tif").write_bytes(b"tampered")
     report = validate_manifest(manifest, root_dir=tmp_path)
     assert "GP_HASH_MISMATCH" in _codes(report)
 
@@ -585,6 +747,7 @@ def test_local_ink_report_mismatch_fails_closed(tmp_path):
     manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
         payload
     ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
 
     result = validate_manifest(manifest, root_dir=tmp_path)
 
