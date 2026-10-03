@@ -22,7 +22,7 @@ Required per submitted mesh:
 
 | claim | v1 PASS authority | interpretation |
 |---|---|---|
-| `flattening-isometry` | **authorized:** `flatcheck-grid/v1` | whole submitted tifxyz grid clears flatcheck's declared bar, has no collapse and zero foldovers |
+| `flattening-isometry` | **not yet authorized** | `flatcheck-grid/v1` is ingested as independent evidence, but Flatcheck's native JSON names the mesh path without hashing its input bytes; ScrolIQ refuses to turn a potentially stale report into a package-level PASS |
 | `mesh-self-intersection` | **authorized:** `windcheck-check/v1` | windcheck's `windcheck_check/v1` certificate says CLEAN and both triangulations contain zero transverse contacts |
 | `render-handedness` | **not yet authorized** | `handcheck` can determine mesh orientation, but the final render transform must also be bound before this can be a package-level PASS |
 
@@ -34,7 +34,7 @@ Required once for the exact eligible volume:
 
 Advisory claims are recorded but do not authorize READY: `surface-sheet-identity`, `surface-ct-support`, and `cross-scan-registration`.
 
-Therefore **policy v1 is expected to remain UNKNOWN at full-package level** even after the two currently objective geometry checks pass. That is deliberate. The next policy revisions must close handedness and calibrate a pre-registered spiral acceptance rule before READY can become reachable.
+Therefore **policy v1 is expected to remain UNKNOWN at full-package level** even when the currently authorized self-intersection check passes. That is deliberate. READY remains unreachable until flattening evidence is exact-byte-bound, handedness is bound through the final render, and a pre-registered spiral acceptance rule exists.
 
 ## Native evidence, not copied conclusions
 
@@ -46,12 +46,19 @@ For Grand Prize readiness, `--root-dir` is mandatory. ScrolIQ:
 2. checks its SHA-256 against the ledger;
 3. parses it with the named adapter;
 4. recomputes claim/status/summary;
-5. fails on any mismatch.
+5. verifies the native diagnostic's own input identity against the submitted mesh when that format supports content identity;
+6. fails on any mismatch.
 
 A hand-edited `"status": "pass"` therefore cannot authorize a required claim.
 Mesh-scoped entries also carry the canonical tifxyz tree digest; `scroliq-gp-ready`
 compares it to the mesh digest in the provenance manifest, so evidence from a
 different mesh cannot be relabeled onto the submitted mesh ID.
+
+This distinction is intentional. A digest recorded by ScrolIQ *after* the fact
+proves which mesh is in the package; it does not prove that an older third-party
+report consumed those bytes. A tool may authorize PASS only when its native
+evidence is itself content-bound and ScrolIQ can independently re-check that
+binding.
 
 ### Flatcheck
 
@@ -74,7 +81,7 @@ scroliq-evidence-import flatcheck \
   --out evidence/column_01-flatcheck.entry.json
 ```
 
-The adapter evaluates the **grid** result because the tifxyz grid is the submitted render canvas. A SLIM/ARAP alternative cannot make a failing submitted grid pass.
+The adapter evaluates the **grid** result because the tifxyz grid is the submitted render canvas. A SLIM/ARAP alternative cannot make a failing submitted grid pass. Flatcheck reports remain useful independent corroboration, but policy v1 deliberately downgrades a declared Flatcheck PASS to unresolved because the native report does not hash the input tifxyz. The clean fix is upstream input-content identity or a verifier-controlled rerun; ScrolIQ does not substitute filename equality for that proof.
 
 ### Windcheck
 
@@ -97,7 +104,9 @@ scroliq-evidence-import windcheck \
   --out evidence/column_01-windcheck.entry.json
 ```
 
-The adapter checks the certificate schema, report-only flag, both transverse-contact counts, crossing-event count, `clean` flag and clean definition. A contradictory certificate is refused rather than interpreted.
+The adapter checks the certificate schema, report-only flag, both transverse-contact counts, crossing-event count, `clean` flag and clean definition. It then independently recomputes the certificate's `windcheck_mesh_manifest/v1` identity against the submitted `x.tif`, `y.tif`, `z.tif`, masks and `meta.json`. A contradictory certificate, malformed manifest, stale report, or byte mismatch is refused rather than interpreted.
+
+For corpus/release evidence, the existing `scroliq-evidence-bind` path remains the preferred way to compose ScrolIQ Mesh IQ with Windcheck's public release index: it already distinguishes coordinate-exact from semantic-exact binding and refuses to launder measurements from a transformed base onto the published original.
 
 ## Ledger format
 
@@ -145,8 +154,8 @@ Validate a ledger against the package:
 scroliq-evidence \
   --ledger submission/evidence.json \
   --volume-id 20250821151723 \
-  --mesh-id mesh:column-01 \
-  --mesh-id mesh:column-02 \
+  --mesh mesh:column-01=column_01.tifxyz \
+  --mesh mesh:column-02=column_02.tifxyz \
   --root-dir submission \
   --out submission/evidence.validation.json
 ```
@@ -167,9 +176,10 @@ The readiness report retains both graph digests and separates blockers from unre
 
 Do not weaken v1 just to obtain READY. Close the remaining claims with independent semantics:
 
-1. **Handedness:** ingest `handcheck`'s decision, then bind its required correction to the exact final renderer command/output. Orientation knowledge alone is not proof that the submitted image applied it.
-2. **Spiral held-out quality:** ingest `spiralcheck` with `--manifest --fit-inputs`, require a non-empty unseen aggregate and clean hash/leakage audit, then calibrate and pre-register an acceptance rule on public reference surfaces before it may authorize PASS.
-3. **Surface identity:** add `xsec`/physical-CT evidence for sheet jumps as an advisory channel first; promote only after a reproducible automated decision rule exists.
-4. **Ink/legibility:** keep separate from geometry readiness. Existing `scroliq-ink-validate` proves deterministic held-out signal evidence and controls, but the Grand Prize's character-level legibility bar still requires its own evidence.
+1. **Flattening:** either upstream a content-identity block into Flatcheck's native report or add a verifier-controlled rerun path; only then promote `flatcheck-grid/v1` to a PASS authority.
+2. **Handedness:** ingest `handcheck`'s decision, then bind its required correction to the exact final renderer command/output. Orientation knowledge alone is not proof that the submitted image applied it.
+3. **Spiral held-out quality:** ingest `spiralcheck` with `--manifest --fit-inputs`, require a non-empty unseen aggregate and clean hash/leakage audit, then calibrate and pre-register an acceptance rule on public reference surfaces before it may authorize PASS.
+4. **Surface identity:** add `xsec`/physical-CT evidence for sheet jumps as an advisory channel first; promote only after a reproducible automated decision rule exists.
+5. **Ink/legibility:** keep separate from geometry readiness. Existing `scroliq-ink-validate` proves deterministic held-out signal evidence and controls, but the Grand Prize's character-level legibility bar still requires its own evidence.
 
 An adapter must never infer PASS from a missing field, parser error, unsupported version, windowed/partial report, or a metric with no pre-registered acceptance rule.
