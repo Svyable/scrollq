@@ -94,6 +94,20 @@ of each UV-to-3D triangle Jacobian after one global UV scale aligns total area.
 This is intentionally reused rather than introducing a second distortion
 definition for the candidate method.
 
+## Tier-0 implementation fixtures
+
+Before a candidate implementation is allowed onto the sealed Tier-1 corpus,
+run it against the pinned non-promoting real-papyrus fixtures in
+[`artifacts/2026-10-03-flattening-tier0/`](../artifacts/2026-10-03-flattening-tier0/README.md).
+The set freezes exact public OBJ hashes for an ordinary PHerc0139 surface, a
+PHerc1447 hole/tear stress case, and a PHercMANBp high-distortion case. The
+verifier replays the existing OBJ audit and preserves the Challenge data's
+CC BY-NC 4.0 boundary.
+
+A successful Tier-0 result is engineering evidence only. It **cannot PROMOTE**
+a flattening backend; production promotion still requires the sealed
+column-sized Tier-1 A/B experiment from issue #114.
+
 ## Beltrami-prolongation experiment
 
 The 2026 method is attractive because it solves a heavily simplified mesh in a
