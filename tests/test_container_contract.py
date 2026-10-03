@@ -88,3 +88,6 @@ def test_publish_workflow_uses_commit_tag_and_emits_immutable_digest():
     assert 'PINNED="${IMAGE}@${DIGEST}"' in workflow
     assert "grand-prize-container-digest" in workflow
     assert "Smoke-test pushed digest" in workflow
+    assert "Verify anonymous reviewer access" in workflow
+    assert "docker logout ghcr.io" in workflow
+    assert 'docker pull "$PINNED"' in workflow
