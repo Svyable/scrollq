@@ -325,6 +325,7 @@ def _read_missingness_selected(
     selected_linear: np.ndarray,
     *,
     expected_rows: int,
+    width: int,
 ) -> tuple[np.ndarray, str, int]:
     """Read only missingness at selected raster positions while hashing raw bytes.
 
@@ -339,10 +340,19 @@ def _read_missingness_selected(
     if targets[0] < 0 or targets[-1] >= expected_rows:
         raise BenchmarkError("selected raw raster index outside expected image")
 
+    if width < 2 or expected_rows % width:
+        raise BenchmarkError("raw raster width must divide expected row count")
+
     result = np.empty(targets.size, dtype=bool)
     target_pos = 0
     data_row = 0
     hasher = hashlib.sha256()
+    first_x: float | None = None
+    current_y: float | None = None
+    previous_x: float | None = None
+    previous_row_y: float | None = None
+    x_direction: int | None = None
+    y_direction: int | None = None
 
     try:
         with path.open("rb") as handle:
@@ -365,6 +375,52 @@ def _read_missingness_selected(
                     continue
                 if not math.isfinite(x) or not math.isfinite(y):
                     continue
+
+                row_index, column_index = divmod(data_row, width)
+                if column_index == 0:
+                    if first_x is None:
+                        first_x = x
+                    elif not math.isclose(x, first_x, rel_tol=1e-9, abs_tol=1e-9):
+                        raise BenchmarkError(
+                            f"raw TXT is not row-major: row {row_index} does not reset X"
+                        )
+                    if previous_row_y is not None:
+                        dy = y - previous_row_y
+                        if math.isclose(dy, 0.0, rel_tol=0.0, abs_tol=1e-12):
+                            raise BenchmarkError(
+                                f"raw TXT is not row-major: row {row_index} repeats Y"
+                            )
+                        direction = 1 if dy > 0 else -1
+                        if y_direction is None:
+                            y_direction = direction
+                        elif direction != y_direction:
+                            raise BenchmarkError(
+                                "raw TXT row Y coordinates are not monotonic"
+                            )
+                    current_y = y
+                    previous_row_y = y
+                    previous_x = x
+                else:
+                    if current_y is None or not math.isclose(
+                        y, current_y, rel_tol=1e-9, abs_tol=1e-9
+                    ):
+                        raise BenchmarkError(
+                            f"raw TXT is not row-major: Y changes inside row {row_index}"
+                        )
+                    assert previous_x is not None
+                    dx = x - previous_x
+                    if math.isclose(dx, 0.0, rel_tol=0.0, abs_tol=1e-12):
+                        raise BenchmarkError(
+                            f"raw TXT X repeats inside row {row_index}"
+                        )
+                    direction = 1 if dx > 0 else -1
+                    if x_direction is None:
+                        x_direction = direction
+                    elif direction != x_direction:
+                        raise BenchmarkError(
+                            "raw TXT X coordinates are not monotonic within rows"
+                        )
+                    previous_x = x
 
                 if target_pos < targets.size and data_row == int(targets[target_pos]):
                     result[target_pos] = not math.isfinite(z)
@@ -549,6 +605,7 @@ def _prepare_sample(
         raw_path,
         linear,
         expected_rows=height * width,
+        width=width,
     )
 
     return SampleEvidence(
