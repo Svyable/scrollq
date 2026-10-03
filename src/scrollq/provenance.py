@@ -469,6 +469,157 @@ def _verify_local_file(
             )
 
 
+def _verify_vc3d_mesh_context(
+    *,
+    mesh_id: str,
+    mesh: dict[str, Any],
+    root_dir: Path | None,
+    eligible_volume_id: str,
+    scroll_id: str,
+    errors: list[dict[str, str]],
+) -> dict[str, Any] | None:
+    """Bind an unpacked TIFXYZ mesh to the eligible CT using its own metadata.
+
+    Modern VC3D writers record target_volume in meta.json. When a local
+    submission root is available we require that evidence for directory-format
+    TIFXYZ meshes, rather than trusting only the provenance manifest's
+    self-declared ct_volume_id.
+    """
+
+    if root_dir is None:
+        return None
+
+    p = f"meshes[{mesh_id}]"
+    rel = mesh.get("path")
+    proof: dict[str, Any] = {
+        "mesh_id": mesh_id,
+        "path": rel,
+        "checked": False,
+        "target_volume": None,
+        "scroll_source": None,
+        "source": None,
+        "scale": None,
+        "meta_sha256": None,
+    }
+    if not isinstance(rel, str) or not rel:
+        return proof
+
+    candidate = root_dir / rel
+    target = candidate.resolve()
+    try:
+        target.relative_to(root_dir.resolve())
+    except ValueError:
+        return proof
+    if not candidate.exists():
+        return proof
+    if not candidate.is_dir():
+        _error(
+            errors,
+            "GP_MESH_TIFXYZ_LAYOUT",
+            f"{p}.path",
+            "Grand Prize TIFXYZ mesh must be an unpacked directory with meta.json",
+        )
+        return proof
+
+    meta_path = candidate / "meta.json"
+    if not meta_path.is_file():
+        _error(
+            errors,
+            "GP_MESH_META",
+            f"{p}.path",
+            "unpacked TIFXYZ mesh is missing meta.json",
+        )
+        return proof
+
+    try:
+        raw = meta_path.read_bytes()
+        meta = json.loads(raw)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        _error(
+            errors,
+            "GP_MESH_META",
+            f"{p}.path",
+            f"cannot parse TIFXYZ meta.json: {exc}",
+        )
+        return proof
+    if not isinstance(meta, dict):
+        _error(
+            errors,
+            "GP_MESH_META",
+            f"{p}.path",
+            "TIFXYZ meta.json must be a JSON object",
+        )
+        return proof
+
+    proof.update(
+        {
+            "checked": True,
+            "target_volume": meta.get("target_volume"),
+            "scroll_source": meta.get("scroll_source"),
+            "source": meta.get("source"),
+            "scale": meta.get("scale"),
+            "meta_sha256": hashlib.sha256(raw).hexdigest(),
+        }
+    )
+
+    if meta.get("format") != "tifxyz":
+        _error(
+            errors,
+            "GP_MESH_META_FORMAT",
+            f"{p}.path",
+            "mesh meta.json must declare format='tifxyz'",
+        )
+
+    target_volume = meta.get("target_volume")
+    if not isinstance(target_volume, str) or eligible_volume_id not in target_volume:
+        _error(
+            errors,
+            "GP_MESH_TARGET_VOLUME",
+            f"{p}.path",
+            (
+                "VC3D meta.json target_volume must identify the exact eligible "
+                f"volume {eligible_volume_id!r}"
+            ),
+        )
+
+    scroll_source = meta.get("scroll_source")
+    if (
+        isinstance(scroll_source, str)
+        and scroll_source
+        and scroll_id not in scroll_source
+    ):
+        _error(
+            errors,
+            "GP_MESH_SCROLL_SOURCE",
+            f"{p}.path",
+            (
+                f"VC3D meta.json scroll_source {scroll_source!r} does not "
+                f"identify submitted scroll {scroll_id!r}"
+            ),
+        )
+
+    scale = meta.get("scale")
+    if not (
+        isinstance(scale, list)
+        and len(scale) == 2
+        and all(
+            isinstance(value, (int, float))
+            and not isinstance(value, bool)
+            and math.isfinite(float(value))
+            and float(value) > 0
+            for value in scale
+        )
+    ):
+        _error(
+            errors,
+            "GP_MESH_SCALE",
+            f"{p}.path",
+            "TIFXYZ meta.json must carry a positive finite 2D scale",
+        )
+
+    return proof
+
+
 def _verify_zpa_evidence(
     *,
     zarr_audit: dict[str, Any],
@@ -1093,6 +1244,7 @@ def validate_manifest(
     warnings: list[dict[str, str]] = []
     chains: list[dict[str, Any]] = []
     held_out_proofs: list[dict[str, Any]] = []
+    mesh_context_proofs: list[dict[str, Any]] = []
 
     if manifest.get("schema_version") != SCHEMA_VERSION:
         _error(
@@ -1675,6 +1827,16 @@ def validate_manifest(
                 )
         _check_sha(mesh, p, errors)
         _verify_local_file(mesh, p, root_dir, errors)
+        context_proof = _verify_vc3d_mesh_context(
+            mesh_id=mesh_id,
+            mesh=mesh,
+            root_dir=root_dir,
+            eligible_volume_id=str(volume_id),
+            scroll_id=str(scroll_id),
+            errors=errors,
+        )
+        if context_proof is not None:
+            mesh_context_proofs.append(context_proof)
 
     recto_coverage = manifest.get("recto_coverage")
     recto_coverage_proof: dict[str, Any] | None = None
@@ -1969,6 +2131,7 @@ def validate_manifest(
         "warnings": warnings,
         "render_chains": chains,
         "held_out_validation_proofs": held_out_proofs,
+        "mesh_context_proofs": mesh_context_proofs,
         "zarr_audit_proof": {
             "root": zpa_report.get("root") if isinstance(zpa_report, dict) else None,
             "integrity": (
