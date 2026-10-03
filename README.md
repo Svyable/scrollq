@@ -741,6 +741,17 @@ tool adds no annotation format. The per-line 70% calculation is explicitly an
 optimization heuristic; the official 70% rule remains per counted column, and
 the Challenge determines which submitted lines are actually legible.
 
+### Executable VC3D render receipts
+
+`scroliq-vc3d` runs one controlled `vc_render_tifxyz` column render and
+emits a hash-bound receipt covering the exact Villa commit and binary, eligible
+volume ID, complete TIFXYZ tree, physical render parameters, argv, log, and raw
+`00.tif`. It explicitly passes voxel size in micrometers and prevents
+critical VC3D flags from being overridden through extra arguments. The
+independent `verify` command re-hashes and re-decodes those artifacts; with
+`--binary` it also rechecks the executable fingerprint. See
+[the VC3D render-receipt contract](docs/vc3d-render-receipt.md).
+
 ### 2027 Grand Prize submission images
 
 `scroliq-submission-image` turns final VC3D renders into the exact reviewer-facing image forms required by the prize. The `column` command derives the 1 cm scale-bar length from the eligible CT voxel size plus the same pyramid level and `--scale` parameters used by `vc_render_tifxyz`, appends the bar in a footer without touching papyrus pixels, and writes a SHA-pinned scale proof. The `banner` command assembles the frozen column images in numeric order and overlays every column number, rejecting gaps or duplicates. See [the submission-image contract](docs/grand-prize-images.md).
