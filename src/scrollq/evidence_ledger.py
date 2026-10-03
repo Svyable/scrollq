@@ -440,7 +440,7 @@ def validate_evidence_ledger(
         if (
             effective_status in {"pass", "fail"}
             and claim in MESH_CLAIMS
-            and adapter in APPROVED_PASS_ADAPTERS.get(str(claim), frozenset())
+            and adapter in APPROVED_VERDICT_ADAPTERS.get(str(claim), frozenset())
         ):
             if native_report is None:
                 if require_local_artifacts:
