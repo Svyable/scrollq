@@ -65,13 +65,6 @@ Eligible vertices are ordered lexicographically by TIFXYZ grid row/column.
 The requested samples are deterministic even-quantile positions in that list.
 No seed exists because no randomness is used.
 
-The implementation evaluates eligibility row-by-row with NumPy and uses two
-passes: the first counts eligible vertices per row; the second recomputes only
-rows that contain selected quantile probes. This preserves exactly the same
-lexicographic candidate ordering and quantile rule without materializing one
-Python object per eligible vertex, which makes the planner practical on
-full-resolution multi-million-vertex TIFXYZ surfaces.
-
 ## Output
 
 Each planned group contains:
