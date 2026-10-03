@@ -18,6 +18,7 @@ REPO = "https://github.com/Svyable/scrollq"
 
 PAGE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ScrolIQ — Diagnostics for reading Herculaneum scrolls</title>
 <meta name="description" content="Provenance-first evidence for Vesuvius pipelines: bind scan, mesh, winding, fiber, model and held-out validation to the exact artifacts they measure.">
@@ -28,6 +29,10 @@ PAGE = """<!doctype html>
 <meta property="og:title" content="ScrolIQ — Evidence for reading Herculaneum scrolls">
 <meta property="og:description" content="Reproducible scan diagnostics, exact-volume Grand Prize qualification, held-out geometry, and ink falsification controls.">
 <meta property="og:url" content="https://svyable.github.io/scrollq/">
+<meta property="og:image" content="https://svyable.github.io/scrollq/favicon.svg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ScrolIQ — Evidence for reading Herculaneum scrolls">
+<meta name="twitter:description" content="Reproducible scan diagnostics, exact-volume Grand Prize qualification, held-out geometry, and ink falsification controls.">
 <style>
 :root{{
   --bg:#0d0b08; --panel:#161310; --panel2:#1c1813; --line:#2c251b;
@@ -416,6 +421,9 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
   · <a href="./september-2026.html">September 2026 writeup →</a>
   · <a href="./october-2026-update.html">October 2026 update →</a>
   · <a href="./october-2026.html">October 2026 goals →</a>
+  <br>Community: <a href="https://discord.com/invite/V4fJhvtaQn">Vesuvius Discord</a>
+  · <a href="https://scrollprize.org">Vesuvius Challenge</a>
+  · <a href="https://github.com/ScrollPrize/villa">villa monorepo</a>
 </div></footer>
 
 <script>
