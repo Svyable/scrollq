@@ -70,6 +70,7 @@ def test_ci_builds_and_smoke_tests_reviewer_container():
         "scroliq-submission-image --help",
         "scroliq-legibility --help",
         "scroliq-spiral-transfer --help",
+        "scroliq-spiral-export --help",
         "zpa-gate --help",
     ):
         assert command in workflow
