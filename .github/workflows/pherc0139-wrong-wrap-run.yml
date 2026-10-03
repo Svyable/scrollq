@@ -1,0 +1,146 @@
+name: PHerc0139 wrong-wrap observation
+
+# Issue #105: execute the already-frozen independent geometry-source rule.
+# This workflow may read the published prediction/CT, but never sheetness.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/pherc0139-wrong-wrap-run.yml"
+      - "artifacts/2026-10-03-pherc0139-wrong-wrap-run/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Guard measured output
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="artifacts/2026-10-03-pherc0139-wrong-wrap-run/wrong-wrap-result.json"
+          if [ -e "$out" ]; then
+            echo "wrong-wrap observation already exists; frozen"
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install campaign code
+        if: steps.guard.outputs.skip != '1'
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+          python -m pip install -e .
+
+      - name: Record frozen input hashes
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-pherc0139-wrong-wrap-run"
+          mkdir -p "$outdir"
+          sha256sum \
+            artifacts/2026-10-03-pherc0139-wrong-wrap-prereg/wrong-wrap-spec.json \
+            artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json \
+            > "$outdir/inputs.sha256"
+
+      - name: Observe frozen independent-geometry controls
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          outdir="artifacts/2026-10-03-pherc0139-wrong-wrap-run"
+          scroliq-wrong-wrap-plan run \
+            --spec artifacts/2026-10-03-pherc0139-wrong-wrap-prereg/wrong-wrap-spec.json \
+            --reference-plan artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json \
+            --out "$outdir/wrong-wrap-result.json" \
+            | tee "$outdir/run.log"
+
+      - name: Verify measured result without selecting on outcome
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          outdir = Path("artifacts/2026-10-03-pherc0139-wrong-wrap-run")
+          result = json.loads((outdir / "wrong-wrap-result.json").read_text())
+          spec_path = Path(
+              "artifacts/2026-10-03-pherc0139-wrong-wrap-prereg/wrong-wrap-spec.json"
+          )
+          ref_path = Path(
+              "artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json"
+          )
+
+          def sha256(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+
+          assert result["schema"] == "scroliq-wrong-wrap-plan/1"
+          assert result["status"] in {"complete", "partial"}
+          assert result["sheetness_response_consulted"] is False
+          assert result["metrics"]["group_count"] == 32
+          assert (
+              result["metrics"]["wrong_wrap_found_count"]
+              + result["metrics"]["wrong_wrap_missing_count"]
+              == 32
+          )
+          assert result["spec"]["file_sha256"] == sha256(spec_path)
+          assert result["reference_plan"]["file_sha256"] == sha256(ref_path)
+          assert len(result["groups"]) == 32
+          allowed = {"found", "no-independent-competing-sheet-found"}
+          assert {row["status"] for row in result["groups"]} <= allowed
+          assert len({row["id"] for row in result["groups"]}) == 32
+
+          print(
+              "observation checks PASS:",
+              result["metrics"]["wrong_wrap_found_count"],
+              "found;",
+              result["metrics"]["wrong_wrap_missing_count"],
+              "missing; status=",
+              result["status"],
+          )
+          PY
+
+      - name: Record environment
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-pherc0139-wrong-wrap-run"
+          {
+            python --version
+            python -m pip freeze
+          } > "$outdir/environment.txt"
+
+      - name: Commit measured result to campaign branch
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/2026-10-03-pherc0139-wrong-wrap-run
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Measure PHerc0139 wrong-wrap controls"
+          branch="${{ github.head_ref || github.ref_name }}"
+          if [ "$branch" = main ]; then
+            branch=campaign/pherc0139-wrong-wrap-run
+          fi
+          git push origin "HEAD:$branch"
