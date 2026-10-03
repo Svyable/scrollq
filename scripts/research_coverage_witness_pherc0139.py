@@ -3,7 +3,7 @@
 
 Research-only runner for issue #151. It deliberately reuses the exact w035
 TIFXYZ plus the independently published surface-m7 prediction frozen in
-artifacts/2026-10-03-coverage-witness-pherc0139-prereg/spec.json.
+a previously merged coverage-witness preregistration.
 
 This is not a production ScrollQ diagnostic and is not installed as a CLI.
 """
@@ -25,8 +25,16 @@ from scrollq.support import ZarrV2Level
 from scrollq.wrong_wrap_plan import _NearestSampler
 
 
-SCHEMA = "scrollq-research-coverage-witness-pherc0139-result/1"
-SPEC_SCHEMA = "scrollq-research-coverage-witness-pherc0139/1"
+SPEC_SCHEMAS = {
+    "scrollq-research-coverage-witness-pherc0139/1": {
+        "status": "frozen-before-witness-read",
+        "result_schema": "scrollq-research-coverage-witness-pherc0139-result/1",
+    },
+    "scrollq-research-coverage-witness-pherc0139/2": {
+        "status": "frozen-before-v2-witness-read",
+        "result_schema": "scrollq-research-coverage-witness-pherc0139-result/2",
+    },
+}
 
 
 class ExperimentError(RuntimeError):
@@ -47,10 +55,16 @@ def _load_spec(path: str | Path) -> tuple[dict[str, Any], str]:
         spec = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ExperimentError(f"cannot read spec: {exc}") from exc
-    if not isinstance(spec, dict) or spec.get("schema") != SPEC_SCHEMA:
-        raise ExperimentError(f"spec must be {SPEC_SCHEMA}")
-    if spec.get("status") != "frozen-before-witness-read":
-        raise ExperimentError("spec is not frozen-before-witness-read")
+    if not isinstance(spec, dict) or spec.get("schema") not in SPEC_SCHEMAS:
+        raise ExperimentError(
+            "unsupported coverage-witness spec schema: "
+            f"{None if not isinstance(spec, dict) else spec.get('schema')!r}"
+        )
+    contract = SPEC_SCHEMAS[spec["schema"]]
+    if spec.get("status") != contract["status"]:
+        raise ExperimentError(
+            f"spec status must be {contract['status']!r} for {spec['schema']}"
+        )
     return spec, sha256_file(path)
 
 
@@ -387,7 +401,16 @@ def run(spec_path: Path, tifxyz: Path) -> dict[str, Any]:
     xyz, valid, surface_info = _load_surface(tifxyz)
     centers = spec["deletion_protocol"]["centers"]
     sizes = [int(v) for v in spec["deletion_protocol"]["square_sizes_vertices"]]
-    max_size = max(sizes)
+    max_deletion_size = max(sizes)
+    evaluation_size = int(
+        spec["deletion_protocol"].get(
+            "evaluation_window_size_vertices", max_deletion_size
+        )
+    )
+    if evaluation_size < max_deletion_size or evaluation_size % 2 != 1:
+        raise ExperimentError(
+            "evaluation window must be odd and at least the largest deletion"
+        )
 
     witness_spec = spec["witness_association"]
     offsets = [float(v) for v in witness_spec["signed_search_offsets_voxels"]]
@@ -426,7 +449,7 @@ def run(spec_path: Path, tifxyz: Path) -> dict[str, Any]:
                 xyz=xyz,
                 valid=valid,
                 center=center,
-                max_size=max_size,
+                max_size=evaluation_size,
                 offsets=offsets,
                 threshold=threshold,
                 pred_sampler=pred_sampler,
@@ -530,7 +553,7 @@ def run(spec_path: Path, tifxyz: Path) -> dict[str, Any]:
     support_counts = [int(row["window"]["witness_count"]) for row in center_results]
 
     return {
-        "schema": SCHEMA,
+        "schema": SPEC_SCHEMAS[spec["schema"]]["result_schema"],
         "status": "measured",
         "spec": {
             "path": str(spec_path),
@@ -553,6 +576,7 @@ def run(spec_path: Path, tifxyz: Path) -> dict[str, Any]:
         },
         "descriptive_witness_support": {
             "center_count": len(center_results),
+            "evaluation_window_size_vertices": evaluation_size,
             "witness_counts": support_counts,
             "min_count": min(support_counts) if support_counts else 0,
             "median_count": float(np.median(support_counts)) if support_counts else 0.0,
@@ -617,7 +641,7 @@ def main() -> int:
     try:
         result = run(Path(args.spec), Path(args.tifxyz))
     except (ExperimentError, OSError, requests.RequestException) as exc:
-        print(json.dumps({"schema": SCHEMA, "status": "invalid", "error": str(exc)}))
+        print(json.dumps({"status": "invalid", "error": str(exc)}))
         return 2
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("x", encoding="utf-8") as handle:
@@ -626,7 +650,7 @@ def main() -> int:
     print(
         json.dumps(
             {
-                "schema": SCHEMA,
+                "schema": result["schema"],
                 "status": result["status"],
                 "decision": result["decision"]["status"],
                 "min_witness_count": result["descriptive_witness_support"]["min_count"],
