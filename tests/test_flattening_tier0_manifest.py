@@ -75,4 +75,4 @@ def test_flattening_tier0_verifier_keeps_claim_boundary():
 
     assert '"promotion_eligible": False' in text
     assert "Tier-1 evidence remains mandatory" in text
-    assert "downloaded Vesuvius Challenge mesh bytes" in text
+    assert "CC-BY-NC-4.0" in text
