@@ -1,11 +1,11 @@
 # Deterministic Grand Prize submission package
 
-`scroliq-package` turns a **passing schema-v6 Grand Prize provenance
+`scroliq-package` turns a **passing schema-v7 Grand Prize provenance
 manifest** into one reviewer-facing ZIP archive. It is intentionally the last
 step after ZPA, mesh/coverage checks, model provenance, held-out ink validation,
 render generation and banner generation.
 
-The package index is schema v3. The underlying archive-byte contract remains
+The package index is schema v4. The underlying archive-byte contract remains
 `zip-stored-deterministic-v1`.
 
 It does not create missing scientific evidence. If `scroliq-provenance`
@@ -97,6 +97,7 @@ The builder includes only:
 - every submitted `column_NN.tifxyz` mesh, recursively and without
   repacking the directory internally;
 - every matching column render and its hash-pinned physical scale-bar proof sidecar;
+- every hash-pinned `scroliq-vc3d` execution receipt plus the exact raw `00.tif` and renderer log named by that receipt;
 - every local held-out-validation artifact;
 - the full-scroll banner and its hash-pinned render-set proof sidecar;
 - methodology and system-requirements documentation;
@@ -123,6 +124,7 @@ directory. It checks that:
 - the package index exists and uses the supported contract;
 - no archive member is duplicated, missing or unindexed;
 - every indexed member has the expected byte length and SHA-256;
+- package-index schema v4's per-column VC3D records are freshly reconstructed from the embedded manifest/receipt/scale-proof chain; the receipt hash must match the manifest, raw TIFF and renderer-log hashes must match archived bytes, mesh path/hash and eligible volume must match the manifest, and raw-input/voxel/group/scale fields must match the submission-image proof;
 - the embedded provenance manifest SHA-256 matches the package index;
 - the embedded provenance validation report is parseable and says
   `eligible: true`;
@@ -141,7 +143,7 @@ directory. It checks that:
 - every archive member uses lexicographic ordering plus the deterministic
   storage, timestamp, and POSIX file-mode contract.
 
-## Archive contract v1 / package index schema v3
+## Archive contract v1 / package index schema v4
 
 The archive format identifier is `zip-stored-deterministic-v1`.
 
@@ -161,8 +163,9 @@ materials produces the same ZIP bytes and therefore the same archive SHA-256.
 The generated `_scroliq/submission-package.json` contains a SHA-256 and byte
 length for every archived file other than the index itself, plus the
 provenance-manifest SHA-256, canonical provenance graph SHA-256, reviewer
-contract SHA-256, legibility-ledger SHA-256, and generated legibility-validation
-SHA-256. `_scroliq/provenance.validation.json` and
+contract SHA-256, legibility-ledger SHA-256, generated legibility-validation
+SHA-256, and one VC3D execution record per column naming the receipt, raw TIFF,
+renderer log, scale proof, mesh identity, Villa commit, and executed binary SHA-256. `_scroliq/provenance.validation.json` and
 `_scroliq/legibility.validation.json` are generated from the exact frozen
 inputs immediately before packaging.
 
