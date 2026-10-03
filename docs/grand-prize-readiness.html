@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2027 Grand Prize readiness — ScrolIQ</title>
+<meta name="description" content="A reviewer-facing map from the 2027 Vesuvius Challenge Grand Prize requirements to ScrolIQ's committed evidence, explicit gaps, and next proof required.">
+<link rel="canonical" href="https://svyable.github.io/scrollq/grand-prize-readiness.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ScrolIQ — 2027 Grand Prize readiness">
+<meta property="og:description" content="Evidence, gaps, and next proof required for the 2027 Vesuvius Challenge Grand Prize.">
+<meta property="og:url" content="https://svyable.github.io/scrollq/grand-prize-readiness.html">
+<style>
+:root{--bg:#0d0b08;--panel:#161310;--panel2:#1c1813;--line:#2c251b;--ink:#ece3d2;--muted:#a89880;--dim:#756957;--ember:#ff7a1a;--gold:#ffd166;--amber:#ffb347;--good:#8fd694;--warn:#ffb347;--bad:#ff7d7d}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.6}
+a{color:var(--amber)}a:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 1.25rem}.top{border-bottom:1px solid var(--line);background:rgba(13,11,8,.94);position:sticky;top:0;z-index:20}
+.top .wrap{display:flex;gap:1rem;align-items:center;min-height:58px}.brand{font-weight:850;color:var(--ink);text-decoration:none}.brand b{color:var(--ember)}
+.nav{display:flex;gap:.8rem;flex-wrap:wrap;margin-left:auto}.nav a{font-size:.84rem;text-decoration:none;color:var(--muted)}.nav a:hover{color:var(--ink)}
+.hero{padding:4.8rem 0 3rem;background:radial-gradient(1000px 500px at 75% -20%,rgba(255,122,26,.15),transparent 62%),var(--bg)}
+.eyebrow{font-size:.72rem;letter-spacing:.24em;color:var(--ember);font-weight:800;text-transform:uppercase}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif}.hero h1{font-size:clamp(2.25rem,5vw,4.4rem);line-height:1.02;margin:.55rem 0 .7rem;letter-spacing:-.025em}
+.lede{max-width:850px;color:var(--muted);font-size:1.08rem}.lede strong{color:var(--ink)}
+.badges{display:flex;gap:.55rem;flex-wrap:wrap;margin:1.35rem 0 0}.badge{border:1px solid var(--line);border-radius:999px;padding:.35rem .65rem;font-size:.75rem;font-weight:800;letter-spacing:.04em}
+.badge.good{color:var(--good);border-color:#35543a}.badge.partial{color:var(--warn);border-color:#634923}.badge.gap{color:var(--bad);border-color:#623a38}
+main{padding:2rem 0 4rem}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.25rem 1.35rem;margin:0 0 1rem}
+.panel h2{font-size:1.45rem;margin:.1rem 0 .8rem}.sub{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;font-weight:400;color:var(--muted);font-size:.86rem;margin-top:.2rem}
+.callout{border-left:3px solid var(--ember);background:var(--panel2);padding:1rem 1.1rem;border-radius:0 10px 10px 0;color:var(--muted)}.callout b{color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:.8rem}.card{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:1rem}.card h3{margin:.05rem 0 .5rem;font-size:1.02rem}.card p{margin:.2rem 0;color:var(--muted);font-size:.9rem}
+.tablewrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:.78rem .7rem;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}th{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.09em}td:first-child{min-width:205px;font-weight:750}
+.status{white-space:nowrap;font-weight:850;font-size:.75rem;letter-spacing:.03em}.status.good{color:var(--good)}.status.partial{color:var(--warn)}.status.gap{color:var(--bad)}
+code{background:#0b0907;border:1px solid var(--line);border-radius:5px;padding:.05rem .28rem;color:var(--gold)}ol{padding-left:1.25rem}li{margin:.45rem 0;color:var(--muted)}li b{color:var(--ink)}
+footer{border-top:1px solid var(--line);padding:1.8rem 0 3rem;color:var(--dim);font-size:.82rem}
+@media(max-width:720px){.nav{display:none}.hero{padding-top:3.4rem}th,td{padding:.65rem .5rem}}
+</style></head><body>
+<div class="top"><div class="wrap">
+<a class="brand" href="./">Scrol<b>IQ</b></a>
+<div class="nav"><a href="./">Dashboard</a><a href="#matrix">Readiness matrix</a><a href="#next">Next proofs</a><a href="./october-2026.html">October plan</a><a href="https://github.com/Svyable/scrollq">GitHub</a></div>
+</div></div>
+
+<header class="hero"><div class="wrap">
+<div class="eyebrow">Vesuvius Challenge · 2027 Grand Prize</div>
+<h1>Evidence first.<br>Prize readiness second.</h1>
+<p class="lede">This page maps the official Grand Prize requirements to what ScrolIQ can <strong>currently demonstrate from committed evidence</strong>, what is only partially covered, and what has not yet been shown. It is intentionally not a “percent complete” score: passing one diagnostic does not imply a readable scroll.</p>
+<div class="badges"><span class="badge good">implemented evidence</span><span class="badge partial">partial / proof still required</span><span class="badge gap">not yet demonstrated</span></div>
+</div></header>
+
+<main class="wrap">
+<section class="panel">
+<h2>What the prize actually requires<span class="sub">Official rules checked 2026-10-02; the Challenge page remains authoritative.</span></h2>
+<p>The 2027 Grand Prize requires a reproducible open-source pipeline, seamless VC3D integration, 100% recto unrolling, column-scale TIFXYZ meshes and images, legible ink, strict train/prediction separation, reproducibility records, false-positive mitigation, and held-out validation. The deadline is June 25, 2027.</p>
+<p><a href="https://scrollprize.org/prizes#2027-grand-prize">Read the official Grand Prize rules →</a></p>
+<div class="callout"><b>ScrolIQ's role:</b> make each stage auditable and volume-bound so weak evidence cannot silently become a readiness claim. It does not currently claim a qualifying full-scroll result.</div>
+</section>
+
+<section class="panel" id="matrix">
+<h2>Reviewer readiness matrix<span class="sub">“Implemented” means the evidence mechanism exists and is committed. It does not mean the Grand Prize requirement is satisfied for a final scroll unless stated.</span></h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Grand Prize requirement</th><th>Status</th><th>What ScrolIQ currently has</th><th>What still has to be shown</th></tr></thead>
+<tbody>
+<tr><td>Permissive open-source code and reproducible pipeline</td><td><span class="status good">IMPLEMENTED CORE</span></td><td>MIT-licensed public repository, deterministic CLI surfaces, exact-input provenance, immutable artifact campaigns, and machine-readable reports.</td><td>A single end-to-end Grand Prize runner and final reproduction package are still needed.</td></tr>
+<tr><td>Use the exact eligible CT volume</td><td><span class="status good">IMPLEMENTED GUARDRAIL</span></td><td><code>scroliq-manifest</code> and <code>scrollq-grand-prize</code> match exact volume IDs and reject same-scroll substitutions, including higher-resolution scans.</td><td>The final chosen target still needs a complete downstream evidence chain on that exact volume.</td></tr>
+<tr><td>Seamless VC3D integration</td><td><span class="status partial">PARTIAL</span></td><td>Native TIFXYZ, VC3D fiber JSON, winding PointCollections, and XYZ review coordinates are accepted or emitted across evidence layers.</td><td>An in-VC3D workflow that a reviewer can run without format translation still needs to be demonstrated.</td></tr>
+<tr><td>100% recto surface unrolled</td><td><span class="status gap">NOT SHOWN</span></td><td>Recto-coverage and geometry evidence tooling can describe coverage and reject cross-volume evidence.</td><td>A qualifying whole-scroll surface whose accepted meshes cover the required recto area, including required detached patches.</td></tr>
+<tr><td>TIFXYZ meshes with low-distortion 2D parametrization, column-scale packaging</td><td><span class="status partial">PARTIAL</span></td><td><code>scroliq-mesh</code> audits native TIFXYZ structure/provenance and selected geometry checks; passports can bind accepted mesh evidence to a volume.</td><td>Final per-column meshes, sequential naming, flattening quality evidence, and full-scroll union coverage.</td></tr>
+<tr><td>Visible text and ≥70% preserved-character legibility for counted columns</td><td><span class="status gap">NOT SHOWN</span></td><td>Ink evidence layers audit provenance and falsification controls.</td><td>Programmatic renders with papyrologically legible characters across qualifying columns.</td></tr>
+<tr><td>No train/prediction overlap</td><td><span class="status partial">AUDIT EXISTS</span></td><td><code>scroliq-ink-audit</code> fails closed on declared spatial overlap and records split, checkpoint, seed, and held-out provenance.</td><td>The final ink model must provide complete train/evaluation region declarations that pass the audit.</td></tr>
+<tr><td>Public ML datasets/checkpoints with required licensing</td><td><span class="status gap">NOT YET PACKAGED</span></td><td>Provenance fields exist for linking checkpoints and evidence runs.</td><td>Every training dataset, pseudo-label stage, checkpoint, and license required by the rules must be published and indexed.</td></tr>
+<tr><td>Fixed random seeds and public experiment tracking</td><td><span class="status partial">PARTIAL</span></td><td>ScrolIQ audits seed/checkpoint declarations and keeps deterministic analysis artifacts.</td><td>Final training and inference runs need complete public experiment-tracking records, not just metadata checks.</td></tr>
+<tr><td>Fully automated unrolling; ≤8 documented human hours</td><td><span class="status gap">NOT SHOWN</span></td><td>Machine-readable evidence contracts are designed for automation.</td><td>An end-to-end automated unrolling run plus a human-time ledger.</td></tr>
+<tr><td>Submission images, 1 cm scale bars, full-scroll numbered banner</td><td><span class="status gap">NOT SHOWN</span></td><td>Traceability contracts can bind outputs to exact inputs.</td><td>Final renderer and submission packager must generate required images, scale bars, names, and banner automatically.</td></tr>
+<tr><td>Docker image and system requirements</td><td><span class="status gap">NOT SHOWN</span></td><td>The Python package and CI establish tested software dependencies.</td><td>A supported Docker image that reproduces the final pipeline on documented hardware.</td></tr>
+<tr><td>False-positive mitigation</td><td><span class="status partial">PROTOCOL READY</span></td><td>The Grand Prize probe protocol requires correct-surface checks, normal offsets, adjacent winding, perturbed geometry, and an independent checkpoint/fold.</td><td>Measured results from those controls on the final ink candidate.</td></tr>
+<tr><td>Held-out validation on known ground truth</td><td><span class="status partial">PROTOCOL READY</span></td><td>Held-out geometry and provenance contracts are predeclared; failed regions remain in denominators.</td><td>Published quantitative held-out results for the final method, including ink validation where trained models are used.</td></tr>
+</tbody></table></div>
+</section>
+
+<section class="panel">
+<h2>Evidence already worth a reviewer’s time</h2>
+<div class="grid">
+<div class="card"><h3>Exact-volume discipline</h3><p>Grand Prize manifests are keyed to the exact official volume IDs; same-scroll substitutions are not accepted as evidence.</p><p><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-provenance.md">Provenance spec →</a></p></div>
+<div class="card"><h3>Blind geometry protocol</h3><p>First-wave targets use deterministic fit/held-out regions so geometry can be tested before committing to whole-scroll processing.</p><p><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-probe-protocol.md">Probe protocol →</a></p></div>
+<div class="card"><h3>Mesh evidence contracts</h3><p>TIFXYZ audits separate structural validity from stronger claims such as correct sheet identity.</p><p><a href="https://github.com/Svyable/scrollq/blob/main/docs/mesh-review-protocol.md">Mesh review protocol →</a></p></div>
+<div class="card"><h3>Ink falsification</h3><p>Ink evidence is treated as something to falsify, not something to “score up” until it looks convincing.</p><p><a href="https://github.com/Svyable/scrollq/blob/main/docs/ink-validation.md">Ink validation →</a></p></div>
+<div class="card"><h3>VC3D-native inputs</h3><p>Fiber and winding audits preserve exact-file provenance while reading formats already used by the Challenge tooling.</p><p><a href="https://github.com/Svyable/scrollq/blob/main/docs/fiber-audit.md">Fiber audit →</a></p></div>
+<div class="card"><h3>Unknown stays unknown</h3><p>Passports exclude cross-volume artifacts and keep unmeasured downstream stages explicit rather than inferring readiness from scan quality.</p><p><a href="./#contracts">Evidence contracts →</a></p></div>
+</div>
+</section>
+
+<section class="panel" id="next">
+<h2>Shortest path from diagnostics to a qualifying package</h2>
+<ol>
+<li><b>Choose one exact eligible volume using blind geometry evidence, not a blended “best scroll” score.</b> Keep failed regions in the denominator.</li>
+<li><b>Close the surface chain first:</b> winding → spiral/geometry → TIFXYZ → recto coverage, with exact-volume bindings at every handoff.</li>
+<li><b>Make VC3D the reviewer path, not an export target.</b> The final workflow should open, inspect, and reproduce the same evidence in VC3D with minimal translation.</li>
+<li><b>Only then spend large ink-model compute.</b> Require train/prediction exclusion certificates, fixed seeds, public tracking, and falsification controls before counting any letters.</li>
+<li><b>Automate submission packaging early.</b> Generate sequential column meshes, matching images, 1 cm scale bars, and the full-scroll numbered banner from the same manifest.</li>
+<li><b>Ship the reproduction environment before the result is “perfect.”</b> Docker, system requirements, licenses, exact commands, and human-time accounting should be continuously testable.</li>
+</ol>
+</section>
+
+<section class="panel">
+<h2>Current claim boundary</h2>
+<div class="callout"><b>What this page does not claim:</b> that ScrolIQ predicts readability, that a high scan-health score implies a good surface, that a passing mesh audit proves sheet identity, or that an ink prediction is real because its provenance is clean. Those are separate empirical questions and remain separate on purpose.</div>
+<p style="margin-bottom:.1rem"><a href="./">Return to the live ScrolIQ dashboard →</a> · <a href="./october-2026.html">October evidence plan →</a> · <a href="https://github.com/Svyable/scrollq">Source repository →</a></p>
+</section>
+</main>
+<footer><div class="wrap">ScrolIQ · reviewer-facing Grand Prize readiness map · updated 2026-10-02</div></footer>
+</body></html>
