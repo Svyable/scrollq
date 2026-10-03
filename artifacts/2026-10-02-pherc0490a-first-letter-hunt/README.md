@@ -29,3 +29,10 @@ The machine-readable receipt is `axial-target.json`.
 ## What happens next
 
 This is axial triage only. It does not establish a seated sheet, recto identity, ink, or a letter. Local surfaces inside the frozen band must be CT-seated and then rendered. Unknown-ground-truth ink outputs are ranked with `scroliq-first-letter-hunt`; a window cannot enter its review queue without two distinct checkpoint hashes and `-3/+3` normal-offset, adjacent-winding, and geometry-perturbation controls.
+
+
+## Frozen x/y survey invocation
+
+The next reduction is preregistered but **not yet reported as executed** in this artifact. Run `run-seed-survey.sh` from a networked checkout. It fixes the exact eligible CT, matching released m7 prediction, z range, 12 x 12 y/x sampling grid, threshold 127, and spatial thinning. `--prefilter 0` means every sampled box containing prediction positives receives a CT-support measurement; the campaign does not keep only dense prediction boxes.
+
+The output `seed-survey.json` and its selected `.ct.npy` / `.surface-mask.npy` cutouts become the inputs to the local geometry stage. No selected seed is a surface-seating pass until an independent CT continuity/orientation check has been recorded.
