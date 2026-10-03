@@ -64,6 +64,14 @@ footer a{color:var(--muted)}
 <p class="tagline">Reproducible scan-health triage and diagnostic provenance. <em>Measure the bottleneck first.</em></p>
 <p class="byline">Submission by <b><a href="https://github.com/Svyable">Sven</a></b> (+ Muse, AI assistant)</p>
 
+<div class="statusbox" style="border-color:var(--ember)"><b>This page is the September submission as submitted.</b>
+Everything added after the deadline (real-segment and corpus-wide Mesh IQ, OBJ input, truly-disjoint and
+pre-registered stability results, fail-closed health, Winding and Fiber IQ on real data) is on the
+<a href="./october-2026-update.html">October 2026 update</a>. Two numbers here have since been superseded: the
+stability ρ = 0.7944 was inflated by chunk re-reading (truly disjoint: 0.63; pre-registered v2: 0.750, FAIL, so the
+leaderboard now shows rank bands), and the evidence table's "synthetic fixtures only" no longer holds for Mesh IQ
+and Fiber IQ.</div>
+
 <div class="statusbox"><b>Contribution URLs</b><br>
 Repo: <a href="https://github.com/Svyable/scrollq">github.com/Svyable/scrollq</a> (MIT)<br>
 Live evaluator dashboard: <a href="./">svyable.github.io/scrollq</a><br>
@@ -78,26 +86,15 @@ label-coverage join corrected (16 → 14 <code>label_next</code> entries).</li>
 (<a href="https://github.com/Svyable/scrollq/pull/43">#43</a>).</li>
 <li>OME-Zarr v2 reader and whole-bucket chunk audit, pre-registered protocol-pair test (negative result),
 and prize manifests derived from pinned official sources (<a href="https://github.com/Svyable/scrollq/pull/33">#33</a>).</li>
-<li>Fiber IQ now reads native VC3D <code>vc3d_fiber</code> JSON v1/v3/v4 as well as CSV, validates persisted tracer/fallback provenance, supports opt-in CI gating, and can bind an audit to the exact CT root for <code>scroliq-passport</code>; unbound or cross-volume fiber evidence is excluded. A frozen public PHercParis4 campaign now audits 8 SHA-256-pinned VC3D fibers (53,828 rendered points): 11 gap candidates, 26 sharp-turn candidates, and 0 control-line offsets/order inversions. The public directory is not asserted to identify one exact CT volume, so this campaign is not passport evidence. Earlier trace-continuity work began in <a href="https://github.com/Svyable/scrollq/pull/45">#45</a>, and
+<li>Fiber IQ trace-continuity audit, <code>scroliq-fiber</code> (<a href="https://github.com/Svyable/scrollq/pull/45">#45</a>), and
 provenance schema v4 binding held-out ink evidence to its exact report
 (<a href="https://github.com/Svyable/scrollq/pull/44">#44</a>).</li>
-<li>Mesh IQ run on all 21 published Grand Prize segment meshes (real data); one broken PHerc1447
-segment found.</li>
-<li>Mesh IQ run on every published segment mesh in the open bucket (843 of 903 TIFXYZ, all 200
-original OBJs); 77 of 307 segments flagged with three or more defect kinds. New <code>scroliq-obj</code>
-reads triangle meshes; new <a href="usage-by-format.md">usage guide by format</a>; comparison with
-existing tools added below.</li>
-<li>Winding IQ run on the published PHercParis4 <code>spiral-input</code> annotations: 2 of 13,700 comparable
-pairs out of radial order around the umbilicus, both under 0.1 voxel; an injection control on the same data
-measures its recall (±3: 89.5%, ±5: 85.5%; ±2 undetectable by design). <code>scrollq-health</code> now fails
-closed: unreadable or absent integrity evidence is DO NOT TRAIN, never a pass. Companion pinned to
-zarr-pyramid-audit 0.4.0 (<a href="https://github.com/Svyable/scrollq/pull/55">#55</a>).</li>
 </ul></div>
 
 <div class="stats">
 <div class="stat"><div class="n good">64 / 64</div><div class="l">listed volcomp scroll volumes scored<br>real L0 voxels decoded</div></div>
 <div class="stat"><div class="n">22.9</div><div class="l">mean chunks decoded / volume<br>24-sample, 5×5×5 campaign</div></div>
-<div class="stat"><div class="n warn">0.63</div><div class="l">Spearman ρ, truly-disjoint resample<br>below our 0.85 gate; 64/64 zero chunk<br>overlap by construction (2026-10-01)</div></div>
+<div class="stat"><div class="n warn">0.7944</div><div class="l">Spearman ρ vs resample<br>below our 0.85 gate; provenance shows<br>only 2/64 truly disjoint (mean 63% re-read)</div></div>
 <div class="stat"><div class="n">14</div><div class="l">top-quartile exact-volume entries<br>flagged “label next”</div></div>
 </div>
 </div></header>
@@ -122,9 +119,6 @@ bucket), read at level 0 alongside the masked CT.</li>
 <li><b>The Challenge's open S3 bucket</b> in its OME-Zarr v2 layout: stored chunk sizes sampled across all 65
 indexed volumes and checked exhaustively for the 23 prize-eligible volumes, plus four rescans registered to their
 original scan by the published <code>transform.json</code>.</li>
-<li><b>All 21 published TIFXYZ segment meshes for the two Grand Prize targets that have public
-segments</b> (PHerc1447: 15, PHerc0800: 6), read from the open S3 bucket and audited against each
-target's exact eligible CT volume.</li>
 <li><b>PHerc1667 as a known-success control</b> for the spatial scan metrics, so target observations can
 be compared against a scroll that has already been completely virtually unwrapped and read.</li>
 </ul></div>
@@ -149,15 +143,12 @@ winding, native TIFXYZ mesh, and ink-validation evidence without upgrading still
 fiber, or spiral stages from <code>unknown</code>.</li>
 <li><b>Integrity and quality can be checked together.</b> <code>scrollq-health</code> combines this
 triage layer with <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>,
-so structurally defective data can be rejected before a quality score is trusted. It fails closed: an
-unreadable level, an absent root or a crashed audit is DO NOT TRAIN, never read as a clean result.</li>
+so structurally defective data can be rejected before a quality score is trusted.</li>
 </ul>
-<div class="callout warn"><b>Important negative result:</b> the truly-disjoint resample (2026-10-01,
-two-phase exclusion protocol, 64/64 zero chunk overlap by construction) reaches
-Spearman ρ = 0.63, below the documented ρ ≥ 0.85 gate. We publish the failure rather than
-rounding it away. Mean |Δscore| is 7.95 and top-10 overlap is 4/10; the evidence says the volumes
-are heterogeneous enough that rankings should be treated as triage bands, not precise truth.
-(The earlier ρ = 0.79 was inflated by 63% chunk re-reading between "disjoint" runs.)</div></div>
+<div class="callout warn"><b>Important negative result:</b> the dense campaign's disjoint resample
+reaches Spearman ρ = 0.7944, below the documented ρ ≥ 0.85 gate. We publish the failure rather than
+rounding it away. Mean |Δscore| is 4.195 and top-10 overlap is 7/10; the evidence says the volumes
+are heterogeneous enough that rankings should be treated as triage bands, not precise truth.</div></div>
 
 <div class="panel"><h2><span class="q">(3)</span> What does it enable that was not possible before?</h2>
 <ul>
@@ -187,7 +178,10 @@ hypothesis and decision rule were committed before any real-data metric was comp
 <li><b>Prize manifests derived, not hand-copied.</b> <code>scroliq-manifest</code> derives the Grand Prize
 and First Letters target lists from the pinned official eligibility list and bucket index, and tests fail
 if the hand-entered manifests drift from them.</li>
-<li><b>VC3D-native Fiber IQ.</b> <code>scroliq-fiber</code> reads native <code>vc3d_fiber</code> JSON versions 1, 3 and 4 as well as CSV; validates persisted control-point/span and tracer configuration, records exact SHA-256 provenance, summarizes native-trace versus fallback spans and meeting-error ratios, independently lists line gaps/sharp turns, and checks whether control points stay near and progress consistently through rendered <code>line_points</code>. The offset threshold is relative to each fiber&#39;s own median rendered step rather than an absolute voxel cutoff. A <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-public-fiber-audit">frozen public PHercParis4 run</a> covers 8 fibers / 53,828 rendered points and surfaces 11 gap plus 26 sharp-turn review candidates, with no control-line offset/order findings. <code>--volume-root</code> binds other reports to an exact CT volume, and <code>scroliq-passport --fiber-audit</code> rejects missing or cross-volume bindings. Review findings can remain advisory or become an explicit CI gate with <code>--fail-on-findings</code>. This remains partial evidence: the public corpus run is not assigned an exact CT volume and does not prove physical fiber or sheet identity.</li>
+<li><b>Fiber trace continuity.</b> <code>scroliq-fiber</code> lists trace-break candidates in ordered
+fiber traces (gaps relative to each trace's median step, sharp turns), records the input's SHA-256, and
+fails on any parse error. It does not prove fiber or sheet identity, so the passport's fiber stage stays
+<code>unknown</code>.</li>
 <li><b>Evidence passports instead of synthetic readiness scores.</b> <code>scroliq-passport</code>
 organizes data, scan, label, winding, native TIFXYZ mesh, and ink-validation evidence around the
 Challenge bottlenecks and leaves unmeasured stages unknown.</li>
@@ -197,20 +191,14 @@ runs, mesh/render traceability, scale-bar declarations, banner coverage, and pub
 against known ground truth; same-volume training/validation overlap fails closed.</li>
 <li><b>Winding-input diagnostics.</b> <code>scroliq-winding</code> audits PointCollections v1 inputs,
 SHA-256 provenance, role semantics, numeric sanity, volume binding, and axial annotation coverage
-before winding constraints are trusted as geometry evidence. Given the dataset umbilicus, it also ranks
-annotated points whose winding numbers are out of radial order, a pre-fit review queue for likely
-mis-numbered annotations, with its recall measured by injecting known errors into real annotations.</li>
+before winding constraints are trusted as geometry evidence.</li>
 <li><b>Native Mesh IQ.</b> <code>scroliq-mesh</code> audits TIFXYZ structure and hashes, mask-aware
 connectivity and enclosed gaps, bbox/scale consistency, local edge jumps, severe normal reversals,
 symmetric quad-area distortion, and per-triangle Jacobian singular-value isometry (which catches
 area-preserving anisotropic stretch that an area check misses). It can also validate an official VC3D
 <code>vc_tifxyz_selfcross</code> census and a Villa <code>vesuvius.surface_preflight</code> CT-support
 report against the exact surface and volume being audited, failing closed on stale or mismatched
-evidence. None of these local checks proves sheet identity. First run on real data: all 21
-published Grand Prize segment meshes, which found one broken PHerc1447 segment. It has since run on
-every published segment mesh in the open bucket (see the evidence table). <code>scroliq-obj</code>
-applies the same checks to Wavefront OBJ triangle meshes, adding non-manifold edges, inconsistent
-winding and folded-over UV triangles.</li>
+evidence. None of these local checks proves sheet identity.</li>
 <li><b>Ink falsification discipline.</b> <code>scroliq-ink-audit</code> checks exact-volume experiment
 binding, checkpoint identity, train/evaluation separation, held-out declarations, run provenance,
 and controls including normal offsets, adjacent winding, geometry perturbation, and an independent
@@ -299,53 +287,13 @@ higher-resolution scans)</td>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-prize-targets"><code>artifacts/2026-10-01-prize-targets/</code></a>;
 regression tests in <code>tests/test_prize_manifest.py</code>.</td></tr>
 
-<tr><td><b>Real-segment mesh audit:</b> all 21 published TIFXYZ meshes for PHerc1447 (15) and PHerc0800 (6).
-All 6 PHerc0800 meshes pass. 14 of 15 PHerc1447 meshes are coherent but have enclosed holes flagged
-for review. One published PHerc1447 segment, <code>20251105093211-z_dbg_gen_00320</code>, is broken:
-153 disconnected pieces, 1,335 edge jumps, 386 severe normal reversals, p95 local stretch 5.07.
-Observed, cause unknown, not filed upstream</td>
-<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-real-mesh-audit"><code>artifacts/2026-10-01-real-mesh-audit/</code></a> —
-<code>run.sh</code> (bucket listing → download → <code>scroliq-mesh</code>), per-segment reports with
-file SHA-256s, <code>summary.json</code>.</td></tr>
+<tr><td>Combined integrity + quality verdict path proven on live data</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-health-verdicts"><code>artifacts/2026-09-30-health-verdicts/</code></a> —
+healthy TRAIN case and defective-data DO NOT TRAIN case.</td></tr>
 
-<tr><td><b>Corpus-wide mesh audit:</b> every published segment mesh in the open bucket, 307 segments on
-11 scrolls. 843 of 903 TIFXYZ meshes audited (60 of the largest ran out of memory and are listed with
-their reason) and all 200 published <code>_original.obj</code> meshes. 77 segments have three or more
-defect kinds on every registration (PHercParis4 27, PHerc0500P2 25, PHerc0814 12, PHerc0172 11,
-PHerc1447 1, PHerc1667 1). Controls: the known-broken PHerc1447 segment is flagged in both formats, and
-all 26 <code>z_dbg</code>-named segments are flagged. TIFXYZ and OBJ agree on 175 of 185 segments.
-Review candidates, not confirmed defects</td>
-<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-corpus-mesh-audit"><code>artifacts/2026-10-01-corpus-mesh-audit/</code></a> —
-<code>run.sh</code>, per-mesh reports with SHA-256s, <code>summary.json</code>, <code>flagged.tsv</code>,
-<code>failed.tsv</code>.</td></tr>
-
-<tr><td>Combined integrity + quality verdict path proven on live data, and fail-closed on missing
-evidence: PHerc0814 DO NOT TRAIN (6 high <code>LEVEL_NO_CHUNKS</code>), PHerc0813 TRAIN (quality 76.2), a v2 dev
-mesh CAUTION, and a non-existent root DO NOT TRAIN (integrity UNKNOWN); the three published verdicts are unchanged</td>
-<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-health-verdicts-fail-closed"><code>artifacts/2026-10-01-health-verdicts-fail-closed/</code></a> —
-live re-run with an absent-root negative control (workflow <code>health-verdicts.yml</code>);
-first run: <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-health-verdicts"><code>artifacts/2026-09-30-health-verdicts/</code></a>;
-tests in <code>tests/test_health.py</code>.</td></tr>
-
-<tr><td>Published PHercParis4 winding annotations are radially consistent: <b>2 / 13,700</b> comparable
-pairs inverted around the umbilicus, both sub-voxel (0.071 and 0.041 voxels); 2,166 of 2,232 annotated points
-are testable. Injection control, one real point mis-numbered at a time (200 per shift): ±3 caught 179 / 200,
-±5 caught 171 / 200, ±2 caught 0 / 191 by design. Review candidates, not verdicts</td>
-<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-paris4-winding-ray-order"><code>artifacts/2026-10-01-paris4-winding-ray-order/</code></a> —
-<code>PHercParis4.winding-audit.json</code>, <code>injection-control.json</code> (input SHA-256s inside),
-workflow <code>paris4-winding-ray-order.yml</code>; tests in <code>tests/test_winding_geometry.py</code>,
-<code>tests/test_ray_order_control.py</code>.</td></tr>
-
-<tr><td>Fiber IQ on public data: 8 SHA-256-pinned PHercParis4 VC3D fibers (53,828 rendered points,
-369 spans: 354 native-trace, 15 fallback). 1 pass / 7 caution; 11 gap candidates, all in one fiber that also has
-the sample's largest fallback share (7 / 28 spans), and 26 sharp-turn candidates; 0 control-line offsets and
-0 control-order inversions. A deterministic 8-file subset, not exhaustive; co-occurrence, not causation; not
-passport evidence (no exact CT volume is asserted for the public directory)</td>
-<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-public-fiber-audit"><code>artifacts/2026-10-01-public-fiber-audit/</code></a> —
-<code>run.sh</code> (hash-pinned downloads, fails closed on changed bytes), <code>summary.json</code>,
-<code>verify.py</code>; offline tests tie the summary to the pins.</td></tr>
-
-<tr><td>Native TIFXYZ/OBJ mesh checks, ink falsification controls, held-out ink validation, VC3D-native fiber auditing, and the fit/held-out geometry gap certificate are implemented and tested. Mesh IQ and Fiber IQ have now run on real public data (rows above and below); ink and geometry-probe evidence remains fixture/synthetic-only where stated. Fiber IQ additionally validates current v1/v3/v4 persisted VC3D span/tracer metadata and can gate review findings in CI</td>
+<tr><td>Native TIFXYZ mesh checks, ink falsification controls, held-out ink validation, fiber trace
+continuity, and the fit/held-out geometry gap certificate are implemented and tested (synthetic
+fixtures; not yet run on real community segments or traces)</td>
 <td><a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/tifxyz_audit.py"><code>scroliq-mesh</code></a>,
 <a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_audit.py"><code>scroliq-ink-audit</code></a>,
 <a href="https://github.com/Svyable/scrollq/blob/main/src/scrollq/ink_validation.py"><code>scroliq-ink-validate</code></a>,
@@ -386,32 +334,6 @@ ink evidence remain explicitly partial unless their own direct diagnostics pass.
 <div class="callout"><b>Design target:</b> ScrolIQ should eventually answer one practical question for
 each candidate scroll: <i>what specific, evidenced bottleneck prevents the next verified step toward a
 complete, low-distortion, legible, reproducible unrolling?</i></div></div>
-
-<div class="panel"><h2>How ScrolIQ compares with existing tools</h2>
-<p>ScrolIQ does not replace the community's tools; it reads their outputs and checks them against the
-exact data they claim to describe. Where a tool already does a job well, ScrolIQ consumes its report
-instead of reimplementing it.</p>
-<table>
-<tr><th>Job</th><th>Existing tool or practice</th><th>What ScrolIQ adds</th></tr>
-<tr><td>Non-local self-intersection of a TIFXYZ surface</td><td>VC3D <code>vc_tifxyz_selfcross</code></td>
-<td>Validates that report against the exact surface path and grid, fails closed on a stale or mismatched
-report, and adds the local checks selfcross does not make: components, enclosed holes, edge jumps,
-folds and Jacobian isometry</td></tr>
-<tr><td>CT support of a surface</td><td>Villa <code>vesuvius.surface_preflight</code></td>
-<td>Binds the report to the exact volume root and surface, and refuses a report made on a different
-scan of the same scroll</td></tr>
-<tr><td>Finding broken segments</td><td>Opening segments one at a time in a viewer</td>
-<td>One command over every published mesh, in TIFXYZ and OBJ, with a dated, reproducible flag list
-(903 + 200 meshes, 77 segments flagged on every registration)</td></tr>
-<tr><td>Zarr store integrity</td><td>Reading the volume and noticing errors downstream</td>
-<td><code>scrollq-health</code> runs zarr-pyramid-audit and refuses to call a corrupt or unverifiable volume trainable</td></tr>
-<tr><td>Choosing which volume to label or train on next</td><td>We found no published per-volume scan
-comparison</td><td>A scan-health survey of all 64 volcomp volumes with sampling provenance, published
-stability failure, and a weight-free Grand Prize frontier</td></tr>
-</table>
-<p>The same finding kinds in TIFXYZ and OBJ reports, one JSON report per input, and inputs never modified
-make each tool a drop-in check before or after an existing pipeline step. See
-<a href="usage-by-format.md">usage by format</a>.</p></div>
 
 <div class="panel"><h2>Honest scope</h2>
 <p><b>The 0–100 ScrolIQ score is scan-health triage only.</b> It is not readability, surface quality,
@@ -455,7 +377,7 @@ the published claims are committed in the repository.</p></div>
 </div>
 
 <footer><div class="wrap">
-<a href="./">← back to the live evaluator dashboard</a> · <a href="./october-2026.html">October 2026 goals →</a><br><br>
+<a href="./">← back to the live evaluator dashboard</a> · <a href="./october-2026-update.html">October 2026 update →</a> · <a href="./october-2026.html">October 2026 goals →</a><br><br>
 Built by Sven + Muse · September 2026 ·
 <a href="https://github.com/Svyable/scrollq">source</a>
 </div></footer>
