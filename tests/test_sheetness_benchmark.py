@@ -47,6 +47,10 @@ def _bundle(tmp_path: Path, *, bad_control=False, decision=None):
         "level": 0,
         "coordinate_space": "level0-voxel-index",
         "source_attestation": source_attestation,
+        "zpa_report": {
+            "sha256": "c" * 64,
+            "integrity": "PASS",
+        },
         "bbox_zyx_half_open": {
             "start": [100, 200, 300],
             "stop": [105, 205, 305],
@@ -294,3 +298,33 @@ def test_cli_returns_two_for_invalid_bundle(tmp_path, capsys):
     )
     assert code == 2
     assert json.loads(capsys.readouterr().out)["status"] == "invalid"
+
+
+@pytest.mark.parametrize(
+    "mutation, message",
+    [
+        (lambda m: m["zpa_report"].update(integrity="WARN"), "PASS ZPA"),
+        (lambda m: m["zpa_report"].update(sha256="bad"), "zpa_report.sha256"),
+        (
+            lambda m: m["source_attestation"].update(axes=["x", "y", "z"]),
+            "source_attestation.axes",
+        ),
+    ],
+)
+def test_cutout_manifest_retains_zpa_proof(tmp_path, mutation, message):
+    spec, cutout_manifest, report, response, normal = _bundle(tmp_path)
+    manifest = json.loads(cutout_manifest.read_text())
+    mutation(manifest)
+    cutout_manifest.write_text(json.dumps(manifest, sort_keys=True))
+
+    frozen = json.loads(spec.read_text())
+    frozen["cutout_manifest_sha256"] = _sha(cutout_manifest)
+    spec.write_text(json.dumps(frozen, sort_keys=True))
+
+    with pytest.raises(ValueError, match=message):
+        bench.run(spec, cutout_manifest, report, response, normal)
+
+
+def test_result_retains_zpa_report_hash(tmp_path):
+    result = bench.run(*_bundle(tmp_path))
+    assert result["inputs"]["zpa_report_sha256"] == "c" * 64
