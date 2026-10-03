@@ -18,7 +18,8 @@ scroliq-package build \
 ```
 
 A successful build prints the archive SHA-256 and writes a companion
-`PHerc0813-grand-prize.zip.sha256` file.
+`PHerc0813-grand-prize.zip.sha256` file. The builder refuses to overwrite an
+existing archive or sidecar, so a frozen package cannot be silently replaced.
 
 The builder includes only:
 
@@ -51,7 +52,8 @@ directory. It checks that:
 - the embedded provenance validation report is parseable and says
   `eligible: true`;
 - the graph SHA-256 in the validation report matches the package index; and
-- every archive member uses the deterministic storage/timestamp contract.
+- every archive member uses lexicographic ordering plus the deterministic
+  storage, timestamp, and POSIX file-mode contract.
 
 ## Archive contract v1
 
