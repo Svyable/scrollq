@@ -10,6 +10,11 @@ ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](h
 
 ## Diagnostic passport
 
+**Held-out geometry evaluation:** `scroliq-geometry-validate` compares a frozen
+point set with fit predictions, checks declared fit-input exclusion, and keeps
+missing predictions in the denominator. See the [O3 evaluator guide](docs/heldout-geometry-evaluation.md).
+Native spiral-fit export and real-fit validation remain outstanding.
+
 The first ScrolIQ interface organizes the evidence for one volume around the Challenge's actual pipeline bottlenecks:
 
 ```bash
