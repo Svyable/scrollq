@@ -21,10 +21,17 @@ def _candidate(tmp_path, candidate_id, control_signal=False, same_checkpoint=Fal
         control[2:5, 2:5] = 0.95
     sha1 = "a" * 64
     sha2 = sha1 if same_checkpoint else "b" * 64
+    seating_path = tmp_path / f"{candidate_id}-surface-seating.json"
+    seating_path.write_text(json.dumps({"status": "pass", "candidate": candidate_id}))
     return {
         "id": candidate_id,
         "bbox_zyx_half_open": [[9274, 100, 100], [9338, 200, 200]],
         "surface_support_frac": 0.8,
+        "surface_seating": {
+            "state": "pass",
+            "path": seating_path.name,
+            "method": "test-ct-seating-v1",
+        },
         "primary_predictions": [
             {"path": _write(tmp_path, f"{candidate_id}-p1.npy", primary1), "checkpoint_sha256": sha1},
             {"path": _write(tmp_path, f"{candidate_id}-p2.npy", primary2), "checkpoint_sha256": sha2},
@@ -102,3 +109,16 @@ def test_cli_writes_queue(tmp_path):
     assert main([str(manifest_path), "--out", str(out_path)]) == 0
     report = json.loads(out_path.read_text())
     assert report["review_candidate_count"] == 1
+
+
+def test_missing_surface_seating_holds_candidate(tmp_path):
+    candidate = _candidate(tmp_path, "unseated")
+    candidate.pop("surface_seating")
+    report = build_hunt_report(
+        {"volume_root": "volume-A", "candidates": [candidate]}, base_dir=tmp_path
+    )
+    row = report["review_queue"][0]
+
+    assert row["status"] == "hold"
+    assert row["gates"]["surface_seating_pass"] is False
+    assert any("surface_seating" in warning for warning in row["warnings"])
