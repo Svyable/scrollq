@@ -337,17 +337,26 @@ def validate_region_results(
         )
         if status == "ok":
             metrics = row.get("metrics")
-            if not isinstance(metrics, dict):
-                raise ValidationError(f"region {region_id}: metrics must be an object")
-            value = metrics.get(metric_name)
-            if type(value) not in (int, float) or not math.isfinite(float(value)):
+            if not isinstance(metrics, dict) or not metrics:
+                raise ValidationError(f"region {region_id}: metrics must be a non-empty object")
+            normalized_metrics: dict[str, float] = {}
+            for raw_name, raw_value in metrics.items():
+                name = _identifier(raw_name, f"region {region_id}.metrics key")
+                if type(raw_value) not in (int, float) or not math.isfinite(float(raw_value)):
+                    raise ValidationError(
+                        f"region {region_id}: metric {name!r} must be finite"
+                    )
+                normalized_metrics[name] = float(raw_value)
+            value = normalized_metrics.get(metric_name)
+            if value is None:
                 raise ValidationError(
-                    f"region {region_id}: primary metric {metric_name!r} must be finite"
+                    f"region {region_id}: primary metric {metric_name!r} is missing"
                 )
             normalized_row = {
                 "id": region_id,
                 "status": "ok",
-                "metric": float(value),
+                "metric": value,
+                "metrics": normalized_metrics,
             }
             if evidence_sha256 is not None:
                 normalized_row["evidence_sha256"] = evidence_sha256
@@ -355,6 +364,21 @@ def validate_region_results(
         elif status == "failed":
             reason = _nonempty_string(row.get("reason"), f"region {region_id}.reason")
             normalized_row = {"id": region_id, "status": "failed", "reason": reason}
+            metrics = row.get("metrics")
+            if metrics is not None:
+                if not isinstance(metrics, dict) or not metrics:
+                    raise ValidationError(
+                        f"region {region_id}: failed-region metrics must be a non-empty object"
+                    )
+                normalized_metrics = {}
+                for raw_name, raw_value in metrics.items():
+                    name = _identifier(raw_name, f"region {region_id}.metrics key")
+                    if type(raw_value) not in (int, float) or not math.isfinite(float(raw_value)):
+                        raise ValidationError(
+                            f"region {region_id}: metric {name!r} must be finite"
+                        )
+                    normalized_metrics[name] = float(raw_value)
+                normalized_row["metrics"] = normalized_metrics
             if evidence_sha256 is not None:
                 normalized_row["evidence_sha256"] = evidence_sha256
             normalized.append(normalized_row)
@@ -644,6 +668,8 @@ def build_report(
             failure = {"id": region_id, "kind": "failed", "reason": row["reason"]}
             failures.append(failure)
             region_report = {**failure, "score_used": failure_value}
+            if row.get("metrics") is not None:
+                region_report["diagnostic_metrics"] = row["metrics"]
             if row.get("evidence_sha256") is not None:
                 region_report["evidence_sha256"] = row["evidence_sha256"]
             region_rows.append(region_report)
@@ -653,6 +679,7 @@ def build_report(
                 "id": region_id,
                 "kind": "ok",
                 "score_used": row["metric"],
+                "metrics": row["metrics"],
             }
             if row.get("evidence_sha256") is not None:
                 region_report["evidence_sha256"] = row["evidence_sha256"]
