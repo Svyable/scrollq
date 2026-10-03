@@ -15,6 +15,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from .artifact_hash import ArtifactHashError, TREE_HASH_SCHEME, artifact_sha256
 from .grand_prize import DEFAULT_MANIFEST
 from .recto_coverage import audit_recto_coverage
 
@@ -420,6 +421,7 @@ def _verify_local_file(
     errors: list[dict[str, str]],
     *,
     path_required: bool = True,
+    expected_kind: str | None = None,
 ) -> None:
     if root_dir is None:
         return
@@ -441,11 +443,31 @@ def _verify_local_file(
     except ValueError:
         _error(errors, "GP_PATH_ESCAPE", f"{path}.path", "path escapes package root")
         return
-    if not target.is_file():
-        _error(errors, "GP_FILE_MISSING", f"{path}.path", f"file not found: {rel}")
+    if not target.exists():
+        _error(errors, "GP_FILE_MISSING", f"{path}.path", f"artifact not found: {rel}")
+        return
+    if expected_kind == "directory" and not target.is_dir():
+        _error(
+            errors,
+            "GP_ARTIFACT_KIND",
+            f"{path}.path",
+            "tifxyz package artifact must be a directory",
+        )
+        return
+    if expected_kind == "file" and not target.is_file():
+        _error(
+            errors,
+            "GP_ARTIFACT_KIND",
+            f"{path}.path",
+            "package artifact must be a regular file",
+        )
         return
     if isinstance(digest, str) and SHA256_RE.fullmatch(digest):
-        actual = hashlib.sha256(target.read_bytes()).hexdigest()
+        try:
+            actual = artifact_sha256(target)
+        except ArtifactHashError as exc:
+            _error(errors, "GP_ARTIFACT_HASH", f"{path}.path", str(exc))
+            return
         if actual != digest:
             _error(
                 errors,
@@ -1309,7 +1331,9 @@ def validate_manifest(
                     ),
                 )
         _check_sha(mesh, p, errors)
-        _verify_local_file(mesh, p, root_dir, errors)
+        _verify_local_file(
+            mesh, p, root_dir, errors, expected_kind="directory"
+        )
 
     recto_coverage = manifest.get("recto_coverage")
     recto_coverage_proof: dict[str, Any] | None = None
@@ -1584,6 +1608,10 @@ def validate_manifest(
     return {
         "validator": "scrollq.provenance",
         "validator_schema_version": SCHEMA_VERSION,
+        "package_hashing": {
+            "file": "sha256(file-bytes)",
+            "directory": TREE_HASH_SCHEME,
+        },
         "rules_url": RULES_URL,
         "manifest_sha256": manifest_sha256,
         "graph_sha256": graph_digest,
