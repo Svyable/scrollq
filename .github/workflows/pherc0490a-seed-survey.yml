@@ -1,0 +1,51 @@
+name: PHerc0490A seed survey
+
+on:
+  push:
+    branches:
+      - agent/pherc0490a-first-letter-hunt
+    paths:
+      - .github/workflows/pherc0490a-seed-survey.yml
+
+permissions:
+  contents: read
+
+jobs:
+  seed-survey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install branch
+        run: python -m pip install -e .
+      - name: Run frozen PHerc0490A survey
+        run: |
+          bash artifacts/2026-10-02-pherc0490a-first-letter-hunt/run-seed-survey.sh \
+            out/pherc0490a-first-letter-hunt
+      - name: Summarize selected seeds
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("out/pherc0490a-first-letter-hunt/seed-survey.json")
+          r = json.loads(p.read_text())
+          print("status:", r["status"])
+          print("sampling:", json.dumps(r["sampling"], sort_keys=True))
+          for row in r["selected"]:
+              print(
+                  row["rank"],
+                  row["bbox_zyx_half_open"],
+                  "support=", row["surface_support_frac"],
+                  "positives=", row["prediction_positive_voxels"],
+              )
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pherc0490a-seed-survey
+          path: out/pherc0490a-first-letter-hunt
+          if-no-files-found: error
+          retention-days: 30
