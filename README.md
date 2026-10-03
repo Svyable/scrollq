@@ -713,6 +713,26 @@ recorded arithmetic threshold. It is not OCR and does not independently certify
 papyrological correctness. See the [legibility evidence contract](docs/grand-prize-legibility.md)
 and [example ledger](examples/grand-prize-legibility.example.json).
 
+#### Legibility rescue planner
+
+`scroliq-legibility-plan` turns that frozen evidence into an iteration queue instead
+of another score. It computes the exact number of currently illegible preserved
+characters that would have to become letter-by-letter legible to cross 70%, first
+for any failing counted column and then for each line as a planning proxy. One-
+character wins rise to the top; lines already over the proxy threshold but only
+one character above it are flagged as fragile.
+
+```bash
+scroliq-legibility-plan \
+  --report submission/legibility-report.json \
+  --out submission/legibility-plan.json
+```
+
+The input report is SHA-256-bound in the plan, sorting is deterministic, and the
+tool adds no annotation format. The per-line 70% calculation is explicitly an
+optimization heuristic; the official 70% rule remains per counted column, and
+the Challenge determines which submitted lines are actually legible.
+
 ### 2027 Grand Prize submission images
 
 `scroliq-submission-image` turns final VC3D renders into the exact reviewer-facing image forms required by the prize. The `column` command derives the 1 cm scale-bar length from the eligible CT voxel size plus the same pyramid level and `--scale` parameters used by `vc_render_tifxyz`, appends the bar in a footer without touching papyrus pixels, and writes a SHA-pinned scale proof. The `banner` command assembles the frozen column images in numeric order and overlays every column number, rejecting gaps or duplicates. See [the submission-image contract](docs/grand-prize-images.md).
