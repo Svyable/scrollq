@@ -320,14 +320,24 @@ def _audit_supervision_stdout(
         if isinstance(reference, dict)
         else None
     )
-    if tracks_required and isinstance(reference_count, int) and not isinstance(reference_count, bool):
-        check(
-            "tracks_reference_count",
-            track_count == reference_count,
-            "post-ROI track count matches the frozen reproduction reference",
-            expected=reference_count,
-            actual=track_count,
+    if tracks_required:
+        reference_count_declared = (
+            isinstance(reference_count, int) and not isinstance(reference_count, bool)
         )
+        check(
+            "tracks_reference_count_declared",
+            reference_count_declared,
+            "recipe declares the frozen post-ROI track-count reproduction reference",
+            actual=reference_count,
+        )
+        if reference_count_declared:
+            check(
+                "tracks_reference_count",
+                track_count == reference_count,
+                "post-ROI track count matches the frozen reproduction reference",
+                expected=reference_count,
+                actual=track_count,
+            )
 
     if patches_disabled:
         check(
@@ -360,7 +370,7 @@ def _audit_supervision_stdout(
                 if isinstance(reference_count, int)
                 and not isinstance(reference_count, bool)
                 and track_count is not None
-                else None
+                else False
             ),
         },
         "patches": {
