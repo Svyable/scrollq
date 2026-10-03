@@ -1,6 +1,6 @@
 # Deterministic Grand Prize submission package
 
-`scroliq-package` turns a **passing schema-v5 Grand Prize provenance
+`scroliq-package` turns a **passing schema-v6 Grand Prize provenance
 manifest** into one reviewer-facing ZIP archive. It is intentionally the last
 step after ZPA, mesh/coverage checks, model provenance, held-out ink validation,
 render generation and banner generation.
@@ -82,9 +82,9 @@ The builder includes only:
 - any package-local surface paths declared in `surfaces[]`;
 - every submitted `column_NN.tifxyz` mesh, recursively and without
   repacking the directory internally;
-- every matching column render;
+- every matching column render and its hash-pinned physical scale-bar proof sidecar;
 - every local held-out-validation artifact;
-- the full-scroll banner;
+- the full-scroll banner and its hash-pinned render-set proof sidecar;
 - methodology and system-requirements documentation;
 - the machine-readable human-input log;
 - the VC3D reproduction/workflow instructions;
