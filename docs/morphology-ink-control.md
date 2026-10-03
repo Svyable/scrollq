@@ -95,6 +95,56 @@ capturing a region/sample shortcut, not ink morphology.
 The first useful result is not a high within-source score. It is evidence that a
 descriptor survives papyrus-level holdout and both controls.
 
+### Executable source benchmark
+
+The preregistered runner is `scroliq-morphology-benchmark`. It consumes a
+complete local mirror of the pinned 14-sample dataset; it does not download
+data or inspect Grand Prize CT.
+
+```bash
+scroliq-morphology-benchmark \
+  --spec artifacts/2026-10-03-morphology-benchmark-v1/spec.json \
+  --control-manifest artifacts/2026-10-03-morphology-control/source-benchmark-manifest.json \
+  --dataset-manifest /data/profilometer/manifest.csv \
+  --data-root /data/profilometer \
+  --out out/profilometer-lopo-descriptors-v1.json
+```
+
+The sampling grid is chosen only from image dimensions and the frozen maximum
+sample count. Labels are read afterward. Each descriptor is converted to
+within-sample average ranks, so the first experiment does not depend on the
+disputed micron-per-pixel value or on absolute height scale.
+
+For each held-out papyrus, descriptor direction is determined from the median
+ink-minus-papyrus mean-rank difference across samples from the *other two*
+papyri. The held-out papyrus then receives that frozen sign and is scored by
+pooled pixel AUROC. Held-out labels never choose the favorable orientation.
+
+The negative label control is a deterministic toroidal roll, seeded from the
+frozen experiment seed plus sample ID. This preserves the label mask's spatial
+shape and class prevalence while breaking registration to topography. The
+missingness control streams the raw semicolon-delimited X/Y/Z export, treats
+non-finite Z as reconstruction failure, and scores that binary mask directly
+against the unshifted ink labels.
+
+The v1 decision rule was committed before a real source run:
+
+- every held-out papyrus must reach AUROC >= 0.55 for a descriptor;
+- the worst label-roll control must remain within 0.05 AUROC of chance;
+- the strongest missingness-only discriminator must remain <= 0.60 AUROC;
+- all 14 source samples must be present and every declared pixel count must
+  match the image dimensions.
+
+A descriptor clearing these gates is reported `RETAIN_SOURCE_ONLY`. It is
+still **not** authorized for CT transfer while the public sampling discrepancy
+remains unresolved.
+
+The output binds the benchmark spec, morphology-control manifest, dataset
+manifest, and every consumed normalized TIFF, label PNG, and raw TXT by
+SHA-256. Raw TXT files are streamed while selecting only the preregistered
+raster positions, avoiding an in-memory copy of the full calibrated height
+export.
+
 ## Stage 2 — target control
 
 `target_control` mode is fail-closed in the current implementation.
