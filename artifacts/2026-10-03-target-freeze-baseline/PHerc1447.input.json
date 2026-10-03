@@ -1,0 +1,44 @@
+{
+  "as_of": "2026-10-03",
+  "candidate": {
+    "scroll": "PHerc1447",
+    "volume_id": "20250521151220",
+    "volume_root": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc1447/volumes/20250521151220-8.640um-1.2m-116keV-masked.zarr"
+  },
+  "prerequisites": {
+    "heldout_geometry": {
+      "artifacts": [],
+      "rationale": "The frozen candidate pool records PHerc1447 centroid/bounds extraction as pending, so a comparable geometry-only held-out split has not been frozen in the baseline sources.",
+      "state": "unknown"
+    },
+    "ink_validation": {
+      "artifacts": [],
+      "rationale": "The frozen baseline sources do not include a spatially disjoint target-specific ink-validation manifest with checkpoint, seed, evaluated-array hashes, and falsification controls.",
+      "state": "unknown"
+    },
+    "input_integrity": {
+      "artifacts": [],
+      "rationale": "The frozen baseline sources do not include a target-specific ZPA report with integrity PASS and source attestation for this exact CT input.",
+      "state": "unknown"
+    },
+    "surface_foothold": {
+      "artifacts": [
+        {
+          "claim": "Derived exact-volume evidence for the surface-foothold prerequisite.",
+          "kind": "target-baseline-evidence",
+          "sha256": "203d60bb18dc0d3d621d3b92c4b09b5727524b8a0d9ed37f836b386b5122a5d3",
+          "uri": "artifacts/2026-10-03-target-freeze-baseline/PHerc1447.evidence.json",
+          "volume_id": "20250521151220"
+        }
+      ],
+      "rationale": "Frozen exact-volume geometry evidence provides at least one proof-candidate surface or mesh foothold.",
+      "state": "pass"
+    },
+    "vc3d_handoff": {
+      "artifacts": [],
+      "rationale": "The frozen baseline sources do not include a target-specific VC3D load/handoff demonstration for these exact surface or review artifacts.",
+      "state": "unknown"
+    }
+  },
+  "schema_version": 1
+}

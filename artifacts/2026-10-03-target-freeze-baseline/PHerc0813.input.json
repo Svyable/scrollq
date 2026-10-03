@@ -1,0 +1,52 @@
+{
+  "as_of": "2026-10-03",
+  "candidate": {
+    "scroll": "PHerc0813",
+    "volume_id": "20250821151723",
+    "volume_root": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr"
+  },
+  "prerequisites": {
+    "heldout_geometry": {
+      "artifacts": [
+        {
+          "claim": "Derived exact-volume evidence for the held-out-geometry prerequisite.",
+          "kind": "target-baseline-evidence",
+          "sha256": "4ccf6af777ffd871b0bb775ca45332e30f6b44a1230616b61bbe818996a9522e",
+          "uri": "artifacts/2026-10-03-target-freeze-baseline/PHerc0813.evidence.json",
+          "volume_id": "20250821151723"
+        }
+      ],
+      "rationale": "A geometry-only fit/held-out split is frozen with disjoint evaluation cores and without quality or ink selection.",
+      "state": "pass"
+    },
+    "ink_validation": {
+      "artifacts": [],
+      "rationale": "The frozen baseline sources do not include a spatially disjoint target-specific ink-validation manifest with checkpoint, seed, evaluated-array hashes, and falsification controls.",
+      "state": "unknown"
+    },
+    "input_integrity": {
+      "artifacts": [],
+      "rationale": "The frozen baseline sources do not include a target-specific ZPA report with integrity PASS and source attestation for this exact CT input.",
+      "state": "unknown"
+    },
+    "surface_foothold": {
+      "artifacts": [
+        {
+          "claim": "Derived exact-volume evidence for the surface-foothold prerequisite.",
+          "kind": "target-baseline-evidence",
+          "sha256": "4ccf6af777ffd871b0bb775ca45332e30f6b44a1230616b61bbe818996a9522e",
+          "uri": "artifacts/2026-10-03-target-freeze-baseline/PHerc0813.evidence.json",
+          "volume_id": "20250821151723"
+        }
+      ],
+      "rationale": "Frozen exact-volume geometry evidence provides at least one proof-candidate surface or mesh foothold.",
+      "state": "pass"
+    },
+    "vc3d_handoff": {
+      "artifacts": [],
+      "rationale": "The frozen baseline sources do not include a target-specific VC3D load/handoff demonstration for these exact surface or review artifacts.",
+      "state": "unknown"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,61 @@
+{
+  "as_of": "2026-10-03",
+  "claim_boundary": "All three candidates remain provisional. This is a blocker census, not a recommendation, ranking, readability estimate, or Grand Prize-success prediction.",
+  "cohort": [
+    "PHerc0800",
+    "PHerc0813",
+    "PHerc1447"
+  ],
+  "diagnostic": "grand-prize-target-freeze-baseline",
+  "next_action": {
+    "reason": "It is unknown for every cohort member and the probe protocol says geometry or ink evidence is not interpretable until the exact consumed inputs pass integrity/provenance checks.",
+    "required_output": "One exact-volume ZPA report with integrity PASS and source attestation for each candidate CT and any geometry inputs actually consumed.",
+    "stage": "input_integrity"
+  },
+  "schema_version": 1,
+  "selection_rule": "Historical first-wave hypotheses are evaluated only as a frozen baseline cohort; this artifact does not rank them or select a target.",
+  "shared_unknown_checks": [
+    "input_integrity",
+    "ink_validation",
+    "vc3d_handoff"
+  ],
+  "targets": [
+    {
+      "blocking_checks": [],
+      "gate_report": "PHerc0800.gate.json",
+      "scroll": "PHerc0800",
+      "status": "provisional",
+      "unknown_checks": [
+        "input_integrity",
+        "ink_validation",
+        "vc3d_handoff"
+      ],
+      "volume_id": "20250521135224"
+    },
+    {
+      "blocking_checks": [],
+      "gate_report": "PHerc0813.gate.json",
+      "scroll": "PHerc0813",
+      "status": "provisional",
+      "unknown_checks": [
+        "input_integrity",
+        "ink_validation",
+        "vc3d_handoff"
+      ],
+      "volume_id": "20250821151723"
+    },
+    {
+      "blocking_checks": [],
+      "gate_report": "PHerc1447.gate.json",
+      "scroll": "PHerc1447",
+      "status": "provisional",
+      "unknown_checks": [
+        "input_integrity",
+        "heldout_geometry",
+        "ink_validation",
+        "vc3d_handoff"
+      ],
+      "volume_id": "20250521151220"
+    }
+  ]
+}

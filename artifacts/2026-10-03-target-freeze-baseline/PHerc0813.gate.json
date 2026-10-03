@@ -1,0 +1,95 @@
+{
+  "blocking_checks": [],
+  "candidate": {
+    "scroll": "PHerc0813",
+    "volume_id": "20250821151723",
+    "volume_root": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr"
+  },
+  "checks": [
+    {
+      "candidate_volume_id": "20250821151723",
+      "eligible_volume_id": "20250821151723",
+      "id": "exact_volume_identity",
+      "reasons": [],
+      "state": "pass",
+      "volume_root": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr"
+    },
+    {
+      "artifacts": [],
+      "declared_state": "unknown",
+      "id": "input_integrity",
+      "rationale": "The frozen baseline sources do not include a target-specific ZPA report with integrity PASS and source attestation for this exact CT input.",
+      "reasons": [],
+      "state": "unknown"
+    },
+    {
+      "artifacts": [
+        {
+          "claim": "Derived exact-volume evidence for the surface-foothold prerequisite.",
+          "kind": "target-baseline-evidence",
+          "sha256": "4ccf6af777ffd871b0bb775ca45332e30f6b44a1230616b61bbe818996a9522e",
+          "uri": "artifacts/2026-10-03-target-freeze-baseline/PHerc0813.evidence.json",
+          "volume_id": "20250821151723"
+        }
+      ],
+      "declared_state": "pass",
+      "id": "surface_foothold",
+      "rationale": "Frozen exact-volume geometry evidence provides at least one proof-candidate surface or mesh foothold.",
+      "reasons": [],
+      "state": "pass"
+    },
+    {
+      "artifacts": [
+        {
+          "claim": "Derived exact-volume evidence for the held-out-geometry prerequisite.",
+          "kind": "target-baseline-evidence",
+          "sha256": "4ccf6af777ffd871b0bb775ca45332e30f6b44a1230616b61bbe818996a9522e",
+          "uri": "artifacts/2026-10-03-target-freeze-baseline/PHerc0813.evidence.json",
+          "volume_id": "20250821151723"
+        }
+      ],
+      "declared_state": "pass",
+      "id": "heldout_geometry",
+      "rationale": "A geometry-only fit/held-out split is frozen with disjoint evaluation cores and without quality or ink selection.",
+      "reasons": [],
+      "state": "pass"
+    },
+    {
+      "artifacts": [],
+      "declared_state": "unknown",
+      "id": "ink_validation",
+      "rationale": "The frozen baseline sources do not include a spatially disjoint target-specific ink-validation manifest with checkpoint, seed, evaluated-array hashes, and falsification controls.",
+      "reasons": [],
+      "state": "unknown"
+    },
+    {
+      "artifacts": [],
+      "declared_state": "unknown",
+      "id": "vc3d_handoff",
+      "rationale": "The frozen baseline sources do not include a target-specific VC3D load/handoff demonstration for these exact surface or review artifacts.",
+      "reasons": [],
+      "state": "unknown"
+    }
+  ],
+  "claim_boundary": "This gate verifies exact-volume identity and the declared provenance contract needed to freeze a proof target. It does not rank scrolls, validate scientific correctness inside third-party artifacts, prove readability, or predict Grand Prize success.",
+  "input_as_of": "2026-10-03",
+  "input_sha256": "31841981f7d8ec8401b0a93827aafa01845e6ade981c5c571f8e837963f96557",
+  "manifest_as_of": "2026-09-30",
+  "ranking": null,
+  "required_prerequisites": [
+    "exact_volume_identity",
+    "input_integrity",
+    "surface_foothold",
+    "heldout_geometry",
+    "ink_validation",
+    "vc3d_handoff"
+  ],
+  "schema": "scroliq-target-gate/1",
+  "status": "provisional",
+  "tool": "scroliq-target-gate",
+  "unknown_checks": [
+    "input_integrity",
+    "ink_validation",
+    "vc3d_handoff"
+  ]
+}
