@@ -49,7 +49,8 @@ def test_dockerfile_pins_base_and_runs_non_root():
     assert "wheel==0.45.1" in dockerfile
     assert "--constraint constraints-container.txt" in dockerfile
     assert "--no-index" in dockerfile
-    assert "--find-links=/wheels" in dockerfile
+    assert "--no-deps" in dockerfile
+    assert "/wheels/*.whl" in dockerfile
     assert "SOURCE_DATE_EPOCH" in dockerfile
     assert 'org.opencontainers.image.revision="${VCS_REF}"' in dockerfile
     assert "USER 10001:10001" in dockerfile
