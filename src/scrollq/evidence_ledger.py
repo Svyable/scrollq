@@ -18,6 +18,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from .package_hash import sha256_path
 from .evidence_adapters import (
     APPROVED_PASS_ADAPTERS,
     ASSESSORS,
@@ -617,7 +618,17 @@ def main() -> None:
         "--mesh-id",
         action="append",
         default=[],
-        help="expected submitted mesh id; repeat for every mesh",
+        help="expected submitted mesh id without local binding; repeat as needed",
+    )
+    ap.add_argument(
+        "--mesh",
+        action="append",
+        default=[],
+        metavar="ID=PATH",
+        help=(
+            "bind a submitted mesh id to its package-relative tifxyz path; "
+            "repeat for every mesh when locally verifying PASS evidence"
+        ),
     )
     ap.add_argument("--root-dir", default=None, help="optional local artifact root")
     ap.add_argument("--out", default=None, help="optional JSON report path")
@@ -627,11 +638,39 @@ def main() -> None:
     path = Path(args.ledger)
     raw = path.read_bytes()
     ledger = json.loads(raw)
+
+    root_dir = Path(args.root_dir) if args.root_dir else None
+    mesh_paths: dict[str, str] = {}
+    mesh_digests: dict[str, str] = {}
+    for spec in args.mesh:
+        if "=" not in spec:
+            ap.error("--mesh must use ID=PATH")
+        mesh_id, rel = spec.split("=", 1)
+        if not mesh_id or not rel:
+            ap.error("--mesh must use non-empty ID=PATH")
+        if mesh_id in mesh_paths:
+            ap.error(f"duplicate --mesh id: {mesh_id}")
+        if root_dir is None:
+            ap.error("--mesh requires --root-dir")
+        target = (root_dir / rel).resolve()
+        try:
+            target.relative_to(root_dir.resolve())
+        except ValueError:
+            ap.error(f"--mesh path escapes --root-dir: {rel}")
+        try:
+            mesh_digests[mesh_id] = sha256_path(target)
+        except (OSError, ValueError) as exc:
+            ap.error(f"cannot hash --mesh {mesh_id}: {exc}")
+        mesh_paths[mesh_id] = rel
+
+    mesh_ids = list(dict.fromkeys([*args.mesh_id, *mesh_paths]))
     report = validate_evidence_ledger(
         ledger,
         expected_volume_id=args.volume_id,
-        expected_mesh_ids=args.mesh_id,
-        root_dir=Path(args.root_dir) if args.root_dir else None,
+        expected_mesh_ids=mesh_ids,
+        expected_mesh_sha256=mesh_digests,
+        expected_mesh_paths=mesh_paths,
+        root_dir=root_dir,
         ledger_sha256=hashlib.sha256(raw).hexdigest(),
         require_local_artifacts=bool(args.root_dir),
     )
