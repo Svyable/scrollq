@@ -588,6 +588,8 @@ The gate fails closed on wrong-volume lineage, missing/tampered/invalid ZPA evid
 See [the provenance-manifest specification](docs/grand-prize-provenance.md) and [example manifest](examples/grand-prize-provenance.example.json).
 For unpacked VC3D surfaces, `scroliq-hash column_01.tifxyz` computes the canonical tree SHA-256 used by the provenance gate, so the complete directory-format mesh is cryptographically bound without repacking it.
 
+Once the provenance gate passes, `scroliq-package build --manifest submission/provenance.json --root-dir submission --out submission.zip` creates a deterministic reviewer package containing only declared artifacts plus the validation report and a per-file hash index. `scroliq-package verify submission.zip` rechecks the archive without the staging directory. See [the package contract](docs/grand-prize-package.md).
+
 ## First Letters target qualification
 
 The same qualifier covers the 22 First Letters scans with `--prize
