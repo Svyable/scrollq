@@ -60,6 +60,15 @@ be frozen before candidate inference; pseudo-label-trained models fail closed
 unless their required datasets, intermediate checkpoints, licenses, and public
 tracking are bound explicitly.
 
+## Morphology-control gate
+
+A separate [morphology-based ink control](morphology-ink-control.md) pins the
+public optical-profilometry source and tests only scale-normalized descriptors
+under leave-one-papyrus-out evaluation plus missingness and label-permutation
+controls. Its current public source has an unresolved physical sampling
+discrepancy, so target-volume transfer and absolute-micron thresholds fail
+closed until that discrepancy is resolved and a source benchmark is committed.
+
 ## Minimum proof package
 
 The first competitive proof should be small enough to finish and strong enough to falsify. It is complete only when the repository contains:
