@@ -1,11 +1,15 @@
 name: Winding attachment (pre-registered)
 
-# October goal O2, step 3. Manual only: dispatch after
-# docs/winding-attachment-protocol.md is committed, so the pre-registration
-# precedes every read of patch geometry. Commits results to the dispatching
-# branch; never pushes to main.
+# October goal O2, step 3. Runs after docs/winding-attachment-protocol.md is
+# committed, so the pre-registration precedes every read of patch geometry:
+# by hand, or on a PR that changes this file. Commits results to the PR (or
+# dispatching) branch, never to main, and skips once the dated results exist
+# so frozen data is never overwritten.
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/winding-attach.yml
 
 permissions:
   contents: write
@@ -16,16 +20,27 @@ jobs:
     timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - name: Skip if the dated results already exist
+        id: guard
+        run: |
+          if [ -e artifacts/2026-10-03-paris4-winding-attachment/result.json ]; then
+            echo "results exist; frozen" && echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != '1'
         with:
           python-version: "3.11"
           cache: pip
       - name: Install
+        if: steps.guard.outputs.skip != '1'
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements-ci.txt
           python -m pip install -e .
       - name: Fetch PHercParis4 spiral-input annotations
+        if: steps.guard.outputs.skip != '1'
         run: |
           set -euxo pipefail
           base="https://dl.ash2txt.org/datasets/spiral_datasets/PHercParis4"
@@ -36,6 +51,7 @@ jobs:
           curl -fsSL --retry 4 -o verified_patches.html "$base/verified_patches/"
           sha256sum input/*.json verified_patches.html
       - name: Run the pre-registered analysis
+        if: steps.guard.outputs.skip != '1'
         run: |
           set -euxo pipefail
           out="artifacts/2026-10-03-paris4-winding-attachment"
@@ -44,6 +60,7 @@ jobs:
             "$out" --workers 32 | tee run.log
           mv run.log "$out/run.log"
       - name: Commit results
+        if: steps.guard.outputs.skip != '1'
         run: |
           set -euxo pipefail
           git config user.name "github-actions[bot]"
@@ -51,6 +68,6 @@ jobs:
           git add artifacts/2026-10-03-paris4-winding-attachment
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Add pre-registered PHercParis4 winding attachment results"
-          branch="${{ github.ref_name }}"
+          branch="${{ github.head_ref || github.ref_name }}"
           if [ "$branch" = main ]; then branch=scroliq-winding-attachment; fi
           git push origin "HEAD:$branch"

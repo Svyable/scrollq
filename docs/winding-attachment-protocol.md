@@ -135,6 +135,7 @@ python bin/winding_attach.py INPUT_DIR verified_patches.html \
   https://dl.ash2txt.org/datasets/spiral_datasets/PHercParis4/verified_patches OUT_DIR
 ```
 
-The manual workflow `.github/workflows/winding-attach.yml` runs this
+The workflow `.github/workflows/winding-attach.yml` (manual, or on the PR
+that adds it) runs this
 against the live data and commits the results to a dated artifact
 directory.
