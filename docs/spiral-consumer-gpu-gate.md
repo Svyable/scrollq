@@ -23,7 +23,7 @@ reproduces semantic equivalence at the exact frozen revisions below.
 | Component | Revision | Terms |
 |---|---|---|
 | adapter | `7jycwjmbfn-eng/spiral-fit-consumer-gpu@f189740211f462193973055a32e3269c03301587` | MIT |
-| official fitter | `ScrollPrize/villa@7769da8cf2233310570608feecc127066a7c0c7c` | upstream repository terms |
+| official fitter | `ScrollPrize/villa@7769da8cf2233310570608feecc127066a7c0c7c` | MIT |
 | PHercParis4 Spiral data used by the adapter | public Vesuvius Challenge dataset | CC BY-NC 4.0; do not treat as unrestricted commercial data |
 
 The adapter's own reproduction guide pins that `villa` revision. Do not
