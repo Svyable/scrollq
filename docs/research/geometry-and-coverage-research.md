@@ -62,13 +62,80 @@ This establishes only that the proposed complement statistic behaves sanely on
 controlled wound geometry. It does not establish that a real CT-derived witness
 is reliable.
 
+### Tier-1 real-papyrus deletion calibration
+
+A frozen PHerc0139 experiment then reused the public w035 TIFXYZ on the exact
+9.362 µm CT together with the independently published `surface-m7` prediction
+already frozen for the wrong-wrap campaign. Six deletion centers came from an
+earlier geometry-only plan rather than from witness strength.
+
+The first protocol version is preserved as a formal **FAIL**: its largest
+41×41 deletion consumed its entire 41×41 evaluation window, so the required
+outside-stability statistic had no outside witnesses. The 21×21 and 31×31
+arms nevertheless had recall 1.0 and outside stability 1.0. The protocol was
+not rewritten in place.
+
+A separately merged v2 changed only the evaluation window to 51×51. All source
+identities, centers, deletion sizes, witness association, tolerances, synthetic
+parallel-sheet control, and decision thresholds were unchanged.
+
+V2 passed every preregistered Stage-A gate at the primary 8-voxel tolerance:
+
+- omission recall: median 1.0 and minimum per-patch 1.0 for 21×21, 31×31,
+  and 41×41 deletions;
+- outside stability: minimum 1.0 for every deletion size;
+- +20-voxel parallel substitution: median recall 1.0 and minimum outside
+  stability 1.0 for the preregistered 31×31 and 41×41 arms;
+- minimum supported witnesses per frozen 51×51 region: 1,168;
+- median supported witnesses: 1,636.5;
+- supported fraction of valid centered-normal material vertices ranged from
+  about 0.449 to 0.822, median about 0.658;
+- no sampled prediction or CT chunks were missing.
+
+Artifacts:
+
+- [v1 preregistration](../../artifacts/2026-10-03-coverage-witness-pherc0139-prereg/)
+- [v1 measured FAIL](../../artifacts/2026-10-03-coverage-witness-pherc0139-run/)
+- [v2 preregistration](../../artifacts/2026-10-03-coverage-witness-pherc0139-prereg-v2/)
+- [v2 measured PASS](../../artifacts/2026-10-03-coverage-witness-pherc0139-run-v2/)
+
+The important conclusion is narrower than the perfect deletion scores suggest.
+Stage A deliberately associates independent predictions to known material
+within ±2 voxels, so large deletion distance is expected once that association
+exists. The stronger evidence is that the independent source supplies
+substantial support across all six preselected real-papyrus regions.
+
+### Newly exposed bottleneck: sheet identity
+
+The same independent geometry source is known to contain competing sheet
+candidates: the earlier frozen wrong-wrap experiment found separated,
+CT-supported `surface-m7` geometry at 32/32 reference probes, typically
+13–29 voxels from the w035 surface.
+
+Therefore **surface existence is not physical sheet identity**. Promoting a raw
+"unexplained surface prediction = omitted recto" rule would generate ambiguity
+from adjacent windings.
+
+The next useful experiment should be identity- or continuity-aware. One
+promising direction is a **boundary/collar-connected coverage witness**:
+seed the independent prediction only from intact submitted-surface material
+around a candidate gap, then ask whether the same independent connected sheet
+continues through the gap. Hidden deleted material may be used for scoring but
+not for seeding or candidate selection. A successful version should also
+measure whether competing neighboring-sheet controls are mistakenly joined to
+the seeded component.
+
+This is complementary to the fiber-texture fingerprint idea below: topology
+may provide a cheaper sheet-identity signal; fiber texture becomes useful where
+topological continuity is insufficient.
+
 ### Promotion gate
 
 Promote only if real-papyrus controls show that:
 
 - coherent artificial mesh deletions are detected at useful recall;
 - intact-surface false flags remain localizable and low;
-- adjacent/wrong-winding substitution is not accepted as valid coverage;
+- adjacent/wrong-winding substitution is not accepted as valid coverage or is explicitly marked ambiguous rather than silently counted;
 - the result replicates across regions and preferably witness families;
 - thresholds are frozen without looking at Grand Prize target failures;
 - unexplained clusters can be exported as reviewer-loadable locations.

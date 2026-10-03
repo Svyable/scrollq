@@ -35,7 +35,7 @@ campaign.
 | Stride/blend/seam invariance | EXPERIMENT FURTHER | Detect stitching/crop-grid false positives | Held-out nuisance sweep using existing Villa controls |
 | Exact inference-configuration binding | INCLUDE, merged in PR #142 | Reproducible model evaluation | Maintain as part of the evaluation contract |
 | Scored-result run identity binding | INCLUDE, merged in PR #147 | Prevent stale score files from masquerading as current results | Maintain adapter compliance |
-| Independent recto coverage witnesses | EXPERIMENT FURTHER | Falsify omitted surface outside a declared inventory | Real-papyrus deliberate deletion/wrong-winding controls |
+| Independent recto coverage witnesses | EXPERIMENT FURTHER; Stage-A deletion calibration passed | Falsify omitted surface outside a declared inventory | Identity/continuity-aware unconditioned witness test; raw surface existence is insufficient |
 | Fiber-texture fingerprints for sheet identity | EXPERIMENT FURTHER | Detect smooth but wrong-winding sheet switches | Adjacent-winding controls on real CT |
 | Fiber-coordinate canonicalization as a model architecture | DISMISS for now | Possible orientation normalization | Reconsider only if an ablation inside another experiment supports it |
 | Global histogram matching | DISMISS | Superficial domain normalization | None; retain only as a negative control |
