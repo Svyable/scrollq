@@ -89,6 +89,7 @@ def test_control_delta_records_correct_surface_advantage():
         ground_truth_source_url="https://example.org/public-ground-truth",
         model_checkpoint_sha256="b" * 64,
         model_window_voxels=(17, 64, 64),
+        label_ancestry="independent",
         controls={"normal+3": control},
     )
 
@@ -97,6 +98,30 @@ def test_control_delta_records_correct_surface_advantage():
     assert row["name"] == "normal+3"
     assert row["primary_minus_control_balanced_accuracy"] == pytest.approx(0.5)
     assert row["primary_minus_control_roc_auc"] == pytest.approx(0.5)
+
+
+def test_related_label_ancestry_prevents_prize_readiness():
+    prediction, labels, mask = _arrays()
+    report = build_report(
+        prediction=prediction,
+        labels=labels,
+        validation_mask=mask,
+        threshold=0.5,
+        split_id="fold-1",
+        held_out=True,
+        training_overlap="none",
+        ground_truth_source_url="https://example.org/public-ground-truth",
+        model_checkpoint_sha256="9" * 64,
+        model_window_voxels=(17, 64, 64),
+        label_ancestry="related",
+        label_source_sha256="8" * 64,
+        controls={"normal+3": np.full_like(prediction, 0.5)},
+    )
+
+    assert report["prize_evidence_ready"] is False
+    assert report["split"]["label_ancestry"] == "related"
+    assert report["split"]["label_source_sha256"] == "8" * 64
+    assert any("label ancestry" in reason for reason in report["readiness_reasons"])
 
 
 def test_training_overlap_prevents_prize_readiness():
