@@ -641,6 +641,28 @@ The gate fails closed on wrong-volume lineage, missing/tampered/invalid ZPA evid
 See [the provenance-manifest specification](docs/grand-prize-provenance.md) and [example manifest](examples/grand-prize-provenance.example.json).
 For unpacked VC3D surfaces, `scroliq-hash column_01.tifxyz` computes the canonical tree SHA-256 used by the provenance gate, so the complete directory-format mesh is cryptographically bound without repacking it.
 
+### 2027 Grand Prize legibility ledger
+
+`scroliq-legibility` audits explicit letter-by-letter reviewer evidence against
+the exact submitted render and TIFXYZ hashes. Counted preserved characters
+require pixel bounds; characters counted as legible additionally require one
+visible-character reading and `interpolated: false`. Uncertain preserved
+characters stay in the denominator, the 70% threshold is applied per counted
+column, and a column omitted from counting requires a documented
+Challenge-acknowledged exclusion.
+
+```bash
+scroliq-legibility \
+  --manifest submission/provenance.json \
+  --ledger submission/legibility.json \
+  --out submission/legibility-report.json
+```
+
+A pass means the supplied ledger is internally consistent and reaches the
+recorded arithmetic threshold. It is not OCR and does not independently certify
+papyrological correctness. See the [legibility evidence contract](docs/grand-prize-legibility.md)
+and [example ledger](examples/grand-prize-legibility.example.json).
+
 ### 2027 Grand Prize submission images
 
 `scroliq-submission-image` turns final VC3D renders into the exact reviewer-facing image forms required by the prize. The `column` command derives the 1 cm scale-bar length from the eligible CT voxel size plus the same pyramid level and `--scale` parameters used by `vc_render_tifxyz`, appends the bar in a footer without touching papyrus pixels, and writes a SHA-pinned scale proof. The `banner` command assembles the frozen column images in numeric order and overlays every column number, rejecting gaps or duplicates. See [the submission-image contract](docs/grand-prize-images.md).
