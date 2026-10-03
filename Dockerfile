@@ -54,10 +54,7 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PYTHONUNBUFFERED=1 \
     HOME=/home/scroliq
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates \
-    && rm -rf /var/lib/apt/lists/* \
-    && useradd --uid 10001 --create-home --home-dir /home/scroliq --shell /usr/sbin/nologin scroliq
+RUN useradd --uid 10001 --create-home --home-dir /home/scroliq --shell /usr/sbin/nologin scroliq
 
 COPY --from=builder /wheels /wheels
 RUN python -m pip install \
