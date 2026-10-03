@@ -106,6 +106,21 @@ def _public_url(value: Any, field: str) -> str:
     return text
 
 
+def _evidence_sha256(value: Any, field: str) -> dict[str, str] | None:
+    """Validate optional named SHA-256 evidence attached to one region."""
+    if value is None:
+        return None
+    if not isinstance(value, dict) or not value:
+        raise ValidationError(f"{field} must be a non-empty object")
+    normalized: dict[str, str] = {}
+    for raw_name, raw_sha in value.items():
+        name = _identifier(raw_name, f"{field} key")
+        if not isinstance(raw_sha, str) or not SHA256_RE.fullmatch(raw_sha):
+            raise ValidationError(f"{field}.{name} must be lowercase 64-hex")
+        normalized[name] = raw_sha
+    return normalized
+
+
 def validate_model_card(document: Mapping[str, Any]) -> dict[str, Any]:
     """Validate and normalize one model registry entry."""
     _schema_v1(document, "model")
@@ -317,6 +332,9 @@ def validate_region_results(
             raise ValidationError(f"duplicate results region id: {region_id}")
         seen.add(region_id)
         status = row.get("status")
+        evidence_sha256 = _evidence_sha256(
+            row.get("evidence_sha256"), f"region {region_id}.evidence_sha256"
+        )
         if status == "ok":
             metrics = row.get("metrics")
             if not isinstance(metrics, dict):
@@ -326,12 +344,20 @@ def validate_region_results(
                 raise ValidationError(
                     f"region {region_id}: primary metric {metric_name!r} must be finite"
                 )
-            normalized.append(
-                {"id": region_id, "status": "ok", "metric": float(value)}
-            )
+            normalized_row = {
+                "id": region_id,
+                "status": "ok",
+                "metric": float(value),
+            }
+            if evidence_sha256 is not None:
+                normalized_row["evidence_sha256"] = evidence_sha256
+            normalized.append(normalized_row)
         elif status == "failed":
             reason = _nonempty_string(row.get("reason"), f"region {region_id}.reason")
-            normalized.append({"id": region_id, "status": "failed", "reason": reason})
+            normalized_row = {"id": region_id, "status": "failed", "reason": reason}
+            if evidence_sha256 is not None:
+                normalized_row["evidence_sha256"] = evidence_sha256
+            normalized.append(normalized_row)
         else:
             raise ValidationError(f"region {region_id}: status must be ok or failed")
 
@@ -617,12 +643,20 @@ def build_report(
             values.append(failure_value)
             failure = {"id": region_id, "kind": "failed", "reason": row["reason"]}
             failures.append(failure)
-            region_rows.append({**failure, "score_used": failure_value})
+            region_report = {**failure, "score_used": failure_value}
+            if row.get("evidence_sha256") is not None:
+                region_report["evidence_sha256"] = row["evidence_sha256"]
+            region_rows.append(region_report)
         else:
             values.append(row["metric"])
-            region_rows.append(
-                {"id": region_id, "kind": "ok", "score_used": row["metric"]}
-            )
+            region_report = {
+                "id": region_id,
+                "kind": "ok",
+                "score_used": row["metric"],
+            }
+            if row.get("evidence_sha256") is not None:
+                region_report["evidence_sha256"] = row["evidence_sha256"]
+            region_rows.append(region_report)
 
     point = float(np.mean(np.asarray(values, dtype=np.float64)))
     ci_low, ci_high = bootstrap_mean_ci(
