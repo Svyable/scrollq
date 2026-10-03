@@ -72,13 +72,27 @@ def validate_model_card(card: dict[str, Any]) -> list[str]:
     for field in ("name", "author", "inference_script", "license"):
         if not _nonempty_string(card.get(field)):
             errors.append(f"{field} must be a non-empty string")
+    if _nonempty_string(card.get("name")) and not MODEL_NAME_RE.fullmatch(card["name"]):
+        errors.append("name must match ^[a-z0-9][a-z0-9._-]*$")
     if card.get("task") not in TASKS:
         errors.append(f"task must be one of {sorted(TASKS)}")
     if not SHA256_RE.fullmatch(str(card.get("checkpoint_sha256", ""))):
         errors.append("checkpoint_sha256 must be lowercase 64-hex")
+    if not _public_url(card.get("checkpoint_url")):
+        errors.append("checkpoint_url must be public http(s)")
     if not SHA256_RE.fullmatch(str(card.get("inference_sha256", ""))):
         errors.append("inference_sha256 must be lowercase 64-hex")
-    _unique_strings(card.get("training_data"), "training_data", errors)
+    training_data = _unique_strings(card.get("training_data"), "training_data", errors)
+    sources = card.get("training_data_sources")
+    if not isinstance(sources, dict):
+        errors.append("training_data_sources must map every training dataset ID to a public URL")
+    else:
+        if set(sources) != set(training_data):
+            errors.append("training_data_sources keys must exactly match training_data")
+        for dataset_id, url in sources.items():
+            if not _nonempty_string(dataset_id) or not _public_url(url):
+                errors.append("training_data_sources values must be public http(s) URLs")
+                break
     training_regions = _unique_strings(
         card.get("training_regions", []), "training_regions", errors
     )
@@ -92,6 +106,28 @@ def validate_model_card(card: dict[str, Any]) -> list[str]:
         errors.append("training_inventory_complete must be boolean")
     if type(card.get("held_out_excluded")) is not bool:
         errors.append("held_out_excluded must be boolean")
+    if type(card.get("pseudo_labeling_used")) is not bool:
+        errors.append("pseudo_labeling_used must be boolean")
+    stages = card.get("pseudo_label_stages")
+    if not isinstance(stages, list):
+        errors.append("pseudo_label_stages must be a list")
+        stages = []
+    if card.get("pseudo_labeling_used") is True and not stages:
+        errors.append("pseudo_label_stages must be non-empty when pseudo_labeling_used is true")
+    if card.get("pseudo_labeling_used") is False and stages:
+        errors.append("pseudo_label_stages must be empty when pseudo_labeling_used is false")
+    for index, stage in enumerate(stages):
+        if not isinstance(stage, dict):
+            errors.append(f"pseudo_label_stages[{index}] must be an object")
+            continue
+        if not _nonempty_string(stage.get("name")):
+            errors.append(f"pseudo_label_stages[{index}].name must be non-empty")
+        for field in ("dataset_url", "checkpoint_url", "experiment_run_url"):
+            if not _public_url(stage.get(field)):
+                errors.append(f"pseudo_label_stages[{index}].{field} must be public http(s)")
+        for field in ("dataset_sha256", "checkpoint_sha256"):
+            if not SHA256_RE.fullmatch(str(stage.get(field, ""))):
+                errors.append(f"pseudo_label_stages[{index}].{field} must be lowercase 64-hex")
     if card.get("training_data_license") != "CC-BY-NC-4.0":
         errors.append("training_data_license must be CC-BY-NC-4.0")
     if type(card.get("random_seed")) is not int or card.get("random_seed", -1) < 0:
@@ -310,8 +346,14 @@ def build_preflight_report(
             "task": card.get("task"),
             "model_card_path": str(model_path),
             "model_card_sha256": canonical_digest(card) if isinstance(card, dict) else None,
-            "checkpoint": checkpoint_check,
+            "checkpoint": {
+                **checkpoint_check,
+                "public_url": card.get("checkpoint_url"),
+            },
             "inference": inference_check,
+            "training_data_sources": card.get("training_data_sources"),
+            "pseudo_labeling_used": card.get("pseudo_labeling_used"),
+            "pseudo_label_stages": card.get("pseudo_label_stages"),
             "random_seed": card.get("random_seed"),
             "experiment_run_url": card.get("experiment_run_url"),
         },
