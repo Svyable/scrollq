@@ -367,7 +367,8 @@ def audit_legibility(
                     errors,
                     "LEGIBILITY_EXCLUSION_ACK",
                     f"{path}.exclusion",
-                    "an uncounted column requires a documented Challenge-acknowledged reason and reference",
+                    "an uncounted column requires a documented "
+                    "Challenge-acknowledged reason and reference",
                 )
 
         lines = row.get("lines")
@@ -489,11 +490,12 @@ def audit_legibility(
                 f"recorded legibility is {rate:.3%}; required threshold is 70%",
             )
 
-        total_preserved += preserved
-        total_legible += legible
-        total_lines_above += lines_above
-        total_lines_with_identified += lines_with_identified
-        total_fully_identified_lines += fully_identified_lines
+        if counted:
+            total_preserved += preserved
+            total_legible += legible
+            total_lines_above += lines_above
+            total_lines_with_identified += lines_with_identified
+            total_fully_identified_lines += fully_identified_lines
 
         reports.append(
             {
@@ -569,7 +571,11 @@ def _load_json(path: Path, label: str) -> tuple[bytes, dict[str, Any]]:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--manifest", required=True, help="Grand Prize provenance JSON")
-    ap.add_argument("--ledger", required=True, help="letter-by-letter legibility ledger JSON")
+    ap.add_argument(
+        "--ledger",
+        required=True,
+        help="letter-by-letter legibility ledger JSON",
+    )
     ap.add_argument("--out", help="optional machine-readable audit report JSON")
     ap.add_argument("--format", choices=("text", "json", "github"), default="text")
     args = ap.parse_args(argv)
