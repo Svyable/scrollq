@@ -17,6 +17,30 @@ That distinction matters because the public ecosystem already contains strong pr
 The next milestone is therefore intentionally narrow: **one exact 2027 Grand Prize volume, one held-out surface/fit/ink improvement, one evidence passport that makes the result independently checkable.** See the [Grand Prize proof campaign](docs/grand-prize-proof-campaign.md).
 
 
+## Model evaluation harness
+
+`scroliq-eval` is the common fail-closed envelope for held-out community-model
+evaluation. It validates versioned model cards in `models/`, binds them to an
+explicit held-out dataset manifest, verifies checkpoint and inference-code
+hashes, rejects declared training/evaluation overlap, and aggregates trusted
+per-region task metrics into a point estimate plus deterministic bootstrap 95%
+CI, `n`, failure breakdown, and exact provenance.
+
+```bash
+scroliq-eval \
+  --model models/example/model.json \
+  --dataset /secure/evals/ink-blind-v1/public-manifest.json \
+  --checkpoint /cache/example.ckpt \
+  --results out/example.regions.json \
+  --out out/example.eval.json
+```
+
+Failed or missing held-out regions remain in the denominator and make the model
+ineligible for ranking. Private truth is intentionally scored in a separate
+trusted phase so model-author PR code never receives hidden labels or truth
+meshes. See [the model-evaluation protocol](docs/model-evaluation.md).
+
+
 ## Diagnostic passport
 
 **Held-out geometry evaluation:** `scroliq-geometry-validate` compares a frozen
