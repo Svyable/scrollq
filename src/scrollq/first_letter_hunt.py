@@ -99,6 +99,55 @@ def _bbox(value: Any) -> list[list[float]]:
     return out
 
 
+def _surface_seating_record(record: Any, base_dir: Path) -> tuple[bool, dict[str, Any] | None, list[str], list[str]]:
+    """Validate and hash the artifact that admits a surface to ink triage.
+
+    The hunt command does not decide whether a surface is physically correct; it
+    requires a separate seating/orientation artifact to have done that job. This
+    prevents strong ink-model output on a sheet switch or m7 orientation failure
+    from becoming a review candidate.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    if not isinstance(record, dict):
+        return False, None, errors, ["surface_seating evidence is required"]
+
+    state = record.get("state")
+    if state not in {"pass", "fail", "unknown"}:
+        errors.append("surface_seating.state must be pass, fail, or unknown")
+
+    raw_path = record.get("path")
+    if not isinstance(raw_path, str) or not raw_path:
+        errors.append("surface_seating.path is required")
+        return False, {"state": state}, errors, warnings
+    path = Path(raw_path)
+    if not path.is_absolute():
+        path = base_dir / path
+    if not path.is_file():
+        errors.append(f"surface_seating artifact does not exist: {raw_path}")
+        return False, {"state": state, "path": raw_path}, errors, warnings
+
+    actual_sha = _sha256_file(path)
+    declared_sha = record.get("sha256")
+    if declared_sha is not None:
+        if not isinstance(declared_sha, str) or not SHA256_RE.fullmatch(declared_sha):
+            errors.append("surface_seating.sha256 must be lowercase hexadecimal SHA-256")
+        elif declared_sha != actual_sha:
+            errors.append("surface_seating.sha256 does not match the artifact")
+
+    method = record.get("method")
+    if not isinstance(method, str) or not method:
+        warnings.append("surface_seating.method is not declared")
+
+    meta = {
+        "state": state,
+        "path": raw_path,
+        "sha256": actual_sha,
+        "method": method,
+    }
+    return state == "pass" and not errors, meta, errors, warnings
+
+
 def _array_record(record: Any, base_dir: Path) -> tuple[np.ndarray, dict[str, Any]]:
     if not isinstance(record, dict):
         raise ValueError("prediction record must be an object")
@@ -187,6 +236,12 @@ def _candidate_report(
         else:
             support = float(support)
 
+    seating_ok, seating_meta, seating_errors, seating_warnings = _surface_seating_record(
+        candidate.get("surface_seating"), base_dir
+    )
+    errors.extend(seating_errors)
+    warnings.extend(seating_warnings)
+
     primary_raw = candidate.get("primary_predictions")
     primary_raw = primary_raw if isinstance(primary_raw, list) else []
     if len(primary_raw) < 2:
@@ -274,7 +329,12 @@ def _candidate_report(
         else None
     )
 
-    evidence_complete = controls_complete and len(checkpoint_shas) >= 2 and len(primary_arrays) >= 2
+    evidence_complete = (
+        seating_ok
+        and controls_complete
+        and len(checkpoint_shas) >= 2
+        and len(primary_arrays) >= 2
+    )
     signal_ok = (
         primary_median_signal is not None
         and primary_median_signal > min_primary_signal_fraction
@@ -293,6 +353,7 @@ def _candidate_report(
         "id": candidate_id,
         "bbox_zyx_half_open": bbox,
         "surface_support_frac": support,
+        "surface_seating": seating_meta,
         "status": status,
         "threshold": threshold,
         "primary": {
@@ -314,6 +375,7 @@ def _candidate_report(
         "localization_margin": localization_margin,
         "gates": {
             "evidence_complete": evidence_complete,
+            "surface_seating_pass": seating_ok,
             "primary_signal_above_minimum": signal_ok,
             "localization_margin_above_minimum": localization_ok,
             "min_primary_signal_fraction": min_primary_signal_fraction,
@@ -414,8 +476,9 @@ def build_hunt_report(
         "errors": errors,
         "limitation": (
             "This tool ranks windows for human/technical review. It does not identify a letter, "
-            "prove biological ink, or replace held-out validation on known ground truth. Distinct "
-            "checkpoint hashes prove only checkpoint distinction, not independent training data."
+            "prove biological ink, independently certify surface seating, or replace held-out validation "
+            "on known ground truth. Distinct checkpoint hashes prove only checkpoint distinction, not "
+            "independent training data."
         ),
     }
 
