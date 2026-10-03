@@ -481,6 +481,25 @@ def verify_receipt(
     commit = vc3d.get("commit")
     if not isinstance(commit, str) or not COMMIT_RE.fullmatch(commit):
         errors.append("VC3D commit is not exact 40-hex")
+    binary_info = vc3d.get("binary")
+    if not isinstance(binary_info, dict):
+        errors.append("binary section is missing")
+        binary_info = {}
+    if not isinstance(binary_info.get("name"), str) or not binary_info.get("name"):
+        errors.append("VC3D binary name is missing")
+    binary_size = binary_info.get("size")
+    if (
+        isinstance(binary_size, bool)
+        or not isinstance(binary_size, int)
+        or binary_size < 1
+    ):
+        errors.append("VC3D binary size must be a positive integer")
+    for key in ("sha256", "help_sha256"):
+        value = binary_info.get(key)
+        if not isinstance(value, str) or not SHA256_RE.fullmatch(value):
+            errors.append(f"VC3D binary {key} is not lowercase 64-hex")
+    if not isinstance(binary_info.get("help_headline"), str):
+        errors.append("VC3D binary help_headline must be a string")
 
     inputs = document.get("inputs")
     if not isinstance(inputs, dict):
@@ -568,7 +587,7 @@ def verify_receipt(
     if not isinstance(argv, list) or not all(isinstance(x, str) for x in argv):
         errors.append("argv must be a list of strings")
     else:
-        expected_name = vc3d.get("binary", {}).get("name") if isinstance(vc3d.get("binary"), dict) else None
+        expected_name = binary_info.get("name")
         try:
             expected_critical = _critical_argv(document)
         except (KeyError, TypeError, ValueError):
@@ -624,19 +643,15 @@ def verify_receipt(
     if binary is not None:
         try:
             executable = _binary_path(binary)
-            binary_info = vc3d.get("binary")
-            if not isinstance(binary_info, dict):
-                errors.append("binary section is missing")
-            else:
-                if executable.name != binary_info.get("name"):
+            if executable.name != binary_info.get("name"):
                     errors.append("VC3D binary name mismatch")
-                if executable.stat().st_size != binary_info.get("size"):
-                    errors.append("VC3D binary size mismatch")
-                if _sha256_file(executable) != binary_info.get("sha256"):
-                    errors.append("VC3D binary sha256 mismatch")
-                help_sha, _ = _help_fingerprint(executable)
-                if help_sha != binary_info.get("help_sha256"):
-                    errors.append("VC3D binary --help fingerprint mismatch")
+            if executable.stat().st_size != binary_info.get("size"):
+                errors.append("VC3D binary size mismatch")
+            if _sha256_file(executable) != binary_info.get("sha256"):
+                errors.append("VC3D binary sha256 mismatch")
+            help_sha, _ = _help_fingerprint(executable)
+            if help_sha != binary_info.get("help_sha256"):
+                errors.append("VC3D binary --help fingerprint mismatch")
         except (OSError, VC3DError) as exc:
             errors.append(f"binary verification failed: {exc}")
 

@@ -106,7 +106,9 @@ The receipt intentionally stops at the raw CT/mesh-derived TIFF. The next
 step is `scroliq-submission-image column`, which adds the required 1 cm
 scale-bar footer without modifying the papyrus pixels.
 
-The next Grand Prize provenance schema binds these two proofs together:
-the VC3D receipt's raw-output SHA must equal the submission-image proof's
-input SHA, while the receipt's group index, render scale, and base voxel size
-must equal the physical-scale fields used to derive the 1 cm bar.
+Grand Prize provenance schema v7 binds these two proofs together. Every render
+must declare a hash-pinned `vc3d_receipt`; with `--root-dir`,
+`scroliq-provenance` verifies the receipt and requires its raw-output SHA to
+equal the submission-image proof's input SHA. The receipt's group index, render
+scale, base voxel size, mesh path/tree hash, and eligible volume must also match
+the corresponding manifest and scale-proof fields.
