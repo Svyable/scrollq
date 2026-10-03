@@ -1,0 +1,114 @@
+name: PHerc0139 wrong-wrap preregistration
+
+# Issue #105: freeze the independent geometry-source rule before prediction
+# values at the 32 frozen reference probes are observed.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/pherc0139-wrong-wrap-prereg.yml"
+      - "artifacts/2026-10-03-pherc0139-wrong-wrap-prereg/**"
+      - "src/scrollq/wrong_wrap_plan.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Guard frozen spec
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="artifacts/2026-10-03-pherc0139-wrong-wrap-prereg/wrong-wrap-spec.json"
+          if [ -e "$out" ]; then
+            echo "wrong-wrap spec already exists; frozen"
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install frozen code revision
+        if: steps.guard.outputs.skip != '1'
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+          python -m pip install -e .
+
+      - name: Freeze wrong-wrap spec without geometry reads
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-pherc0139-wrong-wrap-prereg"
+          mkdir -p "$outdir"
+          {
+            scroliq-wrong-wrap-plan freeze \
+              --reference-plan artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json \
+              --prediction-url https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/representations/predictions/surfaces/20250728140407-surface-20260413222639-surface-m7-L0-th0.2.zarr \
+              --ct-url https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr \
+              --model-id 20260413222639 \
+              --prediction-binding-url https://scrollprize.org/data_browser/PHerc0139 \
+              --min-distance 12 \
+              --max-distance 64 \
+              --min-gap 3 \
+              --min-run 2 \
+              --threshold 127 \
+              --out "$outdir/wrong-wrap-spec.json"
+            python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path("artifacts/2026-10-03-pherc0139-wrong-wrap-prereg/wrong-wrap-spec.json")
+          spec = json.loads(p.read_text())
+          assert spec["schema"] == "scroliq-wrong-wrap-spec/1"
+          assert spec["status"] == "frozen-before-geometry-read"
+          assert spec["reference_plan"]["group_count"] == 32
+          assert spec["geometry_source"]["model_id"] == "20260413222639"
+          assert spec["geometry_source"]["level"] == 0
+          assert spec["geometry_source"]["published_threshold"] == 0.2
+          assert spec["geometry_source"]["stored_value_threshold"] == 127
+          assert spec["algorithm"]["name"] == "normal-ray-supported-surface-v1"
+          assert spec["algorithm"]["ray_step_voxels"] == 1
+          assert spec["algorithm"]["min_distance_voxels"] == 12
+          assert spec["algorithm"]["max_distance_voxels"] == 64
+          assert spec["algorithm"]["min_gap_voxels"] == 3
+          assert spec["algorithm"]["min_run_voxels"] == 2
+          assert spec["algorithm"]["uses_sheetness_response"] is False
+          assert spec["algorithm"]["stochastic"] is False
+          assert spec["algorithm"]["seed"] is None
+          print("freeze checks PASS: no geometry-source values were read")
+          PY
+          } | tee "$outdir/freeze.log"
+          {
+            python --version
+            python -m pip freeze
+          } > "$outdir/environment.txt"
+
+      - name: Commit frozen spec to campaign branch
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/2026-10-03-pherc0139-wrong-wrap-prereg
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Freeze PHerc0139 wrong-wrap geometry spec"
+          branch="${{ github.head_ref || github.ref_name }}"
+          if [ "$branch" = main ]; then
+            branch=campaign/pherc0139-wrong-wrap-prereg
+          fi
+          git push origin "HEAD:$branch"

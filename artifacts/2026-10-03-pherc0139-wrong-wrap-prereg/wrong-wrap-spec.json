@@ -1,0 +1,53 @@
+{
+  "algorithm": {
+    "candidate_rule": "candidate run: prediction > stored_value_threshold AND masked CT > 0; separation gap: in-bounds prediction <= stored_value_threshold",
+    "max_distance_voxels": 64,
+    "min_distance_voxels": 12,
+    "min_gap_voxels": 3,
+    "min_run_voxels": 2,
+    "name": "normal-ray-supported-surface-v1",
+    "normal_source": "frozen TIFXYZ centered-difference normal",
+    "ray_step_voxels": 1,
+    "seed": null,
+    "selection_rule": "nearest run midpoint by absolute normal distance; negative-normal direction wins exact ties",
+    "stochastic": false,
+    "uses_reference_ct_intensity": "mask-support only; no intensity ranking",
+    "uses_sheetness_response": false
+  },
+  "claim_boundary": "This frozen spec nominates a geometrically separate, CT-supported published surface prediction along each reference normal. It does not assert that the prediction is correct physical sheet identity and it does not use any sheetness response. Wrong-wrap probes remain descriptive controls in the downstream benchmark.",
+  "coordinate_space": "level0-voxel-index-zyx",
+  "geometry_source": {
+    "binding_url": "https://scrollprize.org/data_browser/PHerc0139",
+    "ct_support_rule": "masked CT voxel value > 0",
+    "ct_support_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "kind": "published-surface-prediction",
+    "level": 0,
+    "model_id": "20260413222639",
+    "published_threshold": 0.2,
+    "stored_value_threshold": 127,
+    "url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/representations/predictions/surfaces/20250728140407-surface-20260413222639-surface-m7-L0-th0.2.zarr"
+  },
+  "reference_plan": {
+    "group_count": 32,
+    "path": "artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json",
+    "sha256": "8cc043205a72b9e8a285ed81ac46b09f6d2808e1483634b9030cb9dcfc12309d"
+  },
+  "schema": "scroliq-wrong-wrap-spec/1",
+  "source_attestation": {
+    "algorithm": "zpa-metadata-semantics-v1",
+    "axes": [
+      "z",
+      "y",
+      "x"
+    ],
+    "level0_shape_zyx": [
+      20974,
+      6621,
+      6621
+    ],
+    "metadata_semantics_sha256": "58a956b0623bce7ba4f6fc38ec159cc4e500b2859b6619152574d5c9020c9bed",
+    "state": "PRESENT"
+  },
+  "status": "frozen-before-geometry-read",
+  "volume_root": "PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr"
+}
