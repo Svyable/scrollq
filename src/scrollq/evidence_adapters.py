@@ -14,6 +14,8 @@ import re
 from pathlib import Path
 from typing import Any, Callable
 
+from .artifact_hash import artifact_sha256
+
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
@@ -161,6 +163,7 @@ def normalize_native_report(
     artifact_url: str,
     sha256: str,
     path: str,
+    mesh_sha256: str,
     producer_commit: str,
     command: str,
 ) -> dict[str, Any]:
@@ -173,6 +176,8 @@ def normalize_native_report(
         raise NativeEvidenceError("artifact_url must be public http(s)")
     if not isinstance(sha256, str) or not SHA256_RE.fullmatch(sha256):
         raise NativeEvidenceError("sha256 must be lowercase 64-hex")
+    if not isinstance(mesh_sha256, str) or not SHA256_RE.fullmatch(mesh_sha256):
+        raise NativeEvidenceError("mesh_sha256 must be lowercase 64-hex")
     if not isinstance(producer_commit, str) or not COMMIT_RE.fullmatch(producer_commit):
         raise NativeEvidenceError("producer_commit must be lowercase 40-hex")
     if not isinstance(command, str) or not command.strip():
@@ -188,7 +193,10 @@ def normalize_native_report(
         "artifact_url": artifact_url,
         "sha256": sha256,
         "path": path,
-        "scope": {"mesh_ids": [mesh_id]},
+        "scope": {
+            "mesh_ids": [mesh_id],
+            "mesh_sha256": {mesh_id: mesh_sha256},
+        },
         "producer": {
             "repository": ADAPTER_REPOSITORIES[adapter],
             "commit": producer_commit,
@@ -241,6 +249,11 @@ def _main() -> int:
         p.add_argument("--report", required=True)
         p.add_argument("--mesh-id", required=True)
         p.add_argument("--artifact-url", required=True)
+        p.add_argument(
+            "--mesh-path",
+            required=True,
+            help="exact submitted tifxyz directory; its canonical tree digest is recorded",
+        )
         p.add_argument("--producer-commit", required=True)
         p.add_argument("--command", required=True)
         p.add_argument("--entry-id", default=None)
@@ -251,6 +264,16 @@ def _main() -> int:
     path = Path(args.report)
     raw = path.read_bytes()
     report = json.loads(raw)
+    mesh_path = Path(args.mesh_path)
+    native_mesh = (
+        report.get("mesh")
+        if adapter == FLATCHECK_ADAPTER
+        else (report.get("mesh") or {}).get("path")
+    )
+    if not isinstance(native_mesh, str) or Path(native_mesh).name != mesh_path.name:
+        raise NativeEvidenceError(
+            "native report mesh path does not match --mesh-path basename"
+        )
     entry = normalize_native_report(
         adapter=adapter,
         report=report,
@@ -259,6 +282,7 @@ def _main() -> int:
         artifact_url=args.artifact_url,
         sha256=hashlib.sha256(raw).hexdigest(),
         path=args.report,
+        mesh_sha256=artifact_sha256(mesh_path),
         producer_commit=args.producer_commit,
         command=args.command,
     )
