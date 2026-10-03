@@ -28,8 +28,8 @@ ADAPTER_REPOSITORIES = {
 }
 
 # These are the only adapter/claim pairs allowed to turn a required claim into
-# PASS in evidence policy v1.
-APPROVED_PASS_ADAPTERS = {
+# an authoritative PASS or FAIL verdict in evidence policy v1.
+APPROVED_VERDICT_ADAPTERS = {
     # flatcheck/v1 is intentionally evidence-only for now: its native JSON
     # names a path but does not content-bind the tifxyz bytes it scored.
     "flattening-isometry": frozenset(),
