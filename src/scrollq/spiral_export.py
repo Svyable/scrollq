@@ -21,6 +21,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence, TextIO
 
+from .spiral_reproduction_check import (
+    TOOL as REPRODUCTION_CHECK_TOOL,
+    ReproductionCheckError,
+    evaluate_run as evaluate_reproduction_run,
+)
 from .spiral_run import SpiralRunError, verify_villa_checkout
 from .tifxyz_audit import audit_tifxyz
 
@@ -192,6 +197,7 @@ def prepare_export(
     villa_root: Path,
     output: Path,
     evidence_dir: Path,
+    reproduction_check: Path,
     python_executable: str,
     device: str,
     chunk_size: int,
@@ -217,6 +223,40 @@ def prepare_export(
         raise SpiralExportError("Spiral run receipt is not a successful scroliq-spiral-run result")
     if run_receipt.get("scroll") != EXPECTED_SCROLL or run_receipt.get("prize_volume_id") != EXPECTED_VOLUME_ID:
         raise SpiralExportError("Spiral run receipt is not the frozen PHerc0826 prize volume")
+
+    reproduction_path = reproduction_check.resolve()
+    _regular_file(reproduction_path, "Spiral reproduction check")
+    reproduction = _load_json(reproduction_path, "Spiral reproduction check")
+    if (
+        reproduction.get("tool") != REPRODUCTION_CHECK_TOOL
+        or reproduction.get("status") != "sanity-match"
+        or reproduction.get("baseline_reproduction_ready_for_export") is not True
+    ):
+        raise SpiralExportError(
+            "Spiral reproduction check is not a passing sanity-match"
+        )
+    if (
+        reproduction.get("scroll") != EXPECTED_SCROLL
+        or reproduction.get("prize_volume_id") != EXPECTED_VOLUME_ID
+    ):
+        raise SpiralExportError(
+            "Spiral reproduction check is not the frozen PHerc0826 prize volume"
+        )
+    try:
+        fresh_reproduction = evaluate_reproduction_run(run_root)
+    except ReproductionCheckError as exc:
+        raise SpiralExportError(
+            f"cannot independently recompute Spiral reproduction check: {exc}"
+        ) from exc
+    if reproduction != fresh_reproduction:
+        raise SpiralExportError(
+            "supplied Spiral reproduction check differs from fresh recomputation"
+        )
+    reproduction_run = reproduction.get("run_receipt")
+    if not isinstance(reproduction_run, dict) or reproduction_run.get("sha256") != _sha256(run_receipt_path):
+        raise SpiralExportError(
+            "Spiral reproduction check is not bound to this run receipt"
+        )
 
     checkpoint_meta = run_receipt.get("checkpoint")
     if not isinstance(checkpoint_meta, dict) or checkpoint_meta.get("present") is not True:
@@ -313,6 +353,10 @@ def prepare_export(
             "path": str(run_receipt_path),
             "sha256": _sha256(run_receipt_path),
         },
+        "reproduction_check": {
+            "path": str(reproduction_path),
+            "sha256": _sha256(reproduction_path),
+        },
         "checkpoint": {
             "path": str(checkpoint),
             "sha256": checkpoint_sha,
@@ -356,6 +400,7 @@ def export_checkpoint(
     villa_root: Path,
     output: Path,
     evidence_dir: Path,
+    reproduction_check: Path,
     python_executable: str = sys.executable,
     device: str = "cuda",
     chunk_size: int = 65536,
@@ -366,6 +411,7 @@ def export_checkpoint(
         villa_root=villa_root,
         output=output,
         evidence_dir=evidence_dir,
+        reproduction_check=reproduction_check,
         python_executable=python_executable,
         device=device,
         chunk_size=chunk_size,
@@ -430,6 +476,7 @@ def export_checkpoint(
             "gpu": _gpu_identity(),
         },
         "run_receipt": plan["run_receipt"],
+        "reproduction_check": plan["reproduction_check"],
         "checkpoint": plan["checkpoint"],
         "recipe": plan["recipe"],
         "preflight": plan["preflight"],
@@ -471,6 +518,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--villa-root", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--evidence-dir", required=True)
+    parser.add_argument(
+        "--reproduction-check",
+        required=True,
+        help="passing scroliq-spiral-reproduction-check JSON bound to this run",
+    )
     parser.add_argument("--python", default=sys.executable)
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--chunk-size", type=int, default=65536)
@@ -486,6 +538,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         villa_root=Path(args.villa_root),
         output=Path(args.output),
         evidence_dir=Path(args.evidence_dir),
+        reproduction_check=Path(args.reproduction_check),
         python_executable=args.python,
         device=args.device,
         chunk_size=args.chunk_size,
