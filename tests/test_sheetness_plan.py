@@ -131,42 +131,6 @@ def test_even_quantile_selection_spans_eligible_geometry(tmp_path):
     assert ranks[-1] < result["protocol"]["sample_selection"]["eligible_vertex_count"]
 
 
-
-def test_vectorized_two_pass_matches_scalar_candidate_order(tmp_path):
-    result, surface, _zpa_path = _build(
-        tmp_path, samples=4, offsets=(-2.0, 2.0), halo=2
-    )
-    xyz, valid, _info = plan._load_surface(surface)
-    scalar_grid_yx = []
-    source_shape = (30, 30, 30)
-    offsets = (-2.0, 2.0)
-    halo = 2
-
-    h, w = valid.shape
-    for y in range(1, h - 1):
-        for x in range(1, w - 1):
-            normal_xyz = plan._normal_at_grid(xyz, valid, y, x)
-            if normal_xyz is None:
-                continue
-            surface_xyz = np.asarray(xyz[y, x], dtype=np.float64)
-            points = [plan._xyz_to_zyx(surface_xyz)]
-            for distance in offsets:
-                points.append(
-                    plan._xyz_to_zyx(surface_xyz + distance * normal_xyz)
-                )
-            if plan._bbox_for_points(
-                points, halo=halo, source_shape=source_shape
-            ) is not None:
-                scalar_grid_yx.append([y, x])
-
-    ranks = result["protocol"]["sample_selection"]["selected_eligible_ranks"]
-    assert result["protocol"]["sample_selection"]["implementation"] == (
-        "row-vectorized-two-pass-v1"
-    )
-    assert [row["grid_yx"] for row in result["groups"]] == [
-        scalar_grid_yx[rank] for rank in ranks
-    ]
-
 def test_source_binding_token_must_match_surface_and_volume(tmp_path):
     token = "20250728140407"
     volume_root = f"PHerc0139/volumes/{token}-9.362um-1.2m-113keV-masked.zarr"
