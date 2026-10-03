@@ -42,3 +42,31 @@ jobs:
               if ep.group == "console_scripts":
                   subprocess.run([ep.name, "--help"], check=True)
           PYCODE
+
+  container:
+    name: reviewer container
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build pinned reviewer image
+        run: |
+          BUILD_DATE="$(git show -s --format=%cI HEAD)"
+          SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"
+          docker build \
+            --build-arg VCS_REF="$GITHUB_SHA" \
+            --build-arg BUILD_DATE="$BUILD_DATE" \
+            --build-arg SOURCE_DATE_EPOCH="$SOURCE_DATE_EPOCH" \
+            -t "scrollq-ci:$GITHUB_SHA" \
+            .
+      - name: Verify container contract
+        run: |
+          IMAGE="scrollq-ci:$GITHUB_SHA"
+          test "$(docker run --rm "$IMAGE" id -u)" = "10001"
+          test "$(docker inspect --format='{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$IMAGE")" = "$GITHUB_SHA"
+          docker run --rm "$IMAGE" scroliq-provenance --help >/dev/null
+          docker run --rm "$IMAGE" scroliq-package --help >/dev/null
+          docker run --rm "$IMAGE" scroliq-submission-image --help >/dev/null
+          docker run --rm "$IMAGE" scroliq-legibility --help >/dev/null
+          docker run --rm "$IMAGE" zpa-gate --help >/dev/null
+          docker run --rm "$IMAGE" python -c "import scrollq, zpa; print('container imports: ok')"
