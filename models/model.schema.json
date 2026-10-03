@@ -32,6 +32,11 @@
     },
     "held_out_excluded": {"type": "boolean"},
     "inference_script": {"type": "string", "minLength": 1},
+    "inference_config": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Output-affecting inference settings. Optional for schema migration, but scroliq-eval requires it for rank eligibility and binds its canonical SHA-256 into the report."
+    },
     "license": {"type": "string", "minLength": 1},
     "tasks": {
       "type": "array",
