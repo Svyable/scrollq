@@ -6,7 +6,7 @@ import pytest
 
 from scrollq.spiral_transfer import (
     TriangleSurface,
-    _git_blob_sha1,\n    _midpoint_ranks,\n    _choose_offset,
+    _git_blob_sha1,\n    _midpoint_ranks,\n    _choose_offset,\n    _held_metrics,
     _load_predictions,
     _point_triangle_distance,
     _triangles,
@@ -125,3 +125,22 @@ def test_repeat_report_serialization_can_be_byte_identical():
     two = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n"
     assert one.encode() == two.encode()
     assert "timestamp" not in one
+
+
+def test_neighbor_classification_and_missing_expected_stay_in_denominator():
+    per = {
+        -2: np.array([9., 1., np.nan, 4.]),
+        -1: np.array([8., 2., np.nan, 3.]),
+         0: np.array([1., np.nan, np.nan, 3.]),
+         1: np.array([2., 4., np.nan, 3.]),
+         2: np.array([3., 5., np.nan, 3.]),
+    }
+    m = _held_metrics(per)
+    assert m["sample_count"] == 4
+    assert m["missing_or_unscorable_samples"] == 2
+    # Missing expected predictions do not shrink either fixed denominator.
+    assert m["fraction_distance_le_5_voxels"] == pytest.approx(2 / 4)
+    assert m["expected_winding_nearest_fraction_among_plus_minus_2"] == pytest.approx(2 / 4)
+    assert m["nearest_winding_delta_counts"]["0"] == 2
+    assert m["nearest_winding_delta_counts"]["-2"] == 1
+    assert m["neighbor_classifiable_samples"] == 3
