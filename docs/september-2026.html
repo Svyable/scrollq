@@ -4,6 +4,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>September 2026 submission — ScrolIQ</title>
 <meta name="description" content="ScrolIQ: reproducible scan-health triage and diagnostic provenance for Vesuvius scroll data. Measure the bottleneck before spending scarce annotation and GPU time.">
+<meta name="theme-color" content="#0d0b08">
+<meta name="color-scheme" content="dark">
+<link rel="canonical" href="https://svyable.github.io/scrollq/september-2026.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ScrolIQ — September 2026 Vesuvius Progress Prize">
+<meta property="og:description" content="Frozen September submission: corpus-wide scan-health triage, exact-volume provenance, held-out validation tooling, and the evidence trail that October builds on.">
+<meta property="og:url" content="https://svyable.github.io/scrollq/september-2026.html">
+<meta property="og:image" content="https://svyable.github.io/scrollq/favicon.svg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ScrolIQ — September 2026 Vesuvius Progress Prize">
+<meta name="twitter:description" content="Frozen September evidence, with a direct path to the October update and 2027 Grand Prize readiness map.">
 <style>
 :root{--bg:#0d0b08;--panel:#161310;--panel2:#1c1813;--line:#2c251b;
 --ink:#ece3d2;--muted:#a89880;--dim:#6f6350;
@@ -57,7 +68,30 @@ border-radius:12px;padding:1.1rem 1.25rem}
 .suite .card p{margin:.3rem 0;font-size:.9rem}
 footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.4rem 0 3rem;color:var(--dim);font-size:.82rem}
 footer a{color:var(--muted)}
+
+.topnav{position:sticky;top:0;z-index:20;background:rgba(13,11,8,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.topnav .wrap{display:flex;gap:.35rem;align-items:center;overflow-x:auto;padding-top:.55rem;padding-bottom:.55rem;scrollbar-width:none}
+.topnav .wrap::-webkit-scrollbar{display:none}
+.topnav a{white-space:nowrap;text-decoration:none;color:var(--muted);font-size:.78rem;border:1px solid transparent;border-radius:999px;padding:.32rem .62rem}
+.topnav a:hover,.topnav a:focus-visible{color:var(--ink);border-color:var(--line);outline:none}
+.review-panel{border-color:#4c3a24;background:linear-gradient(135deg,rgba(255,122,26,.07),rgba(255,209,102,.025))}
+.kicker{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ember);font-weight:800}
+.review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.7rem;margin-top:1rem}
+.review-card{display:block;text-decoration:none;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:1rem;min-height:112px}
+.review-card:hover,.review-card:focus-visible{border-color:#5b4934;outline:none;transform:translateY(-1px)}
+.review-card b{display:block;color:var(--ink);margin-bottom:.28rem}
+.review-card span{display:block;color:var(--muted);font-size:.85rem;line-height:1.45}
+.panel[id]{scroll-margin-top:4rem}
+@media (max-width:620px){.hero{padding-top:2.6rem}.panel{padding:1.15rem}table{display:block;overflow-x:auto}}
 </style></head><body>
+<nav class="topnav" aria-label="Progress pages"><div class="wrap">
+<a href="./">Dashboard</a>
+<a href="#evidence">September evidence</a>
+<a href="./october-2026-update.html">October update</a>
+<a href="./progress.html">Progress tracker</a>
+<a href="./grand-prize-readiness.html">2027 readiness</a>
+<a href="https://github.com/Svyable/scrollq">Source</a>
+</div></nav>
 
 <header class="hero"><div class="wrap">
 <div class="eyebrow">VESUVIUS CHALLENGE · SEPTEMBER 2026 PROGRESS PRIZE</div>
@@ -101,6 +135,18 @@ provenance schema v4 binding held-out ink evidence to its exact report
 </div></header>
 
 <div class="wrap" style="margin-top:2.5rem">
+<div class="panel review-panel" aria-labelledby="reviewer-path-title">
+<div class="kicker">Reviewer path · navigation layer added 2026-10-03</div>
+<h2 id="reviewer-path-title">September stays frozen; the evidence trail keeps moving.</h2>
+<p>This page preserves the September submission and its corrections. For judging or reuse, the shortest path is to verify the frozen evidence here, then follow the dated October artifacts and the 2027 requirement map. <b>No September score, experiment, or artifact is changed by this navigation layer.</b></p>
+<div class="review-grid">
+<a class="review-card" href="#evidence"><b>1 · Verify September</b><span>Jump to the claim → artifact table and the published negative stability result.</span></a>
+<a class="review-card" href="./october-2026-update.html"><b>2 · See what changed</b><span>Real-segment mesh, winding and fiber evidence; fail-closed health; pre-registered stability v2.</span></a>
+<a class="review-card" href="./grand-prize-readiness.html"><b>3 · Check 2027 gaps</b><span>Requirement-by-requirement evidence, partials, and unknowns without a synthetic readiness score.</span></a>
+<a class="review-card" href="./progress.html"><b>4 · Track execution</b><span>One dated view of October milestones across ScrolIQ and zarr-pyramid-audit.</span></a>
+</div>
+</div>
+
 
 <div class="panel"><h2><span class="q">(1)</span> Which scroll data did you work on?</h2>
 <p>ScrolIQ was run on the public scroll-volume corpus rather than a hand-picked showcase:</p>
@@ -216,7 +262,7 @@ between fit and held-out boxes, so held-out spiral-fit residuals cannot quietly 
 inputs. See the <a href="grand-prize-probe-protocol.md">blind probe protocol</a>.</li>
 </ul></div>
 
-<div class="panel"><h2><span class="q">(4)</span> What evidence have you provided?</h2>
+<div class="panel" id="evidence"><h2><span class="q">(4)</span> What evidence have you provided?</h2>
 <table><thead><tr><th>claim</th><th>evidence (in repo)</th></tr></thead><tbody>
 <tr><td><b>64 / 64</b> listed volumes scored; mean <b>22.9</b> decoded chunks / volume</td>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-scrollq-n24-dense"><code>artifacts/2026-09-30-scrollq-n24-dense/</code></a> —
@@ -378,7 +424,7 @@ the published claims are committed in the repository.</p></div>
 </div>
 
 <footer><div class="wrap">
-<a href="./">← back to the live evaluator dashboard</a> · <a href="./october-2026-update.html">October 2026 update →</a> · <a href="./october-2026.html">October 2026 goals →</a><br><br>
+<a href="./">← back to the live evaluator dashboard</a> · <a href="./progress.html">progress tracker</a> · <a href="./october-2026-update.html">October 2026 update →</a> · <a href="./october-2026.html">October 2026 goals →</a> · <a href="./grand-prize-readiness.html">2027 readiness →</a><br><br>
 Built by Sven + Muse · September 2026 ·
 <a href="https://github.com/Svyable/scrollq">source</a>
 </div></footer>
