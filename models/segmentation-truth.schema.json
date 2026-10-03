@@ -7,7 +7,6 @@
   "required": [
     "schema_version",
     "dataset",
-    "spec_sha256",
     "volume_root",
     "coordinate_system",
     "commitment_salt",
@@ -16,7 +15,6 @@
   "properties": {
     "schema_version": {"const": 1},
     "dataset": {"type": "string", "minLength": 1},
-    "spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "volume_root": {"type": "string", "minLength": 1},
     "coordinate_system": {"const": "base_voxel_xyz"},
     "commitment_salt": {
