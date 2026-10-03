@@ -18,6 +18,7 @@ from .sheetness_benchmark import _validate_rule as validate_benchmark_rule
 
 SCHEMA = "scroliq-sheetness-preregistration/1"
 RECEIPT_SCHEMA = "scroliq-sheetness-preregistration-receipt/1"
+BENCHMARK_SPEC_VERSION = int(BENCHMARK_SCHEMA.rsplit("/", 1)[1])
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _FORBIDDEN_RESULT_KEYS = {
     "input_sha256",
@@ -460,6 +461,7 @@ def validation_receipt(
     preregistration: dict[str, Any], *, file_sha256: str
 ) -> dict[str, Any]:
     normalized = validate_preregistration(preregistration)
+    file_sha256 = _require_sha(file_sha256, "preregistration file sha256")
     return {
         "schema": RECEIPT_SCHEMA,
         "status": "valid",
@@ -569,9 +571,19 @@ def _verify_sheetness_report(
     if normalization.get("enabled") is not engine["normalize"]:
         raise PreregistrationError("sheetness normalization enablement drifted")
     if engine["normalize"]:
-        if float(normalization.get("lower_percentile", -1)) != engine["lower_percentile"]:
+        low = normalization.get("lower_percentile")
+        high = normalization.get("upper_percentile")
+        if (
+            isinstance(low, bool)
+            or not isinstance(low, (int, float))
+            or float(low) != engine["lower_percentile"]
+        ):
             raise PreregistrationError("sheetness lower normalization percentile drifted")
-        if float(normalization.get("upper_percentile", -1)) != engine["upper_percentile"]:
+        if (
+            isinstance(high, bool)
+            or not isinstance(high, (int, float))
+            or float(high) != engine["upper_percentile"]
+        ):
             raise PreregistrationError("sheetness upper normalization percentile drifted")
 
     response = report.get("response")
@@ -645,7 +657,7 @@ def finalize_spec(
         groups.append({"id": group["id"], "surface": final_surface, "controls": controls})
 
     return {
-        "schema_version": 3,
+        "schema_version": BENCHMARK_SPEC_VERSION,
         "preregistration": {
             "schema": SCHEMA,
             "experiment_id": prereg["experiment_id"],
