@@ -324,7 +324,6 @@ def test_cli_commit_spec_hash_and_create_only_output(tmp_path, capsys):
 
     assert main([
         "--dataset", str(dataset_path),
-        "--truth", str(truth_path),
         "--spec", str(spec_path),
         "--print-spec-hash",
     ]) == 0
