@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "diagnostic": "flattening-tier0-fixtures",
+  "promotion_eligible": false,
+  "purpose": "Non-promoting public papyrus OBJ fixtures for debugging independent permissive flattening implementations before any sealed column-sized Tier-1 benchmark.",
+  "source_bucket": "https://vesuvius-challenge-open-data.s3.us-east-1.amazonaws.com",
+  "dataset_license": {
+    "spdx": "CC-BY-NC-4.0",
+    "url": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "notice": "Only metadata/hashes are stored here. Downloaded Vesuvius Challenge mesh bytes remain under their source data license and must not be relicensed as ScrollQ MIT code."
+  },
+  "selection_freeze": {
+    "selected_utc": "2026-10-03",
+    "basis": "Selected from the pre-existing 2026-10-01 corpus-wide OBJ audit before any independent Beltrami prototype result existed.",
+    "candidate_results_observed": false,
+    "roles": [
+      "ordinary-curved-control",
+      "tear-hole-stress",
+      "high-distortion-stress"
+    ],
+    "explicit_nonpromotion": "Results on these fixtures may catch implementation defects but cannot PROMOTE a production flattening backend. Promotion requires the sealed Tier-1 column-sized corpus defined in issue #114."
+  },
+  "cases": [
+    {
+      "id": "pherc0139-w035-ordinary",
+      "role": "ordinary-curved-control",
+      "scroll_id": "PHerc0139",
+      "segment_id": "20260317000000-w035_2026031718",
+      "source_key": "PHerc0139/segments/20260317000000-w035_2026031718/mesh/intermediate/20260317000000-w035_2026031718_original.obj",
+      "sha256": "845ee4bbbef2ff3549a99405cc044fc048282712e8f371d7ef4700f14fc00d30",
+      "bytes": 7107314,
+      "source_audit": "artifacts/2026-10-01-corpus-mesh-audit/obj-reports/PHerc0139.20260317000000-w035_2026031718.json",
+      "expected_audit": {
+        "triangles": 69772,
+        "components": 1,
+        "boundary_loops": 1,
+        "holes": 0,
+        "uv_flips": 0,
+        "p95_symmetric_stretch": 1.7717539634090103
+      },
+      "rationale": "Moderate baseline distortion on a single-component, one-boundary papyrus surface; manageable 7.1 MB fixture."
+    },
+    {
+      "id": "pherc1447-hole-stress",
+      "role": "tear-hole-stress",
+      "scroll_id": "PHerc1447",
+      "segment_id": "20250502183138-auto_grown_20250502162038685",
+      "source_key": "PHerc1447/segments/20250502183138-auto_grown_20250502162038685/mesh/intermediate/20250502183138-auto_grown_20250502162038685_original.obj",
+      "sha256": "7278f1a9ea913865b6b746251d5ce280c19969ad11d26cf65553e77de6b4b7f8",
+      "bytes": 1645481,
+      "source_audit": "artifacts/2026-10-01-corpus-mesh-audit/obj-reports/PHerc1447.20250502183138-auto_grown_20250502162038685.json",
+      "expected_audit": {
+        "triangles": 16986,
+        "components": 1,
+        "boundary_loops": 17,
+        "holes": 16,
+        "uv_flips": 0,
+        "p95_symmetric_stretch": 1.0234633250748315
+      },
+      "rationale": "Connected 1.65 MB papyrus mesh with 16 interior boundary loops; stresses tears/holes without high baseline isometry distortion."
+    },
+    {
+      "id": "phercmanbp-w6-distortion",
+      "role": "high-distortion-stress",
+      "scroll_id": "PHercMANBp",
+      "segment_id": "20251220015639-w6_20251220015639809",
+      "source_key": "PHercMANBp/segments/20251220015639-w6_20251220015639809/mesh/intermediate/20251220015639-w6_20251220015639809_original.obj",
+      "sha256": "7d00d61d75e534fd7e8986725bdc6a5e1630b50628d4813a61a53aaf4a72e57e",
+      "bytes": 17939310,
+      "source_audit": "artifacts/2026-10-01-corpus-mesh-audit/obj-reports/PHercMANBp.20251220015639-w6_20251220015639809.json",
+      "expected_audit": {
+        "triangles": 172218,
+        "components": 1,
+        "boundary_loops": 1,
+        "holes": 0,
+        "uv_flips": 0,
+        "p95_symmetric_stretch": 2.160199114640871
+      },
+      "rationale": "17.9 MB single-boundary papyrus mesh with pre-existing p95 stretch >2; cheap high-distortion stress case compared with ~291 MB Paris4 aggregate meshes."
+    }
+  ]
+}
