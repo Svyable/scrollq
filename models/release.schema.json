@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://svyable.github.io/scrollq/schemas/model-release-v1.json",
+  "title": "ScrolIQ Grand Prize ML release chain",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "visibility",
+    "code",
+    "pseudo_labeling",
+    "datasets",
+    "checkpoints",
+    "final_checkpoint_id",
+    "runs"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+    "visibility": {"const": "public"},
+    "code": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit"],
+      "properties": {
+        "repository": {"type": "string", "format": "uri"},
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "pseudo_labeling": {"type": "boolean"},
+    "datasets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "role", "public_url", "license", "sha256"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+          "role": {"enum": ["training", "pseudo-label", "iterative-label", "validation"]},
+          "public_url": {"type": "string", "format": "uri"},
+          "license": {"const": "CC-BY-NC-4.0"},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "path": {"type": "string", "minLength": 1},
+          "producer_checkpoint_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"}
+        }
+      }
+    },
+    "checkpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "role",
+          "stage",
+          "public_url",
+          "license",
+          "sha256",
+          "training_dataset_ids",
+          "parent_checkpoint_ids"
+        ],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+          "role": {"enum": ["intermediate", "final"]},
+          "stage": {"type": "integer", "minimum": 0},
+          "public_url": {"type": "string", "format": "uri"},
+          "license": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "path": {"type": "string", "minLength": 1},
+          "training_dataset_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"}
+          },
+          "parent_checkpoint_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"}
+          }
+        }
+      }
+    },
+    "final_checkpoint_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+    "runs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "checkpoint_id", "public_url", "public", "stochastic"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+          "kind": {"enum": ["training", "inference"]},
+          "checkpoint_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+          "public_url": {"type": "string", "format": "uri"},
+          "public": {"const": true},
+          "stochastic": {"type": "boolean"},
+          "random_seed": {"type": "integer"}
+        }
+      }
+    }
+  }
+}
