@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 from scrollq.morphology_control import audit_morphology_manifest, main
 
@@ -126,3 +127,15 @@ def test_cli_refuses_overwrite_and_partial_returns_one(tmp_path, capsys):
     assert main(["--manifest", str(manifest), "--out", str(out)]) == 2
     assert out.read_bytes() == before
     assert "refusing to overwrite" in capsys.readouterr().out
+
+
+def test_committed_source_benchmark_manifest_stays_partial_and_transfer_blocked():
+    root = Path(__file__).resolve().parents[1]
+    manifest = json.loads(
+        (root / "artifacts/2026-10-03-morphology-control/"
+         "source-benchmark-manifest.json").read_text(encoding="utf-8")
+    )
+    result = audit_morphology_manifest(manifest)
+    assert result["status"] == "partial"
+    assert result["transfer_authorized"] is False
+    assert result["error_count"] == 0
