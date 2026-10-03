@@ -61,6 +61,26 @@ scroliq-passport \
 The passport rejects a spatial artifact whose volume root does not exactly match the selected volume.
 
 
+## CT sheetness baseline
+
+`scroliq-sheetness` is a deterministic, dependency-light multiscale Hessian
+plate detector for bounded 3-D CT cutouts. It adapts the M=2-in-N=3 objectness
+idea used in medical imaging to measure local sheet-like evidence without
+training data:
+
+```bash
+scroliq-sheetness cutout.npy \
+  --out-prefix out/pherc-cutout \
+  --sigmas 0.8,1.2,1.8 \
+  --write-normal
+```
+
+The command emits hash-pinned response/scale arrays and, optionally, the local
+Hessian normal. A high response is **not** a sheet-identity, winding, recto,
+ink, or readability verdict. The exact mathematical contract, ITK attribution,
+synthetic controls, memory guard, and predeclared real-data falsification plan
+are in [`docs/sheetness.md`](docs/sheetness.md).
+
 ## Winding annotation audit
 
 `scroliq-winding` audits the conventional VC3D / spiral-fitting point-collection inputs before they are trusted as geometry evidence:
