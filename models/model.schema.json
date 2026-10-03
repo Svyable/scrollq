@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://svyable.github.io/scrollq/schemas/model-card-v1.json",
+  "title": "ScrolIQ model registry entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "name",
+    "author",
+    "checkpoint_sha256",
+    "training_data",
+    "held_out_excluded",
+    "inference_script",
+    "license"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "name": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "author": {"type": "string", "minLength": 1},
+    "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "checkpoint_path": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional repository-relative checkpoint path. CI may instead pass --checkpoint."
+    },
+    "training_data": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "held_out_excluded": {"type": "boolean"},
+    "inference_script": {"type": "string", "minLength": 1},
+    "license": {"type": "string", "minLength": 1},
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"enum": ["ink", "geometry", "segmentation"]}
+    },
+    "stochastic": {"type": "boolean", "default": false},
+    "random_seed": {"type": "integer"},
+    "training_run_url": {"type": "string", "format": "uri"},
+    "inference_run_url": {"type": "string", "format": "uri"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"stochastic": {"const": true}},
+        "required": ["stochastic"]
+      },
+      "then": {"required": ["random_seed"]}
+    }
+  ]
+}
