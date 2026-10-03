@@ -133,6 +133,7 @@ def validate_readiness(
         expected_mesh_ids=mesh_ids,
         root_dir=root_dir,
         ledger_sha256=evidence_ledger_sha256,
+        require_local_artifacts=True,
     )
     return evaluate_readiness(provenance_report, evidence_report)
 
@@ -146,7 +147,11 @@ def main() -> None:
     )
     ap.add_argument("--manifest", required=True, help="ScrolIQ provenance manifest JSON")
     ap.add_argument("--evidence", required=True, help="independent evidence ledger JSON")
-    ap.add_argument("--root-dir", default=None, help="optional submission package root")
+    ap.add_argument(
+        "--root-dir",
+        required=True,
+        help="submission package root; required so native evidence is re-verified",
+    )
     ap.add_argument("--out", default=None, help="optional JSON readiness report")
     ap.add_argument("--format", choices=("text", "json", "github"), default="text")
     args = ap.parse_args()
