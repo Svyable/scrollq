@@ -143,7 +143,11 @@ def test_first_run_requires_gap_and_minimum_run():
     hits[9:13] = True  # distances 10..13
     hits[19:21] = True  # clean separated run at distances 20..21
     run = ww._first_separated_run(
-        hits, min_distance=12, min_gap=3, min_run=2
+        hits,
+        gap_clear=~hits,
+        min_distance=12,
+        min_gap=3,
+        min_run=2,
     )
     assert run == {
         "start_distance_voxels": 20,
@@ -176,6 +180,29 @@ def test_nearest_supported_run_wins_and_negative_breaks_tie():
     assert row["selected_sign"] == -1
     assert row["signed_distance_voxels"] == -20.5
     assert row["global_zyx"] == [48.0, 48.0, 27.5]
+
+
+def test_ct_mask_cannot_manufacture_geometry_gap():
+    pred = np.zeros((96, 96, 96), dtype=np.uint8)
+    ct = np.ones_like(pred, dtype=np.uint8)
+
+    # The prediction is continuously present through d=9..13. Masking the
+    # three preceding samples must not turn d=12..13 into a separated sheet.
+    pred[48, 48, 57:62] = 255
+    ct[48, 48, 57:60] = 0
+
+    ps, cs = _samplers(pred, ct)
+    row = ww._propose_group(
+        _group(),
+        pred_sampler=ps,
+        ct_sampler=cs,
+        threshold=127,
+        min_distance=12,
+        max_distance=32,
+        min_gap=3,
+        min_run=2,
+    )
+    assert row["status"] == "no-independent-competing-sheet-found"
 
 
 def test_masked_ct_support_can_reject_closer_prediction_run():
