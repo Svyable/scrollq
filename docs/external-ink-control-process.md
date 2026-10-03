@@ -76,8 +76,12 @@ For the zero-training control, the manifest should declare at least:
     "revision": "217e7521670db49cde97872ea6a8bdfb80c449f1",
     "code_license": "MIT",
     "checkpoint_license": "MIT",
-    "license_evidence": "https://github.com/Nieuwlaar/ink9um-dense-native/blob/217e7521670db49cde97872ea6a8bdfb80c449f1/weights/VERIFY.md",
+    "license_evidence": [
+      "https://github.com/Nieuwlaar/ink9um-dense-native/blob/217e7521670db49cde97872ea6a8bdfb80c449f1/README.md",
+      "https://github.com/Nieuwlaar/ink9um-dense-native/blob/217e7521670db49cde97872ea6a8bdfb80c449f1/weights/VERIFY.md"
+    ],
     "data_license": "CC-BY-NC 4.0",
+    "data_license_evidence": "https://scrollprize.org/data",
     "intended_use_permitted": true,
     "grand_prize_role": "control_only",
     "inference_only": true,
