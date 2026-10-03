@@ -1,0 +1,51 @@
+name: Same-byte Mesh IQ cross-check
+
+on:
+  push:
+    paths:
+      - "scripts/doctor_same_byte_benchmark.py"
+      - "src/scrollq/tifxyz_audit.py"
+      - "artifacts/2026-10-02-doctor-same-byte/**"
+      - ".github/workflows/doctor-same-byte.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ScrolIQ
+        run: python -m pip install .
+      - name: Run pinned same-byte benchmark
+        id: benchmark
+        continue-on-error: true
+        run: |
+          python scripts/doctor_same_byte_benchmark.py             --out out/doctor-same-byte/summary.json
+      - name: Verify frozen evidence when present
+        if: steps.benchmark.outcome == 'success'
+        run: |
+          if [ -f artifacts/2026-10-02-doctor-same-byte/verify.py ]; then
+            python artifacts/2026-10-02-doctor-same-byte/verify.py               out/doctor-same-byte/summary.json               artifacts/2026-10-02-doctor-same-byte/summary.json
+          fi
+      - name: Print evidence
+        if: always()
+        run: |
+          echo "=== DOCTOR_SAME_BYTE_SUMMARY ==="
+          cat out/doctor-same-byte/summary.json
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: doctor-same-byte
+          path: out/doctor-same-byte/summary.json
+          if-no-files-found: error
+      - name: Enforce benchmark result
+        if: steps.benchmark.outcome != 'success'
+        run: exit 1
