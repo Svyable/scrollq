@@ -10,6 +10,7 @@
     "spec_sha256",
     "volume_root",
     "coordinate_system",
+    "commitment_salt",
     "regions"
   ],
   "properties": {
@@ -18,6 +19,11 @@
     "spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "volume_root": {"type": "string", "minLength": 1},
     "coordinate_system": {"const": "base_voxel_xyz"},
+    "commitment_salt": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Private 32-byte random salt used to verify the public hidden-truth commitment. Do not expose while the benchmark remains blind."
+    },
     "regions": {
       "type": "array",
       "minItems": 1,
