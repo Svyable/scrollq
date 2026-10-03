@@ -118,8 +118,15 @@ def _external_method_provenance(
     revision = raw.get("revision")
     code_license = raw.get("code_license")
     checkpoint_license = raw.get("checkpoint_license")
-    license_evidence = raw.get("license_evidence")
+    license_evidence_raw = raw.get("license_evidence")
+    if isinstance(license_evidence_raw, str):
+        license_evidence = [license_evidence_raw]
+    elif isinstance(license_evidence_raw, list):
+        license_evidence = license_evidence_raw
+    else:
+        license_evidence = []
     data_license = raw.get("data_license")
+    data_license_evidence = raw.get("data_license_evidence")
     role = raw.get("grand_prize_role")
     inference_only = raw.get("inference_only")
     uses_pseudolabel_training = raw.get("uses_pseudolabel_training")
@@ -133,12 +140,25 @@ def _external_method_provenance(
     if not isinstance(checkpoint_license, str) or not checkpoint_license.strip():
         errors.append("external_method.checkpoint_license must be declared")
     if (
-        not isinstance(license_evidence, str)
-        or not license_evidence.startswith(("https://", "http://"))
+        not license_evidence
+        or any(
+            not isinstance(url, str)
+            or not url.startswith(("https://", "http://"))
+            for url in license_evidence
+        )
     ):
-        errors.append("external_method.license_evidence must be a public http(s) URL")
+        errors.append(
+            "external_method.license_evidence must contain public http(s) URL(s)"
+        )
     if not isinstance(data_license, str) or not data_license.strip():
         errors.append("external_method.data_license must be declared")
+    if (
+        not isinstance(data_license_evidence, str)
+        or not data_license_evidence.startswith(("https://", "http://"))
+    ):
+        errors.append(
+            "external_method.data_license_evidence must be a public http(s) URL"
+        )
     if raw.get("intended_use_permitted") is not True:
         errors.append("external_method.intended_use_permitted must be true")
     if role not in {"control_only", "candidate_submission_model"}:
@@ -206,6 +226,7 @@ def _external_method_provenance(
         "checkpoint_license": checkpoint_license,
         "license_evidence": license_evidence,
         "data_license": data_license,
+        "data_license_evidence": data_license_evidence,
         "intended_use_permitted": raw.get("intended_use_permitted") is True,
         "grand_prize_role": role,
         "inference_only": inference_only,
