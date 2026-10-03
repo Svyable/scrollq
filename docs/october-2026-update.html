@@ -137,6 +137,11 @@ exact-volume Grand Prize mesh cross-cut.</li>
 patch-collection constraints off by two or more windings, 206 of 254 relative collections tied to the absolute frame,
 injection control 194 / 200 (<a href="https://github.com/Svyable/scrollq/pull/65">#65</a>,
 <a href="https://github.com/Svyable/scrollq/pull/75">#75</a>).</li>
+<li><b>2026-10-03 · Review queues now open natively in VC3D.</b> <code>scroliq-vc3d-review</code> exports diagnostic
+findings as VC3D PointCollections v1 with source hashes and review context preserved. The frozen Paris4 winding result
+becomes five physical review markers for its six flagged constraints, including both conflicting patches at the duplicated
+point (<a href="vc3d-review-bundles.md">handoff contract</a>;
+<a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-10-03-paris4-winding-attachment/vc3d-review-points.json">artifact</a>).</li>
 </ul></div>
 
 <div class="panel"><h2><span class="q">1</span> Mesh IQ: from 21 meshes to the whole public corpus</h2>
@@ -201,6 +206,9 @@ inversions. The public directory is not asserted to name one CT volume, so this 
 PointCollections, fiber CSV/JSON and ink arrays to the command that reads each.</li>
 <li><b><a href="./grand-prize-readiness.html">Grand Prize readiness map</a></b> marks every 2027 requirement as
 implemented evidence, partial, or not yet demonstrated, with links, and deliberately gives no readiness score.</li>
+<li><b><a href="vc3d-review-bundles.md">VC3D-native review handoff</a>.</b> Diagnostic queues can be converted to
+the same PointCollections v1 JSON that VC3D loads, so a machine finding can become an in-context human review point
+without coordinate transcription or a ScrolIQ-specific viewer.</li>
 </ul></div>
 
 <div class="panel"><h2>How ScrolIQ compares with existing tools</h2>
@@ -222,6 +230,9 @@ Grand Prize meshes, structure-only preflight passes all 21, including the broken
 (903 + 200 meshes, 77 segments flagged on every registration)</td></tr>
 <tr><td>Zarr store integrity</td><td>Reading the volume and noticing errors downstream</td>
 <td><code>scrollq-health</code> runs zarr-pyramid-audit and refuses to call a corrupt or unverifiable volume trainable</td></tr>
+<tr><td>Taking a diagnostic into surface review</td><td>VC3D PointCollections and the VC3D agent bridge</td>
+<td><code>scroliq-vc3d-review</code> emits native PointCollections v1 markers, deduplicates coincident findings, and
+keeps the exact diagnostic source hash plus machine context attached to each review point</td></tr>
 <tr><td>Choosing which volume to label or train on next</td><td>We found no published per-volume scan
 comparison</td><td>A scan-health survey of all 64 volcomp volumes with sampling provenance, a published
 stability failure with rank bands, and a weight-free Grand Prize frontier</td></tr>
