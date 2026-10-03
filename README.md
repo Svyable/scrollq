@@ -109,7 +109,10 @@ tracking: hard anchors, bounded adjacent motion, and a smoothness penalty are
 solved by deterministic dynamic programming. It emits a hash-pinned CSV/JSON
 path and explicitly remains **2-D evidence only**, not a 3-D surface or winding
 verdict. See [`docs/horizon-path.md`](docs/horizon-path.md) for the adjacent-field
-references, falsification tests, and held-out real-segment protocol.
+references and falsification tests. `scroliq-horizon-validate` freezes the
+exact-volume source attestation, score/truth hashes, anchors, tracker parameters,
+anchor-exclusion radius, tolerance and success threshold before a measured run;
+see [`docs/horizon-validation.md`](docs/horizon-validation.md).
 
 ## Winding annotation audit
 
