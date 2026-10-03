@@ -40,6 +40,7 @@ def test_flattening_tier0_sources_are_hash_pinned_public_objs_only():
         assert case["source_audit"].startswith(
             "artifacts/2026-10-01-corpus-mesh-audit/obj-reports/"
         )
+        assert (ROOT / case["source_audit"]).is_file()
 
         expected = case["expected_audit"]
         assert expected["triangles"] > 0
@@ -68,7 +69,9 @@ def test_flattening_tier0_roles_have_intended_stress_properties():
 
 
 def test_flattening_tier0_verifier_keeps_claim_boundary():
-    text = (ARTIFACT / "verify.py").read_text(encoding="utf-8")
+    path = ARTIFACT / "verify.py"
+    text = path.read_text(encoding="utf-8")
+    compile(text, str(path), "exec")
 
     assert '"promotion_eligible": False' in text
     assert "Tier-1 evidence remains mandatory" in text
