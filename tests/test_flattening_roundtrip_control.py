@@ -114,6 +114,8 @@ def test_roundtrip_control_workflow_is_non_promoting_and_json_only():
     assert "roundtrip_control.py" in text
     assert 'report["decision"]["verdict"] == "HOLD"' in text
     assert "--implementation-license MIT" in text
+    assert r"\${id}" not in text
+    assert "${id}.compare.json" in text
     assert "verification.json" in text
     assert "reports/*.compare.json" in text
 
