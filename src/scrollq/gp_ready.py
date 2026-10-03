@@ -135,12 +135,22 @@ def validate_readiness(
             and isinstance(item.get("sha256"), str)
         )
     }
+    mesh_paths = {
+        str(item["id"]): str(item["path"])
+        for item in raw_meshes
+        if (
+            isinstance(item, dict)
+            and isinstance(item.get("id"), str)
+            and isinstance(item.get("path"), str)
+        )
+    }
 
     evidence_report = validate_evidence_ledger(
         ledger,
         expected_volume_id=volume_id if isinstance(volume_id, str) else None,
         expected_mesh_ids=mesh_ids,
         expected_mesh_sha256=mesh_sha256,
+        expected_mesh_paths=mesh_paths,
         root_dir=root_dir,
         ledger_sha256=evidence_ledger_sha256,
         require_local_artifacts=True,
