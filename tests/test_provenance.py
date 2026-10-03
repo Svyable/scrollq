@@ -8,7 +8,7 @@ from scrollq.provenance import validate_manifest
 
 def _manifest():
     return {
-        "schema_version": 5,
+        "schema_version": 6,
         "rules": {
             "url": "https://scrollprize.org/prizes",
             "as_of": "2026-09-30",
@@ -160,6 +160,16 @@ def _manifest():
                 "prediction_region_set_id": "regions:column-01",
                 "column": 1,
                 "scale_bar_cm": 1,
+                "scale_proof": {
+                    "tool": "scroliq-submission-image",
+                    "path": "column_01.scale.json",
+                    "sha256": "7" * 64,
+                    "base_voxel_size_um": 9.362,
+                    "group_idx": 0,
+                    "render_scale": 1.0,
+                    "micrometers_per_output_pixel": 9.362,
+                    "scale_bar_pixels": 1068,
+                },
                 "generated_by": {
                     "command": (
                         "python -m pipeline.render --column 1"
@@ -250,6 +260,11 @@ def _manifest():
             "sha256": "1" * 64,
             "render_ids": ["render:column-01"],
             "column_numbers_overlaid": True,
+            "proof": {
+                "tool": "scroliq-submission-image",
+                "path": "banner.proof.json",
+                "sha256": "8" * 64,
+            },
         },
     }
 
@@ -341,13 +356,119 @@ def _zpa_report(manifest):
     }
 
 
+def _write_submission_image_proofs(tmp_path, manifest):
+    render = manifest["renders"][0]
+    scale = render["scale_proof"]
+    scale_payload = {
+        "schema_version": 1,
+        "tool": "scroliq-submission-image",
+        "operation": "column",
+        "column": render["column"],
+        "input": {
+            "path": "column_01.raw.tif",
+            "sha256": "0" * 64,
+            "size_xy": [1200, 100],
+        },
+        "output": {
+            "path": "column_01.tif",
+            "sha256": render["sha256"],
+            "size_xy": [1200, 148],
+        },
+        "vc_render_tifxyz": {
+            "base_voxel_size_um": scale["base_voxel_size_um"],
+            "group_idx": scale["group_idx"],
+            "render_scale": scale["render_scale"],
+            "ds_scale": 1.0,
+            "micrometers_per_output_pixel": scale[
+                "micrometers_per_output_pixel"
+            ],
+            "formula": (
+                "base_voxel_size_um / (2**-group_idx) / render_scale"
+            ),
+        },
+        "scale_bar": {
+            "centimeters": 1,
+            "micrometers": 10000,
+            "pixels": scale["scale_bar_pixels"],
+            "x": 16,
+            "y": 112,
+            "thickness": 4,
+            "footer_height": 48,
+        },
+    }
+    scale_bytes = json.dumps(scale_payload, sort_keys=True).encode("utf-8")
+    (tmp_path / scale["path"]).write_bytes(scale_bytes)
+    scale["sha256"] = hashlib.sha256(scale_bytes).hexdigest()
+
+    banner = manifest["banner"]
+    banner_payload = {
+        "schema_version": 1,
+        "tool": "scroliq-submission-image",
+        "operation": "banner",
+        "columns": [
+            {
+                "column": render["column"],
+                "path": "column_01.tif",
+                "sha256": render["sha256"],
+                "banner_x": 0,
+                "display_size_xy": [1200, 148],
+                "display_scale": 1.0,
+            }
+        ],
+        "column_numbers_overlaid": True,
+        "output": {
+            "path": "banner.tif",
+            "sha256": banner["sha256"],
+            "size_xy": [1200, 176],
+        },
+        "max_column_height": 1200,
+        "label_height": 28,
+        "gap": 8,
+    }
+    banner_bytes = json.dumps(banner_payload, sort_keys=True).encode("utf-8")
+    (tmp_path / banner["proof"]["path"]).write_bytes(banner_bytes)
+    banner["proof"]["sha256"] = hashlib.sha256(banner_bytes).hexdigest()
+
+
 def _write_zpa_report(tmp_path, manifest):
     payload = json.dumps(_zpa_report(manifest), sort_keys=True).encode("utf-8")
     (tmp_path / "zpa-report.json").write_bytes(payload)
     manifest["ct_volume"]["zarr_audit"]["sha256"] = hashlib.sha256(
         payload
     ).hexdigest()
+    if (tmp_path / "column_01.tif").is_file() and (tmp_path / "banner.tif").is_file():
+        _write_submission_image_proofs(tmp_path, manifest)
     return payload
+
+
+def _write_local_mesh(tmp_path, manifest, *, target_volume=None, scroll_source=None):
+    mesh_dir = tmp_path / "column_01.tifxyz"
+    mesh_dir.mkdir(exist_ok=True)
+    meta = {
+        "format": "tifxyz",
+        "scale": [1.0, 1.0],
+        "bbox": [[0, 0, 0], [1, 1, 1]],
+        "source": "vc_grow_seg_from_seed",
+        "target_volume": (
+            target_volume
+            if target_volume is not None
+            else manifest["submission"]["eligible_volume_id"] + ".zarr"
+        ),
+        "scroll_source": (
+            scroll_source
+            if scroll_source is not None
+            else manifest["submission"]["scroll_id"]
+        ),
+    }
+    (mesh_dir / "meta.json").write_text(
+        json.dumps(meta, sort_keys=True), encoding="utf-8"
+    )
+    for channel in "xyz":
+        path = mesh_dir / f"{channel}.tif"
+        if not path.exists():
+            path.write_bytes(channel.encode("ascii"))
+    manifest["meshes"][0]["sha256"] = sha256_path(mesh_dir)
+    return mesh_dir
 
 
 def test_valid_manifest_builds_a_complete_render_chain():
@@ -366,6 +487,29 @@ def test_valid_manifest_builds_a_complete_render_chain():
     assert report["held_out_validation_proofs"][0]["overlaps"] == []
     assert report["recto_coverage_proof"]["status"] == "pass"
     assert report["recto_coverage_proof"]["mesh_ids"] == ["mesh:column-01"]
+
+
+def test_scale_proof_must_match_eligible_voxel_and_true_bar_length():
+    manifest = _manifest()
+    proof = manifest["renders"][0]["scale_proof"]
+    proof["base_voxel_size_um"] = 8.64
+    proof["scale_bar_pixels"] = 999
+
+    report = validate_manifest(manifest)
+
+    assert "GP_SCALE_PROOF_VOXEL" in _codes(report)
+    assert "GP_SCALE_PROOF_PIXELS" in _codes(report)
+
+
+def test_scale_proof_physical_spacing_must_match_vc3d_formula():
+    manifest = _manifest()
+    manifest["renders"][0]["scale_proof"][
+        "micrometers_per_output_pixel"
+    ] = 10.0
+
+    report = validate_manifest(manifest)
+
+    assert "GP_SCALE_PROOF_PIXEL_SIZE" in _codes(report)
 
 
 def test_wrong_same_scroll_volume_fails_closed():
@@ -505,7 +649,6 @@ def test_local_zpa_attestation_mismatch_fails_closed(tmp_path):
 def test_package_file_hashes_are_verified(tmp_path):
     manifest = _manifest()
     payloads = {
-        "column_01.tifxyz": b"mesh",
         "column_01.tif": b"render",
         "banner.tif": b"banner",
         "held_out_validation.json": (
@@ -514,10 +657,8 @@ def test_package_file_hashes_are_verified(tmp_path):
     }
     for name, payload in payloads.items():
         (tmp_path / name).write_bytes(payload)
+    _write_local_mesh(tmp_path, manifest)
 
-    manifest["meshes"][0]["sha256"] = hashlib.sha256(
-        payloads["column_01.tifxyz"]
-    ).hexdigest()
     manifest["renders"][0]["sha256"] = hashlib.sha256(
         payloads["column_01.tif"]
     ).hexdigest()
@@ -537,14 +678,170 @@ def test_package_file_hashes_are_verified(tmp_path):
     assert "GP_HASH_MISMATCH" in _codes(report)
 
 
+def test_local_submission_image_proofs_bind_exact_render_and_banner(tmp_path):
+    manifest = _manifest()
+    payloads = {
+        "column_01.tif": b"render",
+        "banner.tif": b"banner",
+        "held_out_validation.json": (
+            json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
+        ),
+    }
+    for name, payload in payloads.items():
+        (tmp_path / name).write_bytes(payload)
+    _write_local_mesh(tmp_path, manifest)
+    manifest["renders"][0]["sha256"] = hashlib.sha256(
+        payloads["column_01.tif"]
+    ).hexdigest()
+    manifest["banner"]["sha256"] = hashlib.sha256(
+        payloads["banner.tif"]
+    ).hexdigest()
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        payloads["held_out_validation.json"]
+    ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
+
+    report = validate_manifest(manifest, root_dir=tmp_path)
+
+    assert report["eligible"] is True
+    assert report["scale_proofs"][0]["artifact_checked"] is True
+    assert report["banner_proof"]["artifact_checked"] is True
+
+
+def test_local_scale_proof_rejects_render_substitution(tmp_path):
+    manifest = _manifest()
+    payloads = {
+        "column_01.tif": b"render",
+        "banner.tif": b"banner",
+        "held_out_validation.json": (
+            json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
+        ),
+    }
+    for name, payload in payloads.items():
+        (tmp_path / name).write_bytes(payload)
+    _write_local_mesh(tmp_path, manifest)
+    manifest["renders"][0]["sha256"] = hashlib.sha256(b"render").hexdigest()
+    manifest["banner"]["sha256"] = hashlib.sha256(b"banner").hexdigest()
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        payloads["held_out_validation.json"]
+    ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
+
+    scale_path = tmp_path / manifest["renders"][0]["scale_proof"]["path"]
+    payload = json.loads(scale_path.read_text(encoding="utf-8"))
+    payload["output"]["sha256"] = "9" * 64
+    tampered = json.dumps(payload, sort_keys=True).encode("utf-8")
+    scale_path.write_bytes(tampered)
+    manifest["renders"][0]["scale_proof"]["sha256"] = hashlib.sha256(
+        tampered
+    ).hexdigest()
+
+    report = validate_manifest(manifest, root_dir=tmp_path)
+
+    assert "GP_SCALE_PROOF_MISMATCH" in _codes(report)
+
+
+def test_local_banner_proof_rejects_wrong_render_set(tmp_path):
+    manifest = _manifest()
+    payloads = {
+        "column_01.tif": b"render",
+        "banner.tif": b"banner",
+        "held_out_validation.json": (
+            json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
+        ),
+    }
+    for name, payload in payloads.items():
+        (tmp_path / name).write_bytes(payload)
+    _write_local_mesh(tmp_path, manifest)
+    manifest["renders"][0]["sha256"] = hashlib.sha256(b"render").hexdigest()
+    manifest["banner"]["sha256"] = hashlib.sha256(b"banner").hexdigest()
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        payloads["held_out_validation.json"]
+    ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
+
+    proof_path = tmp_path / manifest["banner"]["proof"]["path"]
+    payload = json.loads(proof_path.read_text(encoding="utf-8"))
+    payload["columns"][0]["sha256"] = "9" * 64
+    tampered = json.dumps(payload, sort_keys=True).encode("utf-8")
+    proof_path.write_bytes(tampered)
+    manifest["banner"]["proof"]["sha256"] = hashlib.sha256(
+        tampered
+    ).hexdigest()
+
+    report = validate_manifest(manifest, root_dir=tmp_path)
+
+    assert "GP_BANNER_PROOF_MISMATCH" in _codes(report)
+
+
+def test_local_vc3d_target_context_is_bound_to_eligible_volume(tmp_path):
+    manifest = _manifest()
+    payloads = {
+        "column_01.tif": b"render",
+        "banner.tif": b"banner",
+        "held_out_validation.json": (
+            json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
+        ),
+    }
+    for name, payload in payloads.items():
+        (tmp_path / name).write_bytes(payload)
+    mesh_dir = _write_local_mesh(tmp_path, manifest)
+    manifest["renders"][0]["sha256"] = hashlib.sha256(
+        payloads["column_01.tif"]
+    ).hexdigest()
+    manifest["banner"]["sha256"] = hashlib.sha256(
+        payloads["banner.tif"]
+    ).hexdigest()
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        payloads["held_out_validation.json"]
+    ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
+
+    report = validate_manifest(manifest, root_dir=tmp_path)
+
+    assert report["eligible"] is True
+    proof = report["mesh_context_proofs"][0]
+    assert proof["checked"] is True
+    assert proof["target_volume"] == "20250821151723.zarr"
+    assert proof["scroll_source"] == "PHerc0813"
+    assert proof["source"] == "vc_grow_seg_from_seed"
+    assert proof["meta_sha256"] == hashlib.sha256(
+        (mesh_dir / "meta.json").read_bytes()
+    ).hexdigest()
+
+
+def test_local_vc3d_wrong_target_volume_fails_closed(tmp_path):
+    manifest = _manifest()
+    payloads = {
+        "column_01.tif": b"render",
+        "banner.tif": b"banner",
+        "held_out_validation.json": (
+            json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
+        ),
+    }
+    for name, payload in payloads.items():
+        (tmp_path / name).write_bytes(payload)
+    _write_local_mesh(tmp_path, manifest, target_volume="wrong-volume.zarr")
+    manifest["renders"][0]["sha256"] = hashlib.sha256(
+        payloads["column_01.tif"]
+    ).hexdigest()
+    manifest["banner"]["sha256"] = hashlib.sha256(
+        payloads["banner.tif"]
+    ).hexdigest()
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        payloads["held_out_validation.json"]
+    ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
+
+    report = validate_manifest(manifest, root_dir=tmp_path)
+
+    assert report["eligible"] is False
+    assert "GP_MESH_TARGET_VOLUME" in _codes(report)
+
+
 def test_tifxyz_directory_tree_hash_is_verified(tmp_path):
     manifest = _manifest()
-    mesh_dir = tmp_path / "column_01.tifxyz"
-    mesh_dir.mkdir()
-    (mesh_dir / "meta.json").write_text('{"format":"tifxyz"}', encoding="utf-8")
-    (mesh_dir / "x.tif").write_bytes(b"x")
-    (mesh_dir / "y.tif").write_bytes(b"y")
-    (mesh_dir / "z.tif").write_bytes(b"z")
+    mesh_dir = _write_local_mesh(tmp_path, manifest)
 
     ink_payload = json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
     payloads = {
@@ -734,14 +1031,13 @@ def test_local_ink_report_mismatch_fails_closed(tmp_path):
     payload = json.dumps(report_payload, sort_keys=True).encode("utf-8")
 
     for name, data in {
-        "column_01.tifxyz": b"mesh",
         "column_01.tif": b"render",
         "banner.tif": b"banner",
         "held_out_validation.json": payload,
     }.items():
         (tmp_path / name).write_bytes(data)
+    _write_local_mesh(tmp_path, manifest)
 
-    manifest["meshes"][0]["sha256"] = hashlib.sha256(b"mesh").hexdigest()
     manifest["renders"][0]["sha256"] = hashlib.sha256(b"render").hexdigest()
     manifest["banner"]["sha256"] = hashlib.sha256(b"banner").hexdigest()
     manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(

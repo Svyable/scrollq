@@ -21,8 +21,13 @@ from zpa.report import validate_report as validate_zpa_report
 from .grand_prize import DEFAULT_MANIFEST
 from .package_hash import sha256_path
 from .recto_coverage import audit_recto_coverage
+from .submission_image import (
+    SCHEMA_VERSION as SUBMISSION_IMAGE_SCHEMA_VERSION,
+    TOOL as SUBMISSION_IMAGE_TOOL,
+    vc_render_um_per_pixel,
+)
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 RULES_URL = "https://scrollprize.org/prizes"
 CC_BY_NC_4 = {"CC-BY-NC-4.0", "CC BY-NC 4.0"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -467,6 +472,539 @@ def _verify_local_file(
                 f"{path}.sha256",
                 f"declared {digest}, actual {actual}",
             )
+
+
+def _load_local_json_artifact(
+    record: dict[str, Any],
+    path: str,
+    root_dir: Path | None,
+    errors: list[dict[str, str]],
+    *,
+    code: str,
+) -> dict[str, Any] | None:
+    """Open a hash-pinned package-local JSON artifact after path checks."""
+
+    if root_dir is None:
+        return None
+    rel = record.get("path")
+    if not isinstance(rel, str) or not rel:
+        return None
+    candidate = root_dir / rel
+    target = candidate.resolve()
+    try:
+        target.relative_to(root_dir.resolve())
+    except ValueError:
+        return None
+    if not candidate.is_file():
+        return None
+    try:
+        value = json.loads(candidate.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        _error(errors, code, path, f"cannot parse proof JSON: {exc}")
+        return None
+    if not isinstance(value, dict):
+        _error(errors, code, path, "proof JSON must be an object")
+        return None
+    return value
+
+
+def _check_render_scale_proof(
+    *,
+    render_id: str,
+    render: dict[str, Any],
+    target: dict[str, Any] | None,
+    root_dir: Path | None,
+    errors: list[dict[str, str]],
+) -> dict[str, Any]:
+    """Verify a rendered 1 cm bar against VC3D's physical output scale."""
+
+    p = f"renders[{render_id}].scale_proof"
+    proof = render.get("scale_proof")
+    summary: dict[str, Any] = {
+        "render_id": render_id,
+        "path": None,
+        "sha256": None,
+        "base_voxel_size_um": None,
+        "group_idx": None,
+        "render_scale": None,
+        "micrometers_per_output_pixel": None,
+        "scale_bar_pixels": None,
+        "artifact_checked": False,
+    }
+    if not isinstance(proof, dict):
+        _error(
+            errors,
+            "GP_SCALE_PROOF",
+            p,
+            "hash-pinned scroliq-submission-image column proof is required",
+        )
+        return summary
+
+    summary.update(
+        {
+            key: proof.get(key)
+            for key in (
+                "path",
+                "sha256",
+                "base_voxel_size_um",
+                "group_idx",
+                "render_scale",
+                "micrometers_per_output_pixel",
+                "scale_bar_pixels",
+            )
+        }
+    )
+    if proof.get("tool") != SUBMISSION_IMAGE_TOOL:
+        _error(
+            errors,
+            "GP_SCALE_PROOF",
+            f"{p}.tool",
+            f"tool must be {SUBMISSION_IMAGE_TOOL!r}",
+        )
+    if not isinstance(proof.get("path"), str) or not proof.get("path"):
+        _error(
+            errors,
+            "GP_SCALE_PROOF",
+            f"{p}.path",
+            "package-relative scale proof path is required",
+        )
+    _check_sha(proof, p, errors)
+
+    eligible_voxel = (
+        target.get("voxel_size_um") if isinstance(target, dict) else None
+    )
+    base_voxel = proof.get("base_voxel_size_um")
+    if (
+        isinstance(base_voxel, bool)
+        or not isinstance(base_voxel, (int, float))
+        or not math.isfinite(float(base_voxel))
+        or float(base_voxel) <= 0
+    ):
+        _error(
+            errors,
+            "GP_SCALE_PROOF_VOXEL",
+            f"{p}.base_voxel_size_um",
+            "positive finite eligible-volume voxel size is required",
+        )
+    elif isinstance(eligible_voxel, (int, float)) and not math.isclose(
+        float(base_voxel),
+        float(eligible_voxel),
+        rel_tol=1e-9,
+        abs_tol=1e-6,
+    ):
+        _error(
+            errors,
+            "GP_SCALE_PROOF_VOXEL",
+            f"{p}.base_voxel_size_um",
+            (
+                f"scale proof uses {base_voxel} um but eligible volume uses "
+                f"{eligible_voxel} um"
+            ),
+        )
+
+    group_idx = proof.get("group_idx")
+    render_scale = proof.get("render_scale")
+    params_ok = True
+    if (
+        isinstance(group_idx, bool)
+        or not isinstance(group_idx, int)
+        or group_idx < 0
+    ):
+        params_ok = False
+    if (
+        isinstance(render_scale, bool)
+        or not isinstance(render_scale, (int, float))
+        or not math.isfinite(float(render_scale))
+        or float(render_scale) <= 0
+    ):
+        params_ok = False
+    if not params_ok:
+        _error(
+            errors,
+            "GP_SCALE_PROOF_PARAMS",
+            p,
+            "group_idx must be non-negative and render_scale positive/finite",
+        )
+
+    expected_umpp: float | None = None
+    if (
+        params_ok
+        and isinstance(base_voxel, (int, float))
+        and not isinstance(base_voxel, bool)
+        and math.isfinite(float(base_voxel))
+        and float(base_voxel) > 0
+    ):
+        expected_umpp = vc_render_um_per_pixel(
+            float(base_voxel), int(group_idx), float(render_scale)
+        )
+        declared_umpp = proof.get("micrometers_per_output_pixel")
+        if (
+            isinstance(declared_umpp, bool)
+            or not isinstance(declared_umpp, (int, float))
+            or not math.isfinite(float(declared_umpp))
+            or not math.isclose(
+                float(declared_umpp),
+                expected_umpp,
+                rel_tol=1e-9,
+                abs_tol=1e-9,
+            )
+        ):
+            _error(
+                errors,
+                "GP_SCALE_PROOF_PIXEL_SIZE",
+                f"{p}.micrometers_per_output_pixel",
+                f"must equal VC3D-derived value {expected_umpp:.12g} um/pixel",
+            )
+        expected_pixels = int(round(10_000.0 / expected_umpp))
+        declared_pixels = proof.get("scale_bar_pixels")
+        if (
+            isinstance(declared_pixels, bool)
+            or not isinstance(declared_pixels, int)
+            or declared_pixels != expected_pixels
+        ):
+            _error(
+                errors,
+                "GP_SCALE_PROOF_PIXELS",
+                f"{p}.scale_bar_pixels",
+                f"1 cm must be exactly {expected_pixels} output pixels",
+            )
+
+    _verify_local_file(proof, p, root_dir, errors)
+    artifact = _load_local_json_artifact(
+        proof,
+        p,
+        root_dir,
+        errors,
+        code="GP_SCALE_PROOF_MISMATCH",
+    )
+    if artifact is None:
+        return summary
+    summary["artifact_checked"] = True
+
+    mismatches: list[str] = []
+    if artifact.get("schema_version") != SUBMISSION_IMAGE_SCHEMA_VERSION:
+        mismatches.append("schema_version")
+    if artifact.get("tool") != SUBMISSION_IMAGE_TOOL:
+        mismatches.append("tool")
+    if artifact.get("operation") != "column":
+        mismatches.append("operation")
+    if artifact.get("column") != render.get("column"):
+        mismatches.append("column")
+
+    output = artifact.get("output")
+    if not isinstance(output, dict):
+        mismatches.append("output")
+    else:
+        render_path = render.get("path")
+        expected_name = (
+            Path(render_path).name if isinstance(render_path, str) else None
+        )
+        if output.get("path") != expected_name:
+            mismatches.append("output.path")
+        if output.get("sha256") != render.get("sha256"):
+            mismatches.append("output.sha256")
+
+    physical = artifact.get("vc_render_tifxyz")
+    if not isinstance(physical, dict):
+        mismatches.append("vc_render_tifxyz")
+    else:
+        for key in (
+            "base_voxel_size_um",
+            "group_idx",
+            "render_scale",
+            "micrometers_per_output_pixel",
+        ):
+            left, right = physical.get(key), proof.get(key)
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                if not math.isclose(float(left), float(right), rel_tol=1e-9, abs_tol=1e-9):
+                    mismatches.append(key)
+            elif left != right:
+                mismatches.append(key)
+
+    bar = artifact.get("scale_bar")
+    if not isinstance(bar, dict):
+        mismatches.append("scale_bar")
+    else:
+        if bar.get("centimeters") != 1:
+            mismatches.append("scale_bar.centimeters")
+        if bar.get("micrometers") != 10_000:
+            mismatches.append("scale_bar.micrometers")
+        if bar.get("pixels") != proof.get("scale_bar_pixels"):
+            mismatches.append("scale_bar.pixels")
+
+    if mismatches:
+        _error(
+            errors,
+            "GP_SCALE_PROOF_MISMATCH",
+            p,
+            "manifest/proof mismatch: " + ", ".join(sorted(set(mismatches))),
+        )
+    return summary
+
+
+def _check_banner_proof(
+    *,
+    banner: dict[str, Any],
+    renders: dict[str, dict[str, Any]],
+    root_dir: Path | None,
+    errors: list[dict[str, str]],
+) -> dict[str, Any]:
+    """Bind the numbered overview banner to the exact frozen column renders."""
+
+    p = "banner.proof"
+    proof = banner.get("proof")
+    summary: dict[str, Any] = {
+        "path": None,
+        "sha256": None,
+        "artifact_checked": False,
+        "columns": [],
+    }
+    if not isinstance(proof, dict):
+        _error(
+            errors,
+            "GP_BANNER_PROOF",
+            p,
+            "hash-pinned scroliq-submission-image banner proof is required",
+        )
+        return summary
+
+    summary["path"] = proof.get("path")
+    summary["sha256"] = proof.get("sha256")
+    if proof.get("tool") != SUBMISSION_IMAGE_TOOL:
+        _error(
+            errors,
+            "GP_BANNER_PROOF",
+            f"{p}.tool",
+            f"tool must be {SUBMISSION_IMAGE_TOOL!r}",
+        )
+    if not isinstance(proof.get("path"), str) or not proof.get("path"):
+        _error(
+            errors,
+            "GP_BANNER_PROOF",
+            f"{p}.path",
+            "package-relative banner proof path is required",
+        )
+    _check_sha(proof, p, errors)
+    _verify_local_file(proof, p, root_dir, errors)
+    artifact = _load_local_json_artifact(
+        proof,
+        p,
+        root_dir,
+        errors,
+        code="GP_BANNER_PROOF_MISMATCH",
+    )
+    if artifact is None:
+        return summary
+    summary["artifact_checked"] = True
+
+    mismatches: list[str] = []
+    if artifact.get("schema_version") != SUBMISSION_IMAGE_SCHEMA_VERSION:
+        mismatches.append("schema_version")
+    if artifact.get("tool") != SUBMISSION_IMAGE_TOOL:
+        mismatches.append("tool")
+    if artifact.get("operation") != "banner":
+        mismatches.append("operation")
+    if artifact.get("column_numbers_overlaid") is not True:
+        mismatches.append("column_numbers_overlaid")
+
+    output = artifact.get("output")
+    if not isinstance(output, dict):
+        mismatches.append("output")
+    else:
+        banner_path = banner.get("path")
+        expected_name = (
+            Path(banner_path).name if isinstance(banner_path, str) else None
+        )
+        if output.get("path") != expected_name:
+            mismatches.append("output.path")
+        if output.get("sha256") != banner.get("sha256"):
+            mismatches.append("output.sha256")
+
+    expected_columns = sorted(
+        (
+            int(render.get("column")),
+            Path(str(render.get("path"))).name,
+            render.get("sha256"),
+        )
+        for render in renders.values()
+        if isinstance(render.get("column"), int)
+        and not isinstance(render.get("column"), bool)
+        and isinstance(render.get("path"), str)
+    )
+    observed: list[tuple[int, str, Any]] = []
+    rows = artifact.get("columns")
+    if isinstance(rows, list):
+        for row in rows:
+            if isinstance(row, dict):
+                observed.append(
+                    (row.get("column"), row.get("path"), row.get("sha256"))
+                )
+        observed.sort(key=lambda item: item[0] if isinstance(item[0], int) else -1)
+    else:
+        mismatches.append("columns")
+    if observed != expected_columns:
+        mismatches.append("columns")
+    summary["columns"] = observed
+
+    if mismatches:
+        _error(
+            errors,
+            "GP_BANNER_PROOF_MISMATCH",
+            p,
+            "manifest/proof mismatch: " + ", ".join(sorted(set(mismatches))),
+        )
+    return summary
+
+
+def _verify_vc3d_mesh_context(
+    *,
+    mesh_id: str,
+    mesh: dict[str, Any],
+    root_dir: Path | None,
+    eligible_volume_id: str,
+    scroll_id: str,
+    errors: list[dict[str, str]],
+) -> dict[str, Any] | None:
+    """Bind an unpacked TIFXYZ mesh to the eligible CT using its own metadata.
+
+    Modern VC3D writers record target_volume in meta.json. When a local
+    submission root is available we require that evidence for directory-format
+    TIFXYZ meshes, rather than trusting only the provenance manifest's
+    self-declared ct_volume_id.
+    """
+
+    if root_dir is None:
+        return None
+
+    p = f"meshes[{mesh_id}]"
+    rel = mesh.get("path")
+    proof: dict[str, Any] = {
+        "mesh_id": mesh_id,
+        "path": rel,
+        "checked": False,
+        "target_volume": None,
+        "scroll_source": None,
+        "source": None,
+        "scale": None,
+        "meta_sha256": None,
+    }
+    if not isinstance(rel, str) or not rel:
+        return proof
+
+    candidate = root_dir / rel
+    target = candidate.resolve()
+    try:
+        target.relative_to(root_dir.resolve())
+    except ValueError:
+        return proof
+    if not candidate.exists():
+        return proof
+    if not candidate.is_dir():
+        _error(
+            errors,
+            "GP_MESH_TIFXYZ_LAYOUT",
+            f"{p}.path",
+            "Grand Prize TIFXYZ mesh must be an unpacked directory with meta.json",
+        )
+        return proof
+
+    meta_path = candidate / "meta.json"
+    if not meta_path.is_file():
+        _error(
+            errors,
+            "GP_MESH_META",
+            f"{p}.path",
+            "unpacked TIFXYZ mesh is missing meta.json",
+        )
+        return proof
+
+    try:
+        raw = meta_path.read_bytes()
+        meta = json.loads(raw)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        _error(
+            errors,
+            "GP_MESH_META",
+            f"{p}.path",
+            f"cannot parse TIFXYZ meta.json: {exc}",
+        )
+        return proof
+    if not isinstance(meta, dict):
+        _error(
+            errors,
+            "GP_MESH_META",
+            f"{p}.path",
+            "TIFXYZ meta.json must be a JSON object",
+        )
+        return proof
+
+    proof.update(
+        {
+            "checked": True,
+            "target_volume": meta.get("target_volume"),
+            "scroll_source": meta.get("scroll_source"),
+            "source": meta.get("source"),
+            "scale": meta.get("scale"),
+            "meta_sha256": hashlib.sha256(raw).hexdigest(),
+        }
+    )
+
+    if meta.get("format") != "tifxyz":
+        _error(
+            errors,
+            "GP_MESH_META_FORMAT",
+            f"{p}.path",
+            "mesh meta.json must declare format='tifxyz'",
+        )
+
+    target_volume = meta.get("target_volume")
+    if not isinstance(target_volume, str) or eligible_volume_id not in target_volume:
+        _error(
+            errors,
+            "GP_MESH_TARGET_VOLUME",
+            f"{p}.path",
+            (
+                "VC3D meta.json target_volume must identify the exact eligible "
+                f"volume {eligible_volume_id!r}"
+            ),
+        )
+
+    scroll_source = meta.get("scroll_source")
+    if (
+        isinstance(scroll_source, str)
+        and scroll_source
+        and scroll_id not in scroll_source
+    ):
+        _error(
+            errors,
+            "GP_MESH_SCROLL_SOURCE",
+            f"{p}.path",
+            (
+                f"VC3D meta.json scroll_source {scroll_source!r} does not "
+                f"identify submitted scroll {scroll_id!r}"
+            ),
+        )
+
+    scale = meta.get("scale")
+    if not (
+        isinstance(scale, list)
+        and len(scale) == 2
+        and all(
+            isinstance(value, (int, float))
+            and not isinstance(value, bool)
+            and math.isfinite(float(value))
+            and float(value) > 0
+            for value in scale
+        )
+    ):
+        _error(
+            errors,
+            "GP_MESH_SCALE",
+            f"{p}.path",
+            "TIFXYZ meta.json must carry a positive finite 2D scale",
+        )
+
+    return proof
 
 
 def _verify_zpa_evidence(
@@ -1093,6 +1631,9 @@ def validate_manifest(
     warnings: list[dict[str, str]] = []
     chains: list[dict[str, Any]] = []
     held_out_proofs: list[dict[str, Any]] = []
+    mesh_context_proofs: list[dict[str, Any]] = []
+    scale_proofs: list[dict[str, Any]] = []
+    banner_proof: dict[str, Any] | None = None
 
     if manifest.get("schema_version") != SCHEMA_VERSION:
         _error(
@@ -1675,6 +2216,16 @@ def validate_manifest(
                 )
         _check_sha(mesh, p, errors)
         _verify_local_file(mesh, p, root_dir, errors)
+        context_proof = _verify_vc3d_mesh_context(
+            mesh_id=mesh_id,
+            mesh=mesh,
+            root_dir=root_dir,
+            eligible_volume_id=str(volume_id),
+            scroll_id=str(scroll_id),
+            errors=errors,
+        )
+        if context_proof is not None:
+            mesh_context_proofs.append(context_proof)
 
     recto_coverage = manifest.get("recto_coverage")
     recto_coverage_proof: dict[str, Any] | None = None
@@ -1811,6 +2362,15 @@ def validate_manifest(
                 f"{p}.scale_bar_cm",
                 "submission render must include a 1 cm scale bar",
             )
+        scale_proofs.append(
+            _check_render_scale_proof(
+                render_id=render_id,
+                render=render,
+                target=target,
+                root_dir=root_dir,
+                errors=errors,
+            )
+        )
 
         generated_by = render.get("generated_by")
         if not isinstance(generated_by, dict) or not generated_by.get("command"):
@@ -1946,6 +2506,12 @@ def validate_manifest(
             )
         _check_sha(banner, "banner", errors)
         _verify_local_file(banner, "banner", root_dir, errors)
+        banner_proof = _check_banner_proof(
+            banner=banner,
+            renders=renders,
+            root_dir=root_dir,
+            errors=errors,
+        )
 
     graph_digest = hashlib.sha256(
         json.dumps(
@@ -1969,6 +2535,9 @@ def validate_manifest(
         "warnings": warnings,
         "render_chains": chains,
         "held_out_validation_proofs": held_out_proofs,
+        "mesh_context_proofs": mesh_context_proofs,
+        "scale_proofs": scale_proofs,
+        "banner_proof": banner_proof,
         "zarr_audit_proof": {
             "root": zpa_report.get("root") if isinstance(zpa_report, dict) else None,
             "integrity": (

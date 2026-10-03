@@ -1,6 +1,6 @@
 # Grand Prize provenance manifest
 
-`scroliq-provenance` validates one machine-readable provenance graph for a 2027 Grand Prize submission. Schema v5 (current) binds the eligible CT to a validated ZPA 1.3 source-attestation artifact and requires an explicit physical/model input contract for every model; v4 added deterministic held-out ink evidence, v3 bound the recto-coverage ledger, and held-out validation introduced in v2 remains required. Manifests with an older `schema_version` are rejected. It is intentionally strict about facts that can be checked mechanically; it does **not** claim that text is legible, that the recto surface is complete, or that a reported metric is sufficient for the prize.
+`scroliq-provenance` validates one machine-readable provenance graph for a 2027 Grand Prize submission. Schema v6 (current) binds every final column image to a hash-pinned physical scale-bar proof and binds the full-scroll banner to the exact frozen render set. It retains v5's validated ZPA 1.3 source attestation and explicit model input contract; v4 added deterministic held-out ink evidence, v3 bound the recto-coverage ledger, and held-out validation introduced in v2 remains required. Manifests with an older `schema_version` are rejected. It is intentionally strict about facts that can be checked mechanically; it does **not** claim that text is legible, that the recto surface is complete, or that a reported metric is sufficient for the prize.
 
 The graph ties each submitted render back through the exact eligible CT volume, a hash-pinned and schema-validated ZPA source attestation, declared full-recto coverage inventory, surface, numbered tifxyz mesh, the model's physical input/preprocessing contract, ink checkpoint, training datasets, training/prediction regions, stochastic seeds, and public experiment runs. Each trained model must also carry public held-out validation evidence: public input and known-ground-truth URLs, an explicit validation region, a public evaluation run, numeric metrics, a hashed results artifact, and a machine-checkable training/validation exclusion proof. The graph also pins the code commit, Docker image digest, Zarr audit manifest digest, package file digests, documented human-input hours, and the full-scroll banner.
 
@@ -50,11 +50,57 @@ The current validator rejects a manifest when any of these conditions is not pro
 - a trained model lacks public held-out validation against known ground truth, the validation protocol/results are incomplete, or same-volume training and held-out regions overlap;
 - the required recto-coverage ledger fails its own accounting checks, pins a different code commit/CT root, or its mesh-ID set differs from the submitted mesh set;
 - surfaces, meshes, or renders break lineage to `ct:eligible`;
-- a mesh is not named `column_NN.tifxyz`, lacks the low-distortion-isometric flattening declaration, or duplicates a column;
-- a render does not match its mesh filename stem/column, lacks a 1 cm scale-bar declaration, or is not tied to the pinned code commit;
+- a mesh is not named `column_NN.tifxyz`, lacks the low-distortion-isometric flattening declaration, duplicates a column, or—when `--root-dir` is supplied—is not an unpacked TIFXYZ directory whose `meta.json` `target_volume` identifies the exact eligible CT;
+- a render does not match its mesh filename stem/column, lacks a 1 cm scale-bar declaration, lacks a hash-pinned `scroliq-submission-image` proof, uses the wrong eligible-volume voxel size, reports physical pixel spacing inconsistent with VC3D, or has the wrong computed 1 cm pixel length;
 - training and prediction regions overlap on the same eligible volume;
-- the full-scroll banner does not enumerate all submitted renders with column numbers overlaid;
+- the full-scroll banner does not enumerate all submitted renders with column numbers overlaid, or its hash-pinned banner proof does not bind the exact render filenames and SHA-256 digests;
 - `--root-dir` is supplied and any package file is missing, escapes the package root, or has the wrong SHA-256.
+
+## Reviewer-image proof binding (schema v6)
+
+Each render keeps the human-readable `scale_bar_cm: 1` declaration, but it now
+also carries a machine-checkable summary of the JSON sidecar emitted by
+`scroliq-submission-image column`:
+
+```json
+{
+  "scale_proof": {
+    "tool": "scroliq-submission-image",
+    "path": "evidence/column_01.scale.json",
+    "sha256": "<proof sha256>",
+    "base_voxel_size_um": 9.362,
+    "group_idx": 0,
+    "render_scale": 1.0,
+    "micrometers_per_output_pixel": 9.362,
+    "scale_bar_pixels": 1068
+  }
+}
+```
+
+The validator recomputes the current VC3D relation
+`um/pixel = base_voxel_size_um / (2**-group_idx) / render_scale`, requires
+`base_voxel_size_um` to match the prize-eligible CT, and requires
+`scale_bar_pixels == round(10000 / um_per_pixel)`. With `--root-dir`, it
+opens the hash-pinned sidecar and verifies that its output filename/SHA bind
+the exact submitted render and that its column, physical inputs, pixel size,
+and bar geometry agree with the manifest.
+
+The banner similarly carries:
+
+```json
+{
+  "proof": {
+    "tool": "scroliq-submission-image",
+    "path": "evidence/banner.json",
+    "sha256": "<proof sha256>"
+  }
+}
+```
+
+With `--root-dir`, the banner sidecar must identify the submitted banner
+SHA and list exactly the numbered render filenames and SHA-256 digests in the
+package. The validation report exposes `scale_proofs` and `banner_proof`
+so reviewers can inspect which artifacts were checked.
 
 ## Eligible CT source attestation (schema v5)
 
@@ -231,6 +277,8 @@ directory enumeration order while binding every file in the TIFXYZ surface.
 When `--root-dir` is supplied, `scroliq-provenance` recomputes the same
 digest directly from the unpacked submission directory and fails on any missing
 or tampered content inside a declared TIFXYZ path.
+
+For every unpacked TIFXYZ mesh, the local package gate also opens `meta.json` and records a `mesh_context_proofs` entry. The mesh must declare `format: "tifxyz"`, a positive finite 2D `scale`, and a VC3D `target_volume` containing the exact prize-eligible volume ID. A contradictory `scroll_source` is also rejected. These fields are evidence carried by the mesh itself, not inferred from the submission filename. This directly catches a column copied from another scan even if its manifest IDs and package filename were edited to look correct.
 
 ## CI gate
 

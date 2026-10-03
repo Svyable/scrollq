@@ -90,6 +90,30 @@ ink, or readability verdict. The exact mathematical contract, ITK attribution,
 synthetic controls, memory guard, and predeclared real-data falsification plan
 are in [`docs/sheetness.md`](docs/sheetness.md).
 
+## Seismic-style horizon path baseline
+
+`scroliq-horizon-path` tests whether sparse anchors plus a globally constrained
+path can follow one layer through a 2-D score field, including local evidence
+gaps:
+
+```bash
+scroliq-horizon-path sheetness-slice.npy \
+  --out-prefix out/slice-042 \
+  --max-step 2 \
+  --smoothness 0.20 \
+  --anchor 0:137 --anchor 220:141 --anchor 511:128
+```
+
+The implementation is independent NumPy code inspired by seismic-horizon
+tracking: hard anchors, bounded adjacent motion, and a smoothness penalty are
+solved by deterministic dynamic programming. It emits a hash-pinned CSV/JSON
+path and explicitly remains **2-D evidence only**, not a 3-D surface or winding
+verdict. See [`docs/horizon-path.md`](docs/horizon-path.md) for the adjacent-field
+references and falsification tests. `scroliq-horizon-validate` freezes the
+exact-volume source attestation, score/truth hashes, anchors, tracker parameters,
+anchor-exclusion radius, tolerance and success threshold before a measured run;
+see [`docs/horizon-validation.md`](docs/horizon-validation.md).
+
 ## Winding annotation audit
 
 `scroliq-winding` audits the conventional VC3D / spiral-fitting point-collection inputs before they are trusted as geometry evidence:
@@ -626,7 +650,7 @@ See [the example coverage manifest](examples/grand-prize-recto-coverage.example.
 
 ## 2027 Grand Prize provenance gate
 
-`scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. Schema v5 pins the exact eligible CT volume to a hash-pinned ZPA 1.3 report and its audited metadata source attestation, requires every model to declare its source/model voxel size, axes, resampling policy, window and public preprocessing profile, validates the nested full-recto coverage ledger, and then links each declared coverage component → numbered tifxyz mesh → render → checkpoint → training datasets/regions → stochastic seeds → public training/inference experiment runs → public held-out validation against known ground truth. The v4 deterministic ink-evidence binding remains required.
+`scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. Schema v6 additionally binds each final column image to a hash-pinned `scroliq-submission-image` physical-scale proof and binds the numbered full-scroll banner to the exact frozen render set. It retains v5's exact eligible-CT/ZPA source attestation and model physical-input contract, the nested full-recto coverage ledger, deterministic ink evidence, training/prediction exclusion, stochastic seeds, public experiment runs, and public held-out validation.
 
 ```bash
 scroliq-provenance \
@@ -636,10 +660,50 @@ scroliq-provenance \
   --out submission/provenance.validation.json
 ```
 
-The gate fails closed on wrong-volume lineage, missing/tampered/invalid ZPA evidence, non-PASS source integrity, source-attestation mismatches, model/source voxel or axis mismatches, undeclared resampling/preprocessing, a failing/mismatched recto ledger, coverage mesh IDs that differ from the submitted mesh set, training/prediction overlap, non-public or incorrectly licensed training data, prohibited higher-resolution same-scroll training sources, missing stochastic seeds or experiment runs, missing public held-out validation, same-volume training/validation overlap, broken mesh/render column traceability, package SHA mismatches, missing 1 cm scale-bar declarations, and incomplete banner coverage. It also records a canonical graph SHA-256, emits a complete provenance chain for every submitted render, and records held-out exclusion proofs. It deliberately does not set a performance threshold or claim papyrological legibility.
+The gate fails closed on wrong-volume lineage, missing/tampered/invalid ZPA evidence, non-PASS source integrity, source-attestation mismatches, model/source voxel or axis mismatches, undeclared resampling/preprocessing, a failing/mismatched recto ledger, coverage mesh IDs that differ from the submitted mesh set, training/prediction overlap, non-public or incorrectly licensed training data, prohibited higher-resolution same-scroll training sources, missing stochastic seeds or experiment runs, missing public held-out validation, same-volume training/validation overlap, broken mesh/render column traceability, package SHA mismatches, missing or physically inconsistent 1 cm scale-bar proofs, banner proofs that do not bind the exact frozen render set, and incomplete banner coverage. With `--root-dir`, unpacked TIFXYZ meshes must also carry VC3D `meta.json` target context identifying the exact eligible volume; the validation report records that evidence in `mesh_context_proofs`. It also records a canonical graph SHA-256, emits a complete provenance chain for every submitted render, and records held-out exclusion proofs. It deliberately does not set a performance threshold or claim papyrological legibility.
 
 See [the provenance-manifest specification](docs/grand-prize-provenance.md) and [example manifest](examples/grand-prize-provenance.example.json).
 For unpacked VC3D surfaces, `scroliq-hash column_01.tifxyz` computes the canonical tree SHA-256 used by the provenance gate, so the complete directory-format mesh is cryptographically bound without repacking it.
+
+### 2027 Grand Prize legibility ledger
+
+`scroliq-legibility` audits explicit letter-by-letter reviewer evidence against
+the exact submitted render and TIFXYZ hashes. Counted preserved characters
+require pixel bounds; characters counted as legible additionally require one
+visible-character reading and `interpolated: false`. Uncertain preserved
+characters stay in the denominator, the 70% threshold is applied per counted
+column, and a column omitted from counting requires a documented
+Challenge-acknowledged exclusion.
+
+```bash
+scroliq-legibility \
+  --manifest submission/provenance.json \
+  --ledger submission/legibility.json \
+  --out submission/legibility-report.json
+```
+
+A pass means the supplied ledger is internally consistent and reaches the
+recorded arithmetic threshold. It is not OCR and does not independently certify
+papyrological correctness. See the [legibility evidence contract](docs/grand-prize-legibility.md)
+and [example ledger](examples/grand-prize-legibility.example.json).
+
+### 2027 Grand Prize submission images
+
+`scroliq-submission-image` turns final VC3D renders into the exact reviewer-facing image forms required by the prize. The `column` command derives the 1 cm scale-bar length from the eligible CT voxel size plus the same pyramid level and `--scale` parameters used by `vc_render_tifxyz`, appends the bar in a footer without touching papyrus pixels, and writes a SHA-pinned scale proof. The `banner` command assembles the frozen column images in numeric order and overlays every column number, rejecting gaps or duplicates. See [the submission-image contract](docs/grand-prize-images.md).
+
+### Deterministic Grand Prize reviewer package
+
+`scroliq-package` is the final fail-closed boundary. It will not build the
+reviewer ZIP unless the exact provenance manifest passes, mesh/render columns
+are contiguous, the human-input ledger reconciles at no more than eight hours,
+reviewer methodology/system/VC3D/false-positive materials are present, the
+Docker command uses the exact digest-pinned image, and the letter-by-letter
+legibility ledger passes every counted column at 70% or above.
+
+The builder generates provenance and legibility validation reports itself,
+SHA-256 indexes every archived member, writes a deterministic ZIP and sidecar
+digest, then immediately reopens and verifies the archive before returning
+PASS. See [the package contract](docs/grand-prize-package.md).
 
 ## First Letters target qualification
 
