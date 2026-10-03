@@ -49,6 +49,9 @@ For Grand Prize readiness, `--root-dir` is mandatory. ScrolIQ:
 5. fails on any mismatch.
 
 A hand-edited `"status": "pass"` therefore cannot authorize a required claim.
+Mesh-scoped entries also carry the canonical tifxyz tree digest; `scroliq-gp-ready`
+compares it to the mesh digest in the provenance manifest, so evidence from a
+different mesh cannot be relabeled onto the submitted mesh ID.
 
 ### Flatcheck
 
@@ -65,6 +68,7 @@ scroliq-evidence-import flatcheck \
   --report evidence/column_01-flatcheck.json \
   --mesh-id mesh:column-01 \
   --artifact-url https://example.org/submission/evidence/column_01-flatcheck.json \
+  --mesh-path column_01.tifxyz \
   --producer-commit <40-hex-flatcheck-commit> \
   --command "flatcheck report column_01.tifxyz --json evidence/column_01-flatcheck.json --strict" \
   --out evidence/column_01-flatcheck.entry.json
@@ -87,6 +91,7 @@ scroliq-evidence-import windcheck \
   --report evidence/windcheck-column-01/column_01_check_certificate.json \
   --mesh-id mesh:column-01 \
   --artifact-url https://example.org/submission/evidence/column_01_check_certificate.json \
+  --mesh-path column_01.tifxyz \
   --producer-commit <40-hex-windcheck-commit> \
   --command "windcheck check column_01.tifxyz --out evidence/windcheck-column-01" \
   --out evidence/column_01-windcheck.entry.json
@@ -112,7 +117,10 @@ The ledger binds to one exact eligible volume and retains immutable references t
       "artifact_url": "https://example.org/evidence/column_01-flatcheck.json",
       "path": "evidence/column_01-flatcheck.json",
       "sha256": "<64 hex>",
-      "scope": {"mesh_ids": ["mesh:column-01"]},
+      "scope": {
+        "mesh_ids": ["mesh:column-01"],
+        "mesh_sha256": {"mesh:column-01": "<canonical tifxyz tree hash>"}
+      },
       "producer": {
         "repository": "https://github.com/abundantjoe/flatcheck",
         "commit": "<40 hex>",
