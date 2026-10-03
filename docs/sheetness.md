@@ -109,7 +109,8 @@ pre-registered falsification experiment. The benchmark spec must bind:
 
 - the exact eligible `volume_root`;
 - the ZPA `zpa-metadata-semantics-v1` digest for that source;
-- the exact CT cutout SHA-256;
+- the exact `scroliq-ct-cutout` manifest SHA-256;
+- the exact CT cutout SHA-256 carried by that manifest;
 - the exact `scroliq-sheetness` report SHA-256;
 - one known/high-confidence surface probe per group;
 - a reference surface normal;
@@ -127,6 +128,7 @@ denominator rather than disappearing from the result.
 ```bash
 scroliq-sheetness-eval \
   --spec campaign/sheetness-spec.json \
+  --cutout-manifest out/cutout.json \
   --report out/cutout.sheetness.json \
   --response out/cutout.sheetness.npy \
   --normal out/cutout.normal-zyx.npy \
@@ -140,8 +142,12 @@ invalid/tampered bundle exits 2. The output records both the raw spec-file hash
 and a canonical semantic spec hash, the engine parameters, every probe result,
 and each frozen decision-rule check.
 
-This evaluator deliberately does **not** prove that the cutout bytes came from
-the declared remote CT merely because the spec names that volume. The ZPA
-attestation and cutout hash make substitution visible once the benchmark is
-bound into the wider `scroliq-provenance` graph; they do not replace that
-end-to-end source lineage proof.
+The evaluator now verifies the `scroliq-ct-cutout/1` manifest before scoring:
+the manifest file hash is frozen in the spec, its exact `volume_root` and ZPA
+metadata-semantics attestation must match the spec, its cutout SHA must match the
+sheetness input, its bbox extent must match the response shape, its local→global
+integer translation must be self-consistent, and it must record zero missing
+source chunks plus a PASS ZPA report. Every reported local probe is therefore
+also emitted with its derived global ZYX coordinate. This closes local CT
+lineage for the benchmark; it still does not establish global sheet identity,
+topology, ink, or readability.
