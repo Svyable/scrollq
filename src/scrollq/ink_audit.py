@@ -80,6 +80,168 @@ def _overlap(a: list[list[float]], b: list[list[float]]) -> list[float] | None:
     return extent if all(v > 0 for v in extent) else None
 
 
+
+def _is_hex(value: Any, length: int) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == length
+        and all(ch in "0123456789abcdefABCDEF" for ch in value)
+    )
+
+
+def _is_cc_by_nc_4(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    normalized = (
+        value.lower()
+        .replace("\u2011", "-")
+        .replace("\u2013", "-")
+        .replace("_", "-")
+        .replace(" ", "")
+    )
+    return any(token in normalized for token in ("cc-by-nc-4.0", "cc-by-nc4.0", "ccby-nc4.0"))
+
+
+def _external_method_provenance(
+    manifest: dict[str, Any],
+    errors: list[str],
+    warnings: list[str],
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    raw = manifest.get("external_method")
+    if raw is None:
+        return None, None
+    if not isinstance(raw, dict):
+        errors.append("external_method must be an object")
+        return None, None
+
+    repository = raw.get("repository")
+    revision = raw.get("revision")
+    code_license = raw.get("code_license")
+    checkpoint_license = raw.get("checkpoint_license")
+    license_evidence_raw = raw.get("license_evidence")
+    if isinstance(license_evidence_raw, str):
+        license_evidence = [license_evidence_raw]
+    elif isinstance(license_evidence_raw, list):
+        license_evidence = license_evidence_raw
+    else:
+        license_evidence = []
+    data_license = raw.get("data_license")
+    data_license_evidence = raw.get("data_license_evidence")
+    role = raw.get("grand_prize_role")
+    inference_only = raw.get("inference_only")
+    uses_pseudolabel_training = raw.get("uses_pseudolabel_training")
+
+    if not isinstance(repository, str) or not repository.strip():
+        errors.append("external_method.repository must be a non-empty string")
+    if not _is_hex(revision, 40):
+        errors.append("external_method.revision must be an exact 40-character Git SHA")
+    if not isinstance(code_license, str) or not code_license.strip():
+        errors.append("external_method.code_license must be declared")
+    if not isinstance(checkpoint_license, str) or not checkpoint_license.strip():
+        errors.append("external_method.checkpoint_license must be declared")
+    if (
+        not license_evidence
+        or any(
+            not isinstance(url, str)
+            or not url.startswith(("https://", "http://"))
+            for url in license_evidence
+        )
+    ):
+        errors.append(
+            "external_method.license_evidence must contain public http(s) URL(s)"
+        )
+    if not isinstance(data_license, str) or not data_license.strip():
+        errors.append("external_method.data_license must be declared")
+    if (
+        not isinstance(data_license_evidence, str)
+        or not data_license_evidence.startswith(("https://", "http://"))
+    ):
+        errors.append(
+            "external_method.data_license_evidence must be a public http(s) URL"
+        )
+    if raw.get("intended_use_permitted") is not True:
+        errors.append("external_method.intended_use_permitted must be true")
+    if role not in {"control_only", "candidate_submission_model"}:
+        errors.append(
+            "external_method.grand_prize_role must be control_only or candidate_submission_model"
+        )
+    if type(inference_only) is not bool:
+        errors.append("external_method.inference_only must be boolean")
+    if type(uses_pseudolabel_training) is not bool:
+        errors.append("external_method.uses_pseudolabel_training must be boolean")
+
+    if uses_pseudolabel_training is True:
+        if raw.get("all_training_data_public") is not True:
+            errors.append(
+                "pseudo-label provenance requires all_training_data_public=true"
+            )
+        if not _is_cc_by_nc_4(raw.get("training_data_license")):
+            errors.append(
+                "pseudo-label provenance requires training_data_license=CC-BY-NC 4.0"
+            )
+        if raw.get("all_intermediate_checkpoints_public") is not True:
+            errors.append(
+                "pseudo-label provenance requires all_intermediate_checkpoints_public=true"
+            )
+        if not _is_cc_by_nc_4(raw.get("intermediate_checkpoint_license")):
+            errors.append(
+                "pseudo-label provenance requires intermediate_checkpoint_license=CC-BY-NC 4.0"
+            )
+        if raw.get("experiment_tracking_public") is not True:
+            errors.append(
+                "pseudo-label provenance requires experiment_tracking_public=true"
+            )
+    elif raw.get("experiment_tracking_public") is not True:
+        warnings.append(
+            "external_method does not establish public experiment tracking for the trained source model"
+        )
+
+    selection = manifest.get("selection_contract")
+    if not isinstance(selection, dict):
+        errors.append(
+            "selection_contract is required when external_method is declared"
+        )
+        selection_out = None
+    else:
+        required_true = ("evaluation_regions_frozen_before_candidate_inference",)
+        required_false = (
+            "ocr_or_legibility_used_for_selection",
+            "candidate_output_used_to_choose_evaluation_regions",
+        )
+        for key in required_true:
+            if selection.get(key) is not True:
+                errors.append(f"selection_contract.{key} must be true")
+        for key in required_false:
+            if selection.get(key) is not False:
+                errors.append(f"selection_contract.{key} must be false")
+        selection_out = {
+            key: selection.get(key)
+            for key in (*required_true, *required_false)
+        }
+
+    return {
+        "repository": repository,
+        "revision": revision,
+        "code_license": code_license,
+        "checkpoint_license": checkpoint_license,
+        "license_evidence": license_evidence,
+        "data_license": data_license,
+        "data_license_evidence": data_license_evidence,
+        "intended_use_permitted": raw.get("intended_use_permitted") is True,
+        "grand_prize_role": role,
+        "inference_only": inference_only,
+        "uses_pseudolabel_training": uses_pseudolabel_training,
+        "all_training_data_public": raw.get("all_training_data_public"),
+        "training_data_license": raw.get("training_data_license"),
+        "all_intermediate_checkpoints_public": raw.get(
+            "all_intermediate_checkpoints_public"
+        ),
+        "intermediate_checkpoint_license": raw.get(
+            "intermediate_checkpoint_license"
+        ),
+        "experiment_tracking_public": raw.get("experiment_tracking_public"),
+    }, selection_out
+
 def audit_ink_manifest(
     manifest: dict[str, Any],
     *,
@@ -121,6 +283,10 @@ def audit_ink_manifest(
         or any(c not in "0123456789abcdefABCDEF" for c in checkpoint_sha)
     ):
         errors.append("model.checkpoint_sha256 must be a 64-character hexadecimal SHA-256")
+
+    external_method, selection_contract = _external_method_provenance(
+        manifest, errors, warnings
+    )
 
     seeds = manifest.get("seeds")
     if not isinstance(seeds, list) or not seeds or any(type(v) is not int for v in seeds):
@@ -229,6 +395,8 @@ def audit_ink_manifest(
             "checkpoint_sha256": checkpoint_sha,
         },
         "seeds": seeds if isinstance(seeds, list) else [],
+        "external_method": external_method,
+        "selection_contract": selection_contract,
         "training_regions": training,
         "evaluation_regions": evaluation,
         "leakage": {
@@ -254,8 +422,10 @@ def audit_ink_manifest(
         "warnings": warnings,
         "limitation": (
             "This audit verifies declared spatial separation and validation provenance. "
-            "It does not establish that model output is ink, that the scan contains an ink signal, "
-            "or that the manifest is complete without independently reproducible upstream data generation."
+            "External license, publication, and tracking fields are declarations that still require "
+            "their cited public evidence to be checked independently. It does not establish that "
+            "model output is ink, that the scan contains an ink signal, or that the manifest is "
+            "complete without independently reproducible upstream data generation."
         ),
     }
 

@@ -1,0 +1,61 @@
+{
+  "schema": "scroliq-external-ink-source-pin/1",
+  "created": "2026-10-03",
+  "status": "source-pinned-experiment-not-run",
+  "method_id": "ink9um-soup42-zavg-ctvoid-control",
+  "source": {
+    "repository": "Nieuwlaar/ink9um-dense-native",
+    "revision": "217e7521670db49cde97872ea6a8bdfb80c449f1",
+    "readme_blob_sha": "4dc7800328ab80cd4b41c2783b0d1364a52deb19",
+    "verify_blob_sha": "75898abaf823a1c6eb3101ac32d51bb211198b44",
+    "code_license_declared": "MIT",
+    "top_level_license_file_observed": false,
+    "license_evidence": [
+      "https://github.com/Nieuwlaar/ink9um-dense-native/blob/217e7521670db49cde97872ea6a8bdfb80c449f1/README.md",
+      "https://github.com/Nieuwlaar/ink9um-dense-native/blob/217e7521670db49cde97872ea6a8bdfb80c449f1/weights/VERIFY.md"
+    ],
+    "training_reproduce_blob_sha": "aee10c13828abe52a07ef2206c144267ec2464ae"
+  },
+  "checkpoint": {
+    "path": "weights/soup42_last4.safetensors",
+    "sha256": "ab3f1bdefa53733f4d4c46da6c7713c142bc8c703df5098fe8641757d764849c",
+    "license_declared": "MIT",
+    "derivation": "uniform weight average of released ink_9um seed-42 checkpoints at steps 40k, 50k, 60k, and 75k",
+    "training_in_this_experiment": false
+  },
+  "watch_checkpoint": {
+    "path": "weights/dense_native_016000.safetensors",
+    "sha256": "d3d95dc41dcb24ed76b84b5e12ca5dae25d7fb34edf1dfbb93e0186f91e6fc6d",
+    "status": "WATCH_BLOCKED_CURRENT_PUBLIC_EVIDENCE",
+    "reason": "training/REPRODUCE.md at the pinned source says raw training checkpoints are not in the repository and only the stripped step-16000 state_dict ships; current Grand Prize pseudo-label rules require every stage checkpoint to be public under CC-BY-NC 4.0",
+    "public_evidence_gap": "no public evidence verified here for all intermediate pseudo-label training checkpoints"
+  },
+  "data_terms": {
+    "default_license": "CC-BY-NC 4.0",
+    "source": "https://scrollprize.org/data",
+    "asset_specific_terms_must_be_checked": true
+  },
+  "grand_prize_rules": {
+    "source": "https://scrollprize.org/prizes",
+    "intended_role": "control_only",
+    "target_must_be_eligible_exact_volume": true,
+    "higher_resolution_same_volume_derivatives_prohibited": true,
+    "training_prediction_overlap_prohibited": true,
+    "stochastic_seeds_must_be_fixed_and_reported": true,
+    "public_training_and_inference_tracking_required_for_trained_models": true,
+    "pseudo_label_stage_datasets_and_checkpoints_must_be_public_cc_by_nc_4": true
+  },
+  "control_policy": {
+    "ct_void": "candidate-active-veto",
+    "raw_darkness": "report-only",
+    "line_pitch": "report-only",
+    "depth_band": "WATCH-not-implemented-in-pinned-source"
+  },
+  "blockers_before_inference": [
+    "freeze one exact eligible Grand Prize volume",
+    "freeze evaluation regions before candidate inference",
+    "freeze baseline checkpoint and acceptance thresholds",
+    "verify source-model public experiment tracking or retain PARTIAL status",
+    "record exact upstream villa inference revision and environment"
+  ]
+}
