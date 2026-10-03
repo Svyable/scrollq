@@ -96,6 +96,43 @@ def _safe_div(n: int | float, d: int | float) -> float | None:
     return (float(n) / float(d)) if d else None
 
 
+def _roc_auc(scores: np.ndarray, labels: np.ndarray) -> float | None:
+    """Compute deterministic ROC AUC with average ranks for tied scores."""
+    s = np.asarray(scores, dtype=np.float64).reshape(-1)
+    y = np.asarray(labels, dtype=bool).reshape(-1)
+    if s.shape != y.shape:
+        raise ValueError("ROC AUC scores/labels shape mismatch")
+
+    positives = int(np.count_nonzero(y))
+    negatives = int(y.size - positives)
+    if positives == 0 or negatives == 0:
+        return None
+
+    order = np.argsort(s, kind="mergesort")
+    sorted_scores = s[order]
+    sorted_labels = y[order]
+
+    starts = np.flatnonzero(
+        np.r_[True, sorted_scores[1:] != sorted_scores[:-1]]
+    )
+    ends = np.r_[starts[1:], sorted_scores.size]
+    positive_counts = np.add.reduceat(
+        sorted_labels.astype(np.int64, copy=False), starts
+    )
+    average_ranks = (starts + 1 + ends) / 2.0
+    positive_rank_sum = float(
+        np.sum(positive_counts * average_ranks, dtype=np.float64)
+    )
+
+    return float(
+        (
+            positive_rank_sum
+            - (positives * (positives + 1) / 2.0)
+        )
+        / (positives * negatives)
+    )
+
+
 def evaluate_prediction(
     prediction: np.ndarray,
     labels: np.ndarray,
@@ -173,6 +210,7 @@ def evaluate_prediction(
         else None
     )
     brier = float(np.mean((pv - yv.astype(np.float32)) ** 2))
+    roc_auc = _roc_auc(pv, yv)
 
     return {
         "threshold": float(threshold),
@@ -188,6 +226,7 @@ def evaluate_prediction(
         "f1": f1,
         "iou": iou,
         "balanced_accuracy": balanced,
+        "roc_auc": roc_auc,
         "brier": brier,
         "ink_probability_mean": pos_mean,
         "background_probability_mean": neg_mean,
@@ -269,6 +308,9 @@ def build_report(
             delta_balanced = (
                 primary["balanced_accuracy"] - metrics["balanced_accuracy"]
             )
+        delta_auc = None
+        if primary["roc_auc"] is not None and metrics["roc_auc"] is not None:
+            delta_auc = primary["roc_auc"] - metrics["roc_auc"]
         delta_margin = None
         if (
             primary["ink_background_margin"] is not None
@@ -282,6 +324,7 @@ def build_report(
                 "name": name,
                 "metrics": metrics,
                 "primary_minus_control_balanced_accuracy": delta_balanced,
+                "primary_minus_control_roc_auc": delta_auc,
                 "primary_minus_control_ink_background_margin": delta_margin,
             }
         )

@@ -2,7 +2,7 @@
 
 `scroliq-ink-validate` turns the Grand Prize held-out/false-positive requirement into a reproducible artifact.
 
-It deliberately evaluates **ink signal recovery, not reading**. The primary prediction and every falsification control are scored against the same known binary ink labels and validation mask. The report records the model checkpoint digest, input file digests, model window dimensions, split identity, overlap declaration, balanced accuracy, false-positive rate, F1/IoU, probability separation, and a digest of the exact evaluated arrays.
+It deliberately evaluates **ink signal recovery, not reading**. The primary prediction and every falsification control are scored against the same known binary ink labels and validation mask. The report records the model checkpoint digest, input file digests, model window dimensions, split identity, overlap declaration, balanced accuracy, false-positive rate, F1/IoU, probability separation, threshold-free ROC AUC, and a digest of the exact evaluated arrays. ROC AUC uses deterministic average ranks for tied prediction values, so quantized 8-bit/16-bit maps are scored without arbitrary tie ordering.
 
 ## Example
 
@@ -28,6 +28,10 @@ scroliq-ink-validate \
 The command exits zero only when the report is complete enough to pin as prize evidence: the split is declared held-out, training overlap is explicitly `none`, both ink and background are present in the validation mask, and at least one falsification control was evaluated. The declaration is not independently proven by this command; `scroliq-provenance` separately checks region-set exclusion.
 
 No arbitrary performance cutoff is imposed. The tool reports measurements and control deltas so reviewers can see whether the correct physical surface carries more ink evidence than deliberately wrong surfaces.
+
+ROC AUC is reported alongside thresholded metrics rather than replacing them. This matters for cross-scroll and leave-one-region-out model checks where authors publish AUC: ScrolIQ can now reproduce that threshold-independent discrimination measure inside the same hash-pinned artifact while still retaining false-positive rate, balanced accuracy, calibration-sensitive Brier score, and physical falsification controls.
+
+For every control, the report also records `primary_minus_control_roc_auc`. A positive value means the submitted physical surface separates ink from background better than that deliberately wrong control under the same labels and mask; it is evidence about the tested hypothesis, not proof of readable text.
 
 ## Why the controls matter
 

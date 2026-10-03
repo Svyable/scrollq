@@ -38,8 +38,19 @@ def test_perfect_held_out_metrics():
 
     assert metrics["confusion"] == {"tp": 4, "tn": 12, "fp": 0, "fn": 0}
     assert metrics["balanced_accuracy"] == 1.0
+    assert metrics["roc_auc"] == 1.0
     assert metrics["false_positive_rate"] == 0.0
     assert metrics["both_classes_present"] is True
+
+
+def test_roc_auc_is_tie_correct_and_threshold_independent():
+    labels = np.array([[0, 1, 0, 1]], dtype=np.uint8)
+    prediction = np.array([[0.5, 0.5, 0.1, 0.9]], dtype=np.float32)
+
+    metrics = evaluate_prediction(prediction, labels, threshold=0.95)
+
+    assert metrics["balanced_accuracy"] == pytest.approx(0.5)
+    assert metrics["roc_auc"] == pytest.approx(0.875)
 
 
 def test_report_requires_falsification_control_for_prize_readiness():
@@ -85,6 +96,7 @@ def test_control_delta_records_correct_surface_advantage():
     row = report["controls"][0]
     assert row["name"] == "normal+3"
     assert row["primary_minus_control_balanced_accuracy"] == pytest.approx(0.5)
+    assert row["primary_minus_control_roc_auc"] == pytest.approx(0.5)
 
 
 def test_training_overlap_prevents_prize_readiness():
@@ -161,6 +173,7 @@ def test_single_class_mask_is_measured_but_not_ready():
     )
 
     assert report["evaluation"]["both_classes_present"] is False
+    assert report["evaluation"]["roc_auc"] is None
     assert report["prize_evidence_ready"] is False
 
 
