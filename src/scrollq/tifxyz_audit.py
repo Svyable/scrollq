@@ -652,6 +652,9 @@ def _quad_metrics(
     valid: np.ndarray,
     scale: tuple[float, float],
     flip_angle: float,
+    *,
+    reference_spacing: tuple[float, float],
+    reference_source: str,
 ) -> dict[str, Any]:
     vq = valid[:-1, :-1] & valid[:-1, 1:] & valid[1:, :-1] & valid[1:, 1:]
     p00 = xyz[:-1, :-1]
@@ -669,19 +672,21 @@ def _quad_metrics(
         if ratios.size else np.asarray([])
     )
 
-    # Area alone cannot establish a low-distortion isometric parameterization:
-    # e.g. 2x stretch in one flat axis and 0.5x compression in the other
-    # preserves area exactly. Treat each valid quad as two triangles and
-    # measure the singular values of the local flat->3D Jacobian. TIFXYZ
-    # meta.scale is grid cells per voxel, so multiplying grid-edge vectors by
-    # scale converts derivatives to one-voxel flat-coordinate units.
+    # Area alone cannot establish a low-distortion isometric parameterization.
+    # Normalize the two parameter directions by an explicit expected spacing
+    # when the caller supplies one; otherwise use the observed directional
+    # median edge spacing. TIFXYZ meta.scale is retained as metadata/spacing
+    # evidence but is not assumed to be a universal physical edge-length
+    # contract. That assumption false-positives on real Villa fixtures whose
+    # meta.scale describes the parameter grid at a different sampling scale.
+    ref_x, ref_y = reference_spacing
     if vq.any():
         j1 = np.stack(
-            ((p01 - p00) * scale[0], (p10 - p00) * scale[1]),
+            ((p01 - p00) / ref_x, (p10 - p00) / ref_y),
             axis=-1,
         )[vq]
         j2 = np.stack(
-            ((p11 - p10) * scale[0], (p11 - p01) * scale[1]),
+            ((p11 - p10) / ref_x, (p11 - p01) / ref_y),
             axis=-1,
         )[vq]
         jacobians = np.concatenate([j1, j2], axis=0)
@@ -722,7 +727,12 @@ def _quad_metrics(
         "area_ratio_3d_to_flat": _summary(ratios),
         "symmetric_area_distortion": _summary(distortion),
         "isometry": {
-            "method": "per-triangle singular values of the flat-to-3D Jacobian",
+            "method": "per-triangle singular values of directionally normalized local 3D edges",
+            "normalization": {
+                "source": reference_source,
+                "reference_spacing_voxels": [float(ref_x), float(ref_y)],
+                "meta_scale_xy": [float(scale[0]), float(scale[1])],
+            },
             "triangles": int(2 * vq.sum()),
             "degenerate_triangles": degenerate_triangles,
             "sigma_min": _summary(sigma_min),
@@ -745,6 +755,8 @@ def audit_tifxyz(
     jump_ratio: float = 4.0,
     distortion_p95_threshold: float = 2.0,
     isometry_p95_threshold: float = 2.0,
+    expected_spacing_x: float | None = None,
+    expected_spacing_y: float | None = None,
     normal_flip_angle_deg: float = 120.0,
     selfcross_report: str | Path | None = None,
     surface_preflight_report: str | Path | None = None,
@@ -761,6 +773,15 @@ def audit_tifxyz(
         or isometry_p95_threshold <= 1
     ):
         raise ValueError("ratio thresholds must be > 1")
+    if (expected_spacing_x is None) != (expected_spacing_y is None):
+        raise ValueError("expected_spacing_x and expected_spacing_y must be supplied together")
+    if expected_spacing_x is not None and (
+        not math.isfinite(expected_spacing_x)
+        or not math.isfinite(expected_spacing_y)
+        or expected_spacing_x <= 0
+        or expected_spacing_y <= 0
+    ):
+        raise ValueError("expected spacings must be finite positive numbers")
     if not 90 <= normal_flip_angle_deg < 180:
         raise ValueError("normal_flip_angle_deg must be in [90, 180)")
 
@@ -904,7 +925,34 @@ def audit_tifxyz(
                 warnings.append("meta.json bbox could not be interpreted as finite XYZ bounds")
 
     edges = _edge_metrics(xyz, valid, scale, jump_ratio)
-    quads = _quad_metrics(xyz, valid, scale, normal_flip_angle_deg)
+    observed_x = edges["columns"]["distance_voxels"]["median"]
+    observed_y = edges["rows"]["distance_voxels"]["median"]
+    if expected_spacing_x is not None:
+        isometry_reference = (float(expected_spacing_x), float(expected_spacing_y))
+        isometry_reference_source = "explicit-expected-spacing"
+    elif (
+        observed_x is not None and observed_x > 0
+        and observed_y is not None and observed_y > 0
+    ):
+        isometry_reference = (float(observed_x), float(observed_y))
+        isometry_reference_source = "observed-directional-median"
+    else:
+        # No stable local reference can be derived; keep the audit executable
+        # but make the lack of isometry evidence explicit.
+        isometry_reference = (1.0 / scale[0], 1.0 / scale[1])
+        isometry_reference_source = "meta-scale-fallback"
+        warnings.append(
+            "isometry normalization fell back to meta.scale because directional "
+            "median edge spacing could not be measured"
+        )
+    quads = _quad_metrics(
+        xyz,
+        valid,
+        scale,
+        normal_flip_angle_deg,
+        reference_spacing=isometry_reference,
+        reference_source=isometry_reference_source,
+    )
     if quads["valid_quads"] == 0:
         errors.append("surface contains no valid quads")
 
@@ -1055,6 +1103,24 @@ def main() -> None:
     ap.add_argument("--jump-ratio", type=float, default=4.0)
     ap.add_argument("--distortion-p95-threshold", type=float, default=2.0)
     ap.add_argument("--isometry-p95-threshold", type=float, default=2.0)
+    ap.add_argument(
+        "--expected-spacing-x",
+        type=float,
+        default=None,
+        help=(
+            "optional expected 3D voxel spacing for one TIFXYZ column step; "
+            "requires --expected-spacing-y. Default: observed directional median"
+        ),
+    )
+    ap.add_argument(
+        "--expected-spacing-y",
+        type=float,
+        default=None,
+        help=(
+            "optional expected 3D voxel spacing for one TIFXYZ row step; "
+            "requires --expected-spacing-x. Default: observed directional median"
+        ),
+    )
     ap.add_argument("--normal-flip-angle", type=float, default=120.0)
     ap.add_argument(
         "--selfcross-report",
@@ -1083,6 +1149,8 @@ def main() -> None:
         jump_ratio=args.jump_ratio,
         distortion_p95_threshold=args.distortion_p95_threshold,
         isometry_p95_threshold=args.isometry_p95_threshold,
+        expected_spacing_x=args.expected_spacing_x,
+        expected_spacing_y=args.expected_spacing_y,
         normal_flip_angle_deg=args.normal_flip_angle,
         selfcross_report=args.selfcross_report,
         surface_preflight_report=args.surface_preflight_report,
