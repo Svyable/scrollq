@@ -73,8 +73,16 @@ ghcr.io/svyable/scrollq@sha256:<registry-manifest-digest>
 ```
 
 That digest is written to the workflow summary and uploaded as the
-`grand-prize-container-digest` artifact. The workflow pulls that exact digest
-back from GHCR and smoke-tests it before completing.
+`grand-prize-container-digest` artifact. The workflow first pulls that exact
+digest while authenticated and smoke-tests it. It then logs out of GHCR,
+removes the local image references, and pulls the same immutable digest again
+**anonymously**. The publish workflow does not pass unless a reviewer without
+repository/package credentials can fetch and run the image.
+
+If the anonymous-access step fails after a first publication, make the
+`svyable/scrollq` container package public in GitHub Packages and rerun the
+workflow. Do not copy the digest into a prize manifest until this anonymous
+pull gate is green.
 
 ## Reviewer use
 
