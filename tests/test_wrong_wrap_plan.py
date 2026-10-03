@@ -115,12 +115,24 @@ def test_freeze_spec_records_geometry_only_contract(tmp_path):
 def test_freeze_rejects_wrong_scan_prediction_without_network(tmp_path):
     ref = _reference_plan(tmp_path)
     wrong = PRED_URL.replace("20250728140407", "20260413113053")
-    with pytest.raises(ww.WrongWrapError, match="exact reference volume id"):
+    with pytest.raises(ww.WrongWrapError, match="does not exactly name"):
         ww.freeze_spec(
             reference_plan_path=ref,
             prediction_url=wrong,
             ct_url=CT_URL,
             model_id="20260413222639",
+            prediction_binding_url="https://scrollprize.org/data_browser/PHerc0139",
+        )
+
+
+def test_freeze_rejects_wrong_model_identity(tmp_path):
+    ref = _reference_plan(tmp_path)
+    with pytest.raises(ww.WrongWrapError, match="does not exactly name"):
+        ww.freeze_spec(
+            reference_plan_path=ref,
+            prediction_url=PRED_URL,
+            ct_url=CT_URL,
+            model_id="20250701154204",
             prediction_binding_url="https://scrollprize.org/data_browser/PHerc0139",
         )
 
