@@ -45,7 +45,9 @@ weight-free Pareto frontier (triage, not a readability claim).
   - `sheetness_campaign.py` → `scroliq-sheetness-campaign`: freezes dispersed per-probe CT boxes, exact Hessian-engine bytes/config, and one campaign-level decision rule before inference; seals one provenance-bound v3 spec per cutout and aggregates all frozen groups without dropping failures
   - evidence layers, each its own `scroliq-*` script: `passport.py`,
     `scan_map.py`, `provenance.py`, `recto_coverage.py`, `tifxyz_audit.py`
-    (`scroliq-mesh`), `ink_audit.py`, `ink_validation.py`, `winding_audit.py`;
+    (`scroliq-mesh`), `ink_audit.py`, `ink_validation.py`, `normal_response.py`,
+    `winding_audit.py`; `normal_response.py` → `scroliq-normal-response` for the
+    frozen held-out surface-normal falsification sweep;
     `geometry_probe.py` → `scrollq-geometry-probe`; `fiber_audit.py` →
     `scroliq-fiber`
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware

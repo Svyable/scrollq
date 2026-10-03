@@ -6,9 +6,10 @@ convincing text. It is on making false ink harder to survive.
 
 ## 1. Surface-normal response curves
 
-**Status:** EXPERIMENT FURTHER. Basic normal-offset controls already exist in
-the ink-validation system; the continuous response-curve experiment is still
-unproven.
+**Status:** EXPERIMENT FURTHER. The frozen v1 measurement harness is now
+implemented as `scroliq-normal-response`, but no empirical promotion has been
+made. Existing one-off normal controls remain useful; the continuous response
+curve still has to earn inclusion on held-out data.
 
 ### Hypothesis
 
@@ -30,6 +31,27 @@ Useful measurements include:
 - signed asymmetry;
 - response width;
 - consistency across neighboring material points.
+
+### Executable v1
+
+The committed harness fixes the non-zero displacement grid at
+`-6, -4, -2, +2, +4, +6` voxels and treats the submitted-surface prediction
+as offset zero. It reports the per-offset ink/background response curve, the
+zero-surface advantage over the strongest off-surface response, strict
+zero-peak fractions, unique-peak histograms, and a conservative center-wins
+gate applied at the already-declared ink threshold. Ties never count as
+surface-localized.
+
+A protocol-complete run must also bind the exact surface geometry by SHA-256
+and hash a frozen sampling manifest that records the normal convention, CT
+source, interpolation/sampling settings, and inference command. Partial or
+custom offset grids are still measured, but they fail the v1 completeness
+gate rather than silently becoming comparable evidence.
+
+`experimental_evidence_ready` means only that this held-out falsification
+artifact is complete enough to inspect. It is deliberately not a claim of ink,
+legibility, or Grand Prize readiness. See
+[normal-response.md](../normal-response.md).
 
 ### Promotion gate
 
