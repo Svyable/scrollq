@@ -256,32 +256,36 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
     <div><h3>Reproducibility ledger</h3>
       <p>Exact inputs, hashes, fixed seeds, held-out splits, failure counts, experiment artifacts, and human-input time are part of the evidence trail — not cleanup work at submission time.</p></div>
   </div>
-  <div class="scope"><b>No opaque winner score.</b> The frozen two-axis qualifier exposes a Pareto frontier rather than claiming readability. Its current frontier contains <b>PHerc0813</b> and <b>PHerc1447</b>; <b>PHerc0800</b> remains in the first-wave blind probe as a deliberately different geometry hypothesis.</div>
+  <div class="scope"><b>No opaque winner score.</b> The frozen 2026-09-30 two-axis qualifier produced a Pareto frontier containing <b>PHerc0813</b> and <b>PHerc1447</b>, with <b>PHerc0800</b> retained as a deliberately different geometry hypothesis. The later pre-registered stability-v2 test <b>failed</b>, so that frontier is frozen historical evidence and is <b>under re-evaluation</b>, not a current winner claim.</div>
 </div>
 
 <div class="insights" id="evidence">
-  <div class="card"><h3>Healthiest volume</h3>
-    <p class="big">{top_id}</p>
-    <p><b>{top_score}</b> / 100 · {top_spec}<br>Same scanner family
-    (9.362&thinsp;&micro;m, 113&thinsp;keV) also produced the <b>lowest</b>
-    scores — data condition, not hardware, drives the spread.</p></div>
-  <div class="card"><h3>Label-coverage gap</h3>
-    <p>All <b>70</b> published ink-detection labels sit on
-    <b>PHercParis4</b> — quality rank <b>13 of 39 scrolls</b> (each scroll
-    ranked by its best volume). The healthiest volumes (<b>{top_id}</b> {top_score}, <b>PHerc0139</b> 75.9) have
-    <b>zero</b> ink labels. The published campaign exposes <b>{label_next_n}</b>
-    top-quartile zero-label volumes as <b>label-coverage candidates</b> for review.
-    This is a prioritization signal only: it does not claim that ink is present
-    or that surface geometry is ready for annotation.</p></div>
-  <div class="card"><h3>Failed the gate, fixed the experiment</h3>
-    <p>The first 4-sample resample missed our own stability gate
-    (<b>&rho; = 0.76</b>). We did not lower the threshold: we tripled the
-    sampling budget and re-ran all 64 volumes. The frozen 12-sample result is
-    <b>&rho; = 0.9948</b>, mean |&Delta;| <b>0.556</b>, top-10 overlap
-    <b>10/10</b> — above the &rho; &ge; 0.85 gate. Caveat: dense-grid
-    diagnostics show that sparse volumes can re-read shards, so achieved sample
-    counts remain visible rather than being hidden behind the headline metric.
-    <a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-09-30-resampling-stability/stability-n12.json">Frozen stability JSON →</a></p></div>
+  <div class="card"><h3>Pre-registered stability: FAIL</h3>
+    <p>Two <b>disjoint 48-chunk samples</b> were run under a protocol frozen before reading the data.
+    On the 48 / 64 volumes dense enough for both arms, Spearman <b>&rho; = 0.750</b> against a
+    pre-registered gate of <b>0.85</b>; mean |&Delta;| = <b>2.94</b>, top-10 overlap <b>7 / 10</b>.
+    The consequence was not a softer threshold: the leaderboard now reports <b>rank bands</b>.
+    <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-stability-v2">Frozen result + post-hoc diagnostics →</a></p></div>
+  <div class="card"><h3>Mesh corpus: agreement before judgment</h3>
+    <p><b>843 / 903</b> published TIFXYZ meshes were audited across <b>307 segments / 11 scrolls</b>;
+    60 largest meshes hit the memory limit and remain explicit failures. Across repeated registrations,
+    <b>190 / 262</b> multi-registration segments had identical finding kinds. Where both TIFXYZ and
+    published OBJ existed, <b>175 / 185</b> segments agreed on whether any shared finding kind was present.
+    Findings remain <b>review candidates</b>, not confirmed sheet defects.
+    <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-corpus-mesh-audit">Corpus evidence →</a></p></div>
+  <div class="card"><h3>Winding check with measured sensitivity</h3>
+    <p>On public PHercParis4 annotations, the ray-order audit found <b>2 inversions / 13,700 comparable pairs</b>.
+    In a seeded injection control, deliberate &plusmn;3 winding errors were detected in <b>179 / 200</b>
+    testable trials and &plusmn;5 errors in <b>171 / 200</b>; &plusmn;2 is undetectable by construction.
+    That measured blind spot is part of the result.
+    <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-paris4-winding-ray-order">Audit + injection control →</a></p></div>
+  <div class="card"><h3>Hash-pinned native VC3D fibers</h3>
+    <p>Eight public PHercParis4 VC3D fiber files were SHA-256 pinned and parsed as native v3:
+    <b>53,828 rendered points</b>, 377 control points and 369 spans. The audit surfaced
+    <b>11 gap</b> and <b>26 sharp-turn</b> review candidates, with <b>0 control-line offsets</b> and
+    <b>0 control-order inversions</b>. This campaign is deliberately not attached to a volume passport
+    because exact CT-volume binding is not proven.
+    <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-public-fiber-audit">Pinned fiber campaign →</a></p></div>
 </div>
 
 <div class="panel"><h2>Scan-quality distribution<span class="sub">64 volumes · 5-point bins</span></h2>
