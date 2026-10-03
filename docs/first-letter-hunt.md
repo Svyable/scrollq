@@ -116,6 +116,11 @@ scroliq-sheetness seed-01.ct.npy \
 
 Those outputs are independent geometry observations, not proof that m7 chose the correct winding. The actual surface still has to be grown and tested for CT continuity, sheet switches, and normal-offset behavior before a `surface_seating.state = pass` artifact may be issued.
 
+
+Do not choose a sheetness pass threshold from PHerc0490A after looking at its responses. The quantitative seating path is to freeze a decision rule on known/high-confidence public geometry first, using `scroliq-sheetness-eval`. That evaluator keeps failed probes in the denominator and requires both a normal-offset and a wrong-wrap control. Only a decision rule frozen before the PHerc0490A target run may contribute to a `surface_seating.state = pass` artifact.
+
+The newly added `scroliq-horizon-path` is useful as an additional continuity experiment on 2-D CT likelihood slices, but it remains an exploratory baseline until its own held-out real-surface benchmark is frozen. It is not currently a required gate for this hunt.
+
 ### Why surface seating is a hard gate on PHerc0490A
 
 A high surface-support fraction is not sufficient. The public `ShribyrLabs/vesuvius-reports` orientation-bias report (repository state `81e043bc4e2383f134597f0b7a05458f0bc47d02`, `03-m7-orientation-bias/`) demonstrates a crushed PHerc0490A box where the released m7 map draws structures across CT layers when sheets lie nearly perpendicular to the pose seen in training. The report measures hosted-track tangent/CT-normal disagreement of 0.377 in that box and 0.188 after an orientation-aware fine-tune, while also documenting that the fine-tune increases merged sheets.
