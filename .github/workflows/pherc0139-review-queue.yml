@@ -1,0 +1,52 @@
+name: Public Mesh IQ VC3D review queue
+
+on:
+  push:
+    paths:
+      - "src/scrollq/tifxyz_audit.py"
+      - "tests/test_tifxyz_audit.py"
+      - "scripts/pherc0139_mesh_review_queue.py"
+      - "artifacts/2026-10-03-pherc0139-review-queue/**"
+      - ".github/workflows/pherc0139-review-queue.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ScrolIQ
+        run: python -m pip install .
+      - name: Generate pinned real-data review queue
+        run: |
+          mkdir -p /tmp/expected
+          cp artifacts/2026-10-03-pherc0139-review-queue/summary.json /tmp/expected/summary.json 2>/dev/null || true
+          cp artifacts/2026-10-03-pherc0139-review-queue/review-points.json /tmp/expected/review-points.json 2>/dev/null || true
+          python scripts/pherc0139_mesh_review_queue.py --out-dir /tmp/actual
+      - name: Verify frozen artifacts when present
+        run: |
+          if [ -s /tmp/expected/summary.json ]; then
+            diff -u /tmp/expected/summary.json /tmp/actual/summary.json
+          fi
+          if [ -s /tmp/expected/review-points.json ]; then
+            diff -u /tmp/expected/review-points.json /tmp/actual/review-points.json
+          fi
+      - name: Print evidence
+        run: |
+          echo "=== REVIEW_QUEUE_SUMMARY ==="
+          cat /tmp/actual/summary.json
+          echo "=== REVIEW_POINTS_JSON ==="
+          cat /tmp/actual/review-points.json
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pherc0139-mesh-review-queue
+          path: /tmp/actual/
+          if-no-files-found: error

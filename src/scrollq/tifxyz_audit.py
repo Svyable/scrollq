@@ -652,6 +652,9 @@ def _quad_metrics(
     valid: np.ndarray,
     scale: tuple[float, float],
     flip_angle: float,
+    *,
+    reference_spacing: tuple[float, float],
+    reference_source: str,
 ) -> dict[str, Any]:
     vq = valid[:-1, :-1] & valid[:-1, 1:] & valid[1:, :-1] & valid[1:, 1:]
     p00 = xyz[:-1, :-1]
@@ -669,19 +672,21 @@ def _quad_metrics(
         if ratios.size else np.asarray([])
     )
 
-    # Area alone cannot establish a low-distortion isometric parameterization:
-    # e.g. 2x stretch in one flat axis and 0.5x compression in the other
-    # preserves area exactly. Treat each valid quad as two triangles and
-    # measure the singular values of the local flat->3D Jacobian. TIFXYZ
-    # meta.scale is grid cells per voxel, so multiplying grid-edge vectors by
-    # scale converts derivatives to one-voxel flat-coordinate units.
+    # Area alone cannot establish a low-distortion isometric parameterization.
+    # Normalize the two parameter directions by an explicit expected spacing
+    # when the caller supplies one; otherwise use the observed directional
+    # median edge spacing. TIFXYZ meta.scale is retained as metadata/spacing
+    # evidence but is not assumed to be a universal physical edge-length
+    # contract. That assumption false-positives on real Villa fixtures whose
+    # meta.scale describes the parameter grid at a different sampling scale.
+    ref_x, ref_y = reference_spacing
     if vq.any():
         j1 = np.stack(
-            ((p01 - p00) * scale[0], (p10 - p00) * scale[1]),
+            ((p01 - p00) / ref_x, (p10 - p00) / ref_y),
             axis=-1,
         )[vq]
         j2 = np.stack(
-            ((p11 - p10) * scale[0], (p11 - p01) * scale[1]),
+            ((p11 - p10) / ref_x, (p11 - p01) / ref_y),
             axis=-1,
         )[vq]
         jacobians = np.concatenate([j1, j2], axis=0)
@@ -722,7 +727,12 @@ def _quad_metrics(
         "area_ratio_3d_to_flat": _summary(ratios),
         "symmetric_area_distortion": _summary(distortion),
         "isometry": {
-            "method": "per-triangle singular values of the flat-to-3D Jacobian",
+            "method": "per-triangle singular values of directionally normalized local 3D edges",
+            "normalization": {
+                "source": reference_source,
+                "reference_spacing_voxels": [float(ref_x), float(ref_y)],
+                "meta_scale_xy": [float(scale[0]), float(scale[1])],
+            },
             "triangles": int(2 * vq.sum()),
             "degenerate_triangles": degenerate_triangles,
             "sigma_min": _summary(sigma_min),
@@ -737,6 +747,224 @@ def _quad_metrics(
     }
 
 
+
+def _review_queue(
+    xyz: np.ndarray,
+    valid: np.ndarray,
+    *,
+    jump_ratio: float,
+    flip_angle: float,
+    limit_per_kind: int,
+) -> dict[str, Any]:
+    """Return a deterministic, bounded queue of local geometry review sites."""
+    edge_candidates: list[dict[str, Any]] = []
+
+    for orientation, a, b, edge_valid in (
+        (
+            "column",
+            xyz[:, :-1],
+            xyz[:, 1:],
+            valid[:, :-1] & valid[:, 1:],
+        ),
+        (
+            "row",
+            xyz[:-1, :],
+            xyz[1:, :],
+            valid[:-1, :] & valid[1:, :],
+        ),
+    ):
+        distance = np.linalg.norm(b - a, axis=-1)
+        values = distance[edge_valid]
+        median = float(np.median(values)) if values.size else None
+        if median is None or not math.isfinite(median) or median <= 0:
+            continue
+        candidate_mask = edge_valid & np.isfinite(distance) & (
+            distance > jump_ratio * median
+        )
+        for row, col in np.argwhere(candidate_mask):
+            d = float(distance[row, col])
+            point = ((a[row, col] + b[row, col]) / 2.0).astype(float)
+            if orientation == "column":
+                endpoints = [[int(row), int(col)], [int(row), int(col + 1)]]
+            else:
+                endpoints = [[int(row), int(col)], [int(row + 1), int(col)]]
+            edge_candidates.append(
+                {
+                    "kind": "edge-jump",
+                    "orientation": orientation,
+                    "grid_endpoints_yx": endpoints,
+                    "xyz": point.tolist(),
+                    "distance_voxels": d,
+                    "axis_median_voxels": median,
+                    "ratio_to_axis_median": d / median,
+                }
+            )
+
+    edge_candidates.sort(
+        key=lambda item: (
+            -float(item["ratio_to_axis_median"]),
+            str(item["orientation"]),
+            item["grid_endpoints_yx"][0][0],
+            item["grid_endpoints_yx"][0][1],
+        )
+    )
+
+    normal_candidates: list[dict[str, Any]] = []
+    vq = valid[:-1, :-1] & valid[:-1, 1:] & valid[1:, :-1] & valid[1:, 1:]
+    if vq.size:
+        p00 = xyz[:-1, :-1]
+        p01 = xyz[:-1, 1:]
+        p10 = xyz[1:, :-1]
+        p11 = xyz[1:, 1:]
+        c1 = np.cross(p01 - p00, p10 - p00)
+        c2 = np.cross(p11 - p01, p10 - p01)
+        normals = c1 + c2
+        norm = np.linalg.norm(normals, axis=-1)
+        ok = vq & np.isfinite(norm) & (norm > 1e-8)
+        unit = np.zeros_like(normals)
+        unit[ok] = normals[ok] / norm[ok, None]
+        center = (p00 + p01 + p10 + p11) / 4.0
+        cutoff = math.cos(math.radians(flip_angle))
+
+        for orientation, left, right, pair_valid in (
+            (
+                "column",
+                unit[:, :-1],
+                unit[:, 1:],
+                ok[:, :-1] & ok[:, 1:],
+            ),
+            (
+                "row",
+                unit[:-1, :],
+                unit[1:, :],
+                ok[:-1, :] & ok[1:, :],
+            ),
+        ):
+            dot = (left * right).sum(axis=-1)
+            candidate_mask = pair_valid & np.isfinite(dot) & (dot < cutoff)
+            for row, col in np.argwhere(candidate_mask):
+                d = float(np.clip(dot[row, col], -1.0, 1.0))
+                angle = math.degrees(math.acos(d))
+                if orientation == "column":
+                    point = (center[row, col] + center[row, col + 1]) / 2.0
+                    quads = [[int(row), int(col)], [int(row), int(col + 1)]]
+                else:
+                    point = (center[row, col] + center[row + 1, col]) / 2.0
+                    quads = [[int(row), int(col)], [int(row + 1), int(col)]]
+                normal_candidates.append(
+                    {
+                        "kind": "normal-reversal",
+                        "orientation": orientation,
+                        "grid_quads_yx": quads,
+                        "xyz": point.astype(float).tolist(),
+                        "normal_dot": d,
+                        "angle_deg": float(angle),
+                    }
+                )
+
+    normal_candidates.sort(
+        key=lambda item: (
+            -float(item["angle_deg"]),
+            str(item["orientation"]),
+            item["grid_quads_yx"][0][0],
+            item["grid_quads_yx"][0][1],
+        )
+    )
+
+    emitted: list[dict[str, Any]] = []
+    for candidates in (edge_candidates, normal_candidates):
+        for rank, item in enumerate(candidates[:limit_per_kind], start=1):
+            emitted.append({**item, "rank": rank})
+
+    return {
+        "coordinate_space": "level0-voxel-xyz",
+        "limit_per_kind": int(limit_per_kind),
+        "total_candidates_by_kind": {
+            "edge-jump": len(edge_candidates),
+            "normal-reversal": len(normal_candidates),
+        },
+        "emitted_by_kind": {
+            "edge-jump": min(len(edge_candidates), limit_per_kind),
+            "normal-reversal": min(len(normal_candidates), limit_per_kind),
+        },
+        "candidates": emitted,
+        "limitation": (
+            "Review sites localize the strongest local geometry cues only. "
+            "They are VC3D inspection targets, not defect verdicts or sheet-identity proof."
+        ),
+    }
+
+
+def review_queue_pointcollections(report: dict[str, Any]) -> dict[str, Any]:
+    """Convert a Mesh IQ review queue into VC3D PointCollections JSON v1."""
+    queue = report.get("review_queue")
+    candidates = (
+        queue.get("candidates")
+        if isinstance(queue, dict) and isinstance(queue.get("candidates"), list)
+        else []
+    )
+    groups = (
+        ("edge-jump", "Mesh IQ · edge jumps", [1.0, 0.55, 0.0]),
+        ("normal-reversal", "Mesh IQ · normal reversals", [1.0, 0.2, 0.2]),
+    )
+    collections: dict[str, Any] = {}
+    collection_id = 0
+    for kind, name, color in groups:
+        selected = [item for item in candidates if item.get("kind") == kind]
+        if not selected:
+            continue
+        collection_id += 1
+        points: dict[str, Any] = {}
+        for point_id, item in enumerate(selected, start=1):
+            xyz = item.get("xyz")
+            if not (
+                isinstance(xyz, list)
+                and len(xyz) == 3
+                and all(isinstance(v, (int, float)) and math.isfinite(float(v)) for v in xyz)
+            ):
+                continue
+            points[str(point_id)] = {
+                "id": point_id,
+                "p": [float(v) for v in xyz],
+                "wind_a": None,
+                "collection_id": collection_id,
+            }
+        if not points:
+            continue
+        collections[str(collection_id)] = {
+            "id": collection_id,
+            "name": name,
+            "color": color,
+            "points": points,
+            "metadata": {
+                "tool": "ScrolIQ Mesh IQ",
+                "finding_kind": kind,
+                "source_tifxyz": report.get("tifxyz_path"),
+                "volume_root": report.get("volume_root"),
+                "coordinate_space": "level0-voxel-xyz",
+                "ranking": (
+                    "descending edge ratio" if kind == "edge-jump"
+                    else "descending normal angle"
+                ),
+            },
+        }
+    return {
+        "vc_pointcollections_json_version": "1",
+        "collections": collections,
+    }
+
+
+def write_review_pointcollections(
+    report: dict[str, Any],
+    path: str | Path,
+) -> None:
+    out = Path(path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        json.dumps(review_queue_pointcollections(report), indent=2) + "\n",
+        encoding="utf-8",
+    )
+
 def audit_tifxyz(
     path: str | Path,
     *,
@@ -745,7 +973,10 @@ def audit_tifxyz(
     jump_ratio: float = 4.0,
     distortion_p95_threshold: float = 2.0,
     isometry_p95_threshold: float = 2.0,
+    expected_spacing_x: float | None = None,
+    expected_spacing_y: float | None = None,
     normal_flip_angle_deg: float = 120.0,
+    review_limit_per_kind: int = 20,
     selfcross_report: str | Path | None = None,
     surface_preflight_report: str | Path | None = None,
 ) -> dict[str, Any]:
@@ -761,8 +992,19 @@ def audit_tifxyz(
         or isometry_p95_threshold <= 1
     ):
         raise ValueError("ratio thresholds must be > 1")
+    if (expected_spacing_x is None) != (expected_spacing_y is None):
+        raise ValueError("expected_spacing_x and expected_spacing_y must be supplied together")
+    if expected_spacing_x is not None and (
+        not math.isfinite(expected_spacing_x)
+        or not math.isfinite(expected_spacing_y)
+        or expected_spacing_x <= 0
+        or expected_spacing_y <= 0
+    ):
+        raise ValueError("expected spacings must be finite positive numbers")
     if not 90 <= normal_flip_angle_deg < 180:
         raise ValueError("normal_flip_angle_deg must be in [90, 180)")
+    if review_limit_per_kind < 0:
+        raise ValueError("review_limit_per_kind must be >= 0")
 
     required = [root / name for name in ("meta.json", "x.tif", "y.tif", "z.tif")]
     missing = [p.name for p in required if not p.exists()]
@@ -904,9 +1146,44 @@ def audit_tifxyz(
                 warnings.append("meta.json bbox could not be interpreted as finite XYZ bounds")
 
     edges = _edge_metrics(xyz, valid, scale, jump_ratio)
-    quads = _quad_metrics(xyz, valid, scale, normal_flip_angle_deg)
+    observed_x = edges["columns"]["distance_voxels"]["median"]
+    observed_y = edges["rows"]["distance_voxels"]["median"]
+    if expected_spacing_x is not None:
+        isometry_reference = (float(expected_spacing_x), float(expected_spacing_y))
+        isometry_reference_source = "explicit-expected-spacing"
+    elif (
+        observed_x is not None and observed_x > 0
+        and observed_y is not None and observed_y > 0
+    ):
+        isometry_reference = (float(observed_x), float(observed_y))
+        isometry_reference_source = "observed-directional-median"
+    else:
+        # No stable local reference can be derived; keep the audit executable
+        # but make the lack of isometry evidence explicit.
+        isometry_reference = (1.0 / scale[0], 1.0 / scale[1])
+        isometry_reference_source = "meta-scale-fallback"
+        warnings.append(
+            "isometry normalization fell back to meta.scale because directional "
+            "median edge spacing could not be measured"
+        )
+    quads = _quad_metrics(
+        xyz,
+        valid,
+        scale,
+        normal_flip_angle_deg,
+        reference_spacing=isometry_reference,
+        reference_source=isometry_reference_source,
+    )
     if quads["valid_quads"] == 0:
         errors.append("surface contains no valid quads")
+
+    review_queue = _review_queue(
+        xyz,
+        valid,
+        jump_ratio=jump_ratio,
+        flip_angle=normal_flip_angle_deg,
+        limit_per_kind=review_limit_per_kind,
+    )
 
     spacing: dict[str, Any] = {}
     for axis in ("columns", "rows"):
@@ -1013,6 +1290,7 @@ def audit_tifxyz(
         "spacing": spacing,
         "edges": edges,
         "quads": quads,
+        "review_queue": review_queue,
         "ct_preflight": ct_preflight,
         "self_intersection": self_intersection,
         "error_count": len(errors),
@@ -1055,7 +1333,36 @@ def main() -> None:
     ap.add_argument("--jump-ratio", type=float, default=4.0)
     ap.add_argument("--distortion-p95-threshold", type=float, default=2.0)
     ap.add_argument("--isometry-p95-threshold", type=float, default=2.0)
+    ap.add_argument(
+        "--expected-spacing-x",
+        type=float,
+        default=None,
+        help=(
+            "optional expected 3D voxel spacing for one TIFXYZ column step; "
+            "requires --expected-spacing-y. Default: observed directional median"
+        ),
+    )
+    ap.add_argument(
+        "--expected-spacing-y",
+        type=float,
+        default=None,
+        help=(
+            "optional expected 3D voxel spacing for one TIFXYZ row step; "
+            "requires --expected-spacing-x. Default: observed directional median"
+        ),
+    )
     ap.add_argument("--normal-flip-angle", type=float, default=120.0)
+    ap.add_argument(
+        "--review-limit",
+        type=int,
+        default=20,
+        help="maximum emitted VC3D review sites per local finding kind",
+    )
+    ap.add_argument(
+        "--review-points",
+        default=None,
+        help="optional VC3D PointCollections JSON path for ranked local review sites",
+    )
     ap.add_argument(
         "--selfcross-report",
         default=None,
@@ -1083,13 +1390,18 @@ def main() -> None:
         jump_ratio=args.jump_ratio,
         distortion_p95_threshold=args.distortion_p95_threshold,
         isometry_p95_threshold=args.isometry_p95_threshold,
+        expected_spacing_x=args.expected_spacing_x,
+        expected_spacing_y=args.expected_spacing_y,
         normal_flip_angle_deg=args.normal_flip_angle,
+        review_limit_per_kind=args.review_limit,
         selfcross_report=args.selfcross_report,
         surface_preflight_report=args.surface_preflight_report,
     )
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    if args.review_points and result.get("status") != "fail":
+        write_review_pointcollections(result, args.review_points)
     print(
         f"{result['status'].upper()} {args.tifxyz}: "
         f"{result.get('error_count', 0)} error(s), {result.get('warning_count', 0)} warning(s)"

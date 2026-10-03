@@ -26,13 +26,14 @@ are left out here because they have no adapter yet.
 
 | check | result |
 |---|---|
-| Self-intersection | **95 / 95 clean** (no transverse self-intersection), hash-verified |
+| Self-intersection | **95 / 95 clean** (no transverse self-intersection), `coordinate-exact` binding |
 | Flattening distortion | **95 / 95 below flatcheck's default bar** (93.1 % of quads within ±5 % area); median 66.0 %, best 88.4 %, 8 meshes below 50 %. No mesh has fold-overs or a collapsed parametrization, so every failure is the area-distortion bar alone |
 | tifxyz contract | **95 / 95 caution**, all the same finding: `metadata-area-schema-divergence` (`meta.json` has `area_vx2`/`area_cm2` but no `area`, which the current Villa Python reader expects) |
 | ScrolIQ mesh audit | 50 pass, 45 caution (neighbouring-normal reversals; 11 meshes have a valid-vertex grid in 2 disconnected components) |
 
-Bindings: 190 records hash-verified (windcheck, scroliq-mesh), 285
-path-declared (flatcheck, tifxyz-doctor, tifxyz-repair). No mesh is `ready`
+Bindings (same classes as `scroliq-evidence-bind`), 95 records each:
+`scroliq-mesh` semantic-exact, windcheck coordinate-exact, flatcheck and
+tifxyz-doctor path-grid, tifxyz-repair path-only. No mesh is `ready`
 under this policy; every blocker is listed per mesh.
 
 ## Re-flattening (`reflattening.json`)

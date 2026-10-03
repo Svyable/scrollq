@@ -6,7 +6,7 @@ import sys
 import numpy as np
 from PIL import Image
 
-from scrollq.tifxyz_audit import audit_tifxyz
+from scrollq.tifxyz_audit import audit_tifxyz, review_queue_pointcollections
 
 
 def _write_tifxyz(
@@ -219,18 +219,48 @@ def test_planar_tifxyz_passes_structure_spacing_and_distortion_checks(tmp_path):
     assert result["spacing"]["columns"]["measured_to_nominal_ratio"] == 1.0
     assert result["spacing"]["rows"]["measured_to_nominal_ratio"] == 1.0
     assert result["quads"]["symmetric_area_distortion"]["median"] == 1.0
+    assert result["quads"]["isometry"]["normalization"]["source"] == (
+        "observed-directional-median"
+    )
     assert result["quads"]["isometry"]["symmetric_stretch_distortion"]["median"] == 1.0
     assert result["quads"]["isometry"]["anisotropy"]["median"] == 1.0
     assert result["quads"]["normal_reversal_pairs"] == 0
 
 
-def test_area_preserving_anisotropy_is_detected_as_non_isometric(tmp_path):
+def test_observed_spacing_is_default_isometry_reference(tmp_path):
     result = audit_tifxyz(
         _write_tifxyz(tmp_path, area_preserving_anisotropy=True),
         spacing_tolerance_ratio=3.0,
     )
 
     assert np.isclose(result["quads"]["symmetric_area_distortion"]["median"], 1.0)
+    assert result["quads"]["isometry"]["normalization"]["source"] == (
+        "observed-directional-median"
+    )
+    assert np.allclose(
+        result["quads"]["isometry"]["normalization"]["reference_spacing_voxels"],
+        [5.0, 0.8],
+    )
+    assert np.isclose(
+        result["quads"]["isometry"]["symmetric_stretch_distortion"]["p95"],
+        1.0,
+    )
+    assert not any(
+        item["kind"] == "isometry-distortion" for item in result["findings"]
+    )
+
+
+def test_explicit_expected_spacing_detects_area_preserving_anisotropy(tmp_path):
+    result = audit_tifxyz(
+        _write_tifxyz(tmp_path, area_preserving_anisotropy=True),
+        spacing_tolerance_ratio=3.0,
+        expected_spacing_x=2.0,
+        expected_spacing_y=2.0,
+    )
+
+    assert result["quads"]["isometry"]["normalization"]["source"] == (
+        "explicit-expected-spacing"
+    )
     assert np.isclose(
         result["quads"]["isometry"]["symmetric_stretch_distortion"]["p95"],
         2.5,
@@ -238,6 +268,12 @@ def test_area_preserving_anisotropy_is_detected_as_non_isometric(tmp_path):
     assert np.isclose(result["quads"]["isometry"]["anisotropy"]["median"], 6.25)
     assert result["status"] == "partial"
     assert any(item["kind"] == "isometry-distortion" for item in result["findings"])
+
+
+def test_expected_spacing_requires_both_directions(tmp_path):
+    surface = _write_tifxyz(tmp_path)
+    with np.testing.assert_raises_regex(ValueError, "must be supplied together"):
+        audit_tifxyz(surface, expected_spacing_x=2.0)
 
 
 def test_clean_official_surface_preflight_binds_ct_support(tmp_path):
@@ -424,3 +460,61 @@ def test_cli_fail_on_findings_is_opt_in(tmp_path):
     )
     assert gated.returncode == 2
     assert json.loads(out.read_text())["status"] == "partial"
+
+def test_review_queue_localizes_edge_jumps_as_vc3d_points(tmp_path):
+    surface = _write_tifxyz(tmp_path)
+    x = np.asarray(Image.open(surface / "x.tif"), dtype=np.float32).copy()
+    x[2, 3] = 50.0
+    Image.fromarray(x).save(surface / "x.tif")
+
+    result = audit_tifxyz(surface, review_limit_per_kind=3)
+    queue = result["review_queue"]
+
+    assert queue["coordinate_space"] == "level0-voxel-xyz"
+    assert queue["total_candidates_by_kind"]["edge-jump"] > 0
+    assert 1 <= queue["emitted_by_kind"]["edge-jump"] <= 3
+
+    edges = [item for item in queue["candidates"] if item["kind"] == "edge-jump"]
+    assert edges
+    assert edges[0]["rank"] == 1
+    assert edges == sorted(
+        edges,
+        key=lambda item: (
+            -item["ratio_to_axis_median"],
+            item["orientation"],
+            item["grid_endpoints_yx"][0][0],
+            item["grid_endpoints_yx"][0][1],
+        ),
+    )
+    assert all(len(item["xyz"]) == 3 for item in edges)
+
+    pointcollections = review_queue_pointcollections(result)
+    assert pointcollections["vc_pointcollections_json_version"] == "1"
+    collections = list(pointcollections["collections"].values())
+    edge_collection = next(
+        collection
+        for collection in collections
+        if collection["metadata"]["finding_kind"] == "edge-jump"
+    )
+    assert edge_collection["metadata"]["coordinate_space"] == "level0-voxel-xyz"
+    assert len(edge_collection["points"]) == len(edges)
+    assert edge_collection["points"]["1"]["p"] == edges[0]["xyz"]
+    assert edge_collection["points"]["1"]["wind_a"] is None
+
+
+def test_review_queue_limit_can_disable_emitted_sites(tmp_path):
+    result = audit_tifxyz(_write_tifxyz(tmp_path), review_limit_per_kind=0)
+
+    assert result["review_queue"]["candidates"] == []
+    assert result["review_queue"]["emitted_by_kind"] == {
+        "edge-jump": 0,
+        "normal-reversal": 0,
+    }
+    assert review_queue_pointcollections(result)["collections"] == {}
+
+
+def test_review_queue_rejects_negative_limit(tmp_path):
+    surface = _write_tifxyz(tmp_path)
+    with np.testing.assert_raises_regex(ValueError, "review_limit_per_kind"):
+        audit_tifxyz(surface, review_limit_per_kind=-1)
+

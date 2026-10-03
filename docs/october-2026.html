@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>October 2026 goals — ScrolIQ</title>
 <meta name="description" content="ScrolIQ October 2026 goals: turn September's real-data diagnostics into measured, reviewed, and used evidence for the Vesuvius Challenge open problems.">
@@ -124,16 +125,24 @@ as it is done rather than held for month end.</p>
 <div class="chips"><span class="chip crit">real data</span><span class="chip crit">failure cases of existing methods</span><span class="chip state">pre-registered · sample drawn</span></div>
 <p><b>Why.</b> A flag list is only actionable if reviewers can trust it. September found failure candidates on real segments; October must say how many of them are true.</p>
 <p><b>Starting point.</b> 77 of 307 segments flagged with three or more defect kinds; one broken PHerc1447 segment confirmed (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-corpus-mesh-audit">corpus-mesh-audit</a>).</p>
-<p><b>Deliverable.</b> A stratified sample of the flagged segments, reviewed in VC3D and labelled <i>defect / not a defect / unclear</i> by someone who did not see the finding kind, plus a same-size sample of unflagged segments as the negative control. Publish precision and the false-negative rate with intervals.</p>
-<p><b>Done when.</b> Per-segment verdicts, the review protocol and the precision and false-negative rate with 95% intervals are committed, and the flag list on Pages shows measured precision for each finding kind.</p>
-<p><b>Progress.</b> Protocol frozen in <a href="mesh-review-protocol.md"><code>mesh-review-protocol.md</code></a>. Blinded sample of 54 segments (30 flagged, 4 debug controls, 20 clean) drawn in <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-mesh-review-sample"><code>2026-10-01-mesh-review-sample/</code></a>. Awaiting VC3D review; no precision exists yet.</p></div>
+<p><b>Deliverable.</b> The frozen sample of 30 flagged, 4 debugging-control and 20 clean segments, reviewed in VC3D and labelled <i>defect / not a defect / unclear</i> without seeing finding kinds. Publish flag precision and the clean-segment defect rate with intervals.</p>
+<p><b>Done when.</b> Per-segment verdicts, calibration and both rates with 95% intervals are committed. Per-finding-kind rates remain descriptive. <b>Correction, 2026-10-02 UTC:</b> this design does not measure whole-corpus false-negative rate or recall; mixed segments are excluded.</p>
+<p><b>Progress.</b> Protocol frozen in <a href="mesh-review-protocol.md"><code>mesh-review-protocol.md</code></a>. Blinded sample of 54 segments (30 flagged, 4 debug controls, 20 clean) drawn in <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-mesh-review-sample"><code>2026-10-01-mesh-review-sample/</code></a>. A deterministic key-free reviewer packet is available via <code>bin/mesh_review_packet.py</code> with instructions in <a href="mesh-review-handoff.md"><code>mesh-review-handoff.md</code></a>. Awaiting VC3D review; no precision exists yet.</p></div>
 <div class="goal" id="o2"><h3><span class="id">O2</span>Winding IQ: patch attachment and cross-collection consistency</h3>
-<div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: winding annotations</span><span class="chip state">planned</span></div>
+<div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: winding annotations</span><span class="chip state">done · 6 / 16,074 flagged</span></div>
 <p><b>Why.</b> Within-collection ray order is clean on PHercParis4. The next errors to catch are chains of relative-winding links that disagree when they meet through shared patches. That is what the spiral fitter's own debugging tool does after a fit; ScrolIQ should do it before one.</p>
 <p><b>Starting point.</b> 2 / 13,700 comparable pairs inverted, both sub-voxel; injection-control recall 89.5% (±3) and 85.5% (±5); ±2 undetectable by design (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-paris4-winding-ray-order">paris4-winding-ray-order</a>).</p>
 <p><b>Deliverable.</b> Attach annotation points to verified patches, build the winding graph, and report inconsistent cycles with VC3D coordinates. Include the same kind of injection control as the ray-order check, so the error rate it can detect is measured, not assumed.</p>
-<p><b>Done when.</b> A PHercParis4 run with input hashes, a cycle-consistency count, and a measured detection rate for injected inconsistencies.</p></div>
+<p><b>Done when.</b> A PHercParis4 run with input hashes, a cycle-consistency count, and a measured detection rate for injected inconsistencies.</p>
+<p><b>Result.</b> Pre-registered (<a href="winding-attachment-protocol.md"><code>winding-attachment-protocol.md</code></a>) and run on
+all 20,765 candidate patches: 2,111 of 2,232 points attach within 8 voxels, 206 of 254 relative collections are tied to the
+absolute frame, and <b>6 of 16,074</b> constraints disagree by two or more windings (verdict INCONSISTENT, review queue
+with VC3D coordinates). The injection control detects 194 / 200 +2 errors (localizes 160). Spiral sense is decided by the
+data; the branch-cut angle is not (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-03-paris4-winding-attachment"><code>2026-10-03-paris4-winding-attachment/</code></a>).</p></div>
 <div class="goal" id="o3"><h3><span class="id">O3</span>Spiral IQ: score a fit on constraints it never saw</h3>
+<p><b>Implementation update · 2026-10-03 UTC.</b> The <a href="heldout-geometry-evaluation.md">held-out geometry evaluator</a>
+now provides a hash-bound point-comparison interface with declared fit-input exclusion and missing-prediction accounting.
+This is a foundation, not a completed spiral evaluation: native fitter export, spatial-exclusion evidence and a real fit run remain outstanding.</p>
 <div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: spiral fitting</span><span class="chip crit">insightful, actionable</span><span class="chip state">planned</span><span class="chip gate">needs a GPU fit run</span></div>
 <p><b>Why.</b> The fitter reports how well it satisfies the evidence it was given. A held-out score asks the harder question: does the fit predict annotations that were withheld?</p>
 <p><b>Starting point.</b> Spiral IQ is planned only; the held-out geometry split certificate (<code>scrollq-geometry-probe</code>) exists.</p>

@@ -1,0 +1,55 @@
+name: Winding recon (read-only)
+
+# Read-only reconnaissance for October goal O2. Prints its findings to the
+# job log; never commits. Runs on PRs that change the recon script or this
+# file, or by hand.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - bin/winding_recon.py
+      - bin/winding_patch_index.py
+      - .github/workflows/winding-recon.yml
+
+permissions:
+  contents: read
+
+jobs:
+  recon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+          python -m pip install -e .
+      - name: Fetch PHercParis4 spiral-input annotations
+        run: |
+          set -euxo pipefail
+          base="https://dl.ash2txt.org/datasets/spiral_datasets/PHercParis4"
+          mkdir -p input
+          for f in umbilicus.json abs_winding.json relative_windings.json same_windings.json spiral-scroll.json; do
+            curl -fsSL --retry 4 -o "input/$f" "$base/$f" || rm -f "input/$f"
+          done
+          curl -fsSL --retry 4 -o verified_patches.html "$base/verified_patches/" || true
+          sha256sum input/*.json
+          ls -l input verified_patches.html || true
+      - name: Recon
+        run: python bin/winding_recon.py input --patch-listing verified_patches.html
+      - name: Patch bbox index and attachment reach (step 2)
+        run: |
+          python bin/winding_patch_index.py input verified_patches.html \
+            https://dl.ash2txt.org/datasets/spiral_datasets/PHercParis4/verified_patches \
+            patch-index.json --margin 8 --workers 64 --size-sample 300
+      - name: Keep the index for step 3 (Actions artifact, not committed)
+        uses: actions/upload-artifact@v4
+        with:
+          name: paris4-verified-patch-index
+          path: patch-index.json
+          retention-days: 30

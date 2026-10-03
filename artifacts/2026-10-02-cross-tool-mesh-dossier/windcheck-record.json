@@ -1,0 +1,112 @@
+{
+  "schema": "release_index/v1",
+  "source_projection": {
+    "repository": "https://github.com/joe-carr-data/windcheck",
+    "commit": "2b0fb2f3d305d3727dcb24a8eaa73c3c8ce5c3ce",
+    "path": "out/release/index.json",
+    "git_blob_sha": "74d989952b55744a059cbcdeff435beb1cbcbdce",
+    "source_tree_digest": "e85c2f0df3b9a27d43e4ed62d0c324bfd58c524c1bd292b3ca045d6cf84d4abf",
+    "projection_rule": "one segments[\"20260306000001-w051_2026030600\"] record copied without mutation from the pinned release index"
+  },
+  "provenance": {
+    "source_tree_digest": "e85c2f0df3b9a27d43e4ed62d0c324bfd58c524c1bd292b3ca045d6cf84d4abf",
+    "manifest_schema": "windcheck_mesh_manifest/v1",
+    "policy_version": "round28-greedy-first-v1",
+    "policy_hash": "26296e23cb4d08e4"
+  },
+  "segments": {
+    "20260306000001-w051_2026030600": {
+      "segment": "20260306000001-w051_2026030600",
+      "scroll": "PHerc0139",
+      "volume": "20250728140407",
+      "voxel_um": 9.362,
+      "disposition": "transformed",
+      "disposition_recorded": "transformed",
+      "status": "transverse_clean",
+      "not_censusable_reason": null,
+      "not_censusable_evidence": null,
+      "base_kind": "original",
+      "base_kind_declared": "original",
+      "base_kind_verified_from_hashes": "original",
+      "base_kind_agrees": true,
+      "input_mesh": "data/PHerc0139_tifxyz/20260306000001-w051_2026030600/mesh/20260306000001-on-20250728140407-9.362um.tifxyz",
+      "input_hashes": {
+        "x": "dff240d4c984da3223020562a83ee96d34da9f02787b3b2409adc0b3a5d12215",
+        "y": "a73d4c247505e123a9dfe923c6f7fe53ee9ca7ab9ce7bddecb5405f1014c5c6c",
+        "z": "233bc07b57ed6447e19482785905ebdf41031bf979ca859390de79a2f569237e",
+        "mask": null
+      },
+      "original_mesh": "data/PHerc0139_tifxyz/20260306000001-w051_2026030600/mesh/20260306000001-on-20250728140407-9.362um.tifxyz",
+      "original_hashes": {
+        "x": "dff240d4c984da3223020562a83ee96d34da9f02787b3b2409adc0b3a5d12215",
+        "y": "a73d4c247505e123a9dfe923c6f7fe53ee9ca7ab9ce7bddecb5405f1014c5c6c",
+        "z": "233bc07b57ed6447e19482785905ebdf41031bf979ca859390de79a2f569237e",
+        "mask": null
+      },
+      "output_mesh": "out/excised/corpus/20260306000001-w051_2026030600_excised.tifxyz",
+      "output_hashes": {
+        "x": "12172698d00955607170bdddd4042e9a4dc6361f98eabfab157e3c2419f9027e",
+        "y": "0a415194bd0fea5a21e6a41b26d0dd6928538a24b52cf516c92411a344a960ee",
+        "z": "b9b1d44fd7a25941839ad6dd6c185df88a3f8914b140cc66cfdcb3a7c7387bb5"
+      },
+      "output_mesh_bytes": 2366451,
+      "output_mesh_bytes_on_disk": 2375680,
+      "certificate": "out/excised/corpus/20260306000001-w051_2026030600_excision_certificate.json",
+      "certificate_sha256": "894d7e6cda361e01ef026e1290a4a466b6f75dc37489dbe7f5e2205326a766df",
+      "repair_certificate": null,
+      "repair_certificate_sha256": null,
+      "geometry_key": "bb9e7e391bf6d5f7100a510c6b584b6560d05fd4072b8f3d07c22697aad54a9b",
+      "is_canonical": true,
+      "duplicate_of": null,
+      "claimed_clean": true,
+      "retention": {
+        "operational_retained_fraction": 0.9975269266359427,
+        "headline_retained_fraction": 0.9975269266359427,
+        "operational_A_input_canonical": 64413177.3322961,
+        "operational_A_excised_canonical": 159298.5131548061,
+        "headline_A_original_canonical": 64413177.3322961,
+        "headline_A_removed_priced_on_original": 159298.5131548061,
+        "n_removed_quads": 436,
+        "measured": true,
+        "note": null
+      },
+      "fragmentation": {
+        "measured": true,
+        "min_R_main_all_components": 0.997517308607302,
+        "area_weighted_R_main": 0.997517308607302,
+        "min_R_main_core": 0.997517308607302,
+        "core_gate_pass": true,
+        "n_input_components": 1,
+        "n_core_components": 1,
+        "n_core_components_below_gate": 0,
+        "n_input_components_fully_destroyed": 0,
+        "n_components_before": 1,
+        "n_components_after": 3,
+        "note": null
+      },
+      "census": {
+        "input_transverse_total": 3333,
+        "output_transverse_total": 0,
+        "geometry_status": "transverse_clean_certified",
+        "recensus_kind": "output",
+        "recensus_ran": true,
+        "recensus_d0_transverse": 0,
+        "recensus_d1_transverse": 0,
+        "recensus_clean_both_diagonals": true,
+        "recensus_disagrees_with_certificate": false,
+        "output_hashes_reverified": true
+      },
+      "wall_seconds": 90.95,
+      "log": "out/excised/corpus/logs/20260306000001-w051_2026030600.log",
+      "grid_shape": [
+        379,
+        480
+      ],
+      "n_valid_vertices": 164096,
+      "base_manifest_sha256": "20c8b51cc2ac3ef77786fb5c78d9023d6f112442a92805a5b2e0b5a8dc2f4687",
+      "selection_status": "mixed",
+      "policy_version": "round28-greedy-first-v1",
+      "policy_hash": "26296e23cb4d08e4"
+    }
+  }
+}

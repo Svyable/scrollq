@@ -28,7 +28,7 @@ def _one(tool, report, mesh=MESH, check=None):
 def test_windcheck_clean_certificate_is_hash_verified():
     r = _one("windcheck", REP / "windcheck.json")
     assert (r["check"], r["status"], r["binding"]) == (
-        "mesh.self-intersection", "pass", "hash-verified")
+        "mesh.self-intersection", "pass", "coordinate-exact")
     assert r["metrics"]["crossing_sites"] == 0
     assert r["source"]["pinned_commit"].startswith("2b0fb2f3")
     assert len(r["source"]["report_sha256"]) == 64
@@ -42,13 +42,25 @@ def test_report_about_a_different_mesh_version_is_an_error(tmp_path):
     (other / "x.tif").write_bytes(bytes(data))
     for tool in ("windcheck", "scroliq-mesh"):
         r = ingest(tool, REP / f"{tool}.json", mesh_dir=other)[0]
-        assert r["status"] == "error"
+        assert (r["status"], r["binding"]) == ("error", "mismatch")
         assert any("differ" in n for n in r["notes"])
+
+
+def test_meta_json_change_breaks_semantic_but_not_coordinate_identity(tmp_path):
+    other = tmp_path / "elig" / "meshes" / "PHerc0800" / "z14672_w020"
+    shutil.copytree(MESH, other)
+    meta = json.loads((other / "meta.json").read_text())
+    meta["area"] = meta["area_vx2"]  # the fix tifxyz-doctor asks for
+    (other / "meta.json").write_text(json.dumps(meta))
+    # scroliq-mesh recorded the old meta.json: its claim no longer holds.
+    assert ingest("scroliq-mesh", REP / "scroliq-mesh.json", mesh_dir=other)[0]["binding"] == "mismatch"
+    # windcheck never hashed meta.json, so its coordinate claim still does.
+    assert ingest("windcheck", REP / "windcheck.json", mesh_dir=other)[0]["binding"] == "coordinate-exact"
 
 
 def test_flatcheck_real_mesh_fails_the_bar_without_folds():
     r = _one("flatcheck", REP / "flatcheck.json")
-    assert (r["status"], r["binding"], r["verdict_source"]) == ("fail", "path-declared", "tool")
+    assert (r["status"], r["binding"], r["verdict_source"]) == ("fail", "path-grid", "tool")
     assert r["metrics"]["pct_quads_within_5pct"] == pytest.approx(67.81, abs=0.01)
     assert r["metrics"]["bar_pct"] == 93.1
     assert r["metrics"]["fold_overs"] == 0 and r["metrics"]["collapsed"] is False
@@ -64,12 +76,12 @@ def test_tifxyz_doctor_contract_warning_and_review_cues_are_cautions():
 
 def test_tifxyz_repair_info_is_a_pass():
     r = _one("tifxyz-repair", REP / "tifxyz-repair.json")
-    assert (r["status"], r["binding"]) == ("pass", "path-declared")
+    assert (r["status"], r["binding"]) == ("pass", "path-only")
 
 
 def test_scroliq_mesh_partial_is_caution_and_hash_verified():
     r = _one("scroliq-mesh", REP / "scroliq-mesh.json")
-    assert (r["status"], r["binding"]) == ("caution", "hash-verified")
+    assert (r["status"], r["binding"]) == ("caution", "semantic-exact")
     assert r["metrics"] == {"errors": 0, "warnings": 1}
 
 
@@ -107,5 +119,5 @@ def test_unknown_tool_and_missing_report_are_errors(tmp_path):
 
 def test_mesh_hashes_cover_coordinate_files():
     h = mesh_hashes(MESH)
-    assert set(h) == {"x.tif", "y.tif", "z.tif"}
+    assert set(h) == {"x.tif", "y.tif", "z.tif", "meta.json"}
     assert h["x.tif"].startswith("5e83506b1a85b159")

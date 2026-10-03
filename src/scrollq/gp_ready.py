@@ -34,7 +34,7 @@ DOSSIER_SCHEMA = "scroliq-gp-dossier/1"
 # required anyway, so a dossier cannot look ready while they are unmeasured.
 DEFAULT_POLICY: dict[str, Any] = {
     "policy_id": "scroliq-default-2026-10-02",
-    "min_binding": "path-declared",
+    "min_binding": "path-only",
     "column_checks": [
         "mesh.tifxyz-contract",
         "mesh.scroliq-audit",

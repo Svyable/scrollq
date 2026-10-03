@@ -8,7 +8,21 @@ ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](h
 
 > The existing 0–100 ScrolIQ score is a **scan-health triage signal, not a readability or Grand Prize readiness score**. ScrolIQ treats unmeasured downstream stages as unknown rather than inferring them from CT quality.
 
+## What ScrolIQ adds
+
+ScrolIQ does **not** replace the community's geometry, winding, scan-quality, data-integrity, or ink-validation tools. Its strongest claim is the layer between them: **make their evidence composable and submission-grade**. Every result should be bound to the exact CT / mesh / model / evaluation region it measures; cross-volume or stale evidence is excluded; leakage and missing evidence fail closed; and a failed control remains a published failure instead of silently becoming confidence.
+
+That distinction matters because the public ecosystem already contains strong prior art such as [TIFXYZ Doctor](https://github.com/aviad12g/tifxyz-doctor), [tifxyz-repair](https://github.com/Nieuwlaar/tifxyz-repair), [windcheck](https://github.com/joe-carr-data/windcheck), [spiralcheck](https://github.com/Nicodol/spiralcheck), [scroll-data-audit](https://github.com/Bullo27/scroll-data-audit), and [gp13-ink-detectability](https://github.com/flummoxjr/gp13-ink-detectability). ScrolIQ's differentiation is the **provenance/falsification contract across those stages**, plus derived campaigns that measure where the contract holds and where it fails.
+
+The next milestone is therefore intentionally narrow: **one exact 2027 Grand Prize volume, one held-out surface/fit/ink improvement, one evidence passport that makes the result independently checkable.** See the [Grand Prize proof campaign](docs/grand-prize-proof-campaign.md).
+
+
 ## Diagnostic passport
+
+**Held-out geometry evaluation:** `scroliq-geometry-validate` compares a frozen
+point set with fit predictions, checks declared fit-input exclusion, and keeps
+missing predictions in the denominator. See the [O3 evaluator guide](docs/heldout-geometry-evaluation.md).
+Native spiral-fit export and real-fit validation remain outstanding.
 
 The first ScrolIQ interface organizes the evidence for one volume around the Challenge's actual pipeline bottlenecks:
 
@@ -56,6 +70,50 @@ scroliq-passport \
 The passport rejects a spatial artifact whose volume root does not exactly match the selected volume.
 
 
+## CT sheetness baseline
+
+`scroliq-sheetness` is a deterministic, dependency-light multiscale Hessian
+plate detector for bounded 3-D CT cutouts. It adapts the M=2-in-N=3 objectness
+idea used in medical imaging to measure local sheet-like evidence without
+training data:
+
+```bash
+scroliq-sheetness cutout.npy \
+  --out-prefix out/pherc-cutout \
+  --sigmas 0.8,1.2,1.8 \
+  --write-normal
+```
+
+The command emits hash-pinned response/scale arrays and, optionally, the local
+Hessian normal. A high response is **not** a sheet-identity, winding, recto,
+ink, or readability verdict. The exact mathematical contract, ITK attribution,
+synthetic controls, memory guard, and predeclared real-data falsification plan
+are in [`docs/sheetness.md`](docs/sheetness.md).
+
+## Seismic-style horizon path baseline
+
+`scroliq-horizon-path` tests whether sparse anchors plus a globally constrained
+path can follow one layer through a 2-D score field, including local evidence
+gaps:
+
+```bash
+scroliq-horizon-path sheetness-slice.npy \
+  --out-prefix out/slice-042 \
+  --max-step 2 \
+  --smoothness 0.20 \
+  --anchor 0:137 --anchor 220:141 --anchor 511:128
+```
+
+The implementation is independent NumPy code inspired by seismic-horizon
+tracking: hard anchors, bounded adjacent motion, and a smoothness penalty are
+solved by deterministic dynamic programming. It emits a hash-pinned CSV/JSON
+path and explicitly remains **2-D evidence only**, not a 3-D surface or winding
+verdict. See [`docs/horizon-path.md`](docs/horizon-path.md) for the adjacent-field
+references and falsification tests. `scroliq-horizon-validate` freezes the
+exact-volume source attestation, score/truth hashes, anchors, tracker parameters,
+anchor-exclusion radius, tolerance and success threshold before a measured run;
+see [`docs/horizon-validation.md`](docs/horizon-validation.md).
+
 ## Winding annotation audit
 
 `scroliq-winding` audits the conventional VC3D / spiral-fitting point-collection inputs before they are trusted as geometry evidence:
@@ -91,7 +149,30 @@ The report's `ray_order` section records the umbilicus and input SHA-256s, every
 
 The ±2 row is a **limit of the design, not a tuning miss**: with the minimum compared gap of 2, a shifted point can only invert against a neighbour whose true winding lies strictly between its old and new label, which needs |s| ≥ 3 (`tests/test_ray_order_control.py` pins this). At ±3 the corrupted point and its one inverted partner are often indistinguishable, hence the lower rank-1 share. Absolute points are only 5 of each 200-point sample, too few for a role-specific figure. The ranking was not tuned on this control.
 
-What it does not establish: patch attachment, CT support, relative-winding graph holonomy across collections, ±1/±2 errors, or held-out spiral-fit accuracy. Those remain the next Winding IQ / Spiral IQ layers.
+What it does not establish: CT support, ±1 errors, or held-out spiral-fit accuracy. Patch attachment and cross-collection consistency are the next layer, below.
+
+### Cross-collection consistency through verified patches
+
+[`bin/winding_attach.py`](bin/winding_attach.py), pre-registered in [`docs/winding-attachment-protocol.md`](docs/winding-attachment-protocol.md), works in four steps:
+
+1. It attaches each absolute or relative point to the verified patch surfaces within 8 voxels.
+2. It unwraps each patch around the umbilicus.
+3. It turns every attachment into an integer constraint between a patch and a collection offset.
+4. It flags constraints that disagree by two or more windings.
+
+A +2 injection control must catch at least 90% of the errors it injects; below that the result is `UNVERIFIED`.
+
+**First run, on PHercParis4** ([`artifacts/2026-10-03-paris4-winding-attachment/`](artifacts/2026-10-03-paris4-winding-attachment/)):
+
+- All 20,765 candidate patches were read.
+- **2,111 of 2,232** points attached.
+- **206 of 254** relative collections are tied to the absolute frame.
+- There are 6,165 independent cycles.
+- **6 of 16,074** constraints are flagged, so the verdict is INCONSISTENT. The flagged points are listed with VC3D coordinates.
+- The control detected **194 / 200** injected errors.
+- The spiral sense is decided by the data (524 against 2,120 nonzero residuals). The branch-cut angle is not well identified.
+
+Flags are review cues: a patch traced onto a neighbouring winding gives the same signal as a mis-numbered annotation.
 
 ## Fiber IQ: native VC3D + trace continuity audit
 
@@ -149,13 +230,51 @@ scroliq-mesh \
   --tifxyz /path/to/surface.tifxyz \
   --volume-root community-uploads/forrest/volcomp/PHerc0813/volumes/<volume>.zarr \
   --selfcross-report out/PHerc0813.selfcross.json \
+  --review-points out/PHerc0813.review-points.json \
   --out out/PHerc0813.mesh-audit.json
 
 # Optional CI gate: review findings become a non-zero exit.
 scroliq-mesh --tifxyz /path/to/surface.tifxyz --out out/PHerc0813.mesh-audit.json --fail-on-findings
 ```
 
-The audit follows the upstream TIFXYZ contract: `x.tif`, `y.tif`, `z.tif`, `meta.json`, reciprocal `scale`, the `Z <= 0` validity convention, and integer-multiple `mask.tif` semantics. It records exact file hashes and checks malformed/empty grids, disconnected valid-vertex components, enclosed invalid-grid components, stale metadata bounding boxes, scale-versus-measured spacing, abrupt local edge jumps, severe neighboring-normal reversals, symmetric quad-area distortion, and per-triangle Jacobian singular values for true local isometry. The singular-value check catches area-preserving anisotropic stretch/compression that an area-only metric cannot see.
+The audit follows the upstream TIFXYZ contract: `x.tif`, `y.tif`, `z.tif`, `meta.json`, reciprocal `scale`, the `Z <= 0` validity convention, and integer-multiple `mask.tif` semantics. It records exact file hashes and checks malformed/empty grids, disconnected valid-vertex components, enclosed invalid-grid components, stale metadata bounding boxes, scale-versus-measured spacing, abrupt local edge jumps, severe neighboring-normal reversals, symmetric quad-area distortion, and per-triangle Jacobian singular values for local isometry. **Isometry is normalized by the observed median 3D step in each parameter direction by default; `meta.scale` is not assumed to be a physical edge-length contract.** When a physical spacing contract is known, pass both `--expected-spacing-x` and `--expected-spacing-y`; this makes absolute anisotropic stretch/compression detectable instead of normalizing it away.
+
+
+
+The calibration is independently regression-tested against TIFXYZ Doctor's pinned public real-data benchmark. On the exact same **1,818,055 SHA-256-verified bytes**, the frozen 2026-10-02 campaign agrees **10/10 on enclosed-hole presence** and **10/10 on single-component presence**, including **7/7** hole-presence agreement on the PHerc0800 + PHerc1447 Grand Prize overlap. The first run exposed the old `meta.scale` isometry false positive; after the fix, all 10 Doctor-below-threshold cases have no Mesh IQ isometry finding, and the Villa-control p95 stretch values nearly coincide. See [the same-byte cross-validation artifact](artifacts/2026-10-02-doctor-same-byte/). Benchmark roles are provenance labels, not geometry ground truth.
+
+### Binding external mesh evidence without laundering provenance
+
+`scroliq-evidence-bind` composes third-party mesh evidence with a ScrolIQ
+TIFXYZ audit only after checking identity:
+
+```bash
+scroliq-evidence-bind \
+  --mesh-audit mesh-audit.json \
+  --windcheck-index windcheck-index.json \
+  --segment <segment-id> \
+  --scroll <scroll-id> \
+  --volume-id <exact-volume-id> \
+  --windcheck-commit <pinned-commit> \
+  --out external-mesh-dossier.json
+```
+
+The binding class is explicit. Full x/y/z + mask SHA-256 agreement without an
+external `meta.json` hash is **coordinate-exact**, not semantic-exact.
+Cross-volume evidence, content-hash mismatches, and unsupported external
+schemas are excluded. If Windcheck's census was run on a repaired base, the
+dossier may bind the published original through `original_hashes`, but the
+derived-base census is not imported as a measurement of that original.
+
+The frozen [PHerc0139 cross-tool dossier](artifacts/2026-10-02-cross-tool-mesh-dossier/)
+demonstrates the useful case: ScrolIQ and Windcheck independently bind the same
+published coordinate bytes for segment `20260306000001-w051_2026030600`.
+Mesh IQ reports 15 edge jumps and 173 severe neighbouring-normal reversals;
+Windcheck's same-original census reports 3,333 transverse contacts. The
+passport accepts this as content-bound external evidence while still asking for
+the official VC3D self-cross validator before downstream use.
+
+For local review, `--review-points` emits native VC3D PointCollections with the strongest edge-jump and neighbouring-normal-reversal sites ranked in the audit JSON. The frozen [PHerc0139 review-queue campaign](artifacts/2026-10-03-pherc0139-review-queue/) produces 35 directly loadable points (15/15 edge jumps plus the top 20/173 normal reversals) on the same public surface used by the binding-aware Windcheck dossier. These coordinates are inspection targets, not defect verdicts.
 
 For nonlocal self-intersections, ScrolIQ does not duplicate VC3D's geometry kernel. Generate a deterministic upstream report with `vc_tifxyz_selfcross <surface.tifxyz> -o report.json --collection sites.json` and pass it with `--selfcross-report`. ScrolIQ validates the report against the exact local surface path and grid, blocks on transverse contacts, preserves coplanar/grazing contacts as non-crossings, and keeps a nominally clean census partial when upstream skipped long-edge quads under `maxedge`. The optional `sites.json` remains directly loadable in VC3D for inspection.
 
@@ -242,6 +361,7 @@ The repository includes the exact outputs behind the September 30, 2026 campaign
 | Scan metrics vs documented protocol quality (pre-registered) | **Negative**: `otsu_eta` reverses in 3/4 registered pairs, `edge_sharpness` in 2/4 — do not compare scores across scans of one scroll — [`protocol-pairs/`](artifacts/2026-10-01-protocol-pairs/) |
 | Hand-entered prize manifests match official sources | Grand Prize **13 / 13**, First Letters **22 / 22** — [`prize-targets/`](artifacts/2026-10-01-prize-targets/), `tests/test_prize_manifest.py` |
 | Published PHercParis4 winding annotations are radially consistent | **2 / 13,700** comparable pairs inverted around the umbilicus, both sub-voxel; injection control catches **179 / 200** ±3 and **171 / 200** ±5 single-point mis-numberings (±2 undetectable by design) — [`paris4-winding-ray-order/`](artifacts/2026-10-01-paris4-winding-ray-order/) |
+| PHercParis4 winding annotations agree across collections through verified patches | **6 / 16,074** patch-collection constraints off by ≥ 2 windings; 206 / 254 relative collections tied to the absolute frame; injection control detects **194 / 200** +2 errors — [`paris4-winding-attachment/`](artifacts/2026-10-03-paris4-winding-attachment/) |
 | Fiber IQ runs on public VC3D fibers | **8** SHA-256-pinned PHercParis4 fibers (53,828 points): **11** gap and **26** sharp-turn review candidates, **0** control-line offsets / order inversions; subset, not passport evidence — [`public-fiber-audit/`](artifacts/2026-10-01-public-fiber-audit/) |
 | `scrollq-health` fails closed on missing integrity evidence | A non-existent root is **DO NOT TRAIN** (integrity UNKNOWN); the three published live verdicts are unchanged — [`health-verdicts-fail-closed/`](artifacts/2026-10-01-health-verdicts-fail-closed/) |
 
@@ -530,7 +650,7 @@ See [the example coverage manifest](examples/grand-prize-recto-coverage.example.
 
 ## 2027 Grand Prize provenance gate
 
-`scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. Schema v4 pins the exact eligible CT volume and zarr-pyramid-audit run, validates the nested full-recto coverage ledger, and then links each declared coverage component → numbered tifxyz mesh → render → checkpoint → training datasets/regions → stochastic seeds → public training/inference experiment runs → public held-out validation against known ground truth, now (v4) bound to the exact `scroliq-ink-validate` report, checkpoint digest, evaluated-array digest and named falsification controls.
+`scroliq-provenance` turns submission eligibility evidence into a machine-checkable graph instead of a last-minute manual checklist. Schema v6 additionally binds each final column image to a hash-pinned `scroliq-submission-image` physical-scale proof and binds the numbered full-scroll banner to the exact frozen render set. It retains v5's exact eligible-CT/ZPA source attestation and model physical-input contract, the nested full-recto coverage ledger, deterministic ink evidence, training/prediction exclusion, stochastic seeds, public experiment runs, and public held-out validation.
 
 ```bash
 scroliq-provenance \
@@ -540,9 +660,50 @@ scroliq-provenance \
   --out submission/provenance.validation.json
 ```
 
-The gate fails closed on wrong-volume lineage, a failing/mismatched recto ledger, coverage mesh IDs that differ from the submitted mesh set, training/prediction overlap, non-public or incorrectly licensed training data, prohibited higher-resolution same-scroll training sources, missing stochastic seeds or experiment runs, missing public held-out validation, same-volume training/validation overlap, broken mesh/render column traceability, package SHA mismatches, missing 1 cm scale-bar declarations, and incomplete banner coverage. It also records a canonical graph SHA-256, emits a complete provenance chain for every submitted render, and records held-out exclusion proofs. It deliberately does not set a performance threshold or claim papyrological legibility.
+The gate fails closed on wrong-volume lineage, missing/tampered/invalid ZPA evidence, non-PASS source integrity, source-attestation mismatches, model/source voxel or axis mismatches, undeclared resampling/preprocessing, a failing/mismatched recto ledger, coverage mesh IDs that differ from the submitted mesh set, training/prediction overlap, non-public or incorrectly licensed training data, prohibited higher-resolution same-scroll training sources, missing stochastic seeds or experiment runs, missing public held-out validation, same-volume training/validation overlap, broken mesh/render column traceability, package SHA mismatches, missing or physically inconsistent 1 cm scale-bar proofs, banner proofs that do not bind the exact frozen render set, and incomplete banner coverage. With `--root-dir`, unpacked TIFXYZ meshes must also carry VC3D `meta.json` target context identifying the exact eligible volume; the validation report records that evidence in `mesh_context_proofs`. It also records a canonical graph SHA-256, emits a complete provenance chain for every submitted render, and records held-out exclusion proofs. It deliberately does not set a performance threshold or claim papyrological legibility.
 
 See [the provenance-manifest specification](docs/grand-prize-provenance.md) and [example manifest](examples/grand-prize-provenance.example.json).
+For unpacked VC3D surfaces, `scroliq-hash column_01.tifxyz` computes the canonical tree SHA-256 used by the provenance gate, so the complete directory-format mesh is cryptographically bound without repacking it.
+
+### 2027 Grand Prize legibility ledger
+
+`scroliq-legibility` audits explicit letter-by-letter reviewer evidence against
+the exact submitted render and TIFXYZ hashes. Counted preserved characters
+require pixel bounds; characters counted as legible additionally require one
+visible-character reading and `interpolated: false`. Uncertain preserved
+characters stay in the denominator, the 70% threshold is applied per counted
+column, and a column omitted from counting requires a documented
+Challenge-acknowledged exclusion.
+
+```bash
+scroliq-legibility \
+  --manifest submission/provenance.json \
+  --ledger submission/legibility.json \
+  --out submission/legibility-report.json
+```
+
+A pass means the supplied ledger is internally consistent and reaches the
+recorded arithmetic threshold. It is not OCR and does not independently certify
+papyrological correctness. See the [legibility evidence contract](docs/grand-prize-legibility.md)
+and [example ledger](examples/grand-prize-legibility.example.json).
+
+### 2027 Grand Prize submission images
+
+`scroliq-submission-image` turns final VC3D renders into the exact reviewer-facing image forms required by the prize. The `column` command derives the 1 cm scale-bar length from the eligible CT voxel size plus the same pyramid level and `--scale` parameters used by `vc_render_tifxyz`, appends the bar in a footer without touching papyrus pixels, and writes a SHA-pinned scale proof. The `banner` command assembles the frozen column images in numeric order and overlays every column number, rejecting gaps or duplicates. See [the submission-image contract](docs/grand-prize-images.md).
+
+### Deterministic Grand Prize reviewer package
+
+`scroliq-package` is the final fail-closed boundary. It will not build the
+reviewer ZIP unless the exact provenance manifest passes, mesh/render columns
+are contiguous, the human-input ledger reconciles at no more than eight hours,
+reviewer methodology/system/VC3D/false-positive materials are present, the
+Docker command uses the exact digest-pinned image, and the letter-by-letter
+legibility ledger passes every counted column at 70% or above.
+
+The builder generates provenance and legibility validation reports itself,
+SHA-256 indexes every archived member, writes a deterministic ZIP and sidecar
+digest, then immediately reopens and verifies the archive before returning
+PASS. See [the package contract](docs/grand-prize-package.md).
 
 ## First Letters target qualification
 

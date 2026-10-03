@@ -1,5 +1,5 @@
 {
-  "schema_version": 4,
+  "schema_version": 6,
   "rules": {
     "url": "https://scrollprize.org/prizes",
     "as_of": "2026-09-30"
@@ -22,8 +22,20 @@
     "uri": "s3://vesuvius-challenge-open-data/PHerc0813/volumes/20250821151723.zarr",
     "zarr_audit": {
       "tool": "zarr-pyramid-audit",
-      "manifest_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-      "root": "s3://vesuvius-challenge-open-data/PHerc0813/volumes/20250821151723.zarr"
+      "path": "evidence/zpa-report.json",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "root": "PHerc0813/volumes/20250821151723.zarr",
+      "integrity": "PASS",
+      "source_attestation": {
+        "algorithm": "zpa-metadata-semantics-v1",
+        "state": "PRESENT",
+        "metadata_semantics_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+        "axes": [
+          "z",
+          "y",
+          "x"
+        ]
+      }
     }
   },
   "region_sets": [
@@ -125,6 +137,25 @@
       "inference_run": {
         "url": "https://wandb.ai/OWNER/PROJECT/runs/INFER",
         "public": true
+      },
+      "input_contract": {
+        "axes": [
+          "z",
+          "y",
+          "x"
+        ],
+        "source_voxel_size_um": 9.362,
+        "model_voxel_size_um": 9.362,
+        "resampling": "none",
+        "window_voxels_zyx": [
+          17,
+          64,
+          64
+        ],
+        "preprocessing_profile": {
+          "public_url": "https://example.org/models/ink-v1/preprocessing.json",
+          "sha256": "6666666666666666666666666666666666666666666666666666666666666666"
+        }
       }
     }
   ],
@@ -160,6 +191,16 @@
       "generated_by": {
         "command": "python -m pipeline.render --column 1",
         "code_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "scale_proof": {
+        "tool": "scroliq-submission-image",
+        "path": "evidence/column_01.scale.json",
+        "sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+        "base_voxel_size_um": 9.362,
+        "group_idx": 0,
+        "render_scale": 1,
+        "micrometers_per_output_pixel": 9.362,
+        "scale_bar_pixels": 1068
       }
     }
   ],
@@ -169,7 +210,12 @@
     "render_ids": [
       "render:column-01"
     ],
-    "column_numbers_overlaid": true
+    "column_numbers_overlaid": true,
+    "proof": {
+      "tool": "scroliq-submission-image",
+      "path": "evidence/banner.json",
+      "sha256": "8888888888888888888888888888888888888888888888888888888888888888"
+    }
   },
   "held_out_validations": [
     {

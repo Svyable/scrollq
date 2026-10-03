@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "diagnostic": "external-mesh-evidence-dossier",
+  "surface": {
+    "scroll": "PHerc0139",
+    "segment": "20260306000001-w051_2026030600",
+    "volume_id": "20250728140407",
+    "volume_root": "community-uploads/forrest/volcomp/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "tifxyz_path": "out/corpus-s3/PHerc0139/segments/20260306000001-w051_2026030600/mesh/20260306000001-on-20250728140407-9.362um.tifxyz",
+    "local_mesh_audit_status": "partial",
+    "local_mesh_provenance": {
+      "meta.json": {
+        "sha256": "c0f12d62261968b901df9aa672a65f70133ccf1339dda9ad0cb0cc3b3a158163",
+        "bytes": 419
+      },
+      "x.tif": {
+        "sha256": "dff240d4c984da3223020562a83ee96d34da9f02787b3b2409adc0b3a5d12215",
+        "bytes": 727814
+      },
+      "y.tif": {
+        "sha256": "a73d4c247505e123a9dfe923c6f7fe53ee9ca7ab9ce7bddecb5405f1014c5c6c",
+        "bytes": 727814
+      },
+      "z.tif": {
+        "sha256": "233bc07b57ed6447e19482785905ebdf41031bf979ca859390de79a2f569237e",
+        "bytes": 727814
+      }
+    },
+    "local_mesh_findings": [
+      {
+        "kind": "edge-jump",
+        "severity": "review",
+        "message": "15 edges exceed 4x axis-median spacing"
+      },
+      {
+        "kind": "normal-reversal",
+        "severity": "review",
+        "message": "173 severe neighboring-normal reversals"
+      }
+    ]
+  },
+  "external_source": {
+    "tool": "windcheck",
+    "repository": "https://github.com/joe-carr-data/windcheck",
+    "commit": "2b0fb2f3d305d3727dcb24a8eaa73c3c8ce5c3ce",
+    "release_schema": "release_index/v1",
+    "source_sha256": "119219a67aa8baed4c6eec6b6941ceb86178c4767b2568d416fc16e88ed1a41b"
+  },
+  "status": "bound",
+  "binding": {
+    "level": "coordinate-exact",
+    "coordinates_match": true,
+    "mask_match": true,
+    "metadata_match": null,
+    "reason": "x/y/z and mask semantics match by full SHA-256; external source does not expose meta.json identity",
+    "grid_shape_match": true,
+    "valid_vertex_count_match": true,
+    "external_hash_subject": "input_hashes",
+    "measurement_subject": "same-published-original"
+  },
+  "external_record": {
+    "segment": "20260306000001-w051_2026030600",
+    "scroll": "PHerc0139",
+    "volume": "20250728140407",
+    "voxel_um": 9.362,
+    "base_kind": "original",
+    "input_hashes": {
+      "x": "dff240d4c984da3223020562a83ee96d34da9f02787b3b2409adc0b3a5d12215",
+      "y": "a73d4c247505e123a9dfe923c6f7fe53ee9ca7ab9ce7bddecb5405f1014c5c6c",
+      "z": "233bc07b57ed6447e19482785905ebdf41031bf979ca859390de79a2f569237e",
+      "mask": null
+    },
+    "original_hashes": {
+      "x": "dff240d4c984da3223020562a83ee96d34da9f02787b3b2409adc0b3a5d12215",
+      "y": "a73d4c247505e123a9dfe923c6f7fe53ee9ca7ab9ce7bddecb5405f1014c5c6c",
+      "z": "233bc07b57ed6447e19482785905ebdf41031bf979ca859390de79a2f569237e",
+      "mask": null
+    },
+    "grid_shape": [
+      379,
+      480
+    ],
+    "n_valid_vertices": 164096,
+    "status": "transverse_clean"
+  },
+  "external_measurement": {
+    "status": "included",
+    "subject": "same-published-original",
+    "input_transverse_total": 3333,
+    "geometry_status_after_transaction": "transverse_clean_certified",
+    "output_transverse_total": 0,
+    "recensus_clean_both_diagonals": true,
+    "disposition": "transformed",
+    "retention": {
+      "operational_retained_fraction": 0.9975269266359427,
+      "headline_retained_fraction": 0.9975269266359427,
+      "operational_A_input_canonical": 64413177.3322961,
+      "operational_A_excised_canonical": 159298.5131548061,
+      "headline_A_original_canonical": 64413177.3322961,
+      "headline_A_removed_priced_on_original": 159298.5131548061,
+      "n_removed_quads": 436,
+      "measured": true,
+      "note": null
+    },
+    "fragmentation": {
+      "measured": true,
+      "min_R_main_all_components": 0.997517308607302,
+      "area_weighted_R_main": 0.997517308607302,
+      "min_R_main_core": 0.997517308607302,
+      "core_gate_pass": true,
+      "n_input_components": 1,
+      "n_core_components": 1,
+      "n_core_components_below_gate": 0,
+      "n_input_components_fully_destroyed": 0,
+      "n_components_before": 1,
+      "n_components_after": 3,
+      "note": null
+    },
+    "certificate": "out/excised/corpus/20260306000001-w051_2026030600_excision_certificate.json",
+    "certificate_sha256": "894d7e6cda361e01ef026e1290a4a466b6f75dc37489dbe7f5e2205326a766df",
+    "policy_version": "round28-greedy-first-v1",
+    "policy_hash": "26296e23cb4d08e4"
+  },
+  "claims": {
+    "local_mesh_geometry": {
+      "status": "measured",
+      "source": "ScrolIQ Mesh IQ",
+      "findings": [
+        {
+          "kind": "edge-jump",
+          "severity": "review",
+          "message": "15 edges exceed 4x axis-median spacing"
+        },
+        {
+          "kind": "normal-reversal",
+          "severity": "review",
+          "message": "173 severe neighboring-normal reversals"
+        }
+      ]
+    },
+    "nonlocal_transverse_self_intersection": {
+      "status": "measured",
+      "source": "Windcheck release index",
+      "input_transverse_total": 3333
+    }
+  },
+  "limitations": [
+    "Binding is coordinate-exact rather than semantic-exact because the Windcheck release-index projection exposes full x/y/z/mask hashes but not the original meta.json hash.",
+    "Windcheck transverse-contact evidence and Mesh IQ local findings measure different geometry properties; neither proves physical sheet identity.",
+    "A Windcheck transformation/reference is not substituted for the local published surface; transformed-output evidence remains separately identified."
+  ],
+  "inputs": {
+    "mesh_audit_path": "artifacts/2026-10-01-corpus-mesh-audit/reports/PHerc0139.20260306000001-w051_2026030600.20260306000001-on-20250728140407-9.362um.json",
+    "mesh_audit_sha256": "9279abb6dde50285075bc4d2d01b28c74ee6909043d1d0c36adfdb52788a2c9c",
+    "windcheck_projection_path": "artifacts/2026-10-02-cross-tool-mesh-dossier/windcheck-record.json",
+    "windcheck_projection_sha256": "119219a67aa8baed4c6eec6b6941ceb86178c4767b2568d416fc16e88ed1a41b",
+    "windcheck_release_index_git_blob": "74d989952b55744a059cbcdeff435beb1cbcbdce"
+  },
+  "source_projection": {
+    "repository": "https://github.com/joe-carr-data/windcheck",
+    "commit": "2b0fb2f3d305d3727dcb24a8eaa73c3c8ce5c3ce",
+    "path": "out/release/index.json",
+    "git_blob_sha": "74d989952b55744a059cbcdeff435beb1cbcbdce",
+    "source_tree_digest": "e85c2f0df3b9a27d43e4ed62d0c324bfd58c524c1bd292b3ca045d6cf84d4abf",
+    "projection_rule": "one segments[\"20260306000001-w051_2026030600\"] record copied without mutation from the pinned release index"
+  }
+}

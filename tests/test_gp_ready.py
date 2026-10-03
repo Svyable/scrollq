@@ -67,7 +67,7 @@ def test_measured_needs_a_declared_threshold():
 
 
 def test_stricter_binding_policy_rejects_path_only_evidence():
-    policy = {**DEFAULT_POLICY, "min_binding": "hash-verified",
+    policy = {**DEFAULT_POLICY, "min_binding": "coordinate-exact",
               "column_checks": ["mesh.self-intersection", "mesh.tifxyz-contract"],
               "submission_checks": []}
     ev = [{"tool": "windcheck", "report": "reports/windcheck.json"},

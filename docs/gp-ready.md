@@ -9,6 +9,11 @@ are that the report is about that artifact.
 
 It complements, and does not replace:
 
+- `scroliq-evidence-bind`: binds windcheck's published release index to a
+  `scroliq-mesh` audit; `gp-ready` uses the same binding classes for six tools'
+  per-mesh reports;
+- `scroliq-package`: builds and verifies the final deterministic archive and
+  reviewer contract; a ready dossier is meant to be checked before packaging;
 - `scroliq-provenance`: the fail-closed submission-graph gate (schema v4);
 - `scroliq-passport`: per-volume evidence by Challenge stage;
 - `docs/grand-prize-readiness.html`: the reviewer-facing requirement map.
@@ -27,7 +32,7 @@ records (`schema: scroliq-evidence/1`):
   "source": {"tool": "windcheck", "tool_version": "0.1.0",
              "pinned_commit": "2b0fb2f3…", "report_path": "…",
              "report_sha256": "…"},
-  "binding": "hash-verified",
+  "binding": "coordinate-exact",
   "status": "pass",
   "verdict_source": "tool",
   "metrics": {"crossing_sites": 0}
@@ -50,14 +55,22 @@ weights.
 
 ### Binding
 
+Binding classes are the ones `scroliq-evidence-bind`
+(`scrollq.external_mesh_evidence`) already uses, and hash comparison reuses
+its implementation, so both commands give the same answer for the same
+hashes. Strongest first:
+
 | binding | meaning |
 |---|---|
-| `hash-verified` | the report records content hashes of the mesh files and they equal the files being audited |
-| `path-declared` | the report names the mesh by path and the path resolves to the audited mesh, but nothing proves the report was produced from the current file contents |
+| `semantic-exact` | recorded x/y/z, mask and meta.json hashes all equal the audited files |
+| `coordinate-exact` | recorded x/y/z and mask hashes equal the audited files; no meta.json hash |
+| `path-grid` | no hashes; the report's path resolves to the audited mesh and its grid shape matches |
+| `path-only` | no hashes; only the path matches |
 | `unbound` | the report does not say which mesh it describes |
+| `mismatch` | recorded hashes contradict the audited files |
 
-A report whose recorded hashes **differ** from the audited files is `error`,
-never `path-declared`: it describes some other version of the mesh.
+A `mismatch` record is always `error`: it describes some other version of the
+mesh.
 
 ### Pinned tools
 
@@ -74,7 +87,7 @@ submission can supply its own JSON, which is recorded (with its SHA-256) in
 the dossier.
 
 `min_binding` sets the weakest binding that can count as `pass`. The default
-is `path-declared`, because most community tools identify meshes only by path;
+is `path-only`, because most community tools identify meshes only by path;
 weaker-than-hash bindings are still listed on every passing row so a reviewer
 can see them.
 

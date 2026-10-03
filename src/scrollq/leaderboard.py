@@ -18,9 +18,10 @@ REPO = "https://github.com/Svyable/scrollq"
 
 PAGE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ScrolIQ — Diagnostics for reading Herculaneum scrolls</title>
-<meta name="description" content="Challenge-aligned diagnostics for Vesuvius scrolls: scan health, TIFXYZ/OBJ mesh QA, native VC3D fiber auditing, label quality, ink reliability, held-out validation, and reproducibility.">
+<meta name="description" content="Provenance-first evidence for Vesuvius pipelines: bind scan, mesh, winding, fiber, model and held-out validation to the exact artifacts they measure.">
 <meta name="theme-color" content="#0d0b08">
 <meta name="color-scheme" content="dark">
 <link rel="canonical" href="https://svyable.github.io/scrollq/">
@@ -28,6 +29,10 @@ PAGE = """<!doctype html>
 <meta property="og:title" content="ScrolIQ — Evidence for reading Herculaneum scrolls">
 <meta property="og:description" content="Reproducible scan diagnostics, exact-volume Grand Prize qualification, held-out geometry, and ink falsification controls.">
 <meta property="og:url" content="https://svyable.github.io/scrollq/">
+<meta property="og:image" content="https://svyable.github.io/scrollq/favicon.svg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ScrolIQ — Evidence for reading Herculaneum scrolls">
+<meta name="twitter:description" content="Reproducible scan diagnostics, exact-volume Grand Prize qualification, held-out geometry, and ink falsification controls.">
 <style>
 :root{{
   --bg:#0d0b08; --panel:#161310; --panel2:#1c1813; --line:#2c251b;
@@ -193,7 +198,7 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
 <nav class="topbar" aria-label="Primary"><div class="navinner">
   <a class="brand" href="./"><span class="brandmark">IQ</span><span>ScrolIQ</span></a>
   <div class="navlinks">
-    <a href="#grand-prize">Grand Prize</a><a href="#evidence">Evidence</a>
+    <a href="#grand-prize">Grand Prize</a><a href="#differentiation">Difference</a><a href="#evidence">Evidence</a>
     <a href="#leaderboard">Survey</a><a href="#method">Method</a>
     <a href="./september-2026.html">Writeup</a><a href="./october-2026-update.html">October update</a><a href="./october-2026.html">October goals</a><a href="{repo}">GitHub</a>
   </div>
@@ -204,7 +209,7 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
   <div class="eyebrow">VESUVIUS CHALLENGE · EVIDENCE THROUGH OCTOBER 1, 2026</div>
   <h1>Scrol<span class="q">IQ</span></h1>
   <p class="tagline">Diagnostics for reading Herculaneum scrolls. <em>Find the bottleneck.</em></p>
-  <p class="lede">ScrolIQ is evolving from a scan-quality survey into an observability layer for the Vesuvius Challenge pipeline. The current score still measures sampled CT health from real level-0 voxels, and downstream state is never inferred from that score. Volume-bound passports can now attach spatial scan evidence, winding-input audits, native TIFXYZ Mesh IQ, exact-volume Fiber IQ, and ink leakage/provenance audits. Fiber IQ reads native VC3D fiber JSON, binds the report to the exact CT root, and audits persisted trace/fallback provenance plus line continuity; unbound or cross-volume evidence is excluded, while physical fiber/sheet identity, spiral-fit accuracy, label localization, and biological ink identity remain unknown until direct evidence exists. See the <a href="https://scrollprize.org/2026_open_problems">official open problems</a>, the <a href="https://github.com/Svyable/scrollq/blob/main/docs/open-problems-alignment.md">alignment roadmap</a>, and the <a href="#grand-prize">2027 Grand Prize campaign →</a></p>
+  <p class="lede">ScrolIQ does not try to replace the community's geometry, winding, scan-quality or ink tools. It makes their evidence composable: results are bound to the exact CT, mesh, model and evaluation region they measure; stale or cross-volume evidence is excluded; leakage and missing evidence fail closed; and failed controls stay visible. The next objective is deliberately narrow: use that contract to produce one measurably better held-out surface / fit / ink result on one exact 2027 Grand Prize volume. <a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-proof-campaign.md">Proof campaign →</a></p>
   <div class="stats">
     <div class="stat"><div class="n">{n}</div><div class="l">scroll volumes scored</div></div>
     <div class="stat"><div class="n">{lo}&ndash;{hi}</div><div class="l">score range (0&ndash;100)</div></div>
@@ -215,6 +220,14 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
 
 <main id="main" class="wrap">
 
+<div class="panel" id="differentiation"><h2>What is actually different<span class="sub">The contribution is evidence composition, not ownership of every underlying diagnostic.</span></h2>
+  <p>Public Vesuvius work already covers substantial parts of scan QA, TIFXYZ integrity/repair, self-intersections, spiral evaluation and held-out ink validation. ScrolIQ's system-level contribution is to bind those measurements to the <b>exact bytes and exact eligible volume</b> they describe, preserve negative results, and prevent missing, stale, cross-volume or train-overlapping evidence from being promoted into a stronger claim.</p>
+  <div class="actiongrid">
+    <div><h3>Identity before confidence</h3><p>CT root, surface hashes, external reports, checkpoint identity, seeds and evaluation arrays travel with the result. Same scroll name is not enough.</p></div>
+    <div><h3>Falsification stays visible</h3><p>Disjoint resampling, injection controls and held-out checks are allowed to fail. A failed gate narrows the claim instead of disappearing.</p></div>
+    <div><h3>One proof before more breadth</h3><p>The next milestone is one exact Grand Prize volume with a measurable held-out surface / fit / ink improvement and a single passport connecting the evidence. <a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-proof-campaign.md">Protocol →</a></p></div>
+  </div>
+</div>
 
 <div class="panel alignment" id="pipeline"><h2>Open-problem diagnostics<span class="sub">ScrolIQ maps evidence to the Vesuvius Challenge pipeline instead of treating one score as readiness.</span></h2>
 <div class="problem-grid">
@@ -274,6 +287,31 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
     published segments on those two targets are accounted for. The other 11 targets are
     <b>evidence gaps</b>, not failures.
     <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-02-grand-prize-mesh-crosscut">Offline exact-volume cross-cut →</a></p></div>
+  <div class="card"><h3>Independent same-byte cross-check</h3>
+    <p>Mesh IQ was run on the exact <b>1,818,055 SHA-256-verified bytes</b> in TIFXYZ Doctor's
+    pinned 10-case real-data benchmark: <b>10 / 10</b> agreement on enclosed-hole presence,
+    <b>10 / 10</b> on single-component presence, and <b>7 / 7</b> hole-presence agreement
+    on the PHerc0800 + PHerc1447 Grand Prize overlap. The first run also exposed our own
+    isometry normalization error; after fixing it, all <b>10 / 10</b> Doctor-below-threshold
+    cases have no Mesh IQ isometry finding, with nearly identical p95 stretch on the Villa controls.
+    Rival benchmark roles are provenance labels, not geometry ground truth.
+    <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-02-doctor-same-byte">Frozen same-byte evidence →</a></p></div>
+  <div class="card"><h3>Cross-tool evidence, content-bound</h3>
+    <p>On PHerc0139 segment <code>20260306000001-w051_2026030600</code>, ScrolIQ and Windcheck
+    independently name the <b>same published coordinate bytes</b>: full x/y/z SHA-256s, no mask,
+    379×480 grid, and 164,096 valid vertices agree. Mesh IQ reports <b>15 edge jumps</b> and
+    <b>173 normal reversals</b>; Windcheck's same-original nonlocal census reports
+    <b>3,333 transverse contacts</b>. Binding stops at <b>coordinate-exact</b>, not semantic-exact,
+    because the external release-index projection does not expose the original meta.json hash.
+    <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-02-cross-tool-mesh-dossier">Frozen binding-aware dossier →</a></p></div>
+  <div class="card"><h3>VC3D jump-to-problem queue</h3>
+    <p>Mesh IQ now emits native VC3D PointCollections instead of leaving reviewers with counts.
+    On the content-bound PHerc0139 surface, the frozen queue contains <b>35 directly loadable XYZ sites</b>:
+    all <b>15 / 15 edge jumps</b> plus the top <b>20 / 173 normal reversals</b>.
+    The same surface is independently bound to Windcheck's 3,333-contact nonlocal census, so local
+    review coordinates and independent nonlocal evidence can be inspected without conflating them.
+    <a href="https://github.com/Svyable/scrollq/blob/main/artifacts/2026-10-03-pherc0139-review-queue/review-points.json">VC3D PointCollections →</a> ·
+    <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-03-pherc0139-review-queue">Frozen campaign →</a></p></div>
   <div class="card"><h3>Winding check with measured sensitivity</h3>
     <p>On public PHercParis4 annotations, the ray-order audit found <b>2 inversions / 13,700 comparable pairs</b>.
     In a seeded injection control, deliberate &plusmn;3 winding errors were detected in <b>179 / 200</b>
@@ -383,6 +421,9 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
   · <a href="./september-2026.html">September 2026 writeup →</a>
   · <a href="./october-2026-update.html">October 2026 update →</a>
   · <a href="./october-2026.html">October 2026 goals →</a>
+  <br>Community: <a href="https://discord.com/invite/V4fJhvtaQn">Vesuvius Discord</a>
+  · <a href="https://scrollprize.org">Vesuvius Challenge</a>
+  · <a href="https://github.com/ScrollPrize/villa">villa monorepo</a>
 </div></footer>
 
 <script>

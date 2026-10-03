@@ -10,10 +10,12 @@ Statuses: pass, fail, caution, measured, error. ``measured`` means the tool
 reports numbers but no verdict; it is never promoted to ``pass`` here. A
 policy threshold can do that later in ``scrollq.gp_ready``.
 
-Bindings: ``hash-verified`` (the report's recorded file hashes equal the files
-being audited), ``path-declared`` (the report names the audited mesh by path
-only), ``unbound``. Recorded hashes that differ from the audited files make
-the record ``error``: the report is about another version of the mesh.
+Bindings use the same classes as ``scrollq.external_mesh_evidence``, compared
+against the mesh files on disk: ``semantic-exact`` (coordinate, mask and
+meta.json hashes match), ``coordinate-exact`` (x/y/z and mask hashes match),
+``path-grid`` (path and grid shape agree, no hashes), ``path-only``,
+``unbound``. Hashes that contradict the files give ``mismatch`` and make the
+record ``error``: the report is about another version of the mesh.
 
 See docs/gp-ready.md.
 """
@@ -25,9 +27,15 @@ import json
 from pathlib import Path
 from typing import Any, Callable
 
+import tifffile
+
+from .external_mesh_evidence import _compare_hashes
+
 SCHEMA = "scroliq-evidence/1"
 STATUSES = ("pass", "fail", "caution", "measured", "error")
-BINDINGS = ("hash-verified", "path-declared", "unbound")
+# Strongest first; "mismatch" is not a binding a check can pass at.
+BINDINGS = ("semantic-exact", "coordinate-exact", "path-grid", "path-only",
+            "unbound", "mismatch")
 MESH_FILES = ("x.tif", "y.tif", "z.tif")
 
 # Tool commits each adapter was written and tested against.
@@ -49,11 +57,28 @@ def sha256_file(path: Path) -> str:
 
 
 def mesh_hashes(mesh_dir: Path) -> dict[str, str]:
-    """SHA-256 of the tifxyz coordinate files (and mask, when present)."""
+    """SHA-256 of the tifxyz coordinate files, plus mask/meta when present."""
     out = {name: sha256_file(mesh_dir / name) for name in MESH_FILES}
-    if (mesh_dir / "mask.tif").is_file():
-        out["mask.tif"] = sha256_file(mesh_dir / "mask.tif")
+    for extra in ("mask.tif", "meta.json"):
+        if (mesh_dir / extra).is_file():
+            out[extra] = sha256_file(mesh_dir / extra)
     return out
+
+
+def _local_identity(mesh_dir: Path) -> dict[str, Any]:
+    """The audited files, in the shape external_mesh_evidence compares."""
+    h = mesh_hashes(mesh_dir)
+    return {"status": "bound",
+            "coordinates": {name[0]: h[name] for name in MESH_FILES},
+            "mask": h.get("mask.tif"), "meta": h.get("meta.json")}
+
+
+def _grid_shape(mesh_dir: Path) -> list[int] | None:
+    try:
+        with tifffile.TiffFile(mesh_dir / "x.tif") as tif:
+            return list(tif.pages[0].shape)
+    except Exception:  # unreadable grid: no grid evidence, not a crash
+        return None
 
 
 def _same_dir(declared: Any, mesh_dir: Path, report_dir: Path) -> bool:
@@ -70,21 +95,26 @@ def _same_dir(declared: Any, mesh_dir: Path, report_dir: Path) -> bool:
     return tail is not None and tail == p
 
 
-def _binding(recorded: dict[str, str] | None, declared_path: Any,
+def _binding(recorded: dict | None, declared_path: Any, declared_grid: Any,
              mesh_dir: Path | None, report_dir: Path) -> tuple[str, str | None]:
-    """(binding, error) for a mesh-level report."""
+    """(binding, error) for a report about ``mesh_dir``.
+
+    ``recorded`` uses external_mesh_evidence's hash map: x, y, z, mask and an
+    optional "meta" (meta.json SHA-256).
+    """
     if mesh_dir is None:
         return "unbound", None
-    if recorded:
-        actual = mesh_hashes(mesh_dir)
-        compared = {k: v for k, v in recorded.items() if k in actual and v}
-        if compared:
-            diff = sorted(k for k, v in compared.items() if v != actual[k])
-            if diff:
-                return "unbound", f"recorded hashes differ from audited files: {diff}"
-            return "hash-verified", None
+    if recorded and mesh_dir.is_dir():
+        cmp = _compare_hashes(_local_identity(mesh_dir), recorded,
+                              external_meta_sha256=recorded.get("meta"))
+        if cmp["level"] == "mismatch":
+            return "mismatch", f"recorded hashes differ from audited files: {cmp['reason']}"
+        if cmp["level"] != "unbound":
+            return cmp["level"], None
     if _same_dir(declared_path, mesh_dir, report_dir):
-        return "path-declared", None
+        if declared_grid is not None and list(declared_grid) == _grid_shape(mesh_dir):
+            return "path-grid", None
+        return "path-only", None
     return "unbound", None
 
 
@@ -94,21 +124,20 @@ def _record(check, status, verdict_source, metrics, notes=()):
             "metrics": metrics, "notes": list(notes)}
 
 
-# --- adapters: report dict -> (records, recorded_hashes, declared_path, version)
+# --- adapters: report -> (records, recorded_hashes, declared_path, grid_yx, version)
 
 def _windcheck(rep: dict) -> tuple:
     if rep.get("schema") != "windcheck_check/v1":
         raise ValueError(f"unsupported windcheck schema {rep.get('schema')!r}")
     hashes = rep["mesh"]["hashes"]
-    recorded = {f"{k}.tif": hashes.get(k) for k in ("x", "y", "z", "mask")
-                if hashes.get(k)}
+    recorded = {k: hashes.get(k) for k in ("x", "y", "z", "mask")}
     sites = rep.get("crossing_sites") or []
     status = "pass" if rep.get("clean") is True else "fail"
     rec = _record("mesh.self-intersection", status, "tool",
                   {"crossing_sites": len(sites),
                    "n_valid_vertices": rep["mesh"].get("n_valid_vertices")},
                   [rep.get("verdict", "")])
-    return [rec], recorded, rep["mesh"].get("path"), \
+    return [rec], recorded, rep["mesh"].get("path"), rep["mesh"].get("grid_shape"), \
         rep.get("provenance", {}).get("code_version")
 
 
@@ -128,7 +157,7 @@ def _flatcheck(rep: dict) -> tuple:
                    "bar_pct": r.get("bar_pct"),
                    "fold_overs": r.get("fold_overs"),
                    "collapsed": collapsed})
-    return [rec], None, rep.get("mesh"), None
+    return [rec], None, rep.get("mesh"), rep.get("grid_shape"), None
 
 
 _SEVERITY = {"ok": "pass", "info": "pass", "warning": "caution", "error": "fail"}
@@ -147,7 +176,9 @@ def _tifxyz_doctor(rep: dict) -> tuple:
                         "caution" if cues else "pass", "tool",
                         {"review_cues": len(cues)},
                         [f"{f['code']}: {f.get('message', '')}" for f in cues]))
+    shape = (contract.get("coordinates") or {}).get("shape")
     return recs, None, (rep.get("source") or {}).get("path"), \
+        shape[:2] if isinstance(shape, list) else None, \
         (rep.get("tool") or {}).get("version")
 
 
@@ -160,7 +191,7 @@ def _tifxyz_repair(rep) -> tuple:
     rec = _record("mesh.tifxyz-contract", status, "tool",
                   {"findings": len(row["findings"])},
                   [f"{f['severity']}: {f['check']}: {f['message']}" for f in row["findings"]])
-    return [rec], None, row.get("path"), None
+    return [rec], None, row.get("path"), None, None
 
 
 def _scroliq_mesh(rep: dict) -> tuple:
@@ -168,12 +199,15 @@ def _scroliq_mesh(rep: dict) -> tuple:
         raise ValueError("not a scroliq-mesh report")
     status = {"pass": "pass", "partial": "caution", "fail": "fail"}.get(
         rep.get("status"), "error")
-    recorded = {k: (v or {}).get("sha256") for k, v in (rep.get("provenance") or {}).items()
-                if k in MESH_FILES}
+    prov = rep.get("provenance") or {}
+    recorded = {k[0]: (prov.get(k) or {}).get("sha256") for k in MESH_FILES}
+    recorded["mask"] = (prov.get("mask.tif") or {}).get("sha256")
+    recorded["meta"] = (prov.get("meta.json") or {}).get("sha256")
     rec = _record("mesh.scroliq-audit", status, "tool",
                   {"errors": rep.get("error_count"), "warnings": rep.get("warning_count")},
                   list(rep.get("errors", [])) + list(rep.get("warnings", [])))
-    return [rec], recorded, rep.get("tifxyz_path"), None
+    return [rec], recorded, rep.get("tifxyz_path"), \
+        (rep.get("grid") or {}).get("shape_yx"), None
 
 
 def _spiralcheck(rep: dict) -> tuple:
@@ -191,7 +225,7 @@ def _spiralcheck(rep: dict) -> tuple:
                    "leakage_frac_within_2_vox": leak.get("frac_within_2_vox"),
                    "unseen_frac_within_tau": unseen.get("frac_within_tau")},
                   ["spiralcheck reports held-out distances, not a verdict"])
-    return [rec], None, meta.get("meshes"), meta.get("spiralcheck")
+    return [rec], None, meta.get("meshes"), None, meta.get("spiralcheck")
 
 
 ADAPTERS: dict[str, Callable[[Any], tuple]] = {
@@ -226,12 +260,12 @@ def ingest(tool: str, report_path: str | Path, *, subject_id: str | None = None,
     try:
         raw = report_path.read_bytes()
         source["report_sha256"] = hashlib.sha256(raw).hexdigest()
-        recs, recorded, declared, version = ADAPTERS[tool](json.loads(raw))
+        recs, recorded, declared, grid, version = ADAPTERS[tool](json.loads(raw))
     except (OSError, ValueError, KeyError, TypeError) as exc:
         return wrap([_record(f"report.{tool}", "error", "none", {},
                              [f"{type(exc).__name__}: {exc}"])], "unbound")
     source["tool_version"] = version
-    binding, problem = _binding(recorded, declared, mesh, report_path.parent)
+    binding, problem = _binding(recorded, declared, grid, mesh, report_path.parent)
     if problem:
         for r in recs:
             r["status"], r["verdict_source"] = "error", "none"

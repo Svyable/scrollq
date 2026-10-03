@@ -1,6 +1,6 @@
 # GP dossier: PHerc0800 community meshes (pscamillo/vesuvius-eligible-meshes@620769e2) — mesh gates only
 
-Ready: **False** — columns ready 0 / 95 (policy `mesh-gates-2026-10-02`, sha256 `f4aac9da768c`)
+Ready: **False** — columns ready 0 / 95 (policy `mesh-gates-2026-10-02`, sha256 `7a06b196d45d`)
 
 | column | mesh.tifxyz-contract | mesh.scroliq-audit | mesh.self-intersection | mesh.flatten-distortion |
 |---|---|---|---|---|
