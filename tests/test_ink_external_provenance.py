@@ -106,3 +106,19 @@ def test_missing_public_training_tracking_remains_visible_for_non_pseudolabel_mo
     assert any(
         "public experiment tracking" in message for message in result["warnings"]
     )
+
+
+def test_pseudolabel_method_can_pass_with_complete_public_stage_provenance():
+    manifest = _manifest()
+    manifest["external_method"].update(
+        {
+            "uses_pseudolabel_training": True,
+            "all_training_data_public": True,
+            "training_data_license": "CC-BY-NC 4.0",
+            "all_intermediate_checkpoints_public": True,
+            "intermediate_checkpoint_license": "CC-BY-NC 4.0",
+            "experiment_tracking_public": True,
+        }
+    )
+    result = audit_ink_manifest(manifest)
+    assert result["status"] == "pass"
