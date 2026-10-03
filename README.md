@@ -161,6 +161,37 @@ The audit follows the upstream TIFXYZ contract: `x.tif`, `y.tif`, `z.tif`, `meta
 
 The calibration is independently regression-tested against TIFXYZ Doctor's pinned public real-data benchmark. On the exact same **1,818,055 SHA-256-verified bytes**, the frozen 2026-10-02 campaign agrees **10/10 on enclosed-hole presence** and **10/10 on single-component presence**, including **7/7** hole-presence agreement on the PHerc0800 + PHerc1447 Grand Prize overlap. The first run exposed the old `meta.scale` isometry false positive; after the fix, all 10 Doctor-below-threshold cases have no Mesh IQ isometry finding, and the Villa-control p95 stretch values nearly coincide. See [the same-byte cross-validation artifact](artifacts/2026-10-02-doctor-same-byte/). Benchmark roles are provenance labels, not geometry ground truth.
 
+### Binding external mesh evidence without laundering provenance
+
+`scroliq-evidence-bind` composes third-party mesh evidence with a ScrolIQ
+TIFXYZ audit only after checking identity:
+
+```bash
+scroliq-evidence-bind \
+  --mesh-audit mesh-audit.json \
+  --windcheck-index windcheck-index.json \
+  --segment <segment-id> \
+  --scroll <scroll-id> \
+  --volume-id <exact-volume-id> \
+  --windcheck-commit <pinned-commit> \
+  --out external-mesh-dossier.json
+```
+
+The binding class is explicit. Full x/y/z + mask SHA-256 agreement without an
+external `meta.json` hash is **coordinate-exact**, not semantic-exact.
+Cross-volume evidence, content-hash mismatches, and unsupported external
+schemas are excluded. If Windcheck's census was run on a repaired base, the
+dossier may bind the published original through `original_hashes`, but the
+derived-base census is not imported as a measurement of that original.
+
+The frozen [PHerc0139 cross-tool dossier](artifacts/2026-10-02-cross-tool-mesh-dossier/)
+demonstrates the useful case: ScrolIQ and Windcheck independently bind the same
+published coordinate bytes for segment `20260306000001-w051_2026030600`.
+Mesh IQ reports 15 edge jumps and 173 severe neighbouring-normal reversals;
+Windcheck's same-original census reports 3,333 transverse contacts. The
+passport accepts this as content-bound external evidence while still asking for
+the official VC3D self-cross validator before downstream use.
+
 For nonlocal self-intersections, ScrolIQ does not duplicate VC3D's geometry kernel. Generate a deterministic upstream report with `vc_tifxyz_selfcross <surface.tifxyz> -o report.json --collection sites.json` and pass it with `--selfcross-report`. ScrolIQ validates the report against the exact local surface path and grid, blocks on transverse contacts, preserves coplanar/grazing contacts as non-crossings, and keeps a nominally clean census partial when upstream skipped long-edge quads under `maxedge`. The optional `sites.json` remains directly loadable in VC3D for inspection.
 
 By default, review findings remain advisory (`partial`, exit 0); `--fail-on-findings` keeps that evidence status but exits 2 whenever findings are present, allowing an explicit CI/pipeline geometry gate.\n\nA passing audit is deliberately **partial Mesh IQ**, not a proof that the traced sheet is correct. With a fully clean validated self-cross census it establishes freedom from the specific non-adjacent transverse contacts tested by VC3D under the recorded parameters; it still does not establish CT support or correct sheet/winding identity.
