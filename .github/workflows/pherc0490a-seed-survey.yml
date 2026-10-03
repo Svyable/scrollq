@@ -26,6 +26,65 @@ jobs:
         run: |
           bash artifacts/2026-10-02-pherc0490a-first-letter-hunt/run-seed-survey.sh \
             out/pherc0490a-first-letter-hunt
+      - name: Run CT sheetness and freeze one seed per box
+        run: |
+          python - <<'PY'
+          import json
+          import subprocess
+          from pathlib import Path
+
+          root = Path("out/pherc0490a-first-letter-hunt")
+          survey = json.loads((root / "seed-survey.json").read_text())
+          sheet_dir = root / "sheetness"
+          seed_dir = root / "geometry-seeds"
+          sheet_dir.mkdir(parents=True, exist_ok=True)
+          seed_dir.mkdir(parents=True, exist_ok=True)
+          rows = []
+          for row in survey["selected"]:
+              rank = int(row["rank"])
+              ct = Path(row["cutouts"]["ct"]["path"])
+              mask = Path(row["cutouts"]["surface_mask"]["path"])
+              prefix = sheet_dir / f"seed-{rank:02d}"
+              subprocess.run([
+                  "scroliq-sheetness", str(ct),
+                  "--out-prefix", str(prefix),
+                  "--sigmas", "0.8,1.2,1.8",
+                  "--write-normal",
+              ], check=True)
+              out = seed_dir / f"seed-{rank:02d}.json"
+              origin = ",".join(str(v) for v in row["bbox_zyx_half_open"][0])
+              subprocess.run([
+                  "scroliq-seed-geometry",
+                  "--surface-mask", str(mask),
+                  "--sheetness", str(prefix) + ".sheetness.npy",
+                  "--normal", str(prefix) + ".normal-zyx.npy",
+                  "--bbox-origin", origin,
+                  "--candidate-quantile", "0.99",
+                  "--out", str(out),
+              ], check=True)
+              result = json.loads(out.read_text())
+              rows.append({
+                  "rank": rank,
+                  "bbox_zyx_half_open": row["bbox_zyx_half_open"],
+                  "seed": result["selected_seed"],
+                  "sheetness_on_surface_mask": result["sheetness_on_surface_mask"],
+                  "sheetness_off_surface_mask": result["sheetness_off_surface_mask"],
+                  "mean_sheetness_enrichment": result["mean_sheetness_enrichment"],
+                  "report_path": str(out),
+              })
+          (root / "geometry-seeds.json").write_text(
+              json.dumps({
+                  "schema_version": 1,
+                  "kind": "pherc0490a-sheetness-seed-set",
+                  "candidate_quantile": 0.99,
+                  "rows": rows,
+                  "claim_boundary": (
+                      "These are deterministic growth/review seeds only. "
+                      "They are not surface-seating passes or ink evidence."
+                  ),
+              }, indent=2, sort_keys=True) + "\n"
+          )
+          PY
       - name: Summarize selected seeds
         run: |
           python - <<'PY'
@@ -41,6 +100,15 @@ jobs:
                   row["bbox_zyx_half_open"],
                   "support=", row["surface_support_frac"],
                   "positives=", row["prediction_positive_voxels"],
+              )
+          g = json.loads(Path("out/pherc0490a-first-letter-hunt/geometry-seeds.json").read_text())
+          for row in g["rows"]:
+              print(
+                  "geometry-seed",
+                  row["rank"],
+                  row["seed"]["global_zyx"],
+                  "sheetness=", row["seed"]["sheetness"],
+                  "enrichment=", row["mean_sheetness_enrichment"],
               )
           PY
       - uses: actions/upload-artifact@v4
