@@ -661,6 +661,158 @@ def _verify_zpa_evidence(
     return report, actual
 
 
+def _validate_model_input_contract(
+    *,
+    model_id: str,
+    model: dict[str, Any],
+    target: dict[str, Any] | None,
+    source_attestation: dict[str, Any] | None,
+    errors: list[dict[str, str]],
+) -> dict[str, Any] | None:
+    """Validate the model's physical input/preprocessing contract."""
+
+    p = f"models[{model_id}].input_contract"
+    contract = model.get("input_contract")
+    if not isinstance(contract, dict):
+        _error(
+            errors,
+            "GP_MODEL_INPUT_CONTRACT",
+            p,
+            "explicit physical/model input contract is required",
+        )
+        return None
+
+    axes = contract.get("axes")
+    if (
+        not isinstance(axes, list)
+        or len(axes) != 3
+        or not all(isinstance(v, str) and v for v in axes)
+        or len(set(axes)) != len(axes)
+    ):
+        _error(
+            errors,
+            "GP_MODEL_INPUT_AXES",
+            f"{p}.axes",
+            "model input axes must be three unique axis names",
+        )
+    source_axes = (
+        source_attestation.get("axes")
+        if isinstance(source_attestation, dict)
+        else None
+    )
+    if isinstance(axes, list) and isinstance(source_axes, list) and axes != source_axes:
+        _error(
+            errors,
+            "GP_MODEL_INPUT_AXES",
+            f"{p}.axes",
+            f"model axes {axes!r} do not match audited source axes {source_axes!r}",
+        )
+
+    source_voxel = contract.get("source_voxel_size_um")
+    if (
+        isinstance(source_voxel, bool)
+        or not isinstance(source_voxel, (int, float))
+        or float(source_voxel) <= 0
+    ):
+        _error(
+            errors,
+            "GP_MODEL_SOURCE_VOXEL",
+            f"{p}.source_voxel_size_um",
+            "positive source voxel size in micrometers is required",
+        )
+    else:
+        eligible_voxel = target.get("voxel_size_um") if isinstance(target, dict) else None
+        if isinstance(eligible_voxel, (int, float)) and not math.isclose(
+            float(source_voxel), float(eligible_voxel), rel_tol=1e-9, abs_tol=1e-6
+        ):
+            _error(
+                errors,
+                "GP_MODEL_SOURCE_VOXEL",
+                f"{p}.source_voxel_size_um",
+                (
+                    f"declared source voxel size {source_voxel} um does not match "
+                    f"eligible volume {eligible_voxel} um"
+                ),
+            )
+
+    model_voxel = contract.get("model_voxel_size_um")
+    if (
+        isinstance(model_voxel, bool)
+        or not isinstance(model_voxel, (int, float))
+        or float(model_voxel) <= 0
+    ):
+        _error(
+            errors,
+            "GP_MODEL_VOXEL",
+            f"{p}.model_voxel_size_um",
+            "positive model voxel size in micrometers is required",
+        )
+
+    resampling = contract.get("resampling")
+    if resampling not in {"none", "explicit"}:
+        _error(
+            errors,
+            "GP_MODEL_RESAMPLING",
+            f"{p}.resampling",
+            "resampling must be 'none' or 'explicit'",
+        )
+    elif (
+        resampling == "none"
+        and isinstance(source_voxel, (int, float))
+        and not isinstance(source_voxel, bool)
+        and isinstance(model_voxel, (int, float))
+        and not isinstance(model_voxel, bool)
+        and not math.isclose(
+            float(source_voxel), float(model_voxel), rel_tol=1e-9, abs_tol=1e-6
+        )
+    ):
+        _error(
+            errors,
+            "GP_MODEL_RESAMPLING",
+            f"{p}.model_voxel_size_um",
+            "resampling='none' requires model and source voxel sizes to match",
+        )
+
+    window = contract.get("window_voxels_zyx")
+    if (
+        not isinstance(window, list)
+        or len(window) != 3
+        or not all(isinstance(v, int) and not isinstance(v, bool) and v > 0 for v in window)
+    ):
+        _error(
+            errors,
+            "GP_MODEL_WINDOW",
+            f"{p}.window_voxels_zyx",
+            "positive integer [z,y,x] model window is required",
+        )
+
+    profile = contract.get("preprocessing_profile")
+    if not isinstance(profile, dict):
+        _error(
+            errors,
+            "GP_MODEL_PREPROCESSING",
+            f"{p}.preprocessing_profile",
+            "public hash-pinned preprocessing profile is required",
+        )
+    else:
+        _check_public_url(
+            profile.get("public_url"),
+            f"{p}.preprocessing_profile.public_url",
+            errors,
+            "GP_MODEL_PREPROCESSING",
+        )
+        sha = profile.get("sha256")
+        if not isinstance(sha, str) or not SHA256_RE.fullmatch(sha):
+            _error(
+                errors,
+                "GP_MODEL_PREPROCESSING",
+                f"{p}.preprocessing_profile.sha256",
+                "preprocessing profile must be pinned by lowercase 64-hex sha256",
+            )
+
+    return contract
+
+
 def _verify_ink_evidence(
     *,
     validation_id: str,
