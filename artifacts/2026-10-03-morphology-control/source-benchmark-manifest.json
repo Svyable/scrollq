@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "mode": "source_benchmark",
+  "source": {
+    "dataset_id": "scrollprize/profilometer",
+    "revision": "a806bead2f3b9100c20e19de37814fb285cfeefd",
+    "dataset_license": "CC BY-NC 4.0",
+    "dataset_license_evidence": "https://huggingface.co/datasets/scrollprize/profilometer/blob/a806bead2f3b9100c20e19de37814fb285cfeefd/LICENSE",
+    "paper_url": "https://doi.org/10.1038/s41598-026-58467-1",
+    "paper_license": "CC BY-NC-ND 4.0",
+    "paper_license_evidence": "https://www.nature.com/articles/s41598-026-58467-1_reference.pdf",
+    "source_papyri": [
+      "PHerc. 248",
+      "PHerc. 250",
+      "PHerc. 500P2"
+    ]
+  },
+  "sampling": {
+    "dataset_native_um_xy": [
+      0.68793625,
+      0.68793625
+    ],
+    "manuscript_native_um_xy": [
+      0.34,
+      0.34
+    ],
+    "discrepancy_status": "unresolved"
+  },
+  "design": {
+    "descriptors": [
+      "local-gradient-rank",
+      "curvature-rank",
+      "fiber-relative-roughness"
+    ],
+    "source_split": "leave-one-papyrus-out",
+    "learned_classifier": false,
+    "source_labels_used_for_target_training": false,
+    "paper_adapted_material_in_repo": false,
+    "missingness_mask_control": true,
+    "label_permutation_control": true,
+    "uses_absolute_micron_thresholds": false
+  }
+}
