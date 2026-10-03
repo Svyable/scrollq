@@ -4,7 +4,10 @@ sheet is blind, and the scorer applies the pre-registered rules."""
 import csv
 import importlib.util
 import json
+import subprocess
+import sys
 from pathlib import Path
+from zipfile import ZipFile
 
 import pytest
 
@@ -21,6 +24,7 @@ def _load(name):
 
 sampler = _load("mesh_review_sample")
 scorer = _load("mesh_review_score")
+packet = _load("mesh_review_packet")
 
 
 def test_committed_sample_regenerates_byte_for_byte(tmp_path):
@@ -103,3 +107,82 @@ def test_unclear_is_bounded_not_counted_and_missing_labels_fail_closed():
     sheet[0]["label"] = "maybe"
     assert scorer.score(sheet, key)["invalid_labels"] == ["maybe"]
     assert scorer.score(sheet[1:], key)["missing_review_ids"] == ["R00"]
+
+
+@pytest.mark.parametrize("where", ["sheet", "key"])
+def test_duplicate_ids_never_silently_replace_labels(where):
+    sheet, key = _labelled(["defect"], ["defect"] * 4, ["not_defect"])
+    rows = sheet if where == "sheet" else key
+    rows.append(dict(rows[0]))
+    assert scorer.score(sheet, key)["status"] == "invalid"
+
+
+@pytest.mark.parametrize("field", ["scroll", "segment", "mesh_url", "volume_root"])
+def test_cannot_substitute_the_reviewed_surface(field):
+    sheet, key = _labelled(["defect"], ["defect"] * 4, ["not_defect"])
+    key[0][field] = "original"
+    sheet[0][field] = "substitution"
+    assert scorer.score(sheet, key)["status"] == "invalid"
+
+
+def test_empty_key_and_extra_rows_rejected():
+    assert scorer.score([], [])["status"] == "invalid"
+    sheet, key = _labelled(["defect"], ["defect"] * 4, ["not_defect"])
+    sheet.append({"review_id": "unexpected", "label": "defect"})
+    assert scorer.score(sheet, key)["status"] == "invalid"
+
+
+def test_packet_is_deterministic_and_contains_only_blinded_handoff(tmp_path):
+    a, b = tmp_path / "a.zip", tmp_path / "b.zip"
+    packet.build(a)
+    packet.build(b)
+    assert a.read_bytes() == b.read_bytes()
+    with ZipFile(a) as z:
+        assert set(z.namelist()) == {"REVIEW.md", "review-sheet.csv"}
+        assert z.read("review-sheet.csv") == (SAMPLE_DIR / "review-sheet.csv").read_bytes()
+    with pytest.raises(FileExistsError):
+        packet.build(a)
+
+
+def test_packet_rejects_altered_frozen_sheet(tmp_path):
+    (tmp_path / "manifest.json").write_bytes((SAMPLE_DIR / "manifest.json").read_bytes())
+    (tmp_path / "review-sheet.csv").write_text("wrong sample")
+    with pytest.raises(ValueError, match="checksum"):
+        packet.build(tmp_path / "bad.zip", sample=tmp_path)
+
+
+def test_cli_separate_sheet_preserves_frozen_sample_and_blocks_empty_review(tmp_path):
+    sheet = tmp_path / "returned.csv"
+    sheet.write_bytes((SAMPLE_DIR / "review-sheet.csv").read_bytes())
+    result = subprocess.run([sys.executable, str(ROOT / "bin/mesh_review_score.py"),
+                             str(SAMPLE_DIR), "--sheet", str(sheet), "--require-complete"],
+                            capture_output=True, text=True)
+    assert result.returncode == 1
+    report = json.loads(result.stdout)
+    assert report["status"] == "incomplete"
+    assert len(report["inputs_sha256"]["sheet"]) == 64
+
+
+def test_cli_rejects_key_tampering(tmp_path):
+    for name in ("review-sheet.csv", "key.json", "manifest.json"):
+        (tmp_path / name).write_bytes((SAMPLE_DIR / name).read_bytes())
+    key = json.loads((tmp_path / "key.json").read_text())
+    key[0]["stratum"] = "D"
+    (tmp_path / "key.json").write_text(json.dumps(key))
+    result = subprocess.run([sys.executable, str(ROOT / "bin/mesh_review_score.py"),
+                             str(tmp_path), "--require-complete"], capture_output=True, text=True)
+    assert result.returncode == 1
+    assert json.loads(result.stdout)["errors"] == ["key checksum mismatch"]
+
+
+def test_real_key_with_synthetic_labels_scores_without_changing_sample(tmp_path):
+    # Integration positive control, not human validation or a published result.
+    key = json.loads((SAMPLE_DIR / "key.json").read_text())
+    with (SAMPLE_DIR / "review-sheet.csv").open(newline="") as fh:
+        rows = list(csv.DictReader(fh))
+    by_id = {k["review_id"]: k for k in key}
+    for row in rows:
+        row["label"] = "not_defect" if by_id[row["review_id"]]["stratum"] == "C" else "defect"
+    result = scorer.score(rows, key)
+    assert result["status"] == "calibrated"
+    assert result["flag_enriched_for_defects"] is True
