@@ -39,6 +39,7 @@
               "metrics": {
                 "type": "object",
                 "minProperties": 1,
+                "propertyNames": {"pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
                 "additionalProperties": {"type": "number"}
               },
               "evidence_sha256": {
@@ -58,6 +59,13 @@
               "id": {"type": "string", "minLength": 1},
               "status": {"const": "failed"},
               "reason": {"type": "string", "minLength": 1},
+              "metrics": {
+                "type": "object",
+                "minProperties": 1,
+                "propertyNames": {"pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+                "additionalProperties": {"type": "number"},
+                "description": "Optional diagnostics retained even when the region fails; never used to rescue the failure value."
+              },
               "evidence_sha256": {
                 "type": "object",
                 "minProperties": 1,
