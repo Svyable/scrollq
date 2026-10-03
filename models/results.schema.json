@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://svyable.github.io/scrollq/schemas/eval-region-results-v1.json",
+  "title": "ScrolIQ per-region task adapter results",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "model", "dataset", "task", "regions"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "model": {"type": "string", "minLength": 1},
+    "dataset": {"type": "string", "minLength": 1},
+    "task": {"enum": ["ink", "geometry", "segmentation"]},
+    "regions": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "status", "metrics"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "status": {"const": "ok"},
+              "metrics": {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": {"type": "number"}
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "status", "reason"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "status": {"const": "failed"},
+              "reason": {"type": "string", "minLength": 1}
+            }
+          }
+        ]
+      }
+    }
+  }
+}
