@@ -11,15 +11,18 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import re
 from pathlib import Path
 from typing import Any
+
+from zpa.report import validate_report as validate_zpa_report
 
 from .grand_prize import DEFAULT_MANIFEST
 from .package_hash import sha256_path
 from .recto_coverage import audit_recto_coverage
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 RULES_URL = "https://scrollprize.org/prizes"
 CC_BY_NC_4 = {"CC-BY-NC-4.0", "CC BY-NC 4.0"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -466,6 +469,350 @@ def _verify_local_file(
             )
 
 
+def _verify_zpa_evidence(
+    *,
+    zarr_audit: dict[str, Any],
+    root_dir: Path | None,
+    volume_id: str,
+    errors: list[dict[str, str]],
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Validate the declared ZPA artifact and return report plus attestation.
+
+    Without a local package root the manifest declarations are checked. With
+    a package root, the exact artifact is hash-checked, parsed, validated
+    against ZPA's bundled schema, and matched back to those declarations.
+    """
+
+    p = "ct_volume.zarr_audit"
+    if zarr_audit.get("tool") != "zarr-pyramid-audit":
+        _error(errors, "GP_CT_AUDIT", f"{p}.tool", "tool must be 'zarr-pyramid-audit'")
+
+    rel = zarr_audit.get("path")
+    if not isinstance(rel, str) or not rel:
+        _error(
+            errors,
+            "GP_CT_AUDIT_PATH",
+            f"{p}.path",
+            "package-relative ZPA report path is required",
+        )
+    _check_sha(zarr_audit, p, errors)
+
+    report_root = zarr_audit.get("root")
+    if not isinstance(report_root, str) or volume_id not in report_root:
+        _error(
+            errors,
+            "GP_CT_AUDIT_ROOT",
+            f"{p}.root",
+            "ZPA report root must identify the exact eligible volume",
+        )
+
+    if zarr_audit.get("integrity") != "PASS":
+        _error(
+            errors,
+            "GP_CT_AUDIT_INTEGRITY",
+            f"{p}.integrity",
+            "Grand Prize source CT requires a ZPA integrity PASS",
+        )
+
+    declared = zarr_audit.get("source_attestation")
+    if not isinstance(declared, dict):
+        declared = {}
+        _error(
+            errors,
+            "GP_CT_SOURCE_ATTESTATION",
+            f"{p}.source_attestation",
+            "ZPA metadata source attestation is required",
+        )
+    if declared.get("algorithm") != "zpa-metadata-semantics-v1":
+        _error(
+            errors,
+            "GP_CT_SOURCE_ATTESTATION",
+            f"{p}.source_attestation.algorithm",
+            "source attestation must use zpa-metadata-semantics-v1",
+        )
+    if declared.get("state") != "PRESENT":
+        _error(
+            errors,
+            "GP_CT_SOURCE_ATTESTATION",
+            f"{p}.source_attestation.state",
+            "eligible CT metadata must have PRESENT source evidence",
+        )
+    metadata_sha = declared.get("metadata_semantics_sha256")
+    if not isinstance(metadata_sha, str) or not SHA256_RE.fullmatch(metadata_sha):
+        _error(
+            errors,
+            "GP_CT_SOURCE_ATTESTATION",
+            f"{p}.source_attestation.metadata_semantics_sha256",
+            "lowercase 64-hex audited metadata semantics digest is required",
+        )
+    axes = declared.get("axes")
+    if (
+        not isinstance(axes, list)
+        or not axes
+        or not all(isinstance(v, str) and v for v in axes)
+        or len(set(axes)) != len(axes)
+    ):
+        _error(
+            errors,
+            "GP_CT_SOURCE_AXES",
+            f"{p}.source_attestation.axes",
+            "non-empty unique source axis names are required",
+        )
+
+    if root_dir is None:
+        return None, declared
+
+    _verify_local_file(zarr_audit, p, root_dir, errors)
+    if not isinstance(rel, str) or not rel:
+        return None, declared
+    target = (root_dir / rel).resolve()
+    try:
+        target.relative_to(root_dir.resolve())
+    except ValueError:
+        return None, declared
+    if not target.is_file():
+        return None, declared
+
+    try:
+        payload = json.loads(target.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        _error(
+            errors,
+            "GP_CT_AUDIT_REPORT",
+            f"{p}.path",
+            f"cannot parse ZPA report artifact: {exc}",
+        )
+        return None, declared
+
+    report: dict[str, Any] | None = None
+    if isinstance(payload, dict) and payload.get("tool") == "zarr-pyramid-audit":
+        report = payload
+    elif isinstance(payload, dict) and isinstance(payload.get("results"), list):
+        matches = [
+            row.get("report")
+            for row in payload["results"]
+            if isinstance(row, dict)
+            and isinstance(row.get("report"), dict)
+            and row["report"].get("root") == report_root
+        ]
+        if len(matches) == 1:
+            report = matches[0]
+        else:
+            _error(
+                errors,
+                "GP_CT_AUDIT_REPORT",
+                f"{p}.path",
+                "ZPA gate artifact must contain exactly one report for the declared root",
+            )
+            return None, declared
+    else:
+        _error(
+            errors,
+            "GP_CT_AUDIT_REPORT",
+            f"{p}.path",
+            "artifact is neither a ZPA audit report nor a ZPA gate report",
+        )
+        return None, declared
+
+    schema_errors = validate_zpa_report(report)
+    if schema_errors:
+        _error(
+            errors,
+            "GP_CT_AUDIT_REPORT",
+            f"{p}.path",
+            "ZPA report fails its bundled schema: " + "; ".join(schema_errors[:3]),
+        )
+        return report, declared
+
+    if report.get("root") != report_root:
+        _error(
+            errors,
+            "GP_CT_AUDIT_ROOT",
+            f"{p}.root",
+            "declared root does not match the ZPA report root",
+        )
+    if report.get("integrity") != "PASS":
+        _error(
+            errors,
+            "GP_CT_AUDIT_INTEGRITY",
+            f"{p}.integrity",
+            f"embedded ZPA report integrity is {report.get('integrity')!r}, not PASS",
+        )
+
+    actual = report.get("source_attestation")
+    if not isinstance(actual, dict):
+        _error(
+            errors,
+            "GP_CT_SOURCE_ATTESTATION",
+            f"{p}.path",
+            "validated ZPA report has no source_attestation block",
+        )
+        return report, declared
+
+    for key in ("algorithm", "state", "metadata_semantics_sha256", "axes"):
+        if actual.get(key) != declared.get(key):
+            _error(
+                errors,
+                "GP_CT_SOURCE_ATTESTATION_MISMATCH",
+                f"{p}.source_attestation.{key}",
+                "manifest declaration does not match the validated ZPA report",
+            )
+
+    return report, actual
+
+
+def _validate_model_input_contract(
+    *,
+    model_id: str,
+    model: dict[str, Any],
+    target: dict[str, Any] | None,
+    source_attestation: dict[str, Any] | None,
+    errors: list[dict[str, str]],
+) -> dict[str, Any] | None:
+    """Validate the model's physical input/preprocessing contract."""
+
+    p = f"models[{model_id}].input_contract"
+    contract = model.get("input_contract")
+    if not isinstance(contract, dict):
+        _error(
+            errors,
+            "GP_MODEL_INPUT_CONTRACT",
+            p,
+            "explicit physical/model input contract is required",
+        )
+        return None
+
+    axes = contract.get("axes")
+    if (
+        not isinstance(axes, list)
+        or len(axes) != 3
+        or not all(isinstance(v, str) and v for v in axes)
+        or len(set(axes)) != len(axes)
+    ):
+        _error(
+            errors,
+            "GP_MODEL_INPUT_AXES",
+            f"{p}.axes",
+            "model input axes must be three unique axis names",
+        )
+    source_axes = (
+        source_attestation.get("axes")
+        if isinstance(source_attestation, dict)
+        else None
+    )
+    if isinstance(axes, list) and isinstance(source_axes, list) and axes != source_axes:
+        _error(
+            errors,
+            "GP_MODEL_INPUT_AXES",
+            f"{p}.axes",
+            f"model axes {axes!r} do not match audited source axes {source_axes!r}",
+        )
+
+    source_voxel = contract.get("source_voxel_size_um")
+    if (
+        isinstance(source_voxel, bool)
+        or not isinstance(source_voxel, (int, float))
+        or float(source_voxel) <= 0
+    ):
+        _error(
+            errors,
+            "GP_MODEL_SOURCE_VOXEL",
+            f"{p}.source_voxel_size_um",
+            "positive source voxel size in micrometers is required",
+        )
+    else:
+        eligible_voxel = target.get("voxel_size_um") if isinstance(target, dict) else None
+        if isinstance(eligible_voxel, (int, float)) and not math.isclose(
+            float(source_voxel), float(eligible_voxel), rel_tol=1e-9, abs_tol=1e-6
+        ):
+            _error(
+                errors,
+                "GP_MODEL_SOURCE_VOXEL",
+                f"{p}.source_voxel_size_um",
+                (
+                    f"declared source voxel size {source_voxel} um does not match "
+                    f"eligible volume {eligible_voxel} um"
+                ),
+            )
+
+    model_voxel = contract.get("model_voxel_size_um")
+    if (
+        isinstance(model_voxel, bool)
+        or not isinstance(model_voxel, (int, float))
+        or float(model_voxel) <= 0
+    ):
+        _error(
+            errors,
+            "GP_MODEL_VOXEL",
+            f"{p}.model_voxel_size_um",
+            "positive model voxel size in micrometers is required",
+        )
+
+    resampling = contract.get("resampling")
+    if resampling not in {"none", "explicit"}:
+        _error(
+            errors,
+            "GP_MODEL_RESAMPLING",
+            f"{p}.resampling",
+            "resampling must be 'none' or 'explicit'",
+        )
+    elif (
+        resampling == "none"
+        and isinstance(source_voxel, (int, float))
+        and not isinstance(source_voxel, bool)
+        and isinstance(model_voxel, (int, float))
+        and not isinstance(model_voxel, bool)
+        and not math.isclose(
+            float(source_voxel), float(model_voxel), rel_tol=1e-9, abs_tol=1e-6
+        )
+    ):
+        _error(
+            errors,
+            "GP_MODEL_RESAMPLING",
+            f"{p}.model_voxel_size_um",
+            "resampling='none' requires model and source voxel sizes to match",
+        )
+
+    window = contract.get("window_voxels_zyx")
+    if (
+        not isinstance(window, list)
+        or len(window) != 3
+        or not all(isinstance(v, int) and not isinstance(v, bool) and v > 0 for v in window)
+    ):
+        _error(
+            errors,
+            "GP_MODEL_WINDOW",
+            f"{p}.window_voxels_zyx",
+            "positive integer [z,y,x] model window is required",
+        )
+
+    profile = contract.get("preprocessing_profile")
+    if not isinstance(profile, dict):
+        _error(
+            errors,
+            "GP_MODEL_PREPROCESSING",
+            f"{p}.preprocessing_profile",
+            "public hash-pinned preprocessing profile is required",
+        )
+    else:
+        _check_public_url(
+            profile.get("public_url"),
+            f"{p}.preprocessing_profile.public_url",
+            errors,
+            "GP_MODEL_PREPROCESSING",
+        )
+        sha = profile.get("sha256")
+        if not isinstance(sha, str) or not SHA256_RE.fullmatch(sha):
+            _error(
+                errors,
+                "GP_MODEL_PREPROCESSING",
+                f"{p}.preprocessing_profile.sha256",
+                "preprocessing profile must be pinned by lowercase 64-hex sha256",
+            )
+
+    return contract
+
+
 def _verify_ink_evidence(
     *,
     validation_id: str,
@@ -558,6 +905,22 @@ def _verify_ink_evidence(
             "GP_INK_EVIDENCE_WINDOW",
             f"{p}.model_window_voxels_zyx",
             "positive integer [z,y,x] model window is required",
+        )
+
+    contract = model.get("input_contract")
+    contract_window = (
+        contract.get("window_voxels_zyx") if isinstance(contract, dict) else None
+    )
+    if (
+        isinstance(window, list)
+        and isinstance(contract_window, list)
+        and window != contract_window
+    ):
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_WINDOW",
+            f"{p}.model_window_voxels_zyx",
+            "held-out evaluation window must match the submitted model input contract",
         )
 
     control_names = evidence.get("control_names")
@@ -887,6 +1250,8 @@ def validate_manifest(
         )
 
     zarr_audit = ct.get("zarr_audit")
+    zpa_report: dict[str, Any] | None = None
+    source_attestation: dict[str, Any] | None = None
     if not isinstance(zarr_audit, dict):
         _error(
             errors,
@@ -895,31 +1260,12 @@ def validate_manifest(
             "zarr-pyramid-audit provenance record is required",
         )
     else:
-        if zarr_audit.get("tool") != "zarr-pyramid-audit":
-            _error(
-                errors,
-                "GP_CT_AUDIT",
-                "ct_volume.zarr_audit.tool",
-                "tool must be 'zarr-pyramid-audit'",
-            )
-        audit_sha = zarr_audit.get("manifest_sha256")
-        if not isinstance(audit_sha, str) or not SHA256_RE.fullmatch(audit_sha):
-            _error(
-                errors,
-                "GP_CT_AUDIT",
-                "ct_volume.zarr_audit.manifest_sha256",
-                "audit manifest sha256 is required",
-            )
-        audit_root = zarr_audit.get("root")
-        if not isinstance(audit_root, str) or (
-            isinstance(volume_id, str) and volume_id not in audit_root
-        ):
-            _error(
-                errors,
-                "GP_CT_AUDIT",
-                "ct_volume.zarr_audit.root",
-                "audit root must identify the exact eligible volume",
-            )
+        zpa_report, source_attestation = _verify_zpa_evidence(
+            zarr_audit=zarr_audit,
+            root_dir=root_dir,
+            volume_id=str(volume_id),
+            errors=errors,
+        )
 
     datasets = _index(manifest.get("datasets"), "datasets", errors)
     regions = _index(manifest.get("region_sets"), "region_sets", errors)
@@ -1063,6 +1409,14 @@ def validate_manifest(
                     f"{p}.training_dataset_ids",
                     f"unknown dataset {dataset_id!r}",
                 )
+
+        _validate_model_input_contract(
+            model_id=model_id,
+            model=model,
+            target=target,
+            source_attestation=source_attestation,
+            errors=errors,
+        )
 
         stochastic = model.get("stochastic")
         if not isinstance(stochastic, dict):
@@ -1541,6 +1895,16 @@ def validate_manifest(
                     if isinstance(model_id, str)
                     else None
                 ),
+                "input_contract": (
+                    models.get(model_id, {}).get("input_contract")
+                    if isinstance(model_id, str)
+                    else None
+                ),
+                "source_metadata_semantics_sha256": (
+                    source_attestation.get("metadata_semantics_sha256")
+                    if isinstance(source_attestation, dict)
+                    else None
+                ),
                 "region_exclusion": proof,
             }
         )
@@ -1605,6 +1969,13 @@ def validate_manifest(
         "warnings": warnings,
         "render_chains": chains,
         "held_out_validation_proofs": held_out_proofs,
+        "zarr_audit_proof": {
+            "root": zpa_report.get("root") if isinstance(zpa_report, dict) else None,
+            "integrity": (
+                zpa_report.get("integrity") if isinstance(zpa_report, dict) else None
+            ),
+            "source_attestation": source_attestation,
+        },
         "recto_coverage_proof": recto_coverage_proof,
     }
 
