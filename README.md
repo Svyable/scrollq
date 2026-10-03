@@ -221,6 +221,32 @@ produced with an exact `--volume-root` can be carried by
 `scroliq-passport --fiber-audit ...` as partial Fiber IQ evidence while still
 refusing to infer physical fiber or sheet identity.
 
+## Ink-blind flattening comparison
+
+`scroliq-flatten-compare` is the promotion gate for alternative column
+parameterizations. It compares two OBJ UV layouts only when their ordered 3-D
+vertices/faces are identical, reuses `scroliq-obj`'s Jacobian-stretch and
+foldover metrics, requires a permissively licensed pinned implementation, and
+never consumes ink or legibility signals.
+
+```bash
+scroliq-flatten-compare \
+  --baseline-obj out/column_01.vc3d.obj \
+  --candidate-obj out/column_01.beltrami.obj \
+  --candidate-method beltrami-coefficient-prolongation \
+  --source-ref doi:10.1111/cgf.70341 \
+  --implementation-ref git:<pinned-commit> \
+  --implementation-license MIT \
+  --out out/column_01.flatten-compare.json \
+  --require-promote
+```
+
+The motivating 2026 Beltrami-prolongation paper is treated as a candidate
+method, not as papyrus evidence. The paper is CC BY 4.0; ScrolIQ does not assume
+that an external software implementation is permissively licensed. See
+[`docs/flattening-benchmark.md`](docs/flattening-benchmark.md) for the sealed
+A/B protocol and post-promotion TIFXYZ/VC3D gates.
+
 ## Mesh IQ: native TIFXYZ audit
 
 `scroliq-mesh` audits one native Vesuvius TIFXYZ surface without rewriting it:
