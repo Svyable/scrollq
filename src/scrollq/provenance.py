@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from .grand_prize import DEFAULT_MANIFEST
+from .package_hash import sha256_path
 from .recto_coverage import audit_recto_coverage
 
 SCHEMA_VERSION = 4
@@ -435,17 +436,27 @@ def _verify_local_file(
             )
         return
 
-    target = (root_dir / rel).resolve()
+    candidate = root_dir / rel
+    target = candidate.resolve()
     try:
         target.relative_to(root_dir.resolve())
     except ValueError:
         _error(errors, "GP_PATH_ESCAPE", f"{path}.path", "path escapes package root")
         return
-    if not target.is_file():
-        _error(errors, "GP_FILE_MISSING", f"{path}.path", f"file not found: {rel}")
+    if not candidate.exists():
+        _error(errors, "GP_FILE_MISSING", f"{path}.path", f"path not found: {rel}")
         return
     if isinstance(digest, str) and SHA256_RE.fullmatch(digest):
-        actual = hashlib.sha256(target.read_bytes()).hexdigest()
+        try:
+            actual = sha256_path(candidate)
+        except (OSError, ValueError) as exc:
+            _error(
+                errors,
+                "GP_PATH_UNSUPPORTED",
+                f"{path}.path",
+                f"cannot hash package path {rel}: {exc}",
+            )
+            return
         if actual != digest:
             _error(
                 errors,
