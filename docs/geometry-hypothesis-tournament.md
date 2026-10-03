@@ -61,8 +61,9 @@ Every report must agree on:
 - held-out denominator;
 - exact target IDs and reference coordinates.
 
-The tournament also recomputes report counts, hit rate, median error and maximum
-error from each target row before comparing candidates. Duplicate prediction
+The tournament also recomputes every per-target residual from reference and
+predicted XYZ, then recomputes report counts, hit rate, median error and maximum
+error before comparing candidates. Duplicate prediction
 hashes are rejected so the same evidence cannot be presented as two competing
 methods.
 
