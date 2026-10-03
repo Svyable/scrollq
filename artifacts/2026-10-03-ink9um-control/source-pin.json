@@ -13,7 +13,8 @@
     "license_evidence": [
       "https://github.com/Nieuwlaar/ink9um-dense-native/blob/217e7521670db49cde97872ea6a8bdfb80c449f1/README.md",
       "https://github.com/Nieuwlaar/ink9um-dense-native/blob/217e7521670db49cde97872ea6a8bdfb80c449f1/weights/VERIFY.md"
-    ]
+    ],
+    "training_reproduce_blob_sha": "aee10c13828abe52a07ef2206c144267ec2464ae"
   },
   "checkpoint": {
     "path": "weights/soup42_last4.safetensors",
@@ -25,8 +26,9 @@
   "watch_checkpoint": {
     "path": "weights/dense_native_016000.safetensors",
     "sha256": "d3d95dc41dcb24ed76b84b5e12ca5dae25d7fb34edf1dfbb93e0186f91e6fc6d",
-    "status": "WATCH",
-    "reason": "pseudo-label lineage and Grand Prize publication/tracking requirements must be independently bound before use"
+    "status": "WATCH_BLOCKED_CURRENT_PUBLIC_EVIDENCE",
+    "reason": "training/REPRODUCE.md at the pinned source says raw training checkpoints are not in the repository and only the stripped step-16000 state_dict ships; current Grand Prize pseudo-label rules require every stage checkpoint to be public under CC-BY-NC 4.0",
+    "public_evidence_gap": "no public evidence verified here for all intermediate pseudo-label training checkpoints"
   },
   "data_terms": {
     "default_license": "CC-BY-NC 4.0",
