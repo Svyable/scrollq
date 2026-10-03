@@ -89,6 +89,26 @@ scroll is a different input, even when it is visually or scientifically
 preferable. `scroliq-manifest`, `scroliq-provenance`, and the ZPA source
 attestation exist to make that substitution mechanically visible.
 
+## Output-preserving performance changes
+
+Runtime is part of practical reproducibility: an automated unrolling stage that
+takes hours on common tangled growths can prevent seed search and full-scroll
+coverage even when its algorithm is otherwise correct. Optimize such stages,
+but separate speed evidence from correctness evidence.
+
+For a claimed output-preserving acceleration:
+
+- run baseline and candidate on independent fresh copies of the same inputs;
+- keep deterministic result ordering even when computation is parallelized;
+- compare the complete downstream output trees, not only headline meshes;
+- use `scroliq-hash` to bind each tree and retain per-file comparison evidence
+  when a digest differs;
+- record timing methodology, machine load, thread count, and all completed runs;
+- keep crash guards distinct from fixes for corrupt or stale inputs.
+
+The bad-patch case study and `scroliq-growth-preflight` are documented in
+[`docs/badpatch-growth-preflight.md`](docs/badpatch-growth-preflight.md).
+
 ## Embargoed discoveries
 
 Generic code, required public model/data releases, and non-discovery-specific
