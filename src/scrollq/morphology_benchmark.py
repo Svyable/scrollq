@@ -37,6 +37,7 @@ REQUIRED_COLUMNS = {
     "sample_id",
     "width_px",
     "height_px",
+    "pixel_count",
     "raw_height_txt",
     "normalized_height_tif",
     "label_png",
@@ -398,6 +399,10 @@ def _validate_spec(
     if spec.get("source_split") != "leave-one-papyrus-out":
         raise BenchmarkError("spec source_split must be leave-one-papyrus-out")
 
+    expected_sample_count = _positive_int(
+        spec.get("expected_sample_count"), "expected_sample_count"
+    )
+
     names = spec.get("descriptors")
     if (
         not isinstance(names, list)
@@ -475,6 +480,7 @@ def _validate_spec(
             raise BenchmarkError(f"selection_contract.{key} must be false")
 
     return {
+        "expected_sample_count": expected_sample_count,
         "descriptors": list(names),
         "max_pixels": max_pixels,
         "border": border,
@@ -500,6 +506,11 @@ def _prepare_sample(
     height = _positive_int(row.get("height_px"), f"{sample_id}.height_px")
     width = _positive_int(row.get("width_px"), f"{sample_id}.width_px")
     shape = (height, width)
+    pixel_count = _positive_int(row.get("pixel_count"), f"{sample_id}.pixel_count")
+    if pixel_count != height * width:
+        raise BenchmarkError(
+            f"{sample_id}: pixel_count {pixel_count} != width*height {width * height}"
+        )
 
     norm_path = data_root / row["normalized_height_tif"]
     label_path = data_root / row["label_png"]
@@ -661,6 +672,11 @@ def run_benchmark(
     config = _validate_spec(spec, control_sha256=control_sha, control=control)
     rows = _read_rows(dataset_manifest_path)
     dataset_manifest_sha = _sha256(dataset_manifest_path)
+    if len(rows) != config["expected_sample_count"]:
+        raise BenchmarkError(
+            f"dataset manifest has {len(rows)} samples; "
+            f"expected {config['expected_sample_count']}"
+        )
 
     expected_keys = {
         _canon_papyrus(name)
