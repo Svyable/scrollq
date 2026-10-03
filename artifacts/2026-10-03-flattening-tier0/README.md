@@ -95,3 +95,27 @@ decision requires the separate Tier-1 experiment from issue #114:
 
 This distinction is deliberate. Small convenient fixtures are excellent for
 engineering but must not become evidence for a full-column Grand Prize claim.
+
+
+## Real-data expected-HOLD control
+
+`.github/workflows/flattening-tier0-control.yml` is a narrowly scoped public-data
+negative-control workflow. It runs when the Tier-0 artifact or the comparator
+changes, and can also be dispatched manually.
+
+The workflow:
+
+1. downloads and hash-verifies the three pinned public OBJ fixtures;
+2. replays their frozen `scroliq-obj` audit facts;
+3. canonical-round-trips each OBJ without changing geometry or UV mappings;
+4. runs `scroliq-flatten-compare`;
+5. requires the verdict to be exactly `HOLD` with zero p95 improvement and all
+   required safety gates passing.
+
+A `PROMOTE` verdict from this control is a test failure, not a success. It
+would mean the evidence path is incorrectly manufacturing an improvement from
+an unchanged parameterization.
+
+The workflow uploads only `verification.json` and `*.compare.json` evidence.
+Source and round-tripped OBJ bytes are deliberately excluded from Actions
+artifacts so the CC BY-NC 4.0 mesh data are not republished by this repository.

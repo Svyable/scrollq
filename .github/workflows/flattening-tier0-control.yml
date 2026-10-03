@@ -1,0 +1,107 @@
+name: Flattening Tier-0 control
+
+on:
+  pull_request:
+    paths:
+      - "artifacts/2026-10-03-flattening-tier0/**"
+      - "src/scrollq/flattening_compare.py"
+      - "src/scrollq/obj_audit.py"
+      - ".github/workflows/flattening-tier0-control.yml"
+  push:
+    branches: [main]
+    paths:
+      - "artifacts/2026-10-03-flattening-tier0/**"
+      - "src/scrollq/flattening_compare.py"
+      - "src/scrollq/obj_audit.py"
+      - ".github/workflows/flattening-tier0-control.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-real-data-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install ScrollQ
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+          python -m pip install .
+
+      - name: Verify pinned public Tier-0 sources
+        run: |
+          python artifacts/2026-10-03-flattening-tier0/verify.py \
+            --out-dir out/flattening-tier0 \
+            --report out/flattening-tier0/verification.json
+
+      - name: Run canonical round-trip negative controls
+        run: |
+          set -euo pipefail
+          mkdir -p out/flattening-tier0/reports
+          for obj in out/flattening-tier0/*.obj; do
+            id="$(basename "$obj" .obj)"
+            candidate="out/flattening-tier0/${id}.control.obj"
+            report="out/flattening-tier0/reports/${id}.compare.json"
+
+            python artifacts/2026-10-03-flattening-tier0/roundtrip_control.py \
+              --source "$obj" \
+              --out "$candidate"
+
+            scroliq-flatten-compare \
+              --baseline-obj "$obj" \
+              --candidate-obj "$candidate" \
+              --candidate-method canonical-obj-roundtrip-negative-control \
+              --source-ref scrollq:artifacts/2026-10-03-flattening-tier0 \
+              --implementation-ref "git:${GITHUB_SHA}" \
+              --implementation-license MIT \
+              --min-p95-improvement-fraction 0.01 \
+              --out "$report"
+
+            python - "$report" <<'PYCODE'
+          import json
+          import math
+          import sys
+
+          path = sys.argv[1]
+          with open(path, encoding="utf-8") as fh:
+              report = json.load(fh)
+          assert report["decision"]["verdict"] == "HOLD", report["decision"]
+          assert report["inputs"]["geometry_identical"] is True
+          assert math.isclose(
+              report["metrics"]["p95_improvement_fraction"],
+              0.0,
+              rel_tol=0.0,
+              abs_tol=1e-12,
+          )
+          assert all(
+              gate["passed"]
+              for gate in report["gates"]
+              if gate.get("required") is True
+          )
+          print(f"PASS expected HOLD: {path}")
+          PYCODE
+          done
+
+      - name: Assert evidence upload excludes mesh bytes
+        run: |
+          set -euo pipefail
+          test -f out/flattening-tier0/verification.json
+          test "$(find out/flattening-tier0/reports -name '*.compare.json' | wc -l)" -eq 3
+          ! find out/flattening-tier0/reports -type f \( -name '*.obj' -o -name '*.tif' -o -name '*.tifxyz' \) | grep -q .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flattening-tier0-control-evidence
+          path: |
+            out/flattening-tier0/verification.json
+            out/flattening-tier0/reports/*.compare.json
+          if-no-files-found: error
