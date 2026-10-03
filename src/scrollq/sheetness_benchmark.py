@@ -10,7 +10,7 @@ from typing import Any
 
 import numpy as np
 
-SCHEMA = "scroliq-sheetness-benchmark/3"
+SCHEMA = "scroliq-sheetness-benchmark/4"
 REQUIRED_CONTROL_ROLES = ("normal-offset", "wrong-wrap")
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
@@ -37,7 +37,7 @@ def _require_sha(value: Any, name: str) -> str:
     return value
 
 
-def _coord(value: Any, name: str) -> tuple[int, int, int]:
+def _int_coord(value: Any, name: str) -> tuple[int, int, int]:
     if (
         not isinstance(value, list)
         or len(value) != 3
@@ -45,6 +45,19 @@ def _coord(value: Any, name: str) -> tuple[int, int, int]:
     ):
         raise ValueError(f"{name} must be [z, y, x] integer coordinates")
     return int(value[0]), int(value[1]), int(value[2])
+
+
+def _probe_coord(value: Any, name: str) -> tuple[float, float, float]:
+    if (
+        not isinstance(value, list)
+        or len(value) != 3
+        or any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in value)
+    ):
+        raise ValueError(f"{name} must be [z, y, x] finite numeric coordinates")
+    coord = tuple(float(v) for v in value)
+    if not all(math.isfinite(v) for v in coord):
+        raise ValueError(f"{name} must be finite")
+    return coord  # type: ignore[return-value]
 
 
 def _unit(value: Any, name: str) -> np.ndarray:
@@ -63,23 +76,58 @@ def _unit(value: Any, name: str) -> np.ndarray:
     return vec / norm
 
 
-def _value_at(array: np.ndarray, coord: tuple[int, int, int]) -> tuple[float | None, str | None]:
-    if any(c < 0 or c >= size for c, size in zip(coord, array.shape)):
+def _axis_weights(value: float, size: int) -> tuple[tuple[int, float], ...] | None:
+    if value < 0 or value > size - 1:
+        return None
+    lo = int(math.floor(value))
+    hi = min(lo + 1, size - 1)
+    frac = value - lo
+    if hi == lo or frac == 0:
+        return ((lo, 1.0),)
+    return ((lo, 1.0 - frac), (hi, frac))
+
+
+def _value_at(
+    array: np.ndarray, coord: tuple[float, float, float]
+) -> tuple[float | None, str | None]:
+    axes = [_axis_weights(c, size) for c, size in zip(coord, array.shape)]
+    if any(axis is None for axis in axes):
         return None, "out-of-bounds"
-    value = float(array[coord])
-    if not math.isfinite(value):
-        return None, "non-finite"
-    return value, None
+    value = 0.0
+    for z, wz in axes[0]:  # type: ignore[union-attr]
+        for y, wy in axes[1]:  # type: ignore[union-attr]
+            for x, wx in axes[2]:  # type: ignore[union-attr]
+                sample = float(array[z, y, x])
+                if not math.isfinite(sample):
+                    return None, "non-finite"
+                value += wz * wy * wx * sample
+    return float(value), None
 
 
 def _normal_at(
-    normals: np.ndarray, coord: tuple[int, int, int], reference: np.ndarray
+    normals: np.ndarray,
+    coord: tuple[float, float, float],
+    reference: np.ndarray,
 ) -> tuple[float | None, str | None]:
-    if any(c < 0 or c >= size for c, size in zip(coord, normals.shape[:3])):
+    axes = [_axis_weights(c, size) for c, size in zip(coord, normals.shape[:3])]
+    if any(axis is None for axis in axes):
         return None, "out-of-bounds"
-    pred = np.asarray(normals[coord], dtype=np.float64)
-    if pred.shape != (3,) or not np.isfinite(pred).all():
-        return None, "non-finite"
+
+    pred = np.zeros(3, dtype=np.float64)
+    for z, wz in axes[0]:  # type: ignore[union-attr]
+        for y, wy in axes[1]:  # type: ignore[union-attr]
+            for x, wx in axes[2]:  # type: ignore[union-attr]
+                sample = np.asarray(normals[z, y, x], dtype=np.float64)
+                if sample.shape != (3,) or not np.isfinite(sample).all():
+                    return None, "non-finite"
+                norm = float(np.linalg.norm(sample))
+                if norm <= 0:
+                    return None, "zero-vector"
+                sample = sample / norm
+                if float(np.dot(sample, reference)) < 0:
+                    sample = -sample
+                pred += wz * wy * wx * sample
+
     norm = float(np.linalg.norm(pred))
     if norm <= 0:
         return None, "zero-vector"
@@ -95,9 +143,10 @@ def _validate_rule(rule: Any) -> dict[str, float]:
     if not isinstance(rule, dict):
         raise ValueError("decision_rule is required")
     names = {
-        "min_score_completeness": (0.0, 1.0),
+        "min_localization_completeness": (0.0, 1.0),
         "min_normal_offset_win_fraction": (0.0, 1.0),
         "min_median_normal_offset_margin": (None, None),
+        "min_wrong_wrap_completeness": (0.0, 1.0),
         "min_normal_completeness": (0.0, 1.0),
         "min_median_abs_cosine": (0.0, 1.0),
     }
@@ -164,15 +213,15 @@ def _validate_cutout_manifest(
         raise ValueError("cutout manifest cutout block is required")
     if cutout.get("sha256") != expected_input_sha:
         raise ValueError("cutout manifest sha256 does not match frozen input_sha256")
-    shape = _coord(cutout.get("shape_zyx"), "cutout manifest cutout.shape_zyx")
+    shape = _int_coord(cutout.get("shape_zyx"), "cutout manifest cutout.shape_zyx")
     if cutout.get("dtype") != "uint8":
         raise ValueError("cutout manifest dtype must be uint8")
 
     bbox = manifest.get("bbox_zyx_half_open")
     if not isinstance(bbox, dict):
         raise ValueError("cutout manifest bbox_zyx_half_open is required")
-    start = _coord(bbox.get("start"), "cutout manifest bbox start")
-    stop = _coord(bbox.get("stop"), "cutout manifest bbox stop")
+    start = _int_coord(bbox.get("start"), "cutout manifest bbox start")
+    stop = _int_coord(bbox.get("stop"), "cutout manifest bbox stop")
     if any(a >= b for a, b in zip(start, stop)):
         raise ValueError("cutout manifest bbox must use increasing half-open bounds")
     if tuple(stop[d] - start[d] for d in range(3)) != shape:
@@ -212,8 +261,8 @@ def evaluate(
     cutout_manifest: dict[str, Any],
     cutout_manifest_file_sha256: str,
 ) -> dict[str, Any]:
-    if spec.get("schema_version") != 3:
-        raise ValueError("spec.schema_version must be 3")
+    if spec.get("schema_version") != 4:
+        raise ValueError("spec.schema_version must be 4")
     volume_root = spec.get("volume_root")
     if not isinstance(volume_root, str) or not volume_root.strip():
         raise ValueError("spec.volume_root is required")
@@ -286,8 +335,10 @@ def evaluate(
     rows: list[dict[str, Any]] = []
     normal_offset_margins: list[float] = []
     wrong_wrap_margins: list[float] = []
+    wrong_wrap_scores_all: list[float] = []
     cosines: list[float] = []
-    score_complete_count = 0
+    localization_complete_count = 0
+    wrong_wrap_complete_count = 0
     normal_complete_count = 0
     normal_offset_win_count = 0
     wrong_wrap_win_count = 0
@@ -306,7 +357,7 @@ def evaluate(
         surface = group.get("surface")
         if not isinstance(surface, dict):
             raise ValueError(f"{path}.surface is required")
-        surface_coord = _coord(surface.get("zyx"), f"{path}.surface.zyx")
+        surface_coord = _probe_coord(surface.get("zyx"), f"{path}.surface.zyx")
         reference = _unit(
             surface.get("reference_normal_zyx"),
             f"{path}.surface.reference_normal_zyx",
@@ -322,7 +373,8 @@ def evaluate(
             "normal-offset": [],
             "wrong-wrap": [],
         }
-        control_complete = True
+        normal_offset_complete = True
+        wrong_wrap_complete = True
         for c_index, control in enumerate(controls):
             cpath = f"{path}.controls[{c_index}]"
             if not isinstance(control, dict):
@@ -339,19 +391,26 @@ def evaluate(
                     f"{cpath}.role must be one of {', '.join(REQUIRED_CONTROL_ROLES)}"
                 )
             seen_roles.add(str(role))
-            coord = _coord(control.get("zyx"), f"{cpath}.zyx")
+            coord = _probe_coord(control.get("zyx"), f"{cpath}.zyx")
             score, reason = _value_at(response, coord)
-            if score is None:
-                control_complete = False
+            if role == "normal-offset":
+                if score is None:
+                    normal_offset_complete = False
+                else:
+                    control_scores_by_role["normal-offset"].append(score)
             else:
-                control_scores_by_role[str(role)].append(score)
+                if score is None:
+                    wrong_wrap_complete = False
+                else:
+                    control_scores_by_role["wrong-wrap"].append(score)
+                    wrong_wrap_scores_all.append(score)
             control_rows.append(
                 {
                     "id": cid,
                     "role": role,
                     "zyx": list(coord),
                     "global_zyx": [
-                        int(coord[d] + global_start[d]) for d in range(3)
+                        float(coord[d] + global_start[d]) for d in range(3)
                     ],
                     "score": score,
                     "failure": reason,
@@ -362,27 +421,30 @@ def evaluate(
             raise ValueError(f"{path} missing required control roles: {missing_roles}")
 
         surface_score, surface_failure = _value_at(response, surface_coord)
-        score_complete = surface_score is not None and control_complete
+        localization_complete = surface_score is not None and normal_offset_complete
         normal_offset_margin = None
         wrong_wrap_margin = None
         surface_beats_normal_offsets = False
         surface_beats_wrong_wraps = False
-        if score_complete:
-            score_complete_count += 1
 
+        if localization_complete:
+            localization_complete_count += 1
             normal_scores = control_scores_by_role["normal-offset"]
-            wrong_scores = control_scores_by_role["wrong-wrap"]
             normal_offset_margin = float(surface_score - max(normal_scores))
-            wrong_wrap_margin = float(surface_score - max(wrong_scores))
             normal_offset_margins.append(normal_offset_margin)
-            wrong_wrap_margins.append(wrong_wrap_margin)
-
             surface_beats_normal_offsets = bool(surface_score > max(normal_scores))
-            surface_beats_wrong_wraps = bool(surface_score > max(wrong_scores))
             if surface_beats_normal_offsets:
                 normal_offset_win_count += 1
-            if surface_beats_wrong_wraps:
-                wrong_wrap_win_count += 1
+
+        if wrong_wrap_complete:
+            wrong_wrap_complete_count += 1
+            if surface_score is not None:
+                wrong_scores = control_scores_by_role["wrong-wrap"]
+                wrong_wrap_margin = float(surface_score - max(wrong_scores))
+                wrong_wrap_margins.append(wrong_wrap_margin)
+                surface_beats_wrong_wraps = bool(surface_score > max(wrong_scores))
+                if surface_beats_wrong_wraps:
+                    wrong_wrap_win_count += 1
 
         cosine, normal_failure = _normal_at(normals, surface_coord, reference)
         if cosine is not None:
@@ -395,7 +457,7 @@ def evaluate(
                 "surface": {
                     "zyx": list(surface_coord),
                     "global_zyx": [
-                        int(surface_coord[d] + global_start[d]) for d in range(3)
+                        float(surface_coord[d] + global_start[d]) for d in range(3)
                     ],
                     "score": surface_score,
                     "score_failure": surface_failure,
@@ -404,7 +466,8 @@ def evaluate(
                     "normal_failure": normal_failure,
                 },
                 "controls": control_rows,
-                "score_complete": score_complete,
+                "localization_complete": localization_complete,
+                "wrong_wrap_complete": wrong_wrap_complete,
                 "surface_beats_all_normal_offsets": surface_beats_normal_offsets,
                 "surface_minus_best_normal_offset": normal_offset_margin,
                 "surface_beats_all_wrong_wraps": surface_beats_wrong_wraps,
@@ -413,37 +476,47 @@ def evaluate(
         )
 
     total = len(rows)
-    score_completeness = score_complete_count / total
+    localization_completeness = localization_complete_count / total
+    wrong_wrap_completeness = wrong_wrap_complete_count / total
     normal_completeness = normal_complete_count / total
     normal_offset_win_fraction = normal_offset_win_count / total
     wrong_wrap_win_fraction = wrong_wrap_win_count / total
     median_normal_offset_margin = _median(normal_offset_margins)
     median_wrong_wrap_margin = _median(wrong_wrap_margins)
+    median_wrong_wrap_sheetness = _median(wrong_wrap_scores_all)
     median_abs_cosine = _median(cosines)
 
     metrics = {
         "group_count": total,
-        "score_complete_count": score_complete_count,
-        "score_completeness": score_completeness,
+        "localization_complete_count": localization_complete_count,
+        "localization_completeness": localization_completeness,
         "normal_offset_win_count": normal_offset_win_count,
         "normal_offset_win_fraction": normal_offset_win_fraction,
         "median_surface_minus_best_normal_offset": median_normal_offset_margin,
+        "wrong_wrap_complete_count": wrong_wrap_complete_count,
+        "wrong_wrap_completeness": wrong_wrap_completeness,
         "wrong_wrap_win_count_descriptive": wrong_wrap_win_count,
         "wrong_wrap_win_fraction_descriptive": wrong_wrap_win_fraction,
         "median_surface_minus_best_wrong_wrap_descriptive": median_wrong_wrap_margin,
+        "median_wrong_wrap_sheetness_descriptive": median_wrong_wrap_sheetness,
         "normal_complete_count": normal_complete_count,
         "normal_completeness": normal_completeness,
         "median_abs_cosine": median_abs_cosine,
     }
 
     checks = {
-        "score_completeness": score_completeness >= rule["min_score_completeness"],
+        "localization_completeness": (
+            localization_completeness >= rule["min_localization_completeness"]
+        ),
         "normal_offset_win_fraction": (
             normal_offset_win_fraction >= rule["min_normal_offset_win_fraction"]
         ),
         "median_normal_offset_margin": (
             median_normal_offset_margin is not None
             and median_normal_offset_margin >= rule["min_median_normal_offset_margin"]
+        ),
+        "wrong_wrap_completeness": (
+            wrong_wrap_completeness >= rule["min_wrong_wrap_completeness"]
         ),
         "normal_completeness": normal_completeness >= rule["min_normal_completeness"],
         "median_abs_cosine": (
@@ -495,10 +568,12 @@ def evaluate(
         "claim_boundary": (
             "This result tests whether a frozen sheetness field localizes a candidate "
             "surface relative to deliberate normal offsets on an exact audited CT "
-            "volume. Wrong-wrap/competing-sheet probes are retained as mandatory "
-            "descriptive controls, not a pass/fail target, because another papyrus "
-            "sheet is itself sheet-like. This does not establish physical sheet "
-            "identity/topology or demonstrate readable ink."
+            "volume. Probe values and normals are sampled trilinearly at continuous "
+            "TIFXYZ-compatible coordinates. Wrong-wrap/competing-sheet probes remain "
+            "mandatory ambiguity evidence; their measurement completeness is gated, "
+            "but their score is descriptive because another papyrus sheet is itself "
+            "sheet-like. This does not establish physical sheet identity/topology or "
+            "demonstrate readable ink."
         ),
     }
 
