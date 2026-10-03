@@ -28,7 +28,7 @@ SCHEMA_VERSION = 1
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 TRACKS_IN_ROI_RE = re.compile(
     r"^loaded (?P<count>[0-9][0-9,]*) tracks within z-roi "
-    r"\\[(?P<z_begin>[^,]+), (?P<z_end>[^)]+)\\)$",
+    r"\[(?P<z_begin>[^,]+), (?P<z_end>[^)]+)\)$",
     re.MULTILINE,
 )
 FITTING_PATCHES_RE = re.compile(
