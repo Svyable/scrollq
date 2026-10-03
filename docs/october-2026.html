@@ -126,6 +126,9 @@ as it is done rather than held for month end.</p>
 <p><b>Deliverable.</b> Attach annotation points to verified patches, build the winding graph, and report inconsistent cycles with VC3D coordinates. Include the same kind of injection control as the ray-order check, so the error rate it can detect is measured, not assumed.</p>
 <p><b>Done when.</b> A PHercParis4 run with input hashes, a cycle-consistency count, and a measured detection rate for injected inconsistencies.</p></div>
 <div class="goal" id="o3"><h3><span class="id">O3</span>Spiral IQ: score a fit on constraints it never saw</h3>
+<p><b>Implementation update · 2026-10-03 UTC.</b> The <a href="heldout-geometry-evaluation.md">held-out geometry evaluator</a>
+now provides a hash-bound point-comparison interface with declared fit-input exclusion and missing-prediction accounting.
+This is a foundation, not a completed spiral evaluation: native fitter export, spatial-exclusion evidence and a real fit run remain outstanding.</p>
 <div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: spiral fitting</span><span class="chip crit">insightful, actionable</span><span class="chip state">planned</span><span class="chip gate">needs a GPU fit run</span></div>
 <p><b>Why.</b> The fitter reports how well it satisfies the evidence it was given. A held-out score asks the harder question: does the fit predict annotations that were withheld?</p>
 <p><b>Starting point.</b> Spiral IQ is planned only; the held-out geometry split certificate (<code>scrollq-geometry-probe</code>) exists.</p>
