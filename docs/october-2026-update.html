@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>October 2026 update — ScrolIQ</title>
+<meta name="description" content="ScrolIQ October 2026 monthly update: every result added after the September Progress Prize submission, with its committed evidence.">
+<style>
+:root{--bg:#0d0b08;--panel:#161310;--panel2:#1c1813;--line:#2c251b;
+--ink:#ece3d2;--muted:#a89880;--dim:#6f6350;
+--ember:#ff7a1a;--gold:#ffd166;--amber:#ffb347;
+--good:#8fd694;--warn:#ff9e5e;--bad:#ff6b6b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+-webkit-font-smoothing:antialiased;line-height:1.65}
+a{color:var(--amber)}
+.wrap{max-width:960px;margin:0 auto;padding:0 1.25rem}
+.hero{padding:4rem 0 2.5rem;
+background:radial-gradient(1200px 500px at 70% -10%,rgba(255,122,26,.14),transparent 60%),
+radial-gradient(800px 400px at 15% 110%,rgba(255,209,102,.08),transparent 60%),var(--bg)}
+.eyebrow{letter-spacing:.28em;font-size:.72rem;color:var(--ember);font-weight:700}
+.hero h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2rem,5vw,3.2rem);
+margin:.4rem 0 .2rem;font-weight:700;letter-spacing:-.02em}
+.tagline{font-size:1.2rem;margin:.2rem 0 1rem}
+.tagline em{color:var(--amber);font-style:normal;font-weight:600}
+.byline{color:var(--muted);font-size:.92rem}
+.statusbox{background:rgba(22,19,16,.85);border:1px solid var(--line);border-radius:12px;
+padding:1rem 1.25rem;margin-top:1.5rem;font-size:.9rem;color:var(--muted)}
+.statusbox b{color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-top:2rem}
+.stat{background:rgba(22,19,16,.85);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem}
+.stat .n{font-size:1.8rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.stat .n.good{color:var(--good)} .stat .n.warn{color:var(--warn)}
+.stat .l{font-size:.78rem;color:var(--muted);margin-top:.25rem;line-height:1.4}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.5rem;margin:0 0 1.5rem}
+.panel h2{margin:.1rem 0 1rem;font-family:Georgia,serif;font-size:1.5rem}
+.panel h2 .q{color:var(--ember)}
+.panel p{color:var(--muted);font-size:.95rem}
+.panel p b,.panel li b{color:var(--ink)}
+.panel ul{color:var(--muted);font-size:.95rem}
+.panel li{margin:.5rem 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;margin:.8rem 0}
+thead th{text-align:left;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;
+color:var(--muted);padding:.6rem .5rem;border-bottom:1px solid var(--line)}
+tbody td{padding:.6rem .5rem;border-bottom:1px solid #211c14;vertical-align:top;color:var(--muted)}
+tbody td b{color:var(--ink)}
+tbody tr:hover td{background:#1e1913}
+code{font-size:.8rem;color:var(--amber)}
+.callout{border-left:3px solid var(--ember);padding:.6rem 1rem;background:#171208;
+border-radius:0 8px 8px 0;color:var(--muted);font-size:.93rem;margin-top:1rem}
+.callout.warn{border-left-color:var(--gold)}
+.meta{color:var(--dim);font-size:.85rem}
+.suite{display:flex;gap:1rem;flex-wrap:wrap}
+.suite .card{flex:1;min-width:250px;background:var(--panel2);border:1px solid var(--line);
+border-radius:12px;padding:1.1rem 1.25rem}
+.suite .card h3{margin:0 0 .4rem;font-size:.8rem;letter-spacing:.14em;color:var(--ember);text-transform:uppercase}
+.suite .card p{margin:.3rem 0;font-size:.9rem}
+footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.4rem 0 3rem;color:var(--dim);font-size:.82rem}
+footer a{color:var(--muted)}
+
+.goals{display:grid;gap:1rem}
+.goal{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.25rem}
+.goal h3{margin:0 0 .35rem;font-size:1.05rem}
+.goal h3 .id{color:var(--ember);font-variant-numeric:tabular-nums;margin-right:.4rem}
+.goal p{margin:.35rem 0;font-size:.92rem;color:var(--muted)}
+.goal p b{color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem;margin:.2rem 0 .5rem}
+.chip{font-size:.7rem;letter-spacing:.04em;padding:.12rem .5rem;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.chip.crit{border-color:#5a3a1a;color:var(--amber)}
+.chip.state{border-color:#3a3a24;color:var(--gold)}
+.chip.gate{border-color:#5a2a2a;color:var(--bad)}
+.weeks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.75rem}
+.week{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:.9rem 1rem}
+.week h3{margin:0 0 .3rem;font-size:.8rem;letter-spacing:.12em;color:var(--ember);text-transform:uppercase}
+.week ul{margin:.2rem 0 0 1rem;padding:0;font-size:.88rem}
+@media (max-width:520px){.panel{padding:1.1rem}.goal{padding:.95rem 1rem}}
+</style></head><body>
+</head><body>
+
+<header class="hero"><div class="wrap">
+<div class="eyebrow">VESUVIUS CHALLENGE · OCTOBER 2026 PROGRESS PRIZE · MONTHLY UPDATE</div>
+<h1>ScrolIQ in October: what changed</h1>
+<p class="tagline">Everything added after the September submission, in one place. <em>Real data, measured controls, published failures.</em></p>
+<p class="byline">Update by <b><a href="https://github.com/Svyable">Sven</a></b> (+ Muse, AI assistant) · work from 2026-10-01 onward</p>
+
+<div class="statusbox"><b>How to read this page.</b> The <a href="./september-2026.html">September submission</a> is kept as
+submitted. Every result below landed after its deadline and is dated by its artifact directory. The plan for the rest of
+the month, with exit criteria, is on the <a href="./october-2026.html">October goals page</a>; this page reports what is
+already done. Reviewer shortcut: the <a href="./grand-prize-readiness.html">2027 Grand Prize readiness map</a>.<br>
+<span class="meta">Same evidence rules as September: every number traces to a command and a committed artifact, and missing
+evidence stays <code>unknown</code>. No scan-health score in a frozen September artifact was edited.</span></div>
+
+<div class="stats">
+<div class="stat"><div class="n">1,043</div><div class="l">published segment meshes audited<br>843 TIFXYZ + 200 OBJ, 307 segments</div></div>
+<div class="stat"><div class="n warn">77</div><div class="l">segments flagged on every registration<br>precision under blinded review (O1)</div></div>
+<div class="stat"><div class="n warn">0.750</div><div class="l">Spearman ρ, pre-registered stability v2<br>FAIL vs 0.85 gate → rank bands</div></div>
+<div class="stat"><div class="n good">2 / 13,700</div><div class="l">PHercParis4 winding pairs out of order<br>both sub-voxel; recall measured</div></div>
+</div>
+</div></header>
+
+<main class="wrap" style="margin-top:2.5rem">
+
+<div class="panel"><h2>Update log</h2>
+<ul>
+<li><b>2026-10-01 · Mesh IQ on real segments.</b> All 21 published Grand Prize segment meshes audited; one broken
+PHerc1447 segment found (<code>20251105093211-z_dbg_gen_00320</code>).</li>
+<li><b>2026-10-01 · Mesh IQ on the whole public corpus.</b> Every published segment mesh in the open bucket: 843 of 903
+TIFXYZ and all 200 original OBJs; 77 of 307 segments flagged with three or more defect kinds. New
+<code>scroliq-obj</code> reads triangle meshes; new <a href="usage-by-format.md">usage guide by format</a>; comparison
+with existing tools (<a href="https://github.com/Svyable/scrollq/pull/49">#49</a>).</li>
+<li><b>2026-10-01 · Truly-disjoint stability.</b> Two-phase exclusion makes the resample disjoint by construction
+(64/64 zero chunk overlap): ρ = 0.63, replacing the inflated 0.7944.</li>
+<li><b>2026-10-01 · Winding IQ on real annotations and fail-closed health.</b> PHercParis4 ray-order audit with an
+injection control; <code>scrollq-health</code> treats missing integrity evidence as DO NOT TRAIN; companion pinned to
+zarr-pyramid-audit 0.4.0 (<a href="https://github.com/Svyable/scrollq/pull/55">#55</a>).</li>
+<li><b>2026-10-01 · VC3D-native Fiber IQ.</b> <code>scroliq-fiber</code> reads <code>vc3d_fiber</code> JSON v1/v3/v4,
+binds to exact CT roots, and has a frozen public PHercParis4 campaign
+(<a href="https://github.com/Svyable/scrollq/pull/52">#52</a>–<a href="https://github.com/Svyable/scrollq/pull/54">#54</a>,
+<a href="https://github.com/Svyable/scrollq/pull/56">#56</a>).</li>
+<li><b>2026-10-01 · Pre-registrations.</b> Mesh-flag review protocol and blinded sample (O1); stability v2 protocol with
+a balanced, interleaved sample (O5, <a href="https://github.com/Svyable/scrollq/pull/60">#60</a>).</li>
+<li><b>2026-10-01 · Stability v2 result.</b> Pre-registered verdict FAIL (ρ = 0.750); the leaderboard now shows
+reproducible rank bands instead of ranks (<a href="https://github.com/Svyable/scrollq/pull/61">#61</a>,
+<a href="https://github.com/Svyable/scrollq/pull/62">#62</a>).</li>
+<li><b>2026-10-01 · Scoring hygiene.</b> Dead-slice penalty budget sensitivity made explicit, results versioned as
+<code>scan-health-v1</code> (<a href="https://github.com/Svyable/scrollq/pull/63">#63</a>); companion pinned to a
+full commit SHA in package metadata too (<a href="https://github.com/Svyable/scrollq/pull/64">#64</a>);
+TRAIN now requires complete quality evidence (<a href="https://github.com/Svyable/scrollq/pull/66">#66</a>).</li>
+<li><b>2026-10-02 · Grand Prize reviewer path.</b> <a href="./grand-prize-readiness.html">Readiness map</a> and an
+exact-volume Grand Prize mesh cross-cut.</li>
+</ul></div>
+
+<div class="panel"><h2><span class="q">1</span> Mesh IQ: from 21 meshes to the whole public corpus</h2>
+<ul>
+<li><b>Grand Prize meshes.</b> All 21 published TIFXYZ meshes for the two targets with public segments, audited
+against each target's exact eligible CT volume. All 6 PHerc0800 meshes pass; 14 of 15 PHerc1447 meshes are coherent
+with enclosed holes flagged for review; <code>20251105093211-z_dbg_gen_00320</code> is broken (153 disconnected pieces,
+1,335 edge jumps, 386 severe normal reversals, p95 local stretch 5.07).</li>
+<li><b>Every published segment mesh.</b> 307 segments on 11 scrolls. Tiers count distinct finding kinds: TIFXYZ 189
+clean, 462 review, 192 multi-defect; OBJ 47 / 88 / 65. 77 segments are multi-defect on every registration
+(PHercParis4 27, PHerc0500P2 25, PHerc0814 12, PHerc0172 11, PHerc1447 1, PHerc1667 1). The 60 largest TIFXYZ meshes
+ran out of memory on a 16 GB runner and are listed with that reason, so the artifact is marked partial.</li>
+<li><b>Controls.</b> The hand-confirmed broken PHerc1447 segment is flagged in both formats; all 26
+<code>z_dbg</code>-named segments are flagged; TIFXYZ and OBJ agree on 175 of 185 segments.</li>
+<li><b>Triangle meshes.</b> <code>scroliq-obj</code> applies the same finding kinds to Wavefront OBJ and adds
+non-manifold edges, inconsistent winding (kept separate from real folds), degenerate faces and folded-over UV
+triangles. An OBJ with no faces fails rather than passing.</li>
+<li><b>Exact-volume Grand Prize cross-cut.</b> Only 2 of the 13 eligible volumes have published exact-volume segment
+meshes: PHerc0800 (6 meshes, all clean) and PHerc1447 (15 meshes, 14 review, 1 multi-defect). The other 11 are an
+evidence gap, not a pass.</li>
+<li><b>How often are the flags right?</b> Not known yet. The review protocol is frozen in
+<a href="mesh-review-protocol.md"><code>mesh-review-protocol.md</code></a> and a blinded sample of 54 segments (30
+flagged, 4 debug controls, 20 clean) is drawn and awaiting VC3D review. No precision is claimed until it is labelled.</li>
+</ul></div>
+
+<div class="panel"><h2><span class="q">2</span> Scan-health stability: measured honestly, then acted on</h2>
+<ul>
+<li><b>Truly disjoint.</b> The September resample re-read 63% of chunks between "disjoint" runs. With exclusion by
+construction (64/64 zero overlap), Spearman ρ = 0.63, mean |Δ| = 7.95, top-10 overlap 4/10.</li>
+<li><b>Pre-registered v2.</b> A balanced, interleaved sample (48 chunks per run, spread 7) was frozen before any data
+was read. Verdict <b>FAIL</b>: ρ = 0.750 on 48 eligible volumes, mean |Δ| 2.94, top-10 overlap 7/10, no shared chunk.
+The systematic run shift fell from +5.46 to +0.25 and Pearson r is 0.911: scores are reliable, but close volumes still
+swap ranks.</li>
+<li><b>Consequence applied.</b> The leaderboard rank column now shows each volume's rank band (best and worst rank
+across run A, run B and their pooled score). The September scores differ from the v2 pooled score by 6.92 points on
+average, so the Grand Prize and First Letters frontiers need a new dated campaign; the September artifacts stay
+frozen.</li>
+<li><b>Known policy sensitivity.</b> The dead-slice penalty sums detections, so it depends on the chunk budget (15
+points at 6 chunks, the 30-point cap from 12). Made explicit and versioned, not silently changed.</li>
+</ul></div>
+
+<div class="panel"><h2><span class="q">3</span> Integrity: missing evidence never trains</h2>
+<p><code>scrollq-health</code> now fails closed. An unreadable level, an absent root or a crashed audit is DO NOT
+TRAIN, never a pass. TRAIN additionally requires finite quality of at least 40/100 and sampling provenance showing
+every requested chunk decoded. The live re-run reproduces the published verdicts (PHerc0814 DO NOT TRAIN, PHerc0813
+TRAIN) and adds an absent-root negative control.</p></div>
+
+<div class="panel"><h2><span class="q">4</span> Winding and fiber evidence on real data</h2>
+<ul>
+<li><b>Winding IQ.</b> Published PHercParis4 <code>spiral-input</code> annotations: 2 of 13,700 comparable pairs out
+of radial order around the umbilicus, both under 0.1 voxel. Injecting one mis-numbered real point at a time, the check
+catches ±3 errors 179/200, ±5 171/200, and ±2 0/191 by design.</li>
+<li><b>Fiber IQ.</b> Reads native VC3D <code>vc3d_fiber</code> JSON v1/v3/v4 and CSV, validates tracer and fallback
+provenance, can gate CI, and binds to an exact CT root for passports. A frozen public PHercParis4 run covers 8
+hash-pinned fibers and 53,828 rendered points: 11 gap and 26 sharp-turn candidates, 0 control-line offsets or order
+inversions. The public directory is not asserted to name one CT volume, so this is not passport evidence.</li>
+</ul></div>
+
+<div class="panel"><h2><span class="q">5</span> Formats and documentation</h2>
+<ul>
+<li><b><a href="usage-by-format.md">Usage by format</a></b> maps OME-Zarr v3 (sharded) and v2, TIFXYZ, OBJ,
+PointCollections, fiber CSV/JSON and ink arrays to the command that reads each.</li>
+<li><b><a href="./grand-prize-readiness.html">Grand Prize readiness map</a></b> marks every 2027 requirement as
+implemented evidence, partial, or not yet demonstrated, with links, and deliberately gives no readiness score.</li>
+</ul></div>
+
+<div class="panel"><h2>How ScrolIQ compares with existing tools</h2>
+<p>ScrolIQ does not replace the community's tools; it reads their outputs and checks them against the
+exact data they claim to describe. Where a tool already does a job well, ScrolIQ consumes its report
+instead of reimplementing it.</p>
+<table><thead><tr><th>Job</th><th>Existing tool or practice</th><th>What ScrolIQ adds</th></tr></thead><tbody>
+<tr><td>Non-local self-intersection of a TIFXYZ surface</td><td>VC3D <code>vc_tifxyz_selfcross</code></td>
+<td>Validates that report against the exact surface path and grid, fails closed on a stale or mismatched
+report, and adds the local checks selfcross does not make: components, enclosed holes, edge jumps,
+folds and Jacobian isometry</td></tr>
+<tr><td>CT support of a surface</td><td>Villa <code>vesuvius.surface_preflight</code></td>
+<td>Binds the report to the exact volume root and surface, and refuses a report made on a different
+scan of the same scroll</td></tr>
+<tr><td>Finding broken segments</td><td>Opening segments one at a time in a viewer</td>
+<td>One command over every published mesh, in TIFXYZ and OBJ, with a dated, reproducible flag list
+(903 + 200 meshes, 77 segments flagged on every registration)</td></tr>
+<tr><td>Zarr store integrity</td><td>Reading the volume and noticing errors downstream</td>
+<td><code>scrollq-health</code> runs zarr-pyramid-audit and refuses to call a corrupt or unverifiable volume trainable</td></tr>
+<tr><td>Choosing which volume to label or train on next</td><td>We found no published per-volume scan
+comparison</td><td>A scan-health survey of all 64 volcomp volumes with sampling provenance, a published
+stability failure with rank bands, and a weight-free Grand Prize frontier</td></tr>
+</tbody></table></div>
+
+<div class="panel"><h2>Evidence</h2>
+<table><thead><tr><th>claim</th><th>evidence (in repo)</th></tr></thead><tbody>
+<tr><td><b>Real-segment mesh audit:</b> 21 Grand Prize meshes; PHerc0800 6/6 pass; PHerc1447 14/15 holes flagged
+for review, 1 broken</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-real-mesh-audit"><code>artifacts/2026-10-01-real-mesh-audit/</code></a> —
+<code>run.sh</code>, per-segment reports with SHA-256s, <code>summary.json</code></td></tr>
+<tr><td><b>Corpus-wide mesh audit:</b> 843/903 TIFXYZ + 200/200 OBJ; 77/307 segments flagged; controls flagged; formats
+agree on 175/185. Review candidates, not confirmed defects</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-corpus-mesh-audit"><code>artifacts/2026-10-01-corpus-mesh-audit/</code></a> —
+<code>run.sh</code>, <code>summary.json</code>, <code>flagged.tsv</code>, <code>failed.tsv</code></td></tr>
+<tr><td><b>Exact-volume Grand Prize cross-cut:</b> 2/13 eligible volumes have published meshes</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-02-grand-prize-mesh-crosscut"><code>artifacts/2026-10-02-grand-prize-mesh-crosscut/</code></a></td></tr>
+<tr><td><b>Mesh-flag review:</b> protocol frozen, 54-segment blinded sample drawn; no labels yet</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-mesh-review-sample"><code>artifacts/2026-10-01-mesh-review-sample/</code></a>,
+<a href="mesh-review-protocol.md"><code>mesh-review-protocol.md</code></a></td></tr>
+<tr><td><b>Truly-disjoint stability:</b> ρ = 0.63, |Δ| 7.95, top-10 4/10, 64/64 zero overlap</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-truly-disjoint"><code>artifacts/2026-10-01-truly-disjoint/</code></a></td></tr>
+<tr><td><b>Stability v2 (pre-registered):</b> FAIL, ρ = 0.750 on 48 volumes; rank bands on the leaderboard</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-stability-v2"><code>artifacts/2026-10-stability-v2/</code></a>,
+<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-stability-v2-prereg"><code>artifacts/2026-10-01-stability-v2-prereg/</code></a>,
+<a href="stability-v2-protocol.md"><code>stability-v2-protocol.md</code></a></td></tr>
+<tr><td><b>Score refactor changed no score or sample</b></td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-score-equivalence"><code>artifacts/2026-10-01-score-equivalence/</code></a></td></tr>
+<tr><td><b>Dead-slice penalty is chunk-budget sensitive</b> (synthetic, deterministic)</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-dead-slice-sensitivity"><code>artifacts/2026-10-01-dead-slice-sensitivity/</code></a></td></tr>
+<tr><td><b>Fail-closed health verdicts:</b> PHerc0814 DO NOT TRAIN (6 high <code>LEVEL_NO_CHUNKS</code>), PHerc0813 TRAIN
+(quality 76.2), a v2 dev mesh CAUTION, a non-existent root DO NOT TRAIN</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-health-verdicts-fail-closed"><code>artifacts/2026-10-01-health-verdicts-fail-closed/</code></a>;
+tests in <code>tests/test_health.py</code></td></tr>
+<tr><td><b>Winding ray order:</b> 2/13,700 pairs inverted, both sub-voxel; injection recall ±3 179/200, ±5 171/200,
+±2 0/191 by design</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-paris4-winding-ray-order"><code>artifacts/2026-10-01-paris4-winding-ray-order/</code></a></td></tr>
+<tr><td><b>Public Fiber IQ:</b> 8 hash-pinned fibers, 53,828 points; 11 gap, 26 sharp-turn candidates; not passport
+evidence</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-public-fiber-audit"><code>artifacts/2026-10-01-public-fiber-audit/</code></a></td></tr>
+</tbody></table></div>
+
+<div class="panel"><h2>Honest scope</h2>
+<p><b>The 0–100 ScrolIQ score is scan-health triage only.</b> It is not readability, surface quality, ink quality,
+or Grand Prize readiness, and its ranking failed our own stability gate twice. Mesh, winding and fiber flags are
+review candidates: none has been confirmed by a person in VC3D yet, and nothing has been filed upstream. Local mesh
+checks do not prove a surface follows the papyrus sheet.</p></div>
+
+</main>
+<footer><div class="wrap">
+<a href="./">← live evaluator dashboard</a> · <a href="./october-2026.html">October 2026 goals</a> ·
+<a href="./grand-prize-readiness.html">Grand Prize readiness</a> · <a href="./september-2026.html">September 2026 submission</a> ·
+<a href="https://github.com/Svyable/scrollq">source</a> · Built by Sven + Muse · October 2026
+</div></footer>
+</body></html>

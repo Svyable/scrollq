@@ -195,7 +195,7 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
   <div class="navlinks">
     <a href="#grand-prize">Grand Prize</a><a href="#evidence">Evidence</a>
     <a href="#leaderboard">Survey</a><a href="#method">Method</a>
-    <a href="./september-2026.html">Writeup</a><a href="./october-2026.html">October goals</a><a href="{repo}">GitHub</a>
+    <a href="./september-2026.html">Writeup</a><a href="./october-2026-update.html">October update</a><a href="./october-2026.html">October goals</a><a href="{repo}">GitHub</a>
   </div>
   <span class="navstatus">● reproducible evidence</span>
 </div></nav>
@@ -381,6 +381,7 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
   weights, don't worship the ranking. Companion:
   <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>.
   · <a href="./september-2026.html">September 2026 writeup →</a>
+  · <a href="./october-2026-update.html">October 2026 update →</a>
   · <a href="./october-2026.html">October 2026 goals →</a>
 </div></footer>
 
