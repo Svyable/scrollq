@@ -26,6 +26,7 @@ DATASET_SCHEMA_VERSION = 1
 TASKS = {"ink_detection", "geometry", "segmentation"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 REGION_KEY_RE = re.compile(r"^[^:\s]+:[^:\s]+$")
+MODEL_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 
 
 def canonical_digest(document: dict[str, Any]) -> str:
