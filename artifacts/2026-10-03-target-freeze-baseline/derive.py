@@ -80,7 +80,7 @@ def _sha256(data: bytes) -> str:
 
 
 def _git_blob_sha1(data: bytes) -> str:
-    return hashlib.sha1(f"blob {len(data)}\\0".encode("ascii") + data).hexdigest()
+    return hashlib.sha1(\n        b"blob " + str(len(data)).encode("ascii") + b"\\0" + data\n    ).hexdigest()
 
 
 def _read_source(name: str) -> dict[str, Any]:

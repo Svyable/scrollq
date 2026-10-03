@@ -4,7 +4,7 @@
 
 ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](https://scrollprize.org/) virtual-unwrapping pipeline. The existing `scrollq` package measures **real level-0 CT voxels** and keeps its current commands for compatibility, but the project is expanding beyond a single volume-quality ranking toward evidence-backed diagnostics for the Challenge's published [2026 Open Problems](https://scrollprize.org/2026_open_problems): scan degradation, surface topology, mesh connectivity, fibers, winding annotations, spiral fitting, label quality, ink reliability, and data-scale reproducibility.
 
-**[Live scan-quality survey](https://svyable.github.io/scrollq/)** · **[2027 Grand Prize readiness](https://svyable.github.io/scrollq/grand-prize-readiness.html)** · **[Open-problems alignment](docs/open-problems-alignment.md)** · **[September 2026 Progress Prize write-up](https://svyable.github.io/scrollq/september-2026.html)** · **[October 2026 update](https://svyable.github.io/scrollq/october-2026-update.html)** · **[October 2026 goals](https://svyable.github.io/scrollq/october-2026.html)** · **[Reproducible campaign artifacts](artifacts/2026-09-30-scrollq/)**
+**[Live scan-quality survey](https://svyable.github.io/scrollq/)** · **[October reviewer map](docs/SUBMISSION.md)** · **[2027 Grand Prize readiness](https://svyable.github.io/scrollq/grand-prize-readiness.html)** · **[Open-problems alignment](docs/open-problems-alignment.md)** · **[September 2026 Progress Prize write-up](https://svyable.github.io/scrollq/september-2026.html)** · **[October 2026 update](https://svyable.github.io/scrollq/october-2026-update.html)** · **[October 2026 goals](https://svyable.github.io/scrollq/october-2026.html)** · **[Reproducible campaign artifacts](artifacts/2026-09-30-scrollq/)**
 
 > The existing 0–100 ScrolIQ score is a **scan-health triage signal, not a readability or Grand Prize readiness score**. ScrolIQ treats unmeasured downstream stages as unknown rather than inferring them from CT quality.
 
@@ -225,20 +225,28 @@ refusing to infer physical fiber or sheet identity.
 
 ## Ink-blind flattening comparison
 
-`scroliq-flatten-compare` is the promotion gate for alternative column
-parameterizations. It compares two OBJ UV layouts only when their ordered 3-D
+`scroliq-flatten-compare` is the generic promotion gate for alternative column
+parameterizations. Grand Prize experiments use `scroliq-flatten-plan` to seal
+the baseline, implementation identity/license, and thresholds before candidate
+evaluation. It compares two OBJ UV layouts only when their ordered 3-D
 vertices/faces are identical, reuses `scroliq-obj`'s Jacobian-stretch and
 foldover metrics, requires a permissively licensed pinned implementation, and
 never consumes ink or legibility signals.
 
 ```bash
-scroliq-flatten-compare \
+scroliq-flatten-plan seal \
   --baseline-obj out/column_01.vc3d.obj \
-  --candidate-obj out/column_01.beltrami.obj \
+  --experiment-id column_01-beltrami-v1 \
   --candidate-method beltrami-coefficient-prolongation \
   --source-ref doi:10.1111/cgf.70341 \
-  --implementation-ref git:<pinned-commit> \
+  --implementation-ref git:<pinned-permissive-commit> \
   --implementation-license MIT \
+  --out prereg/column_01.flatten-spec.json
+
+scroliq-flatten-plan evaluate \
+  --spec prereg/column_01.flatten-spec.json \
+  --baseline-obj out/column_01.vc3d.obj \
+  --candidate-obj out/column_01.beltrami.obj \
   --out out/column_01.flatten-compare.json \
   --require-promote
 ```
@@ -714,6 +722,26 @@ A pass means the supplied ledger is internally consistent and reaches the
 recorded arithmetic threshold. It is not OCR and does not independently certify
 papyrological correctness. See the [legibility evidence contract](docs/grand-prize-legibility.md)
 and [example ledger](examples/grand-prize-legibility.example.json).
+
+#### Legibility rescue planner
+
+`scroliq-legibility-plan` turns that frozen evidence into an iteration queue instead
+of another score. It computes the exact number of currently illegible preserved
+characters that would have to become letter-by-letter legible to cross 70%, first
+for any failing counted column and then for each line as a planning proxy. One-
+character wins rise to the top; lines already over the proxy threshold but only
+one character above it are flagged as fragile.
+
+```bash
+scroliq-legibility-plan \
+  --report submission/legibility-report.json \
+  --out submission/legibility-plan.json
+```
+
+The input report is SHA-256-bound in the plan, sorting is deterministic, and the
+tool adds no annotation format. The per-line 70% calculation is explicitly an
+optimization heuristic; the official 70% rule remains per counted column, and
+the Challenge determines which submitted lines are actually legible.
 
 ### 2027 Grand Prize submission images
 
