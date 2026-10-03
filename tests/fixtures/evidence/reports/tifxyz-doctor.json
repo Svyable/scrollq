@@ -1,0 +1,1378 @@
+{
+  "config": {
+    "area_ratio_high": 4.0,
+    "area_ratio_low": 0.25,
+    "condition_number": 4.0,
+    "expected_spacing_x": null,
+    "expected_spacing_y": null,
+    "long_edge_ratio": 2.0,
+    "max_proximity_pairs": 10000,
+    "max_proximity_points": 100000,
+    "nonlocal_distance_ratio": 0.25,
+    "nonlocal_uv_exclusion": 4,
+    "normal_jump_degrees": 75.0,
+    "normal_step_min_component_cells": 8,
+    "normal_step_ratio": 0.25,
+    "shear": 0.8660254037844387,
+    "short_edge_ratio": 0.5,
+    "symmetric_dirichlet": 20.0,
+    "symmetric_stretch": 2.0
+  },
+  "contract": {
+    "coordinates": {
+      "canonical_sentinel_vertex_count": 2836,
+      "finite_vertex_count": 9016,
+      "nonfinite_by_channel": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "nonfinite_vertex_count": 0,
+      "nonpositive_z_nonsentinel_vertex_count": 0,
+      "partial_sentinel_vertex_count": 0,
+      "shape": [
+        56,
+        161
+      ],
+      "vertex_count": 9016
+    },
+    "files": {
+      "optional_mask": false,
+      "required": {
+        "meta.json": true,
+        "x.tif": true,
+        "y.tif": true,
+        "z.tif": true
+      }
+    },
+    "findings": [
+      {
+        "code": "metadata-area-schema-divergence",
+        "file": "meta.json",
+        "message": "meta.json supplies area_vx2/area_cm2 but no area; the current Villa Python reader preserves those fields only as extra metadata and leaves Tifxyz.area unset.",
+        "severity": "warning"
+      }
+    ],
+    "geometry": {
+      "actual_bbox": [
+        [
+          2859.3017578125,
+          5071.3388671875,
+          14677.515625
+        ],
+        [
+          3818.001708984375,
+          6417.7412109375,
+          15470.6025390625
+        ]
+      ],
+      "bbox_comparison": {
+        "comparable": true,
+        "matches": true,
+        "max_absolute_delta": 0.0,
+        "tolerance_by_axis": [
+          0.003918001708984375,
+          0.0065177412109375,
+          0.015570602539062499
+        ]
+      },
+      "portable_valid_face_count": 5965
+    },
+    "metadata": {
+      "area": null,
+      "area_cm2": null,
+      "area_vx2": 2386000.0,
+      "bbox": [
+        [
+          2859.3017578125,
+          5071.3388671875,
+          14677.515625
+        ],
+        [
+          3818.001708984375,
+          6417.7412109375,
+          15470.6025390625
+        ]
+      ],
+      "format": "tifxyz",
+      "readable": true,
+      "root_type": "dict",
+      "scale": [
+        0.05,
+        0.05
+      ],
+      "type": "seg",
+      "uuid": "PHerc0800_z14672_w020"
+    },
+    "path": "elig/meshes/PHerc0800/z14672_w020",
+    "schema_version": "tifxyz-integrity-v1",
+    "status": "warning",
+    "summary": {
+      "errors": 0,
+      "info": 0,
+      "warnings": 1
+    },
+    "tiffs": {
+      "mask": null,
+      "x": {
+        "dtype": "float32",
+        "filename": "x.tif",
+        "frames": 1,
+        "mode": "F",
+        "readable": true,
+        "shape": [
+          56,
+          161
+        ]
+      },
+      "y": {
+        "dtype": "float32",
+        "filename": "y.tif",
+        "frames": 1,
+        "mode": "F",
+        "readable": true,
+        "shape": [
+          56,
+          161
+        ]
+      },
+      "z": {
+        "dtype": "float32",
+        "filename": "z.tif",
+        "frames": 1,
+        "mode": "F",
+        "readable": true,
+        "shape": [
+          56,
+          161
+        ]
+      }
+    },
+    "validity": {
+      "cpp_finite_point_vertex_count": 6180,
+      "cpp_rule": "not(z <= 0), then mask >= 255; reject NaN/full sentinel",
+      "cpp_valid_mask_vertex_count": 6180,
+      "mask_present": false,
+      "mask_scale_factors_yx": null,
+      "mask_shape_relation": "absent",
+      "mask_values": null,
+      "portable_valid_vertex_count": 6180,
+      "python_cpp_finite_point_disagreement_count": 0,
+      "python_cpp_valid_mask_disagreement_count": 0,
+      "python_rule": "finite(z) and z > 0",
+      "python_valid_vertex_count": 6180
+    }
+  },
+  "findings": [
+    {
+      "code": "coherent-normal-step",
+      "level": "review",
+      "message": "5 spatially coherent band(s) contain a large surface-normal edge component."
+    },
+    {
+      "code": "normal-jumps",
+      "level": "review",
+      "message": "60 adjacent-cell normal jumps exceed the threshold."
+    },
+    {
+      "code": "short-edges",
+      "level": "review",
+      "message": "8 grid edges fall below the configured observed-spacing ratio."
+    },
+    {
+      "code": "symmetric-stretch",
+      "level": "review",
+      "message": "7 cells exceed the configured symmetric-stretch threshold."
+    }
+  ],
+  "geometry": {
+    "alternate_diagonal_fold_cosine": {
+      "count": 5965,
+      "max": 0.9999999996440281,
+      "min": 0.42394542577394917,
+      "p05": 0.9692956703443175,
+      "p50": 0.9982941844125697,
+      "p95": 0.9999861818139226
+    },
+    "area_ratio": {
+      "count": 5965,
+      "max": 1.4758257212335317,
+      "min": 0.4557222372673718,
+      "p05": 0.9528398515434395,
+      "p50": 0.9982558143972656,
+      "p95": 1.1319125026193437
+    },
+    "coherent_normal_steps": {
+      "candidate_edge_examples": [
+        {
+          "direction": "horizontal",
+          "rc": [
+            14,
+            117
+          ],
+          "value": 0.706822529963088
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            13,
+            118
+          ],
+          "value": 0.7013008489119621
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            30,
+            36
+          ],
+          "value": 0.6709396314242059
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            28,
+            118
+          ],
+          "value": 0.6510853819316812
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            46,
+            117
+          ],
+          "value": 0.6479116414530414
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            29,
+            36
+          ],
+          "value": 0.6168622914357037
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            44,
+            117
+          ],
+          "value": 0.5963514234638778
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            31,
+            36
+          ],
+          "value": 0.5855940190746426
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            7,
+            38
+          ],
+          "value": 0.5827465222432138
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            47,
+            117
+          ],
+          "value": 0.5722987423601569
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            14,
+            118
+          ],
+          "value": 0.5691431704099128
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            28,
+            117
+          ],
+          "value": 0.5689924269736254
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            49,
+            117
+          ],
+          "value": 0.5651640420198001
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            46,
+            118
+          ],
+          "value": 0.5548337851834274
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            26,
+            117
+          ],
+          "value": 0.5525974339105467
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            9,
+            114
+          ],
+          "value": 0.547953614075252
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            12,
+            37
+          ],
+          "value": 0.5456074084059853
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            8,
+            38
+          ],
+          "value": 0.5405039754375324
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            13,
+            38
+          ],
+          "value": 0.5330502333203332
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            25,
+            117
+          ],
+          "value": 0.5317187086745192
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            48,
+            117
+          ],
+          "value": 0.5252782427136465
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            42,
+            37
+          ],
+          "value": 0.5224614022823023
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            12,
+            38
+          ],
+          "value": 0.5206564096184556
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            43,
+            37
+          ],
+          "value": 0.5183738258585737
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            44,
+            37
+          ],
+          "value": 0.5159229281852835
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            23,
+            118
+          ],
+          "value": 0.5110464094049451
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            27,
+            118
+          ],
+          "value": 0.49037456573986704
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            9,
+            115
+          ],
+          "value": 0.4172184687814953
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            14,
+            118
+          ],
+          "value": 0.4150910529780755
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            17,
+            117
+          ],
+          "value": 0.4105446270347582
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            35,
+            117
+          ],
+          "value": 0.3748625023924422
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            39,
+            102
+          ],
+          "value": 0.3702778063716425
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            36,
+            120
+          ],
+          "value": 0.35051286612964033
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            33,
+            38
+          ],
+          "value": 0.34524970557676465
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            9,
+            114
+          ],
+          "value": 0.3432056542815172
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            32,
+            142
+          ],
+          "value": 0.3345942125536302
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            38,
+            97
+          ],
+          "value": 0.31795731633845126
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            22,
+            115
+          ],
+          "value": 0.31508298944263113
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            21,
+            105
+          ],
+          "value": 0.3125092794988303
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            26,
+            101
+          ],
+          "value": 0.30293211745264326
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            29,
+            151
+          ],
+          "value": 0.30094061593417487
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            39,
+            106
+          ],
+          "value": 0.29565194879818935
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            16,
+            118
+          ],
+          "value": 0.2936049143565437
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            29,
+            118
+          ],
+          "value": 0.2850027688013983
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            26,
+            116
+          ],
+          "value": 0.2809556187152961
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            29,
+            117
+          ],
+          "value": 0.27703007100726007
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            25,
+            116
+          ],
+          "value": 0.2769796883306737
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            23,
+            116
+          ],
+          "value": 0.2747674947464752
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            35,
+            120
+          ],
+          "value": 0.2580148182116797
+        },
+        {
+          "direction": "vertical",
+          "rc": [
+            35,
+            121
+          ],
+          "value": 0.2566764705448819
+        }
+      ],
+      "candidate_edges": 155,
+      "coherent_cells": 141,
+      "coherent_component_sizes": [
+        45,
+        34,
+        32,
+        22,
+        8
+      ],
+      "coherent_components": 5,
+      "horizontal_score": {
+        "count": 6125,
+        "max": 0.706822529963088,
+        "min": 7.375728151628089e-06,
+        "p05": 0.0020792033096351244,
+        "p50": 0.025049775087634955,
+        "p95": 0.13891066025533216
+      },
+      "minimum_component_cells": 8,
+      "normal_component_ratio_threshold": 0.25,
+      "vertical_score": {
+        "count": 6017,
+        "max": 0.7013008489119621,
+        "min": 5.828211113433868e-07,
+        "p05": 0.0029119376586125476,
+        "p50": 0.03206233284158378,
+        "p95": 0.12621623696894824
+      }
+    },
+    "condition_number": {
+      "count": 5965,
+      "max": 2.548666841685907,
+      "min": 1.000531829149721,
+      "p05": 1.006214420568563,
+      "p50": 1.0275302699864106,
+      "p95": 1.2070469839370515
+    },
+    "degenerate_triangle_examples": [],
+    "degenerate_triangles": 0,
+    "folded_quad_examples": [],
+    "folded_quads": 0,
+    "folded_quads_both_diagonals": 0,
+    "high_area_distortion_cells": 0,
+    "high_area_ratio_examples": [],
+    "high_condition_cells": 0,
+    "high_condition_examples": [],
+    "high_shear_cells": 0,
+    "high_shear_examples": [],
+    "high_symmetric_dirichlet_cells": 0,
+    "high_symmetric_dirichlet_examples": [],
+    "high_symmetric_stretch_cells": 7,
+    "high_symmetric_stretch_examples": [
+      {
+        "rc": [
+          35,
+          37
+        ],
+        "value": 2.308347851950612
+      },
+      {
+        "rc": [
+          16,
+          37
+        ],
+        "value": 2.2467069557799864
+      },
+      {
+        "rc": [
+          19,
+          37
+        ],
+        "value": 2.217595633400978
+      },
+      {
+        "rc": [
+          20,
+          37
+        ],
+        "value": 2.198128549717711
+      },
+      {
+        "rc": [
+          36,
+          37
+        ],
+        "value": 2.1290637213152523
+      },
+      {
+        "rc": [
+          17,
+          37
+        ],
+        "value": 2.0695207198932932
+      },
+      {
+        "rc": [
+          34,
+          37
+        ],
+        "value": 2.0314876501964876
+      }
+    ],
+    "horizontal_edge_length": {
+      "count": 6126,
+      "max": 30.582575423977843,
+      "min": 7.974397236517746,
+      "p05": 19.375264512607444,
+      "p50": 20.194110311213848,
+      "p95": 23.102401632768597
+    },
+    "horizontal_observed_ratio": {
+      "count": 6126,
+      "max": 1.5144304429690696,
+      "min": 0.394887277212185,
+      "p05": 0.9594512565303905,
+      "p50": 1.0,
+      "p95": 1.1440168086998994
+    },
+    "long_edge_examples": [],
+    "long_edges": 0,
+    "low_area_ratio_examples": [],
+    "near_degenerate_triangles": 0,
+    "normal_jumps": {
+      "angle_degrees": {
+        "count": 11718,
+        "max": 130.30272098696784,
+        "min": 0.012716511387218764,
+        "p05": 0.8360980171635258,
+        "p50": 4.380538919111441,
+        "p95": 15.426614568436849
+      },
+      "jump_examples": [
+        {
+          "direction": "horizontal",
+          "rc": [
+            7,
+            37
+          ],
+          "value": 130.30272098696784
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            8,
+            37
+          ],
+          "value": 129.27468729798
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            46,
+            117
+          ],
+          "value": 128.9589424653471
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            12,
+            37
+          ],
+          "value": 128.18891823699428
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            43,
+            37
+          ],
+          "value": 127.37618277159075
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            44,
+            117
+          ],
+          "value": 126.18237584998175
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            47,
+            117
+          ],
+          "value": 125.79799285962397
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            43,
+            117
+          ],
+          "value": 125.52999026702905
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            45,
+            117
+          ],
+          "value": 124.71557794862875
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            6,
+            37
+          ],
+          "value": 124.7119442632742
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            42,
+            37
+          ],
+          "value": 124.20578179882847
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            48,
+            117
+          ],
+          "value": 123.2744370391704
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            13,
+            37
+          ],
+          "value": 122.74354265254188
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            11,
+            37
+          ],
+          "value": 122.3038719068446
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            29,
+            36
+          ],
+          "value": 121.44915359989906
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            9,
+            37
+          ],
+          "value": 120.7066202389019
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            30,
+            36
+          ],
+          "value": 119.93490359673406
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            24,
+            117
+          ],
+          "value": 118.62081479541773
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            25,
+            117
+          ],
+          "value": 116.15259989917018
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            28,
+            117
+          ],
+          "value": 115.93302900097308
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            14,
+            37
+          ],
+          "value": 114.10001371470904
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            22,
+            117
+          ],
+          "value": 113.38653301644266
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            23,
+            117
+          ],
+          "value": 113.31407085682947
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            10,
+            37
+          ],
+          "value": 113.10795281300432
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            28,
+            36
+          ],
+          "value": 112.33324466088008
+        }
+      ],
+      "jumps_above_threshold": 60,
+      "orientation_flip_examples": [
+        {
+          "direction": "horizontal",
+          "rc": [
+            7,
+            37
+          ],
+          "value": 130.30272098696784
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            8,
+            37
+          ],
+          "value": 129.27468729798
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            46,
+            117
+          ],
+          "value": 128.9589424653471
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            12,
+            37
+          ],
+          "value": 128.18891823699428
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            43,
+            37
+          ],
+          "value": 127.37618277159075
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            44,
+            117
+          ],
+          "value": 126.18237584998175
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            47,
+            117
+          ],
+          "value": 125.79799285962397
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            43,
+            117
+          ],
+          "value": 125.52999026702905
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            45,
+            117
+          ],
+          "value": 124.71557794862875
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            6,
+            37
+          ],
+          "value": 124.7119442632742
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            42,
+            37
+          ],
+          "value": 124.20578179882847
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            48,
+            117
+          ],
+          "value": 123.2744370391704
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            13,
+            37
+          ],
+          "value": 122.74354265254188
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            11,
+            37
+          ],
+          "value": 122.3038719068446
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            29,
+            36
+          ],
+          "value": 121.44915359989906
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            9,
+            37
+          ],
+          "value": 120.7066202389019
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            30,
+            36
+          ],
+          "value": 119.93490359673406
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            24,
+            117
+          ],
+          "value": 118.62081479541773
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            25,
+            117
+          ],
+          "value": 116.15259989917018
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            28,
+            117
+          ],
+          "value": 115.93302900097308
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            14,
+            37
+          ],
+          "value": 114.10001371470904
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            22,
+            117
+          ],
+          "value": 113.38653301644266
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            23,
+            117
+          ],
+          "value": 113.31407085682947
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            10,
+            37
+          ],
+          "value": 113.10795281300432
+        },
+        {
+          "direction": "horizontal",
+          "rc": [
+            28,
+            36
+          ],
+          "value": 112.33324466088008
+        }
+      ],
+      "orientation_flips": 50
+    },
+    "normalization_mode": "observed_regularized",
+    "normalization_spacing_x": 20.194110311213848,
+    "normalization_spacing_y": 19.97889734898576,
+    "observed_grid_area_voxel2": 2406615.379777354,
+    "observed_spacing_x": 20.194110311213848,
+    "observed_spacing_y": 19.97889734898576,
+    "official_diagonal_fold_cosine": {
+      "count": 5965,
+      "max": 0.9999999996215356,
+      "min": 0.41426680450183795,
+      "p05": 0.9694807187515567,
+      "p50": 0.9982813268830097,
+      "p95": 0.9999867169095757
+    },
+    "quad_area": {
+      "count": 5965,
+      "max": 595.6490490529229,
+      "min": 183.96636401297013,
+      "p05": 385.9639744532055,
+      "p50": 403.4874001993244,
+      "p95": 457.0843246469538
+    },
+    "shear": {
+      "count": 5965,
+      "max": 0.45583655119859784,
+      "min": 4.025802924938015e-06,
+      "p05": 0.0009076350549195686,
+      "p50": 0.011633406114509467,
+      "p95": 0.10432749205959731
+    },
+    "short_edge_examples": [
+      {
+        "direction": "horizontal",
+        "rc": [
+          17,
+          37
+        ],
+        "value": 0.394887277212185
+      },
+      {
+        "direction": "horizontal",
+        "rc": [
+          20,
+          37
+        ],
+        "value": 0.4467382045343584
+      },
+      {
+        "direction": "horizontal",
+        "rc": [
+          35,
+          37
+        ],
+        "value": 0.4474705478657555
+      },
+      {
+        "direction": "horizontal",
+        "rc": [
+          37,
+          37
+        ],
+        "value": 0.46311689849293597
+      },
+      {
+        "direction": "horizontal",
+        "rc": [
+          21,
+          37
+        ],
+        "value": 0.46640291127978606
+      },
+      {
+        "direction": "horizontal",
+        "rc": [
+          33,
+          37
+        ],
+        "value": 0.4786925150967022
+      },
+      {
+        "direction": "horizontal",
+        "rc": [
+          36,
+          37
+        ],
+        "value": 0.48173552988952156
+      },
+      {
+        "direction": "horizontal",
+        "rc": [
+          19,
+          37
+        ],
+        "value": 0.49414076404806345
+      }
+    ],
+    "short_edges": 8,
+    "surface_area_voxel2": 2445169.4921526373,
+    "surface_to_observed_grid_area_ratio": 1.0160200556762211,
+    "symmetric_dirichlet": {
+      "count": 5965,
+      "max": 7.555503779831319,
+      "min": 4.000002234184054,
+      "p05": 4.000176062549986,
+      "p50": 4.00232867647832,
+      "p95": 4.111572251810713
+    },
+    "symmetric_stretch": {
+      "count": 5965,
+      "max": 2.308347851950612,
+      "min": 1.0007267573198138,
+      "p05": 1.006039255565224,
+      "p50": 1.0229730538624,
+      "p95": 1.1703485625975545
+    },
+    "target_spacing": {
+      "anisotropy_factor": null,
+      "expected_x": null,
+      "expected_y": null,
+      "isotropic_factor": null,
+      "observed_to_expected_x": null,
+      "observed_to_expected_y": null
+    },
+    "triangle_normalized_area_sine": {
+      "count": 11930,
+      "max": 0.999999999980377,
+      "min": 0.3366125502805459,
+      "p05": 0.6965884023767788,
+      "p50": 0.8887241966881272,
+      "p95": 0.9999980769781752
+    },
+    "triangulation_sensitive_examples": [],
+    "triangulation_sensitive_quads": 0,
+    "vertical_edge_length": {
+      "count": 6018,
+      "max": 25.366877356284828,
+      "min": 15.591946524334707,
+      "p05": 19.239362965981307,
+      "p50": 19.97889734898576,
+      "p95": 20.594476033616928
+    },
+    "vertical_observed_ratio": {
+      "count": 6018,
+      "max": 1.2696835522593337,
+      "min": 0.7804207735781895,
+      "p05": 0.9629842242999462,
+      "p50": 0.9999999999999999,
+      "p95": 1.0308114443894683
+    }
+  },
+  "integrity": {
+    "mask_coordinate_disagreements": 0,
+    "nonfinite_valid_vertices": 0,
+    "nonfinite_vertices": 0,
+    "partial_sentinel_vertices": 0,
+    "sentinel_vertices": 2836,
+    "shape": [
+      56,
+      161
+    ],
+    "valid_vertex_count": 6180,
+    "valid_vertex_fraction": 0.6854480922803904,
+    "vertex_count": 9016
+  },
+  "metadata": {
+    "actual_bbox": [
+      [
+        2859.3017578125,
+        5071.3388671875,
+        14677.515625
+      ],
+      [
+        3818.001708984375,
+        6417.7412109375,
+        15470.6025390625
+      ]
+    ],
+    "bbox_max_abs_error": 0.0,
+    "declared_area_voxel2": 2386000.0,
+    "declared_bbox": [
+      [
+        2859.3017578125,
+        5071.3388671875,
+        14677.515625
+      ],
+      [
+        3818.001708984375,
+        6417.7412109375,
+        15470.6025390625
+      ]
+    ],
+    "declared_scale_x": 0.05,
+    "declared_scale_y": 0.05,
+    "declared_vs_parametric_area_relative_error": 1.9516399300408184e-16,
+    "derived_parametric_area_voxel2": 2385999.9999999995,
+    "derived_parametric_cell_area_voxel2": 399.99999999999994
+  },
+  "nonlocal_proximity": {
+    "distance_threshold": 5.021553898955459,
+    "pair_count": 0,
+    "pairs": [],
+    "pairs_truncated": false,
+    "sample_stride": 1,
+    "sampled_points": 6180,
+    "sampled_points_capped": false,
+    "uv_exclusion": 4
+  },
+  "schema_version": "1.0.0",
+  "source": {
+    "path": "elig/meshes/PHerc0800/z14672_w020",
+    "uuid": "PHerc0800_z14672_w020"
+  },
+  "tool": {
+    "name": "tifxyz-doctor",
+    "version": "0.2.0"
+  },
+  "topology": {
+    "enclosed_invalid_region_details": [],
+    "enclosed_invalid_region_sizes": [],
+    "enclosed_invalid_regions": 0,
+    "valid_quad_component_sizes": [
+      5964,
+      1
+    ],
+    "valid_quad_components": 2,
+    "valid_quad_count": 5965,
+    "valid_vertex_component_sizes": [
+      6180
+    ],
+    "valid_vertex_components": 1,
+    "valid_vertices_without_faces": 2
+  }
+}

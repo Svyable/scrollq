@@ -1,0 +1,155 @@
+{
+  "uuid": "PHerc0800_z14672_w020",
+  "name": "PHerc0800_z14672_w020",
+  "type": "seg",
+  "format": "tifxyz",
+  "scale": [
+    0.05,
+    0.05
+  ],
+  "bbox": [
+    [
+      2859.3017578125,
+      5071.3388671875,
+      14677.515625
+    ],
+    [
+      3818.001708984375,
+      6417.7412109375,
+      15470.6025390625
+    ]
+  ],
+  "area_vx2": 2386000.0,
+  "fit_config": {
+    "args": {
+      "model-init": "flatten",
+      "flatten_solver": "forward",
+      "flatten_initial_inversion": false,
+      "flatten_output_step": 20.0,
+      "flatten_output_margin": 0.0,
+      "input": null,
+      "device": "cuda",
+      "downscale": 4.0,
+      "crop": null,
+      "seed": null,
+      "model-w": null,
+      "model-w-unit": "voxels",
+      "model-h": null,
+      "winding-volume": null,
+      "cuda-gridsample": 1,
+      "erode-valid-mask": 0,
+      "sparse-prefetch-backend": "tensorstore",
+      "corr-point-roi": false,
+      "corr-point-roi-init-margin": 80,
+      "corr-point-roi-output-radius": 20,
+      "mesh-step": 100,
+      "winding-step": 25,
+      "subsample-mesh": 4,
+      "subsample-winding": 4,
+      "depth": 3,
+      "mesh-h": 32,
+      "mesh-w": 32,
+      "init-mode": "cylinder_seed",
+      "z-center": 0.0,
+      "pyramid-d": true,
+      "model-input": null,
+      "model-output": null,
+      "snapshot-interval": 1000,
+      "normal-mask-zero": 0,
+      "tifxyz-init": null,
+      "self-map-init": "off",
+      "flatten-solver": "forward",
+      "approval-inpaint": false,
+      "approval-inpaint-corr-spacing": null,
+      "approval-inpaint-padding-frac": 0.25,
+      "approval-inpaint-output-mask": false,
+      "approval-inpaint-output-mask-dilate": 3,
+      "approval-inpaint-tifxyz": null,
+      "tifxyz-flow-gate-channels": false,
+      "progress": false
+    },
+    "base": {
+      "flatten_sdir": 1.0,
+      "flatten_map_step": 0.1,
+      "flatten_avg_offset": 1.0,
+      "flatten_orient": 2.0
+    },
+    "stages": [
+      {
+        "name": "flatten",
+        "steps": 4500,
+        "lr": 0.01,
+        "params": [
+          "map_flatten_ms"
+        ],
+        "min_scaledown": 0,
+        "args": {
+          "compile_flatten": true,
+          "compile_flatten_combined": true,
+          "flatten_diagnostics": false,
+          "fused_flatten_adam_clamp": true,
+          "flatten_support": true,
+          "flatten_support_radius": 1,
+          "flatten_orient_min_det": 0.01,
+          "flatten_filter_source_angles": false,
+          "flatten_max_update": 0.1,
+          "flatten_sdir_eps": 1e-08,
+          "status_interval": 100,
+          "auto_steps_window": 2000,
+          "auto_steps_max": 100000,
+          "auto_steps_rel_threshold": 1e-05
+        }
+      },
+      {
+        "name": "flatten",
+        "steps": 1000,
+        "lr": 0.001,
+        "params": [
+          "map_flatten_ms"
+        ],
+        "min_scaledown": 0,
+        "args": {
+          "compile_flatten": true,
+          "compile_flatten_combined": true,
+          "flatten_diagnostics": false,
+          "fused_flatten_adam_clamp": true,
+          "flatten_support": true,
+          "flatten_support_radius": 1,
+          "flatten_orient_min_det": 0.01,
+          "flatten_filter_source_angles": false,
+          "flatten_max_update": 0.1,
+          "flatten_sdir_eps": 1e-08,
+          "status_interval": 100,
+          "auto_steps_window": 2000,
+          "auto_steps_max": 100000,
+          "auto_steps_rel_threshold": 1e-05
+        }
+      },
+      {
+        "name": "flatten",
+        "steps": 1000,
+        "lr": 0.0001,
+        "params": [
+          "map_flatten_ms"
+        ],
+        "min_scaledown": 0,
+        "args": {
+          "compile_flatten": true,
+          "compile_flatten_combined": true,
+          "flatten_diagnostics": false,
+          "fused_flatten_adam_clamp": true,
+          "flatten_support": true,
+          "flatten_support_radius": 1,
+          "flatten_orient_min_det": 0.01,
+          "flatten_filter_source_angles": false,
+          "flatten_max_update": 0.1,
+          "flatten_sdir_eps": 1e-08,
+          "status_interval": 100,
+          "auto_steps_window": 2000,
+          "auto_steps_max": 100000,
+          "auto_steps_rel_threshold": 1e-05
+        }
+      }
+    ]
+  }
+}

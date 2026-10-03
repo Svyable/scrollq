@@ -1,0 +1,162 @@
+{
+ "tool": "windcheck check",
+ "record_kind": "census certificate",
+ "schema": "windcheck_check/v1",
+ "generated_utc": "2026-10-03T03:58:02Z",
+ "segment": "z14672_w020",
+ "report_only": true,
+ "report_only_note": "This command read the input and wrote nothing into it. No mesh was produced. Use `windcheck transform` to change geometry.",
+ "provenance": {
+  "schema": "windcheck_provenance/v1",
+  "code_version": "0.1.0",
+  "source_tree_digest": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+  "source_tree_n_files": 0,
+  "source_tree_globs": [
+   "pyproject.toml",
+   "uv.lock",
+   "src/windcheck/*.py",
+   "engines/*.cpp",
+   "engines/*.h",
+   "bench/*.py"
+  ],
+  "manifest_schema": "windcheck_mesh_manifest/v1",
+  "serialisation": "manifest rows sorted by path; each row serialised UTF-8 as \"path\\0size\\0sha256\" when the file is present and \"path\\0absent\\0absent\" when it is declared but absent; rows joined by \\n with a trailing \\n; digest = sha256 of that blob. Declared files that are absent are serialised explicitly, never skipped.",
+  "rule": "sha256 over the canonical file manifest of the published source tree: paths matching ['pyproject.toml', 'uv.lock', 'src/windcheck/*.py', 'engines/*.cpp', 'engines/*.h', 'bench/*.py'] relative to the repository root, excluding __pycache__, serialised by the frozen rule below. Recompute with `uv run python -m windcheck.provenance`; no repository history is required.",
+  "verify_command": "uv run python -m windcheck.provenance",
+  "policy_version": "round28-greedy-first-v1",
+  "policy_hash": "26296e23cb4d08e4"
+ },
+ "mesh_identity_rule": "mesh identity is a content manifest over every file a tifxyz reader consumes semantically -- x/y/z.tif, mask.tif or mask.png, meta.json -- not the coordinate planes alone, so a mask change (the carrier of an excision) cannot leave a recorded mesh hash valid.",
+ "mesh": {
+  "path": "elig/meshes/PHerc0800/z14672_w020",
+  "hashes": {
+   "schema": "windcheck_mesh_manifest/v1",
+   "files": [
+    {
+     "path": "mask.png",
+     "present": false,
+     "size": null,
+     "sha256": null
+    },
+    {
+     "path": "mask.tif",
+     "present": false,
+     "size": null,
+     "sha256": null
+    },
+    {
+     "path": "meta.json",
+     "present": true,
+     "size": 4214,
+     "sha256": "d0e50b6ac29ccb2e76ea1c8487aabbde9718b50aaf06cc109a29214390434cba"
+    },
+    {
+     "path": "x.tif",
+     "present": true,
+     "size": 36336,
+     "sha256": "5e83506b1a85b1597a98230790f32d548716980699cfb9896aea03315aca0f84"
+    },
+    {
+     "path": "y.tif",
+     "present": true,
+     "size": 36336,
+     "sha256": "03e3fa45f73862ec0eab7afbe3b28037a565928cc07386a051503a49a1ea4493"
+    },
+    {
+     "path": "z.tif",
+     "present": true,
+     "size": 36336,
+     "sha256": "7786ab169202a19c652ee37b720aed2cfe261a7c738bdc2eea1cfad60db1f4e9"
+    }
+   ],
+   "digest": "53b29f52ee352324d2a184989de66df6b38d45aa92aa6dbfc584e2492cc1a25f",
+   "serialisation": "manifest rows sorted by path; each row serialised UTF-8 as \"path\\0size\\0sha256\" when the file is present and \"path\\0absent\\0absent\" when it is declared but absent; rows joined by \\n with a trailing \\n; digest = sha256 of that blob. Declared files that are absent are serialised explicitly, never skipped.",
+   "x": "5e83506b1a85b1597a98230790f32d548716980699cfb9896aea03315aca0f84",
+   "y": "03e3fa45f73862ec0eab7afbe3b28037a565928cc07386a051503a49a1ea4493",
+   "z": "7786ab169202a19c652ee37b720aed2cfe261a7c738bdc2eea1cfad60db1f4e9",
+   "mask": null
+  },
+  "grid_shape": [
+   56,
+   161
+  ],
+  "n_valid_vertices": 6180,
+  "n_retained_quads": 5965,
+  "voxel_um": null,
+  "validity_rule": "sentinel (-1,-1,-1) OR non-finite OR masked-out; the upstream loader additionally discards z <= 0",
+  "n_valid_vertices_upstream_rule": 6180,
+  "n_cells_below_z_floor": 0
+ },
+ "census": {
+  "engine": "<work>/toolsvenv/lib/python3.11/engines/selfcross",
+  "engine_sha256": "14cf52a46ba834b2834978eb8d8ef7e07f8261935d690dde2cc329aab96d55bd",
+  "engine_source_sha256": null,
+  "parameters": {
+   "cell": 40.0,
+   "exclude": 1,
+   "maxedge": 60.0,
+   "threads": 0,
+   "touch_tol": 0.001,
+   "diagonals": [
+    0,
+    1
+   ]
+  },
+  "csv": {
+   "d0": {
+    "path": "gates800/z14672_w020/windcheck/work_6ec435090593/z14672_w020_check_d0.csv",
+    "sha256": "90351ceecefbc15b59c242ac96c69e101285edaa3a60d4b80534319b6e3598f1",
+    "n_rows": 0,
+    "out_of_range_rows": 0
+   },
+   "d1": {
+    "path": "gates800/z14672_w020/windcheck/work_6ec435090593/z14672_w020_check_d1.csv",
+    "sha256": "90351ceecefbc15b59c242ac96c69e101285edaa3a60d4b80534319b6e3598f1",
+    "n_rows": 0,
+    "out_of_range_rows": 0
+   }
+  }
+ },
+ "measurements": {
+  "diagonal_0": {
+   "triangles": 11930,
+   "quads_dropped": 0,
+   "pairs_tested": 88005,
+   "transverse": 0,
+   "coplanar": 0,
+   "grazing": 0
+  },
+  "diagonal_1": {
+   "triangles": 11930,
+   "quads_dropped": 0,
+   "pairs_tested": 87742,
+   "transverse": 0,
+   "coplanar": 0,
+   "grazing": 0
+  },
+  "transverse_d0": 0,
+  "transverse_d1": 0,
+  "transverse_both_diagonals": 0,
+  "transverse_min_of_diagonals": 0,
+  "crossing_events": 0,
+  "max_penetration_vx": 0.0
+ },
+ "clean": true,
+ "verdict": "clean: no transverse self-intersection under either triangulation",
+ "clean_definition": "CLEAN means: the mesh, censused by engines/selfcross under BOTH quad triangulations with Chebyshev adjacency exclusion, reports zero transverse contacts. Coplanar and grazing contacts are recorded but are not crossings and do not affect the verdict.",
+ "crossing_sites": [],
+ "crossing_sites_truncated_to": 2000,
+ "outputs": {
+  "point_collection": "gates800/z14672_w020/windcheck/z14672_w020_points.json",
+  "point_collection_format": "volume-cartographer PointCollections JSON; one collection, one point per crossing event, `p` is [x, y, z] in volume voxels"
+ },
+ "wall_seconds": 0.02,
+ "caveats": [
+  "Deterministic floating-point validator, not exact predicates.",
+  "Reports that the surface meets itself and where; does not identify which branch is wrong, nor establish a cause.",
+  "Adjacent quads (sharing a corner) are excluded by construction, so a reported contact is always non-local in the grid.",
+  "Event counts depend on the grid-connectivity clustering rule; the per-diagonal contact counts do not.",
+  "The mesh fingerprint is a partial one: file names, sizes and a bounded head of each file, not full content.",
+  "This command is report-only. It does not modify the input and does not write a mesh."
+ ]
+}

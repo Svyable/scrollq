@@ -38,6 +38,12 @@ weight-free Pareto frontier (triage, not a readability claim).
     (`DEFAULT_MANIFEST`, `FIRST_LETTERS_MANIFEST` via `--prize`, `as_of`,
     per-prize `required_assets`), Pareto frontier, `--run` for stability
     reports, optional surface-support sensitivity axis
+  - `evidence.py` — adapters normalizing internal and community tool reports
+    (windcheck, flatcheck, tifxyz-doctor, tifxyz-repair, spiralcheck,
+    scroliq-mesh) into status + binding records; each adapter is tested
+    against real output of a pinned tool commit in `tests/fixtures/evidence/`
+  - `gp_ready.py` → `scroliq-gp-ready`: per-column Grand Prize evidence
+    dossier with a published policy (see `docs/gp-ready.md`)
   - `support.py` → `scroliq-support`: exact-scan surface-prediction CT support
     (phantom = prediction > 127 on masked CT == 0) with bootstrap 95% CI
   - evidence layers, each its own `scroliq-*` script: `passport.py`,
