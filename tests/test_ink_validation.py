@@ -32,6 +32,17 @@ def _arrays():
     return prediction, labels, mask
 
 
+def _full_controls(prediction, *, independent="independent-checkpoint"):
+    control = np.full_like(prediction, 0.5)
+    return {
+        "normal-minus-3": control,
+        "normal-plus-3": control,
+        "adjacent-winding": control,
+        "geometry-perturbation": control,
+        independent: control,
+    }
+
+
 def test_perfect_held_out_metrics():
     prediction, labels, mask = _arrays()
     metrics = evaluate_prediction(prediction, labels, mask, threshold=0.5)
@@ -78,13 +89,16 @@ def test_control_delta_records_correct_surface_advantage():
         ground_truth_source_url="https://example.org/public-ground-truth",
         model_checkpoint_sha256="b" * 64,
         model_window_voxels=(17, 64, 64),
-        controls={"normal+3": control},
+        controls=_full_controls(prediction),
     )
 
     assert report["prize_evidence_ready"] is True
-    row = report["controls"][0]
-    assert row["name"] == "normal+3"
+    row = next(
+        item for item in report["controls"]
+        if item["name"] == "normal-plus-3"
+    )
     assert row["primary_minus_control_balanced_accuracy"] == pytest.approx(0.5)
+    assert report["control_contract"]["complete"] is True
 
 
 def test_training_overlap_prevents_prize_readiness():
@@ -100,7 +114,7 @@ def test_training_overlap_prevents_prize_readiness():
         ground_truth_source_url="https://example.org/public-ground-truth",
         model_checkpoint_sha256="c" * 64,
         model_window_voxels=(17, 64, 64),
-        controls={"normal+3": np.full_like(prediction, 0.5)},
+        controls=_full_controls(prediction),
     )
 
     assert report["prize_evidence_ready"] is False
@@ -157,7 +171,7 @@ def test_single_class_mask_is_measured_but_not_ready():
         ground_truth_source_url="https://example.org/public-ground-truth",
         model_checkpoint_sha256="d" * 64,
         model_window_voxels=(17, 64, 64),
-        controls={"normal+3": prediction},
+        controls=_full_controls(prediction),
     )
 
     assert report["evaluation"]["both_classes_present"] is False
@@ -223,3 +237,55 @@ def test_cli_writes_report_and_returns_fail_closed_status(tmp_path):
     assert status == 1
     assert out_path.is_file()
     assert '"prize_evidence_ready": false' in out_path.read_text()
+
+
+
+def test_full_control_contract_rejects_partial_named_suite():
+    prediction, labels, mask = _arrays()
+    controls = _full_controls(prediction)
+    controls.pop("geometry-perturbation")
+
+    report = build_report(
+        prediction=prediction,
+        labels=labels,
+        validation_mask=mask,
+        threshold=0.5,
+        split_id="fold-1",
+        held_out=True,
+        training_overlap="none",
+        ground_truth_source_url="https://example.org/public-ground-truth",
+        model_checkpoint_sha256="1" * 64,
+        model_window_voxels=(17, 64, 64),
+        controls=controls,
+    )
+
+    assert report["prize_evidence_ready"] is False
+    assert report["control_contract"]["complete"] is False
+    assert report["control_contract"]["missing_required"] == [
+        "geometry-perturbation"
+    ]
+
+
+def test_independent_fold_satisfies_independence_control():
+    prediction, labels, mask = _arrays()
+    report = build_report(
+        prediction=prediction,
+        labels=labels,
+        validation_mask=mask,
+        threshold=0.5,
+        split_id="fold-1",
+        held_out=True,
+        training_overlap="none",
+        ground_truth_source_url="https://example.org/public-ground-truth",
+        model_checkpoint_sha256="2" * 64,
+        model_window_voxels=(17, 64, 64),
+        controls=_full_controls(
+            prediction,
+            independent="independent-fold",
+        ),
+    )
+
+    assert report["prize_evidence_ready"] is True
+    assert report["control_contract"]["independent_present"] == [
+        "independent-fold"
+    ]
