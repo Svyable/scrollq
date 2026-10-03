@@ -50,6 +50,16 @@ exact cache/linker parity before a real fit, and then subjects the bounded A/B
 to the existing held-out geometry evaluator. Faster execution alone is not
 evidence and cannot compensate for changed geometry semantics.
 
+## External ink-control gate
+
+Before an external checkpoint, ensemble, or physics filter can strengthen an
+ink claim, apply the [external ink-control process](external-ink-control-process.md).
+The first admitted experiment is the pinned zero-training `ink9um` checkpoint
+soup + z-window ensemble, used as a control-only arm. Evaluation regions must
+be frozen before candidate inference; pseudo-label-trained models fail closed
+unless their required datasets, intermediate checkpoints, licenses, and public
+tracking are bound explicitly.
+
 ## Minimum proof package
 
 The first competitive proof should be small enough to finish and strong enough to falsify. It is complete only when the repository contains:
