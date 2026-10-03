@@ -31,7 +31,8 @@ missing region also makes the model ineligible for ranking.
 The final report contains a point estimate, percentile-bootstrap 95% confidence
 interval over regions, `n`, explicit failures, a fixed bootstrap seed, and
 SHA-256 provenance for the model card, dataset manifest, checkpoint, inference
-script, results, and evaluator code.
+script, canonical output-affecting inference configuration, results, and
+evaluator code.
 
 ## CLI
 
@@ -61,6 +62,21 @@ scroliq-eval \
 
 A ranked report requires every preflight check to pass and every expected
 region to return a valid score for the declared primary metric.
+
+### Inference configuration identity
+
+The model card's `inference_config` object records output-affecting settings
+that are not captured by the inference-script or checkpoint hashes. Examples
+include patch overlap, blending mode, depth/layer windows, resolution, test-time
+augmentation, and other model-specific inference knobs. `scroliq-eval`
+canonicalizes this JSON object, records its SHA-256 in the preflight/report
+provenance, and fails rank eligibility when the object is absent.
+
+Paths that vary per evaluation region (input, output, checkpoint file location)
+should not be encoded here unless they themselves change model behavior.
+The goal is to make two materially different inference procedures
+cryptographically distinguishable without hard-coding one model family's CLI
+into the task-neutral evaluator.
 
 ## Blind evaluation boundary
 
