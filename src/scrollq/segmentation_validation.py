@@ -796,7 +796,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--dataset", required=True, help="held-out dataset manifest JSON")
     parser.add_argument("--spec", help="public frozen segmentation evaluation spec JSON")
-    parser.add_argument("--truth", required=True, help="private truth manifest JSON")
+    parser.add_argument("--truth", help="private truth manifest JSON; trusted modes only")
     parser.add_argument(
         "--predictions",
         help="prediction manifest from the untrusted inference phase",
@@ -827,14 +827,26 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     try:
         dataset_path = Path(args.dataset)
-        truth_path = Path(args.truth)
         dataset_document = _load_object(dataset_path, "dataset manifest")
+
+        if args.print_spec_hash:
+            if not args.spec:
+                parser.error("--spec is required with --print-spec-hash")
+            if args.predictions or args.out or args.truth or args.truth_root:
+                parser.error(
+                    "--print-spec-hash is public-only and cannot be combined with "
+                    "--truth/--truth-root/--predictions/--out"
+                )
+            spec_document = _load_object(Path(args.spec), "segmentation spec")
+            validate_spec(spec_document, dataset_document=dataset_document)
+            print(digest(spec_document))
+            return 0
+
+        if not args.truth:
+            parser.error("--truth is required for trusted truth/evaluation modes")
+        truth_path = Path(args.truth)
         truth_document = _load_object(truth_path, "truth manifest")
-        truth_root = (
-            Path(args.truth_root)
-            if args.truth_root
-            else truth_path.parent
-        )
+        truth_root = Path(args.truth_root) if args.truth_root else truth_path.parent
 
         if args.print_truth_commitment:
             if args.predictions or args.out:
@@ -853,15 +865,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             parser.error("--spec is required unless --print-truth-commitment is used")
         spec_path = Path(args.spec)
         spec_document = _load_object(spec_path, "segmentation spec")
-
-        if args.print_spec_hash:
-            if args.predictions or args.out:
-                parser.error(
-                    "--print-spec-hash cannot be combined with --predictions/--out"
-                )
-            validate_spec(spec_document, dataset_document=dataset_document)
-            print(digest(spec_document))
-            return 0
 
         if not args.predictions:
             parser.error("--predictions is required for evaluation")
