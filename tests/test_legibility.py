@@ -198,6 +198,9 @@ def test_uncounted_column_requires_challenge_acknowledgement():
     assert "LEGIBILITY_EXCLUSION_ACK" not in _codes(report)
     assert report["passes_recorded_thresholds"] is True
     assert report["summary"]["excluded_columns"] == 1
+    assert report["summary"]["preserved_characters"] == 0
+    assert report["summary"]["legible_characters"] == 0
+    assert report["summary"]["weighted_recorded_legibility_rate"] is None
 
 
 def test_duplicate_character_ids_fail_closed():
