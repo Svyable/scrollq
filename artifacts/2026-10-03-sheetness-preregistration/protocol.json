@@ -1,0 +1,429 @@
+{
+  "schema_version": 1,
+  "kind": "scroliq-sheetness-realdata-preregistration",
+  "campaign_id": "2026-10-03-pherc0800-sheetness-v1",
+  "measurement_state": "not-run",
+  "input_snapshot_commit": "7229030c18e9bb64363efe614b203d4183d96619",
+  "source_artifacts": {
+    "grand_prize_manifest": "artifacts/2026-10-01-prize-targets/grand-prize-manifest.json",
+    "mesh_corpus_summary": "artifacts/2026-10-01-corpus-mesh-audit/summary.json"
+  },
+  "target": {
+    "scroll": "PHerc0800",
+    "eligible_volume_id": "20250521135224",
+    "voxel_size_um": 8.64,
+    "eligible_volume_root": "PHerc0800/volumes/20250521135224-8.640um-1.2m-116keV-masked.zarr",
+    "ct_base_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com",
+    "primary_selection_rule": "Among exact-volume PHerc0800 TIFXYZ rows that are status=pass, tier=clean, and have no findings in the frozen corpus audit, choose the lexicographically first segment ID.",
+    "primary_mesh": {
+      "segment": "20251028213516-auto_grown_20251028213516907",
+      "registered_volume_root": "community-uploads/forrest/volcomp/PHerc0800/volumes/20250521135224-8.640um-1.2m-116keV-masked.zarr",
+      "public_tifxyz_path": "PHerc0800/segments/20251028213516-auto_grown_20251028213516907/mesh/20251028213516-on-20250521135224-8.64um.tifxyz",
+      "audit_report": "artifacts/2026-10-01-corpus-mesh-audit/reports/PHerc0800.20251028213516-auto_grown_20251028213516907.20251028213516-on-20250521135224-8.64um.json",
+      "audit_status": "pass",
+      "audit_findings": [],
+      "shape_yx": [
+        108,
+        112
+      ],
+      "observed_bbox_xyz": [
+        [
+          2963.6953125,
+          5306.8388671875,
+          11083.4970703125
+        ],
+        [
+          4250.04638671875,
+          6947.79052734375,
+          13077.0224609375
+        ]
+      ],
+      "coordinate_files": {
+        "meta.json": {
+          "sha256": "fd8b3e2e2cd4241a58044af00bd802734159e4188d5613b8e5339483d7c63e61",
+          "bytes": 285
+        },
+        "x.tif": {
+          "sha256": "519354f8910fd6f73d1a4d15060ca51de2bdc8f47cd2f8d9ef012fa99e83c579",
+          "bytes": 48518
+        },
+        "y.tif": {
+          "sha256": "10a6b03d8bf501a317f98442ff338b6300e7434d2be6cb2f8bd442f078e8b458",
+          "bytes": 48518
+        },
+        "z.tif": {
+          "sha256": "0a18c65f2beb0b010cf1ef647c09b62b9d302e3a6bcaac492c54e597b3ed4fbe",
+          "bytes": 48518
+        }
+      }
+    },
+    "wrong_wrap_candidate_pool": [
+      {
+        "segment": "20251028220042-auto_grown_20251028220042762",
+        "registered_volume_root": "community-uploads/forrest/volcomp/PHerc0800/volumes/20250521135224-8.640um-1.2m-116keV-masked.zarr",
+        "public_tifxyz_path": "PHerc0800/segments/20251028220042-auto_grown_20251028220042762/mesh/20251028220042-on-20250521135224-8.64um.tifxyz",
+        "audit_report": "artifacts/2026-10-01-corpus-mesh-audit/reports/PHerc0800.20251028220042-auto_grown_20251028220042762.20251028220042-on-20250521135224-8.64um.json",
+        "audit_status": "pass",
+        "audit_findings": [],
+        "shape_yx": [
+          102,
+          100
+        ],
+        "observed_bbox_xyz": [
+          [
+            2956.458740234375,
+            5488.59423828125,
+            11151.9619140625
+          ],
+          [
+            4280.96826171875,
+            6844.96484375,
+            13034.0966796875
+          ]
+        ],
+        "coordinate_files": {
+          "meta.json": {
+            "sha256": "a11639703aaa4d0ff24f8331b4a84ea95f923ae81e19f886c0d6de8177427309",
+            "bytes": 288
+          },
+          "x.tif": {
+            "sha256": "493ad418e4031b67335b0f046879f7ff80eae7520d7e95a6baa1da22c1f5a03c",
+            "bytes": 40934
+          },
+          "y.tif": {
+            "sha256": "8f0620501e04c8b2bd8cd485966b0982e6c88cab111e2febff09452ac9bdeb0e",
+            "bytes": 40934
+          },
+          "z.tif": {
+            "sha256": "93f83223784b72c290d9f64354808a4c774bf988a96d81d44cd9b118c89bf246",
+            "bytes": 40934
+          }
+        }
+      },
+      {
+        "segment": "20251028220955-auto_grown_20251028220955262",
+        "registered_volume_root": "community-uploads/forrest/volcomp/PHerc0800/volumes/20250521135224-8.640um-1.2m-116keV-masked.zarr",
+        "public_tifxyz_path": "PHerc0800/segments/20251028220955-auto_grown_20251028220955262/mesh/20251028220955-on-20250521135224-8.64um.tifxyz",
+        "audit_report": "artifacts/2026-10-01-corpus-mesh-audit/reports/PHerc0800.20251028220955-auto_grown_20251028220955262.20251028220955-on-20250521135224-8.64um.json",
+        "audit_status": "pass",
+        "audit_findings": [],
+        "shape_yx": [
+          105,
+          105
+        ],
+        "observed_bbox_xyz": [
+          [
+            3083.927001953125,
+            5391.02587890625,
+            10986.3974609375
+          ],
+          [
+            4314.04833984375,
+            6913.109375,
+            12902.7060546875
+          ]
+        ],
+        "coordinate_files": {
+          "meta.json": {
+            "sha256": "1dd2bafe483b52ec1fc9c5317b4b1b61fdd6022288b78eec762a74dfbc514fb5",
+            "bytes": 286
+          },
+          "x.tif": {
+            "sha256": "2685a43e360ba15c271efedd8b65029cf00ac587a25f28a3da65336f0ef2c611",
+            "bytes": 44234
+          },
+          "y.tif": {
+            "sha256": "a53177c7bb88e1c3797a1a320946f4fb862876893bcfe9368dab91c65ac7834a",
+            "bytes": 44234
+          },
+          "z.tif": {
+            "sha256": "22b985ad06c4809ef0e107c8afa24b4ce14e19b035191e15bc48325ee22073e5",
+            "bytes": 44234
+          }
+        }
+      },
+      {
+        "segment": "20251028222030-auto_grown_20251028222030940",
+        "registered_volume_root": "community-uploads/forrest/volcomp/PHerc0800/volumes/20250521135224-8.640um-1.2m-116keV-masked.zarr",
+        "public_tifxyz_path": "PHerc0800/segments/20251028222030-auto_grown_20251028222030940/mesh/20251028222030-on-20250521135224-8.64um.tifxyz",
+        "audit_report": "artifacts/2026-10-01-corpus-mesh-audit/reports/PHerc0800.20251028222030-auto_grown_20251028222030940.20251028222030-on-20250521135224-8.64um.json",
+        "audit_status": "pass",
+        "audit_findings": [],
+        "shape_yx": [
+          129,
+          129
+        ],
+        "observed_bbox_xyz": [
+          [
+            2926.172607421875,
+            5152.0693359375,
+            10860.3330078125
+          ],
+          [
+            4423.8154296875,
+            7032.79833984375,
+            13188.8330078125
+          ]
+        ],
+        "coordinate_files": {
+          "meta.json": {
+            "sha256": "f7c101ec939bc37cc888e3c4990e85cac4fbfebeba51b2c18b0ded523b1138ef",
+            "bytes": 289
+          },
+          "x.tif": {
+            "sha256": "4d76b0c52c98dfc85c0a242af02ec9e6b923c462f99158771fb3ffd6778d2209",
+            "bytes": 66698
+          },
+          "y.tif": {
+            "sha256": "bf68dadf590e676266493e544ae1e5336310a0b8be6a63be3ff233e4a03e2c0c",
+            "bytes": 66698
+          },
+          "z.tif": {
+            "sha256": "11dd2d78632ba5fabf23d3d917904e4e3af5f740a1079ce63d659c49c12e896d",
+            "bytes": 66698
+          }
+        }
+      },
+      {
+        "segment": "20251028225813-auto_grown_20251028225813045",
+        "registered_volume_root": "community-uploads/forrest/volcomp/PHerc0800/volumes/20250521135224-8.640um-1.2m-116keV-masked.zarr",
+        "public_tifxyz_path": "PHerc0800/segments/20251028225813-auto_grown_20251028225813045/mesh/20251028225813-on-20250521135224-8.64um.tifxyz",
+        "audit_report": "artifacts/2026-10-01-corpus-mesh-audit/reports/PHerc0800.20251028225813-auto_grown_20251028225813045.20251028225813-on-20250521135224-8.64um.json",
+        "audit_status": "pass",
+        "audit_findings": [],
+        "shape_yx": [
+          115,
+          113
+        ],
+        "observed_bbox_xyz": [
+          [
+            2891.698974609375,
+            5364.5576171875,
+            11106.2578125
+          ],
+          [
+            4252.9833984375,
+            6975.5068359375,
+            13243.2177734375
+          ]
+        ],
+        "coordinate_files": {
+          "meta.json": {
+            "sha256": "09580efea0064ad67c8a7fa272c55e9bde069cc613ff11ffeb11b0597e978f66",
+            "bytes": 285
+          },
+          "x.tif": {
+            "sha256": "21da87d0ab1729352172d56d9da07dcc103fe92c9079eb911215237c1dfe793e",
+            "bytes": 52114
+          },
+          "y.tif": {
+            "sha256": "8a44f7936396dfdcdd4257c24ad470a8a292ff1bde69ef21ec8291bc96791527",
+            "bytes": 52114
+          },
+          "z.tif": {
+            "sha256": "02f479757bb10de67138e81ef726f5f7f909a12b196205df1a3203e5e4681011",
+            "bytes": 52114
+          }
+        }
+      },
+      {
+        "segment": "20251029010146-auto_grown_20251029010146642",
+        "registered_volume_root": "community-uploads/forrest/volcomp/PHerc0800/volumes/20250521135224-8.640um-1.2m-116keV-masked.zarr",
+        "public_tifxyz_path": "PHerc0800/segments/20251029010146-auto_grown_20251029010146642/mesh/20251029010146-on-20250521135224-8.64um.tifxyz",
+        "audit_report": "artifacts/2026-10-01-corpus-mesh-audit/reports/PHerc0800.20251029010146-auto_grown_20251029010146642.20251029010146-on-20250521135224-8.64um.json",
+        "audit_status": "pass",
+        "audit_findings": [],
+        "shape_yx": [
+          49,
+          49
+        ],
+        "observed_bbox_xyz": [
+          [
+            3089.978515625,
+            5907.083984375,
+            11617.8837890625
+          ],
+          [
+            3703.01904296875,
+            6614.24560546875,
+            12497.9765625
+          ]
+        ],
+        "coordinate_files": {
+          "meta.json": {
+            "sha256": "ebdbef59fd5dd1dbe581b06e1cb8dc918ef5a544fe24fa446be078a3802f5dbd",
+            "bytes": 283
+          },
+          "x.tif": {
+            "sha256": "6ca11758b24635a5acabf5b5a30560988cdaa418eb69b5055ac18f937dc59541",
+            "bytes": 9738
+          },
+          "y.tif": {
+            "sha256": "298a6737c82a02e8813bac39272d9200718433a3838c679f6e22432bb90c8dd4",
+            "bytes": 9738
+          },
+          "z.tif": {
+            "sha256": "bf1c81820105b5eebcc97cc306711c09f5accc49f5c82eb09ed913eb9f1afaa5",
+            "bytes": 9738
+          }
+        }
+      }
+    ]
+  },
+  "volume_context_gate": {
+    "required": true,
+    "reason": "The frozen mesh audit records a community-uploads/forrest/volcomp registration root, while the prize CT is the top-level exact eligible S3 root. Same volume_id alone is not accepted as a coordinate-frame proof.",
+    "pass_if_either": [
+      "the downloaded TIFXYZ meta.json identifies the exact eligible volume_id in target_volume",
+      "a separately hash-pinned volume-context artifact proves the registered source and eligible CT share the required level-0 coordinate frame"
+    ],
+    "on_failure": "STOP; publish context as unbound and do not extract CT or score sheetness"
+  },
+  "wrong_wrap_gate": {
+    "candidate_order": "ascending segment ID; measured selection uses the rule below, not manual choice",
+    "coordinate_hashes_must_match_frozen_audit": true,
+    "interior_vertex_rule": "primary/control vertex must be valid and have valid +/-1 row and +/-1 column neighbours so a centered normal can be estimated",
+    "nearest_vertex_distance_voxels": {
+      "min_inclusive": 12,
+      "max_inclusive": 96
+    },
+    "minimum_abs_normal_cosine": 0.8,
+    "minimum_eligible_pairs": 4,
+    "selection_rule": "For each candidate mesh, compute the nearest interior control vertex for every interior primary vertex. Keep pairs meeting distance and normal-alignment gates. Select the candidate with the most eligible pairs; ties go to the lexicographically smaller segment ID.",
+    "on_failure": "STOP as inconclusive; do not relabel a duplicate surface, distant background point, normal offset, or another scan as a wrong-wrap control"
+  },
+  "probe_selection": {
+    "group_count": 4,
+    "seed_rule": "smallest primary grid linear index among eligible pairs",
+    "cluster_radius_voxels": 96,
+    "selection_rule": "Starting at the seed, keep eligible primary vertices within the cluster radius; sort by grid linear index and take the first four.",
+    "normal_offset_voxels": [
+      -8,
+      8
+    ],
+    "coordinate_rounding": "round half to nearest NumPy integer only after global probe coordinates are frozen",
+    "cutout_padding_voxels": 12,
+    "max_cutout_voxels": 2500000,
+    "on_insufficient_groups_or_oversize": "STOP; do not alter thresholds or hand-pick another patch"
+  },
+  "sheetness_engine": {
+    "tool": "scroliq-sheetness",
+    "sigmas": [
+      0.8,
+      1.2,
+      1.8
+    ],
+    "beta": 0.5,
+    "gamma": 0.1,
+    "bright_object": true,
+    "scale_objectness": false,
+    "normalization": {
+      "enabled": true,
+      "lower_percentile": 1,
+      "upper_percentile": 99
+    },
+    "write_normal": true,
+    "stochastic": false,
+    "seed": null
+  },
+  "decision_rule": {
+    "tool": "scroliq-sheetness-eval",
+    "min_score_completeness": 1,
+    "min_surface_win_fraction": 0.75,
+    "min_median_margin": 0,
+    "min_normal_completeness": 1,
+    "min_median_abs_cosine": 0.7,
+    "frozen_before_measurement": true
+  },
+  "required_runtime_provenance": [
+    "fresh ZPA PASS report for the exact eligible CT root with PRESENT source attestation",
+    "scroliq-ct-cutout manifest for the exact global level-0 box",
+    "hash-verified downloaded TIFXYZ coordinate files",
+    "generated frozen probe spec before scroliq-sheetness-eval",
+    "sheetness report/response/normal hashes"
+  ],
+  "geometry_stress_control": {
+    "scroll": "PHerc1447",
+    "eligible_volume_id": "20250521151220",
+    "eligible_volume_root": "PHerc1447/volumes/20250521151220-8.640um-1.2m-116keV-masked.zarr",
+    "mesh": {
+      "segment": "20251105093211-z_dbg_gen_00320",
+      "registered_volume_root": "community-uploads/forrest/volcomp/PHerc1447/volumes/20250521151220-8.640um-1.2m-116keV-masked.zarr",
+      "public_tifxyz_path": "PHerc1447/segments/20251105093211-z_dbg_gen_00320/mesh/20251105093211-on-20250521151220-8.64um.tifxyz",
+      "audit_report": "artifacts/2026-10-01-corpus-mesh-audit/reports/PHerc1447.20251105093211-z_dbg_gen_00320.20251105093211-on-20250521151220-8.64um.json",
+      "audit_status": "partial",
+      "audit_findings": [
+        {
+          "kind": "connectivity",
+          "severity": "review",
+          "message": "153 disconnected valid-vertex components"
+        },
+        {
+          "kind": "hole",
+          "severity": "review",
+          "message": "11 enclosed invalid grid component(s)"
+        },
+        {
+          "kind": "edge-jump",
+          "severity": "review",
+          "message": "1335 edges exceed 4x axis-median spacing"
+        },
+        {
+          "kind": "normal-reversal",
+          "severity": "review",
+          "message": "386 severe neighboring-normal reversals"
+        },
+        {
+          "kind": "isometry-distortion",
+          "severity": "review",
+          "message": "p95 local symmetric stretch 5.07 exceeds 2"
+        }
+      ],
+      "shape_yx": [
+        682,
+        411
+      ],
+      "observed_bbox_xyz": [
+        [
+          2136.60791015625,
+          1624.433349609375,
+          5838.3193359375
+        ],
+        [
+          5437.6337890625,
+          3535.28662109375,
+          15276.9951171875
+        ]
+      ],
+      "coordinate_files": {
+        "meta.json": {
+          "sha256": "5e21fd4cc013255d5bfef0c2c490a6d99286af692710196e9879fb5d2f45ac98",
+          "bytes": 289
+        },
+        "x.tif": {
+          "sha256": "f7db4456af3dcb1d2045afe32280e0b3d106259a7c5d3c4b63b2bebe2736abfb",
+          "bytes": 111172
+        },
+        "y.tif": {
+          "sha256": "f0eb52fd72659d1f5f837672fc8e7b3f986c91f71df36979749668e2b454652f",
+          "bytes": 117418
+        },
+        "z.tif": {
+          "sha256": "b1714b6afc54ce7169aac1c9633ff5ceaaacbcc398f2d54e8d7dd0c9adc57293",
+          "bytes": 99190
+        }
+      }
+    },
+    "interpretation": "This is a known multi-defect geometry control, not a presumed non-papyrus or low-sheetness control. A high physical sheetness response MUST NOT upgrade its Mesh IQ status or be interpreted as correct topology.",
+    "expected_sheetness_outcome": null
+  },
+  "stop_rules": [
+    "No real-data parameter or threshold may change after this protocol is committed.",
+    "No substitute scan of PHerc0800 or PHerc1447 may be used.",
+    "If volume context is unbound, stop rather than infer coordinate equivalence from the volume ID.",
+    "If no wrong-wrap candidate satisfies the geometric gate, report the campaign inconclusive.",
+    "If the frozen decision rule fails, publish FAIL; do not tune and rerun as v1.",
+    "Horizon-path experiments remain blocked until this sheetness campaign has a valid measured result."
+  ],
+  "claim_boundary": "A PASS would establish only that a frozen Hessian sheetness field preferentially supports selected public mesh points over preregistered normal-offset and geometrically distinct nearby-surface controls on one exact Grand Prize CT. It would not prove sheet identity, winding correctness, recto completeness, ink, or readability."
+}
