@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://svyable.github.io/scrollq/schemas/segmentation-truth-v1.json",
+  "title": "ScrolIQ private held-out segmentation truth manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dataset",
+    "volume_root",
+    "coordinate_system",
+    "commitment_salt",
+    "regions"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "dataset": {"type": "string", "minLength": 1},
+    "volume_root": {"type": "string", "minLength": 1},
+    "coordinate_system": {"const": "base_voxel_xyz"},
+    "commitment_salt": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Private 32-byte random salt used to verify the public hidden-truth commitment. Do not expose while the benchmark remains blind."
+    },
+    "regions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "tifxyz"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "tifxyz": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "description": "Private truth locations. Model-submission code must never execute with this manifest or these paths mounted."
+}

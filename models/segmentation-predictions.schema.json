@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://svyable.github.io/scrollq/schemas/segmentation-predictions-v1.json",
+  "title": "ScrolIQ held-out segmentation prediction manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "model",
+    "dataset",
+    "spec_sha256",
+    "volume_root",
+    "coordinate_system",
+    "provenance",
+    "regions"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "model": {"type": "string", "minLength": 1},
+    "dataset": {"type": "string", "minLength": 1},
+    "spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "volume_root": {"type": "string", "minLength": 1},
+    "coordinate_system": {"const": "base_voxel_xyz"},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpoint_sha256",
+        "inference_script_sha256",
+        "inference_config_sha256"
+      ],
+      "properties": {
+        "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "inference_script_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "inference_config_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "regions": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "status", "tifxyz"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "status": {"const": "ok"},
+              "tifxyz": {"type": "string", "minLength": 1}
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "status", "reason"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "status": {"const": "failed"},
+              "reason": {"type": "string", "minLength": 1}
+            }
+          }
+        ]
+      }
+    }
+  }
+}

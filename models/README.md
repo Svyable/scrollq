@@ -48,6 +48,15 @@ blind overlap checks.
 
 See `docs/model-evaluation.md` for the evaluator and blind-runner boundary.
 
+For held-out surface recovery, the additional contracts are:
+
+- `segmentation-spec.schema.json` — public preregistered metric/tolerance/topology contract plus salted hidden-truth commitment;
+- `segmentation-truth.schema.json` — private truth locations and private commitment salt;
+- `segmentation-predictions.schema.json` — model prediction paths and verified inference-run identity.
+
+`scroliq-segmentation-validate` turns those inputs into the common
+`results.schema.json` contract. See `docs/segmentation-validation.md`.
+
 ## Grand Prize public release chain
 
 The evaluation card above answers “can this model be evaluated safely?” It does
