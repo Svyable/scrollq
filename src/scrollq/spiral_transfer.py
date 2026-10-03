@@ -93,6 +93,27 @@ def _verified_file(root: Path, manifest: dict[str, Any], rel: str, expected: str
     return path
 
 
+def _midpoint_ranks(n: int, max_points: int = MAX_POINTS) -> np.ndarray:
+    if n <= 0 or max_points <= 0:
+        raise ValueError("n and max_points must be positive")
+    k = min(n, max_points)
+    return np.floor((np.arange(k, dtype=np.float64) + 0.5) * n / k).astype(np.int64)
+
+
+def _choose_offset(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    eligible = [r for r in rows if r.get("eligible") is True]
+    if not eligible:
+        raise ValueError("no winding offset has all required fit-role predictions/cores")
+    return min(
+        eligible,
+        key=lambda r: (
+            float(r["fit_mesh_median_of_medians"]),
+            abs(int(r["offset"])),
+            int(r["offset"]),
+        ),
+    )
+
+
 def _candidate_by_path(split: dict[str, Any]) -> dict[str, dict[str, Any]]:
     candidates = split.get("candidates")
     if not isinstance(candidates, list):
@@ -147,7 +168,7 @@ def _load_reference_points(root: Path, manifest: dict[str, Any], spec: dict[str,
     if n == 0:
         raise ValueError(f"{mesh}: no eligible reference vertices in frozen core")
     k = min(n, MAX_POINTS)
-    ranks = np.floor((np.arange(k, dtype=np.float64) + 0.5) * n / k).astype(np.int64)
+    ranks = _midpoint_ranks(n, MAX_POINTS)
     chosen = flat[ranks]
     rows, cols = np.unravel_index(chosen, z.shape, order="C")
     pts = np.column_stack((x.ravel()[chosen], y.ravel()[chosen], z.ravel()[chosen]))
@@ -357,10 +378,7 @@ def evaluate(
             medians.append(float(np.median(distances)))
         score = float(np.median(medians)) if eligible else None
         offset_rows.append({"offset": int(offset), "eligible": eligible, "fit_mesh_median_of_medians": score})
-    eligible_rows = [r for r in offset_rows if r["eligible"]]
-    if not eligible_rows:
-        raise ValueError("no winding offset has all required fit-role predictions/cores")
-    selected = min(eligible_rows, key=lambda r: (r["fit_mesh_median_of_medians"], abs(r["offset"]), r["offset"]))
+    selected = _choose_offset(offset_rows)
     offset = int(selected["offset"])
 
     held_results = []
