@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -59,14 +60,40 @@ def _rate(labels: list[str]) -> dict:
 
 
 def score(sheet_rows: list[dict], key: list[dict]) -> dict:
+    # Never silently overwrite duplicate IDs or score substituted surfaces.
+    errors = []
+    for name, rows in (("sheet", sheet_rows), ("key", key)):
+        ids = [r.get("review_id") for r in rows]
+        if any(not isinstance(rid, str) or not rid.strip() for rid in ids):
+            errors.append(f"{name}: missing review_id")
+        elif len(set(ids)) != len(ids):
+            errors.append(f"{name}: duplicate review_id")
+    if not key:
+        errors.append("key: empty sample")
+    if errors:
+        return {"status": "invalid", "errors": errors}
     by_id = {row["review_id"]: row for row in sheet_rows}
+    expected = {k["review_id"] for k in key}
+    if set(by_id) - expected:
+        errors.append("sheet: unexpected review_id")
+    for k in key:
+        if k.get("stratum") not in {"F", "D", "C"}:
+            errors.append(f"{k['review_id']}: invalid stratum")
+        row = by_id.get(k["review_id"])
+        if row is not None:
+            for field in ("scroll", "segment", "mesh_url", "volume_root"):
+                # CSV serializes a missing optional CT root (JSON null) as "".
+                if field in k and row.get(field) != (k[field] if k[field] is not None else ""):
+                    errors.append(f"{k['review_id']}: changed {field}")
+    if errors:
+        return {"status": "invalid", "errors": errors}
     missing = [k["review_id"] for k in key if k["review_id"] not in by_id]
     bad = sorted(
         {
-            by_id[k["review_id"]].get("label", "").strip()
+            str(by_id[k["review_id"]].get("label") or "").strip()
             for k in key
             if k["review_id"] in by_id
-            and by_id[k["review_id"]].get("label", "").strip() not in LABELS
+            and str(by_id[k["review_id"]].get("label") or "").strip() not in LABELS
         }
     )
     if missing or bad:
@@ -104,20 +131,34 @@ def score(sheet_rows: list[dict], key: list[dict]) -> dict:
     }
 
 
-def main() -> None:
+def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("review_dir")
     ap.add_argument("--out")
+    ap.add_argument("--sheet", help="returned labelled CSV; leaves the frozen sample untouched")
+    ap.add_argument("--require-complete", action="store_true",
+                    help="exit 1 for invalid, incomplete, or uncalibrated reviews")
     args = ap.parse_args()
     root = Path(args.review_dir)
-    with (root / "review-sheet.csv").open(newline="", encoding="utf-8") as fh:
+    sheet = Path(args.sheet) if args.sheet else root / "review-sheet.csv"
+    key_path = root / "key.json"
+    with sheet.open(newline="", encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))
-    result = score(rows, json.loads((root / "key.json").read_text(encoding="utf-8")))
+    key_bytes = key_path.read_bytes()
+    manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+    key_hash = hashlib.sha256(key_bytes).hexdigest()
+    if key_hash != manifest["files_sha256"]["key.json"]:
+        result = {"status": "invalid", "errors": ["key checksum mismatch"]}
+    else:
+        result = score(rows, json.loads(key_bytes))
+    result["inputs_sha256"] = {"sheet": hashlib.sha256(sheet.read_bytes()).hexdigest(),
+                              "key": key_hash}
     text = json.dumps(result, indent=2)
     if args.out:
         Path(args.out).write_text(text + "\n", encoding="utf-8")
     print(text)
+    return int(args.require_complete and result["status"] != "calibrated")
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
