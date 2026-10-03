@@ -229,7 +229,7 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
   <div class="actiongrid">
     <div><h3>Exact-volume eligibility</h3>
       <p><b>13 prize targets</b> are matched by exact volume ID. Same-scroll higher-resolution scans are explicitly excluded rather than silently substituted.</p>
-      <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-grand-prize-qualifier">Frozen qualifier artifacts →</a></p></div>
+      <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-02-grand-prize-mesh-crosscut">Exact-volume mesh cross-cut →</a> · <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-09-30-grand-prize-qualifier">Frozen qualifier →</a></p></div>
     <div><h3>Blind geometry first</h3>
       <p>Each first-wave target gets the same deterministic <b>24-region</b> sample: 18 fit regions and <b>6 held-out</b> regions. Failed regions stay in the denominator.</p>
       <p class="evidence-link"><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-probe-protocol.md">Blind probe protocol →</a></p></div>
@@ -248,13 +248,14 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
     pre-registered gate of <b>0.85</b>; mean |&Delta;| = <b>2.94</b>, top-10 overlap <b>7 / 10</b>.
     The consequence was not a softer threshold: the leaderboard now reports <b>rank bands</b>.
     <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-stability-v2">Frozen result + post-hoc diagnostics →</a></p></div>
-  <div class="card"><h3>Mesh corpus: agreement before judgment</h3>
-    <p><b>843 / 903</b> published TIFXYZ meshes were audited across <b>307 segments / 11 scrolls</b>;
-    60 largest meshes hit the memory limit and remain explicit failures. Across repeated registrations,
-    <b>190 / 262</b> multi-registration segments had identical finding kinds. Where both TIFXYZ and
-    published OBJ existed, <b>175 / 185</b> segments agreed on whether any shared finding kind was present.
-    Findings remain <b>review candidates</b>, not confirmed sheet defects.
-    <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-corpus-mesh-audit">Corpus evidence →</a></p></div>
+  <div class="card"><h3>Exact-volume Grand Prize mesh evidence</h3>
+    <p>Intersecting the pinned 13-volume prize manifest with the public mesh corpus leaves only
+    <b>2 / 13</b> eligible targets with published meshes on the <b>exact prize-listed scan</b>.
+    <b>PHerc0800: 6 / 6 clean</b> local Mesh IQ audits. <b>PHerc1447: 15 / 15</b> carry an
+    enclosed-hole review finding; 14 are review tier and 1 is multi-defect. All <b>21 / 21</b>
+    published segments on those two targets are accounted for. The other 11 targets are
+    <b>evidence gaps</b>, not failures.
+    <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-02-grand-prize-mesh-crosscut">Offline exact-volume cross-cut →</a></p></div>
   <div class="card"><h3>Winding check with measured sensitivity</h3>
     <p>On public PHercParis4 annotations, the ray-order audit found <b>2 inversions / 13,700 comparable pairs</b>.
     In a seeded injection control, deliberate &plusmn;3 winding errors were detected in <b>179 / 200</b>
