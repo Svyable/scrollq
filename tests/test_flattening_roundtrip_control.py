@@ -103,3 +103,21 @@ def test_roundtrip_control_source_compiles_and_declares_negative_control():
 
     assert "Expected result under scroliq-flatten-compare: HOLD" in text
     assert "not a parameterizer" in text
+
+
+def test_roundtrip_control_workflow_is_non_promoting_and_json_only():
+    workflow_path = ROOT / ".github" / "workflows" / "flattening-tier0-control.yml"
+    text = workflow_path.read_text(encoding="utf-8")
+
+    assert "workflow_dispatch:" in text
+    assert "Verify pinned public Tier-0 sources" in text
+    assert "roundtrip_control.py" in text
+    assert 'report["decision"]["verdict"] == "HOLD"' in text
+    assert "--implementation-license MIT" in text
+    assert "verification.json" in text
+    assert "reports/*.compare.json" in text
+
+    upload_block = text.split("- uses: actions/upload-artifact@v4", 1)[1]
+    assert "*.obj" not in upload_block
+    assert "*.tif" not in upload_block
+    assert "*.tifxyz" not in upload_block
