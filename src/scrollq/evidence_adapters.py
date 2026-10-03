@@ -30,13 +30,177 @@ ADAPTER_REPOSITORIES = {
 # These are the only adapter/claim pairs allowed to turn a required claim into
 # PASS in evidence policy v1.
 APPROVED_PASS_ADAPTERS = {
-    "flattening-isometry": frozenset({FLATCHECK_ADAPTER}),
+    # flatcheck/v1 is intentionally evidence-only for now: its native JSON
+    # names a path but does not content-bind the tifxyz bytes it scored.
+    "flattening-isometry": frozenset(),
+    # windcheck_check/v1 embeds a full semantic TIFXYZ content manifest. The
+    # readiness gate independently compares that manifest with the submitted
+    # mesh before allowing PASS.
     "mesh-self-intersection": frozenset({WINDCHECK_ADAPTER}),
 }
 
 
 class NativeEvidenceError(ValueError):
     """Native report is missing the semantics required by an adapter."""
+
+
+SEMANTIC_TIFXYZ_FILES = (
+    "x.tif",
+    "y.tif",
+    "z.tif",
+    "mask.tif",
+    "mask.png",
+    "meta.json",
+)
+
+
+def _sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _windcheck_manifest_digest(rows: list[dict[str, Any]]) -> str:
+    lines: list[str] = []
+    for row in sorted(rows, key=lambda item: str(item.get("path"))):
+        path = row.get("path")
+        if not isinstance(path, str):
+            raise NativeEvidenceError("windcheck mesh manifest row.path must be a string")
+        if row.get("present") is True and isinstance(row.get("sha256"), str):
+            size = row.get("size")
+            if not isinstance(size, int) or isinstance(size, bool) or size < 0:
+                raise NativeEvidenceError(
+                    f"windcheck mesh manifest {path!r} size must be a non-negative integer"
+                )
+            lines.append(f"{path}\0{size}\0{row['sha256']}")
+        else:
+            lines.append(f"{path}\0absent\0absent")
+    blob = ("\n".join(lines) + "\n").encode("utf-8")
+    return hashlib.sha256(blob).hexdigest()
+
+
+def verify_native_mesh_identity(
+    adapter: str,
+    report: dict[str, Any],
+    mesh_path: str | Path,
+) -> dict[str, Any]:
+    """Verify that a native report is about the exact submitted mesh bytes.
+
+    A path/name match is not sufficient. Adapters may authorize PASS only when
+    the native format exposes enough content identity to reproduce this check.
+    """
+    mesh = Path(mesh_path)
+    if not mesh.is_dir():
+        return {
+            "status": "mismatch",
+            "reason": f"submitted mesh is not a directory: {mesh}",
+        }
+
+    if adapter == FLATCHECK_ADAPTER:
+        return {
+            "status": "unbound",
+            "reason": (
+                "flatcheck native JSON does not content-hash its input tifxyz; "
+                "path equality cannot prove the report scored the submitted bytes"
+            ),
+        }
+
+    if adapter != WINDCHECK_ADAPTER:
+        return {
+            "status": "unbound",
+            "reason": f"adapter {adapter!r} has no exact mesh-identity verifier",
+        }
+
+    mesh_block = report.get("mesh")
+    hashes = mesh_block.get("hashes") if isinstance(mesh_block, dict) else None
+    if not isinstance(hashes, dict):
+        return {
+            "status": "unbound",
+            "reason": "windcheck certificate does not contain mesh.hashes",
+        }
+    if hashes.get("schema") != "windcheck_mesh_manifest/v1":
+        return {
+            "status": "unbound",
+            "reason": "unsupported windcheck mesh manifest schema",
+        }
+    rows = hashes.get("files")
+    if not isinstance(rows, list):
+        return {
+            "status": "unbound",
+            "reason": "windcheck mesh manifest has no files list",
+        }
+
+    by_name: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, dict) or not isinstance(row.get("path"), str):
+            return {
+                "status": "mismatch",
+                "reason": "windcheck mesh manifest contains a malformed row",
+            }
+        name = row["path"]
+        if name in by_name:
+            return {
+                "status": "mismatch",
+                "reason": f"windcheck mesh manifest duplicates {name!r}",
+            }
+        by_name[name] = row
+
+    if set(by_name) != set(SEMANTIC_TIFXYZ_FILES):
+        return {
+            "status": "unbound",
+            "reason": (
+                "windcheck mesh manifest does not declare exactly the semantic "
+                "tifxyz file set expected by windcheck_mesh_manifest/v1"
+            ),
+        }
+
+    try:
+        computed_manifest_digest = _windcheck_manifest_digest(rows)
+    except NativeEvidenceError as exc:
+        return {"status": "mismatch", "reason": str(exc)}
+    if hashes.get("digest") != computed_manifest_digest:
+        return {
+            "status": "mismatch",
+            "reason": "windcheck mesh manifest digest contradicts its file rows",
+        }
+
+    mismatches: list[str] = []
+    for name in SEMANTIC_TIFXYZ_FILES:
+        row = by_name[name]
+        path = mesh / name
+        present = path.is_file()
+        if row.get("present") is not present:
+            mismatches.append(f"{name}: presence differs")
+            continue
+        if not present:
+            continue
+        expected_size = row.get("size")
+        expected_sha = row.get("sha256")
+        if path.stat().st_size != expected_size:
+            mismatches.append(f"{name}: byte length differs")
+            continue
+        if not isinstance(expected_sha, str) or not SHA256_RE.fullmatch(expected_sha):
+            mismatches.append(f"{name}: certificate sha256 is invalid")
+            continue
+        if _sha256_file(path) != expected_sha:
+            mismatches.append(f"{name}: sha256 differs")
+
+    if mismatches:
+        return {
+            "status": "mismatch",
+            "reason": "; ".join(mismatches),
+            "manifest_digest": computed_manifest_digest,
+        }
+    return {
+        "status": "exact",
+        "reason": (
+            "windcheck semantic manifest exactly matches x/y/z, masks, and meta.json "
+            "in the submitted tifxyz"
+        ),
+        "manifest_digest": computed_manifest_digest,
+    }
 
 
 def assess_flatcheck(report: dict[str, Any]) -> dict[str, Any]:
