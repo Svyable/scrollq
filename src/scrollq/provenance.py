@@ -1250,6 +1250,8 @@ def validate_manifest(
         )
 
     zarr_audit = ct.get("zarr_audit")
+    zpa_report: dict[str, Any] | None = None
+    source_attestation: dict[str, Any] | None = None
     if not isinstance(zarr_audit, dict):
         _error(
             errors,
@@ -1258,31 +1260,12 @@ def validate_manifest(
             "zarr-pyramid-audit provenance record is required",
         )
     else:
-        if zarr_audit.get("tool") != "zarr-pyramid-audit":
-            _error(
-                errors,
-                "GP_CT_AUDIT",
-                "ct_volume.zarr_audit.tool",
-                "tool must be 'zarr-pyramid-audit'",
-            )
-        audit_sha = zarr_audit.get("manifest_sha256")
-        if not isinstance(audit_sha, str) or not SHA256_RE.fullmatch(audit_sha):
-            _error(
-                errors,
-                "GP_CT_AUDIT",
-                "ct_volume.zarr_audit.manifest_sha256",
-                "audit manifest sha256 is required",
-            )
-        audit_root = zarr_audit.get("root")
-        if not isinstance(audit_root, str) or (
-            isinstance(volume_id, str) and volume_id not in audit_root
-        ):
-            _error(
-                errors,
-                "GP_CT_AUDIT",
-                "ct_volume.zarr_audit.root",
-                "audit root must identify the exact eligible volume",
-            )
+        zpa_report, source_attestation = _verify_zpa_evidence(
+            zarr_audit=zarr_audit,
+            root_dir=root_dir,
+            volume_id=str(volume_id),
+            errors=errors,
+        )
 
     datasets = _index(manifest.get("datasets"), "datasets", errors)
     regions = _index(manifest.get("region_sets"), "region_sets", errors)
