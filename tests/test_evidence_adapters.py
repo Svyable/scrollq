@@ -98,6 +98,7 @@ def test_normalized_entry_is_recomputable_from_native_report():
         artifact_url="https://example.org/column-01-flatcheck.json",
         sha256="a" * 64,
         path="evidence/column-01-flatcheck.json",
+        mesh_sha256="c" * 64,
         producer_commit="b" * 40,
         command="flatcheck report column_01.tifxyz --json report.json",
     )
