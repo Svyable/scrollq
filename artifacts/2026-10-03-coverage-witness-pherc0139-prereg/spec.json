@@ -1,0 +1,147 @@
+{
+  "schema": "scrollq-research-coverage-witness-pherc0139/1",
+  "status": "frozen-before-witness-read",
+  "purpose": "Real-papyrus deletion-control calibration for issue #151. Tests whether an independent published surface-prediction source can continue to witness deliberately omitted w035 material after that material is removed from the submitted/reference surface.",
+  "claim_boundary": "A positive result establishes omission sensitivity only for w035 material that the independent surface-m7 source already supports near the known reference surface. It does not establish complete discovery of unknown papyrus outside an arbitrary inventory, physical recto identity, or Grand Prize eligibility.",
+  "reference_surface": {
+    "scroll": "PHerc0139",
+    "segment": "20260317000000-w035_2026031718",
+    "tifxyz": "mesh/20260317000000-on-20250728140407-9.362um.tifxyz",
+    "exact_ct_root": "PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "binding_url": "https://scrollprize.org/tutorial5",
+    "tifxyz_sha256": {
+      "meta.json": "11752e63185cc6bc8842cf6f4d7aef84a7e3ec7b0b4eb5c10bf99842e7cd8dda",
+      "x.tif": "d827a5d2e51035c91da74b5fba4fea55c9df9d8f58c6ec7f534d6012ee2f7b69",
+      "y.tif": "41f1df324572b68450f4da92dcd4598844f602982f1965e5bea67e6de080d664",
+      "z.tif": "b61f8bbcd9cb538f43cd72678fd4d38a25cc1643daa4bcfdd7f2e9954f9a1e81"
+    },
+    "audit_path": "artifacts/2026-10-01-corpus-mesh-audit/reports/PHerc0139.20260317000000-w035_2026031718.20260317000000-on-20250728140407-9.362um.json",
+    "reference_plan_path": "artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json",
+    "reference_plan_sha256": "8cc043205a72b9e8a285ed81ac46b09f6d2808e1483634b9030cb9dcfc12309d"
+  },
+  "independent_witness_source": {
+    "kind": "published-surface-prediction",
+    "model_id": "20260413222639",
+    "level": 0,
+    "prediction_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/representations/predictions/surfaces/20250728140407-surface-20260413222639-surface-m7-L0-th0.2.zarr",
+    "stored_value_threshold": 127,
+    "published_threshold": 0.2,
+    "ct_support_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "ct_support_rule": "masked CT voxel value > 0",
+    "source_spec_path": "artifacts/2026-10-03-pherc0139-wrong-wrap-prereg/wrong-wrap-spec.json",
+    "source_spec_file_sha256": "4e7cefffb59665c7b9551daf615ac5d68c26295f42ac0524ad1b865b0593db06",
+    "uses_downstream_sheetness": false,
+    "uses_ink": false
+  },
+  "deletion_protocol": {
+    "material_grid_coordinate_system": "TIFXYZ y,x indices",
+    "centers": [
+      {
+        "id": "surface-0004",
+        "grid_yx": [
+          41,
+          210
+        ]
+      },
+      {
+        "id": "surface-0008",
+        "grid_yx": [
+          74,
+          121
+        ]
+      },
+      {
+        "id": "surface-0012",
+        "grid_yx": [
+          106,
+          231
+        ]
+      },
+      {
+        "id": "surface-0016",
+        "grid_yx": [
+          139,
+          124
+        ]
+      },
+      {
+        "id": "surface-0023",
+        "grid_yx": [
+          196,
+          45
+        ]
+      },
+      {
+        "id": "surface-0028",
+        "grid_yx": [
+          235,
+          188
+        ]
+      }
+    ],
+    "square_sizes_vertices": [
+      21,
+      31,
+      41
+    ],
+    "rectangle_rule": "For odd size S and frozen center [y,x], delete valid TIFXYZ vertices with |dy|<=floor(S/2) and |dx|<=floor(S/2). Invalid vertices remain invalid and do not count toward deletion denominator.",
+    "center_selection": "Six already-frozen geometry-only sheetness probes, selected before any coverage-witness response is read. No prediction density, CT intensity, ink, or deletion outcome may replace a center.",
+    "missing_patch_policy": "A patch with too few valid or independently supported witness points remains in the denominator and may fail the experiment; do not substitute another center."
+  },
+  "witness_association": {
+    "normal_method": "Same centered TIFXYZ tangent cross-product convention used by scroliq-sheetness-plan.",
+    "signed_search_offsets_voxels": [
+      -2,
+      -1,
+      0,
+      1,
+      2
+    ],
+    "candidate_rule": "At each valid patch vertex with a valid centered normal, sample the frozen surface-m7 prediction and masked CT at the five signed normal offsets. A witness exists when prediction > 127 and CT > 0. Choose the smallest absolute offset; negative wins exact ties.",
+    "baseline_association_note": "This stage deliberately calibrates omission sensitivity only where the independent source co-locates with known w035 material. It is not a global witness-discovery test."
+  },
+  "counterfactuals": {
+    "omission": "Remove the frozen material-grid patch from the reference surface.",
+    "parallel_substitution": {
+      "enabled": true,
+      "signed_normal_shift_voxels": 20,
+      "rule": "Replace each deleted valid vertex having a valid normal by the same 3-D point shifted +20 voxels along that frozen local normal. This is a synthetic parallel-sheet falsifier, not a claim about an actual neighboring winding."
+    }
+  },
+  "metric": {
+    "method": "nearest 3-D Euclidean distance from each independently supported witness point to the counterfactual submitted-surface point cloud",
+    "nearest_neighbor": "scipy.spatial.cKDTree",
+    "primary_unexplained_tolerance_voxels": 8,
+    "sensitivity_tolerances_voxels": [
+      4,
+      8,
+      12
+    ],
+    "denominators": {
+      "deletion_recall": "all independently supported witnesses whose source TIFXYZ material index lies inside the frozen deletion rectangle",
+      "outside_stability": "all independently supported witnesses in the same maximum 41x41 local evaluation window but outside the active deletion rectangle"
+    }
+  },
+  "decision_rule": {
+    "minimum_supported_witnesses_per_patch": 25,
+    "omission_primary_requirements": {
+      "size_21_min_median_recall": 0.75,
+      "size_31_min_median_recall": 0.9,
+      "size_41_min_median_recall": 0.9,
+      "every_size_min_patch_recall": 0.5,
+      "min_outside_stability": 0.99
+    },
+    "parallel_substitution_primary_requirements": {
+      "size_31_min_median_recall": 0.75,
+      "size_41_min_median_recall": 0.75,
+      "min_outside_stability": 0.99
+    },
+    "interpretation": "Passing is necessary but not sufficient for promotion. A positive result unlocks Stage B: extract witnesses without conditioning on the known surface and measure false unexplained clusters on intact real papyrus. Failure retains EXPERIMENT FURTHER or DISMISS depending on mechanism; thresholds may not be rewritten after observation."
+  },
+  "reproducibility": {
+    "randomness": null,
+    "overwrite_policy": "create-only measured result",
+    "response_selection": "No patch, threshold, tolerance, or witness-source parameter may change after this spec is merged.",
+    "target_scroll_use": false
+  }
+}
