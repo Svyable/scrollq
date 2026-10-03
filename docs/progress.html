@@ -233,8 +233,8 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
         <div><div class="req-num">GP-04</div><div class="req-title">No train/prediction overlap + blind held-out validation</div></div>
         <span class="state ready">Ready to test</span>
       </div>
-      <p><code>scroliq-eval</code> now provides model/dataset/result contracts, checkpoint and code hashing, overlap blocking, fixed seeds, region-level failures, and deterministic 95% bootstrap CIs.</p>
-      <div class="evidence">Infrastructure is merged. Real community model adapters and blind benchmark runs are the next step.</div>
+      <p><code>scroliq-eval</code> provides model/dataset/result contracts, checkpoint and code hashing, overlap blocking, fixed seeds, region-level failures, and deterministic 95% bootstrap CIs. <code>scroliq-segmentation-validate</code> now adds blind TIFXYZ surface scoring with a salted frozen-truth commitment.</p>
+      <div class="evidence">Ink/geometry adapters and real blind community benchmark runs remain next; no model is promoted from infrastructure alone.</div>
     </article>
 
     <article class="req partial">
@@ -269,8 +269,8 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
   <div class="change-grid">
     <article class="change">
       <div class="date">OCT 03</div>
-      <h3>Blind model evaluation became a first-class ScrolIQ contract</h3>
-      <p><code>scroliq-eval</code> merged with fail-closed model registry, held-out dataset/results schemas, deterministic CIs, failure accounting, and provenance.</p>
+      <h3>Blind model evaluation now reaches held-out surface recovery</h3>
+      <p><code>scroliq-eval</code> provides the fail-closed envelope; <code>scroliq-segmentation-validate</code> adds bidirectional TIFXYZ coverage, exact-distance diagnostics, topology gates, and a salted commitment that freezes private truth before scoring.</p>
     </article>
     <article class="change">
       <div class="date">OCT 03</div>
@@ -423,7 +423,7 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
     <p>The highest-leverage next move is therefore not another dashboard metric. It is an exact-volume physical surface campaign that produces held-out surface predictions, validates them against truth without leakage, and then scales the successful geometry into complete recto coverage.</p>
 
     <div class="next">
-      <div class="next-item"><b>1 · Prove surface recovery</b><span>Transfer the frozen physical-sheet experiment to an exact prize-eligible volume and score held-out surface predictions.</span></div>
+      <div class="next-item"><b>1 · Prove surface recovery</b><span>Transfer the frozen physical-sheet experiment to an exact prize-eligible volume, produce blind TIFXYZ predictions, and score them with the now-implemented held-out surface evaluator.</span></div>
       <div class="next-item"><b>2 · Scale to coverage</b><span>Turn validated local surface recovery into sequential column-scale TIFXYZ meshes plus detached-patch accounting.</span></div>
       <div class="next-item"><b>3 · Prove reading</b><span>Render ink on held-out geometry, quantify falsification controls, then demonstrate letter-by-letter legibility across complete columns.</span></div>
     </div>
