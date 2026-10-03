@@ -250,7 +250,7 @@ Windcheck's same-original census reports 3,333 transverse contacts. The
 passport accepts this as content-bound external evidence while still asking for
 the official VC3D self-cross validator before downstream use.
 
-For local review, `--review-points` emits native VC3D PointCollections with the strongest edge-jump and neighbouring-normal-reversal sites ranked in the audit JSON. The frozen [PHerc0139 review-queue campaign](artifacts/2026-10-02-pherc0139-review-queue/) produces 35 directly loadable points (15/15 edge jumps plus the top 20/173 normal reversals) on the same public surface used by the binding-aware Windcheck dossier. These coordinates are inspection targets, not defect verdicts.
+For local review, `--review-points` emits native VC3D PointCollections with the strongest edge-jump and neighbouring-normal-reversal sites ranked in the audit JSON. The frozen [PHerc0139 review-queue campaign](artifacts/2026-10-03-pherc0139-review-queue/) produces 35 directly loadable points (15/15 edge jumps plus the top 20/173 normal reversals) on the same public surface used by the binding-aware Windcheck dossier. These coordinates are inspection targets, not defect verdicts.
 
 For nonlocal self-intersections, ScrolIQ does not duplicate VC3D's geometry kernel. Generate a deterministic upstream report with `vc_tifxyz_selfcross <surface.tifxyz> -o report.json --collection sites.json` and pass it with `--selfcross-report`. ScrolIQ validates the report against the exact local surface path and grid, blocks on transverse contacts, preserves coplanar/grazing contacts as non-crossings, and keeps a nominally clean census partial when upstream skipped long-edge quads under `maxedge`. The optional `sites.json` remains directly loadable in VC3D for inspection.
 
