@@ -198,6 +198,8 @@ A +2 injection control must catch at least 90% of the errors it injects; below t
 
 Flags are review cues: a patch traced onto a neighbouring winding gives the same signal as a mis-numbered annotation.
 
+For the human review step, `scroliq-vc3d-review` converts that queue into native VC3D PointCollections v1 JSON. The committed Paris4 bundle contains five deduplicated markers for the six flagged constraints, preserves the exact `result.json` SHA-256 and all patch/residual context in collection tags, and loads through VC3D's standard point-collection path. See [VC3D-native review bundles](docs/vc3d-review-bundles.md).
+
 ## Fiber IQ: native VC3D + trace continuity audit
 
 `scroliq-fiber` now reads the community's native VC3D `vc3d_fiber` JSON

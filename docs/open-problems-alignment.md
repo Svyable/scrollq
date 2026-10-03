@@ -124,7 +124,9 @@ Next, attach the actual measured outputs for normal-offset, adjacent-winding, ge
 
 ### 8. VC3D integration
 
-The end state is not a standalone dashboard. A ScrolIQ diagnostic should point to a region that can be opened directly in VC3D for inspection or correction, and corrections should be able to flow back into a new diagnostic pass.
+The first diagnostic-to-review bridge is implemented. `scroliq-vc3d-review` converts a ScrolIQ review queue into native VC3D PointCollections v1 JSON, hash-binds the file to the exact diagnostic source, and preserves machine context in collection tags. The frozen PHercParis4 winding-attachment result ships five deduplicated VC3D markers for six flagged constraints; they load through VC3D's standard point-collection path. See [VC3D-native review bundles](vc3d-review-bundles.md).
+
+The remaining half of the loop is correction provenance: a reviewer-confirmed edit should be exportable from VC3D, bound to the reviewed finding, and fed into a new diagnostic pass without losing the before/after evidence.
 
 ## Grand Prize readiness
 

@@ -206,8 +206,13 @@ console script. A new entry point must therefore be declared in
   `artifacts/*/README.md` — change them together or not at all.
 - Do not claim readability prediction. The 0–100 score is scan-health triage only.
 - Do not infer surface, mesh, spiral, fiber, label-localization, or ink state from the scan score; missing evidence stays `unknown`.
-- Opening PRs/issues upstream or publishing to PyPI needs the maintainer's
-  explicit approval — prepare the branch, don't ship it.
+- Any contributor or coding agent may open and update PRs/issues in this
+  repository or upstream without prior maintainer approval. PR creation is a
+  normal delivery step once the branch is coherent and the evidence is
+  documented; do not stop at "prepare the branch" merely to wait for permission.
+  Merging changes into repositories outside the Svyable organization,
+  publishing packages/releases, or making other irreversible external releases
+  still requires explicit maintainer approval.
 - For the tested development setup, install `requirements-ci.txt`, then
   `pip install -e .`. Both CI requirements and public package metadata pin
   the companion to the same verified immutable commit. Update both pins

@@ -82,6 +82,7 @@ So 3 of the 5 points look like patch-side issues: a neighbouring-winding attachm
 - `result.json`: decision, summary, control, sense and cut table, distance arms, review queue, input counts and hashes, and constants.
 - `attachments.json`: every attachment within 12 voxels (point, patch piece, distance, unwrapped angle), enough to recompute any arm offline.
 - `review-queue.csv`: the six flagged attachments with VC3D XYZ.
+- `vc3d-review-points.json`: five deduplicated native VC3D PointCollections markers for those six flagged constraints, hash-bound to `result.json`.
 - `run.log`: the workflow output.
 - `review-context.json` (post-hoc, descriptive, `bin/winding_attach_review.py`): for each flagged point, all its attachments and their residuals. It was added by the workflow after this run and is not part of the decision.
 
