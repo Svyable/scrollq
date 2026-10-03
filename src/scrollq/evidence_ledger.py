@@ -399,14 +399,14 @@ def validate_evidence_ledger(
         )
         effective_status = status
         approved = APPROVED_PASS_ADAPTERS.get(str(claim), frozenset())
-        if status == "pass" and required_claim and adapter not in approved:
+        if status in {"pass", "fail"} and required_claim and adapter not in approved:
             warnings.append(
                 {
-                    "code": "EVIDENCE_PASS_NOT_AUTHORIZED",
+                    "code": "EVIDENCE_VERDICT_NOT_AUTHORIZED",
                     "path": f"{path}.normalization.adapter",
                     "message": (
-                        f"{claim!r} has no approved adapter-backed PASS in this "
-                        "policy version; treating the claim as unknown"
+                        f"{claim!r} has no approved adapter-backed verdict in this "
+                        "policy version; treating the declared {status!r} as unknown"
                     ),
                 }
             )
@@ -433,11 +433,12 @@ def validate_evidence_ledger(
                         mismatch,
                     )
 
-        # A native diagnostic may authorize PASS only if its own format binds
-        # the measurement to the exact submitted mesh bytes. The ledger's
-        # current-mesh digest alone cannot prove a stale report consumed them.
+        # A native diagnostic may authorize a geometry verdict (PASS or FAIL)
+        # only if its own format binds the measurement to the exact submitted
+        # mesh bytes. The ledger's current-mesh digest alone cannot prove that
+        # a stale report consumed them.
         if (
-            effective_status == "pass"
+            effective_status in {"pass", "fail"}
             and claim in MESH_CLAIMS
             and adapter in APPROVED_PASS_ADAPTERS.get(str(claim), frozenset())
         ):
@@ -447,7 +448,7 @@ def validate_evidence_ledger(
                         errors,
                         "EVIDENCE_NATIVE_BINDING_REQUIRED",
                         path,
-                        "approved mesh PASS requires a locally re-verifiable native report",
+                        "approved mesh verdict requires a locally re-verifiable native report",
                     )
                 else:
                     effective_status = "unknown"
@@ -456,7 +457,7 @@ def validate_evidence_ledger(
                             "code": "EVIDENCE_NATIVE_BINDING_UNVERIFIED",
                             "path": path,
                             "message": (
-                                "approved mesh PASS was not byte-bound because local "
+                                "approved mesh verdict was not byte-bound because local "
                                 "native evidence was not re-verified"
                             ),
                         }
