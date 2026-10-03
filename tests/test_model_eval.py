@@ -43,6 +43,7 @@ def _write_inputs(tmp_path):
         "task": "ink_detection",
         "held_out": True,
         "source_url": "https://example.org/datasets/heldout-v1",
+        "truth_commitment_sha256": "9" * 64,
         "regions": [
             {
                 "id": "r1",
@@ -79,6 +80,22 @@ def test_preflight_passes_but_never_ranks(tmp_path):
     assert report["model"]["inference"]["status"] == "pass"
     assert report["rank_status"] == "not_evaluated"
     assert report["rank_eligible"] is False
+
+
+def test_private_heldout_source_can_be_opaque_when_truth_is_committed(tmp_path):
+    root, _, checkpoint, card, dataset, model_path, dataset_path = _write_inputs(tmp_path)
+    dataset.pop("source_url")
+    report = build_preflight_report(
+        card=card,
+        dataset=dataset,
+        model_path=model_path,
+        dataset_path=dataset_path,
+        checkpoint_path=checkpoint,
+        root_dir=root,
+    )
+    assert report["status"] == "pass"
+    assert report["held_out_dataset"]["source_url"] is None
+    assert report["held_out_dataset"]["truth_commitment_sha256"] == "9" * 64
 
 
 def test_checkpoint_hash_mismatch_fails_closed(tmp_path):
