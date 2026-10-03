@@ -112,6 +112,10 @@ def read_box(
     info = vc.parse_zarr_json(meta)
     if info is None or info.inner_codec != "volcomp":
         raise CutoutError("level 0 is not a volcomp sharding_indexed array")
+    if info.index_location != "end":
+        raise CutoutError(
+            f"unsupported shard index_location {info.index_location!r}; expected 'end'"
+        )
     if len(info.shape) != 3:
         raise CutoutError("level 0 must be three-dimensional")
     if tuple(int(v) for v in meta.get("shape", [])) != tuple(info.shape):
