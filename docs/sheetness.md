@@ -100,3 +100,48 @@ The first real-data experiment should be frozen before tuning thresholds:
 A useful result is either positive or negative. If correct surfaces do not
 separate from offset controls, this signal should remain an exploratory
 diagnostic rather than becoming another score.
+
+
+## Frozen control evaluation
+
+`scroliq-sheetness-eval` turns the exploratory response field into a
+pre-registered falsification experiment. The benchmark spec must bind:
+
+- the exact eligible `volume_root`;
+- the ZPA `zpa-metadata-semantics-v1` digest for that source;
+- the exact CT cutout SHA-256;
+- the exact `scroliq-sheetness` report SHA-256;
+- one known/high-confidence surface probe per group;
+- a reference surface normal;
+- at least one deliberate `normal-offset` control and one `wrong-wrap`
+  control per group;
+- all pass/fail thresholds before evaluation.
+
+The evaluator then verifies the response and normal-array hashes recorded by the
+sheetness report and measures four things without dropping failures: score
+completeness, the fraction of all groups where the surface beats every control,
+the median surface-minus-best-control margin, and absolute-cosine normal
+alignment. Missing, out-of-bounds, or non-finite probes remain in the group
+denominator rather than disappearing from the result.
+
+```bash
+scroliq-sheetness-eval \
+  --spec campaign/sheetness-spec.json \
+  --report out/cutout.sheetness.json \
+  --response out/cutout.sheetness.npy \
+  --normal out/cutout.normal-zyx.npy \
+  --out campaign/sheetness-result.json \
+  --require-pass
+```
+
+A valid negative experiment is still a reproducible result: without
+`--require-pass` the CLI exits zero for both `pass` and `fail`, while an
+invalid/tampered bundle exits 2. The output records both the raw spec-file hash
+and a canonical semantic spec hash, the engine parameters, every probe result,
+and each frozen decision-rule check.
+
+This evaluator deliberately does **not** prove that the cutout bytes came from
+the declared remote CT merely because the spec names that volume. The ZPA
+attestation and cutout hash make substitution visible once the benchmark is
+bound into the wider `scroliq-provenance` graph; they do not replace that
+end-to-end source lineage proof.
