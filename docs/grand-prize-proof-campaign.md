@@ -41,6 +41,8 @@ A target can be frozen only when one exact prize-listed volume has a dated artif
 
 There is deliberately no blended "best scroll" score. A candidate either clears these prerequisites or stays provisional.
 
+The prerequisite record is now executable rather than prose-only. Run `scroliq-target-gate --in <candidate.json> --out <gate.json>` for every candidate in a frozen comparison cohort. The command verifies exact eligible-volume identity against the dated Grand Prize manifest and requires same-volume, SHA-256-pinned evidence for every declared pass. It returns `ready-to-freeze`, `provisional`, or `blocked`; it never ranks candidates. See [`docs/target-freeze-gate.md`](target-freeze-gate.md).
+
 ## Minimum proof package
 
 The first competitive proof should be small enough to finish and strong enough to falsify. It is complete only when the repository contains:

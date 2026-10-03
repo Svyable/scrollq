@@ -1,15 +1,16 @@
 # Grand Prize blind probe protocol
 
-This protocol is the second stage after `scrollq-grand-prize`. Its purpose is
-to decide whether to commit the full unrolling campaign to **PHerc0800**,
-**PHerc0813**, or **PHerc1447** using evidence from the actual prize-eligible
-volumes.
+This protocol follows `scroliq-target-gate`. Its purpose is to compare a
+**pre-frozen cohort of exact prize-eligible volumes** using held-out geometry
+and falsification evidence, then decide whether any target is strong enough to
+justify a whole-scroll campaign.
 
-These are intentionally different hypotheses rather than the top three rows of
-a weighted ranking: PHerc0813 is the scan-quality leader, PHerc1447 has the
-strongest existing public-segment bootstrap, and PHerc0800 combines six public
-segments with better exact-volume imported surface-support evidence than either.
-The imported support metric is sensitivity evidence, not a readability claim.
+The cohort is not selected from the legacy 0–100 ordering or from a blended
+"best scroll" score. Scan-health rank stability is insufficient for that use.
+Every candidate must first reach `ready-to-freeze` under the same prerequisite
+contract; candidates that are blocked or provisional remain visible but do not
+enter the blind comparison. Historical first-wave candidates are hypotheses,
+not privileged defaults.
 
 Official references:
 
@@ -26,7 +27,7 @@ held-out geometry checks and falsification controls.
 The comparison is deliberately blind and symmetric:
 
 - same number of sampled regions per scroll;
-- same tools and hyperparameters across all three first-wave targets;
+- same tools and hyperparameters across the frozen cohort;
 - same maximum human-verification time;
 - same held-out fraction;
 - fixed random seed where randomness is unavoidable;
@@ -44,8 +45,13 @@ For each target:
 3. Run ScrolIQ against the exact eligible CT volume.
 4. Record the surface-prediction and lasagna model IDs and pyramid levels.
 5. Fail closed on high-severity storage/integrity findings.
+6. Record the candidate in a schema-v1 target-gate input and run
+   `scroliq-target-gate`. Do not enter Stage B unless the result is
+   `ready-to-freeze`.
 
 No geometry or ink result is considered interpretable until this gate passes.
+The gate report is part of the frozen campaign evidence and must not be rewritten
+after held-out outcomes are known.
 
 ## Stage B — deterministic 24-region geometry sample
 
@@ -112,7 +118,7 @@ harder band, so use it conditionally:
 3. If coverage is sparse or unstable, keep the baseline spiral fit rather than
    forcing low-confidence constraints.
 4. If used, feed only the pre-declared confidence tier into the fit and keep
-   the configuration/weight fixed across the first-wave targets.
+   the configuration/weight fixed across the frozen cohort.
 5. Never use PCU output as the sole held-out reference: PCU and the spiral fit
    share Lasagna-derived information. Held-out scoring remains based on
    independently verified CT/fiber geometry.
@@ -164,7 +170,7 @@ regions, not merely on the annotations used to fit it.
 Only after Stage E passes:
 
 1. Flatten/render the held-out-correct geometry.
-2. Run identical ink inference on both targets.
+2. Run identical ink inference on every target in the frozen cohort.
 3. Keep model windows physically small enough that outputs are tied to local CT
    evidence rather than long linguistic context.
 4. Use checkpoints/training data that do not overlap the prediction regions.
@@ -187,22 +193,24 @@ No papyrological interpolation is used to decide whether this stage passes.
 
 ## Stage G — target commitment
 
-Commit the whole-scroll campaign only after the evidence table exists for all
-three first-wave targets: PHerc0800, PHerc0813, and PHerc1447.
+Commit the whole-scroll campaign only after the evidence table exists for every
+member of the **pre-frozen cohort**. Do not add a candidate after seeing held-out
+results from another candidate.
 
 The decision record must state:
 
-- which target was selected;
+- the cohort manifest and each `scroliq-target-gate` report;
+- which target, if any, was selected;
 - which evidence dimensions drove the decision;
 - where each non-selected target was stronger;
 - unresolved risks;
 - exact artifact paths supporting every claim.
 
-If none of the three produces credible held-out geometry, expand the same
-protocol to PHerc0191, PHerc0211, and PHerc0268. PHerc1203 should not enter a
-surface-support comparison until its prize-eligible 9.362 µm volume has been
-audited directly; the currently imported PHerc1203 support survey used the
-ineligible same-scroll 2.403 µm volume.
+If no candidate produces credible held-out geometry, preserve the failed
+campaign unchanged and start a new dated cohort. The new cohort must clear the
+same gate before any held-out comparison begins. This prevents target selection
+from drifting toward whichever scroll happened to produce the prettiest early
+render.
 
 ## Human-time accounting
 

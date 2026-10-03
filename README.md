@@ -16,6 +16,8 @@ That distinction matters because the public ecosystem already contains strong pr
 
 The next milestone is therefore intentionally narrow: **one exact 2027 Grand Prize volume, one held-out surface/fit/ink improvement, one evidence passport that makes the result independently checkable.** See the [Grand Prize proof campaign](docs/grand-prize-proof-campaign.md).
 
+Before that target is frozen, `scroliq-target-gate` applies the proof campaign's prerequisite contract without ranking candidates: exact eligible-volume identity is checked automatically, and declared passes for integrity, surface foothold, held-out geometry, ink validation, and VC3D handoff require hash-pinned evidence from the same volume. Missing evidence remains provisional and failed controls remain blocking. See the [target-freeze gate](docs/target-freeze-gate.md).
+
 
 ## Diagnostic passport
 
