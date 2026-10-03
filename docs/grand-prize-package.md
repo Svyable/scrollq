@@ -50,6 +50,13 @@ The Docker command must invoke the **exact digest-pinned image** already named
 by `code.docker_image` in the provenance manifest. A tag such as `:latest`
 is rejected even if it points to the same image today.
 
+ScrolIQ's own reviewer/evidence image is built from the repository
+`Dockerfile` and published by `.github/workflows/container.yml`. The workflow
+reports the immutable `ghcr.io/svyable/scrollq@sha256:<digest>` value to use
+here; see [grand-prize-container.md](grand-prize-container.md). The image covers
+the machine-checkable evidence layer and does not substitute for the separately
+required VC3D workflow documentation.
+
 A successful build prints the archive SHA-256 and writes a companion
 `PHerc0813-grand-prize.zip.sha256` file. The builder refuses to overwrite an
 existing archive or sidecar, so a frozen package cannot be silently replaced.

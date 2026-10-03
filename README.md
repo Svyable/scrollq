@@ -221,6 +221,32 @@ produced with an exact `--volume-root` can be carried by
 `scroliq-passport --fiber-audit ...` as partial Fiber IQ evidence while still
 refusing to infer physical fiber or sheet identity.
 
+## Ink-blind flattening comparison
+
+`scroliq-flatten-compare` is the promotion gate for alternative column
+parameterizations. It compares two OBJ UV layouts only when their ordered 3-D
+vertices/faces are identical, reuses `scroliq-obj`'s Jacobian-stretch and
+foldover metrics, requires a permissively licensed pinned implementation, and
+never consumes ink or legibility signals.
+
+```bash
+scroliq-flatten-compare \
+  --baseline-obj out/column_01.vc3d.obj \
+  --candidate-obj out/column_01.beltrami.obj \
+  --candidate-method beltrami-coefficient-prolongation \
+  --source-ref doi:10.1111/cgf.70341 \
+  --implementation-ref git:<pinned-commit> \
+  --implementation-license MIT \
+  --out out/column_01.flatten-compare.json \
+  --require-promote
+```
+
+The motivating 2026 Beltrami-prolongation paper is treated as a candidate
+method, not as papyrus evidence. The paper is CC BY 4.0; ScrolIQ does not assume
+that an external software implementation is permissively licensed. See
+[`docs/flattening-benchmark.md`](docs/flattening-benchmark.md) for the sealed
+A/B protocol and post-promotion TIFXYZ/VC3D gates.
+
 ## Mesh IQ: native TIFXYZ audit
 
 `scroliq-mesh` audits one native Vesuvius TIFXYZ surface without rewriting it:
@@ -690,6 +716,22 @@ and [example ledger](examples/grand-prize-legibility.example.json).
 ### 2027 Grand Prize submission images
 
 `scroliq-submission-image` turns final VC3D renders into the exact reviewer-facing image forms required by the prize. The `column` command derives the 1 cm scale-bar length from the eligible CT voxel size plus the same pyramid level and `--scale` parameters used by `vc_render_tifxyz`, appends the bar in a footer without touching papyrus pixels, and writes a SHA-pinned scale proof. The `banner` command assembles the frozen column images in numeric order and overlays every column number, rejecting gaps or duplicates. See [the submission-image contract](docs/grand-prize-images.md).
+
+### Reproducible Grand Prize reviewer container
+
+The repository now builds and publishes a non-root reviewer/evidence image from
+a digest-pinned Python base and an exact-version runtime constraint set. Normal
+CI builds and smoke-tests the image; the publish workflow tags by Git commit,
+pushes to GHCR, resolves the immutable registry digest, pulls that exact digest
+back, and smoke-tests it again. Use the resulting
+`ghcr.io/svyable/scrollq@sha256:<digest>` value in
+`code.docker_image`—never a moving tag. See the
+[container reproduction contract](docs/grand-prize-container.md).
+
+The image contains ScrolIQ plus the pinned ZPA companion and covers the
+machine-checkable evidence/reviewer layer. It intentionally does not claim to
+bundle the VC3D GUI; the final package still requires a concrete
+`VC3D_WORKFLOW.md` describing the host-side Volume Cartographer workflow.
 
 ### Deterministic Grand Prize reviewer package
 
