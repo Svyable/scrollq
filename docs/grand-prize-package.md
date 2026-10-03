@@ -5,7 +5,7 @@ manifest** into one reviewer-facing ZIP archive. It is intentionally the last
 step after ZPA, mesh/coverage checks, model provenance, held-out ink validation,
 render generation and banner generation.
 
-The package index is schema v2. The underlying archive-byte contract remains
+The package index is schema v3. The underlying archive-byte contract remains
 `zip-stored-deterministic-v1`.
 
 It does not create missing scientific evidence. If `scroliq-provenance`
@@ -41,6 +41,7 @@ scroliq-package build \
   --human-input-log human-input.json \
   --vc3d-workflow VC3D_WORKFLOW.md \
   --false-positive-mitigation FALSE_POSITIVES.md \
+  --legibility-ledger legibility.json \
   --docker-run-command 'docker run --rm ghcr.io/OWNER/PIPELINE@sha256:<digest> ...' \
   --out PHerc0813-grand-prize.zip
 ```
@@ -65,13 +66,19 @@ that should not be left as prose-only claims:
   `submission.human_input_hours`;
 - methodology, system requirements, VC3D workflow, and false-positive
   mitigation files must be non-empty UTF-8 text;
+- the letter-by-letter legibility ledger must bind the exact submitted
+  mesh/render hashes and pass the 70% preserved-character threshold for every
+  counted column;
 - the reproduction command must contain the exact digest-pinned Docker image
   from the provenance manifest; and
 - every reviewer material is SHA-256 bound into the archive.
 
-Those checks produce `_scroliq/reviewer-contract.json`. The contract records
-the reviewer-file hashes, Docker image and copy-paste command, human-hours
-reconciliation, and final contiguous column sequence.
+Those checks produce `_scroliq/reviewer-contract.json` and
+`_scroliq/legibility.validation.json`. The reviewer contract records the
+reviewer-file hashes, Docker image and copy-paste command, human-hours
+reconciliation, final contiguous column sequence, and legibility-ledger hash.
+The legibility report is generated during packaging from the frozen manifest
+and ledger; a hand-written PASS report is never accepted.
 
 ## Included files
 
@@ -89,6 +96,8 @@ The builder includes only:
 - the machine-readable human-input log;
 - the VC3D reproduction/workflow instructions;
 - the false-positive mitigation note;
+- the letter-by-letter legibility ledger;
+- the generated legibility validation report;
 - the generated provenance validation report;
 - the generated reviewer contract; and
 - the generated package index.
@@ -111,8 +120,12 @@ directory. It checks that:
 - the embedded provenance validation report is parseable and says
   `eligible: true`;
 - the graph SHA-256 in the validation report matches the package index;
-- the embedded reviewer contract and all five reviewer materials match their
+- the embedded reviewer contract and all six reviewer materials match their
   recorded hashes;
+- the legibility ledger and generated validation hashes agree with each other
+  and the exact provenance-manifest hash, the validation passes the 70%
+  per-counted-column contract, and the verifier independently recomputes that
+  validation from the embedded manifest and ledger;
 - reviewer human-hours accounting is internally consistent and no more than
   eight hours;
 - the reviewer Docker command uses its digest-pinned image;
@@ -121,7 +134,7 @@ directory. It checks that:
 - every archive member uses lexicographic ordering plus the deterministic
   storage, timestamp, and POSIX file-mode contract.
 
-## Archive contract v1 / package index schema v2
+## Archive contract v1 / package index schema v3
 
 The archive format identifier is `zip-stored-deterministic-v1`.
 
@@ -140,9 +153,11 @@ materials produces the same ZIP bytes and therefore the same archive SHA-256.
 
 The generated `_scroliq/submission-package.json` contains a SHA-256 and byte
 length for every archived file other than the index itself, plus the
-provenance-manifest SHA-256, canonical provenance graph SHA-256, and reviewer
-contract SHA-256. `_scroliq/provenance.validation.json` is the exact
-fail-closed provenance result generated immediately before packaging.
+provenance-manifest SHA-256, canonical provenance graph SHA-256, reviewer
+contract SHA-256, legibility-ledger SHA-256, and generated legibility-validation
+SHA-256. `_scroliq/provenance.validation.json` and
+`_scroliq/legibility.validation.json` are generated from the exact frozen
+inputs immediately before packaging.
 
 ## Safety and scope
 
@@ -154,6 +169,8 @@ directories such as TIFXYZ surfaces.
 The reviewer contract proves that required evidence and reproduction
 instructions are present, hashed, mutually consistent, and packaged. It does
 **not** prove that the methodology is scientifically sufficient, that the VC3D
-workflow is seamless in practice, that text is legible, or that the underlying
-reconstruction is correct. Those claims remain bound to the empirical evidence
-referenced by the provenance graph.
+workflow is seamless in practice, that the human character readings are
+papyrologically correct, or that the underlying reconstruction is correct. The
+legibility gate proves the submitted ledger is hash-bound, non-interpolated,
+complete for submitted columns, and arithmetically above threshold; the
+character judgments remain empirical reviewer evidence.

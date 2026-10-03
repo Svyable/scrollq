@@ -11,6 +11,7 @@ def _package_manifest():
     return {
         "schema_version": 6,
         "submission": {
+            "scroll_id": "PHerc0813",
             "human_input_hours": 1.5,
         },
         "code": {
@@ -22,8 +23,24 @@ def _package_manifest():
             }
         },
         "surfaces": [],
-        "meshes": [{"path": "column_01.tifxyz", "column": 1}],
-        "renders": [{"path": "column_01.tif", "column": 1, "scale_proof": {"path": "evidence/column_01.scale.json"}}],
+        "meshes": [
+            {
+                "id": "mesh:column-01",
+                "path": "column_01.tifxyz",
+                "column": 1,
+                "sha256": "1" * 64,
+            }
+        ],
+        "renders": [
+            {
+                "id": "render:column-01",
+                "path": "column_01.tif",
+                "column": 1,
+                "mesh_id": "mesh:column-01",
+                "sha256": "2" * 64,
+                "scale_proof": {"path": "evidence/column_01.scale.json"},
+            }
+        ],
         "held_out_validations": [{"path": "validation/heldout.json"}],
         "banner": {"path": "banner.tif", "proof": {"path": "evidence/banner.json"}},
     }
@@ -67,6 +84,40 @@ def _write_tree(root):
                     {
                         "description": "Review surface handoff",
                         "hours": 1.5,
+                    }
+                ],
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    characters = []
+    for index in range(10):
+        status = "legible" if index < 7 else "illegible"
+        character = {
+            "id": f"c{index + 1:02d}",
+            "status": status,
+            "bbox_xyxy": [index * 10, 0, index * 10 + 8, 14],
+        }
+        if status == "legible":
+            character["reading"] = "α"
+            character["interpolated"] = False
+        characters.append(character)
+    (root / "legibility.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "scroll_id": "PHerc0813",
+                "columns": [
+                    {
+                        "column": 1,
+                        "render_id": "render:column-01",
+                        "mesh_id": "mesh:column-01",
+                        "render_sha256": "2" * 64,
+                        "mesh_sha256": "1" * 64,
+                        "counted": True,
+                        "lines": [{"line": 1, "characters": characters}],
                     }
                 ],
             },
@@ -146,16 +197,24 @@ def test_package_is_deterministic_and_only_contains_declared_artifacts(
         assert "banner.tif" in names
         assert pkg.VALIDATION_PATH in names
         assert pkg.REVIEWER_CONTRACT_PATH in names
+        assert pkg.LEGIBILITY_VALIDATION_PATH in names
         assert pkg.INDEX_PATH in names
         assert "METHODOLOGY.md" in names
         assert "SYSTEM_REQUIREMENTS.md" in names
         assert "human-input.json" in names
         assert "VC3D_WORKFLOW.md" in names
         assert "FALSE_POSITIVES.md" in names
+        assert "legibility.json" in names
+        legibility = json.loads(zf.read(pkg.LEGIBILITY_VALIDATION_PATH))
+        assert legibility["passes_recorded_thresholds"] is True
+        assert legibility["summary"]["legible_characters"] == 7
+        assert legibility["summary"]["preserved_characters"] == 10
         reviewer = json.loads(zf.read(pkg.REVIEWER_CONTRACT_PATH))
         assert reviewer["columns"]["meshes"] == [1]
         assert reviewer["columns"]["renders"] == [1]
         assert reviewer["human_input"]["ledger_hours"] == 1.5
+        assert reviewer["materials"]["legibility_ledger"]["path"] == "legibility.json"
+        assert reviewer["legibility"]["threshold"] == 0.70
         assert (
             reviewer["reproduction"]["docker_image"]
             in reviewer["reproduction"]["docker_run_command"]
@@ -388,3 +447,52 @@ def test_package_builder_rejects_empty_reviewer_material(tmp_path, monkeypatch):
             root_dir=root,
             out_path=tmp_path / "empty-method.zip",
         )
+
+
+
+def test_package_builder_refuses_failing_legibility_ledger(tmp_path, monkeypatch):
+    root = tmp_path / "submission"
+    root.mkdir()
+    manifest_path = _write_tree(root)
+    monkeypatch.setattr(pkg, "validate_manifest", _passing_validation)
+
+    ledger_path = root / "legibility.json"
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    character = ledger["columns"][0]["lines"][0]["characters"][6]
+    character["status"] = "illegible"
+    character.pop("reading")
+    character.pop("interpolated")
+    ledger_path.write_text(
+        json.dumps(ledger, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(pkg.PackageError, match="LEGIBILITY_BELOW_70_PERCENT"):
+        pkg.build_package(
+            manifest_path=manifest_path,
+            root_dir=root,
+            out_path=tmp_path / "bad-legibility.zip",
+        )
+
+
+def test_package_verifier_binds_legibility_validation_to_manifest_and_ledger(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "submission"
+    root.mkdir()
+    manifest_path = _write_tree(root)
+    monkeypatch.setattr(pkg, "validate_manifest", _passing_validation)
+
+    archive = tmp_path / "submission.zip"
+    pkg.build_package(
+        manifest_path=manifest_path,
+        root_dir=root,
+        out_path=archive,
+    )
+
+    with zipfile.ZipFile(archive) as zf:
+        index = json.loads(zf.read(pkg.INDEX_PATH))
+        legibility = json.loads(zf.read(pkg.LEGIBILITY_VALIDATION_PATH))
+        assert legibility["manifest_sha256"] == index["manifest_sha256"]
+        assert legibility["ledger_sha256"] == index["legibility_ledger_sha256"]
+        assert index["legibility_ledger_path"] == "legibility.json"
