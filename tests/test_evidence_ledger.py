@@ -72,7 +72,7 @@ def test_policy_does_not_invent_passes_for_unresolved_claims():
     assert by_claim["render-handedness"] == "partial"
     assert by_claim["spiral-held-out"] == "partial"
     assert sum(
-        item["code"] == "EVIDENCE_PASS_NOT_AUTHORIZED"
+        item["code"] == "EVIDENCE_VERDICT_NOT_AUTHORIZED"
         for item in report["warnings"]
     ) == 3
     assert any(
@@ -100,7 +100,7 @@ def test_unauthorized_mesh_evidence_satisfies_no_required_coverage():
     assert claim["missing_mesh_ids"] == ["mesh:01", "mesh:02"]
 
 
-def test_explicit_failure_blocks_even_when_other_evidence_passes():
+def test_unauthorized_declared_failure_cannot_convict_submission():
     ledger = _ledger()
     ledger["entries"][2]["status"] = "fail"
 
@@ -110,12 +110,17 @@ def test_explicit_failure_blocks_even_when_other_evidence_passes():
         expected_mesh_ids=["mesh:01", "mesh:02"],
     )
 
-    assert report["status"] == "fail"
+    assert report["status"] == "partial"
     claim = next(
         item for item in report["required_claims"]
         if item["claim"] == "render-handedness"
     )
-    assert claim["failed_evidence_ids"] == ["hand"]
+    assert claim["status"] == "partial"
+    assert claim["failed_evidence_ids"] == []
+    assert any(
+        item["code"] == "EVIDENCE_VERDICT_NOT_AUTHORIZED"
+        for item in report["warnings"]
+    )
 
 
 def test_wrong_exact_volume_fails_closed():
@@ -182,7 +187,7 @@ def test_mesh_digest_must_match_provenance_manifest():
 
 
 
-def _windcheck_report_for(mesh):
+def _windcheck_report_for(mesh, *, clean=True):
     names = ("x.tif", "y.tif", "z.tif", "mask.tif", "mask.png", "meta.json")
     rows = []
     for name in names:
@@ -222,11 +227,11 @@ def _windcheck_report_for(mesh):
             },
         },
         "measurements": {
-            "transverse_d0": 0,
-            "transverse_d1": 0,
-            "crossing_events": 0,
+            "transverse_d0": 0 if clean else 2,
+            "transverse_d1": 0 if clean else 1,
+            "crossing_events": 0 if clean else 3,
         },
-        "clean": True,
+        "clean": clean,
         "clean_definition": "zero transverse contacts under both triangulations",
     }
 
@@ -295,3 +300,58 @@ def test_windcheck_pass_requires_and_accepts_exact_native_mesh_binding(tmp_path)
     assert "EVIDENCE_NATIVE_MESH_BINDING" in {
         item["code"] for item in report["errors"]
     }
+
+
+
+def test_bound_windcheck_failure_can_convict_exact_submitted_mesh(tmp_path):
+    mesh = tmp_path / "column_01.tifxyz"
+    mesh.mkdir()
+    (mesh / "x.tif").write_bytes(b"x")
+    (mesh / "y.tif").write_bytes(b"y")
+    (mesh / "z.tif").write_bytes(b"z")
+    (mesh / "meta.json").write_bytes(b'{"format":"tifxyz"}')
+
+    evidence_dir = tmp_path / "evidence"
+    evidence_dir.mkdir()
+    native = _windcheck_report_for(mesh, clean=False)
+    native_path = evidence_dir / "windcheck-fail.json"
+    raw = json.dumps(native, sort_keys=True).encode()
+    native_path.write_bytes(raw)
+
+    mesh_digest = sha256_path(mesh)
+    entry = normalize_native_report(
+        adapter=WINDCHECK_ADAPTER,
+        report=native,
+        entry_id="wind:column-01:fail",
+        mesh_id="mesh:column-01",
+        artifact_url="https://example.org/evidence/windcheck-fail.json",
+        sha256=hashlib.sha256(raw).hexdigest(),
+        path="evidence/windcheck-fail.json",
+        mesh_sha256=mesh_digest,
+        producer_commit="b" * 40,
+        command="windcheck check column_01.tifxyz --out evidence",
+    )
+    ledger = {
+        "schema_version": 1,
+        "diagnostic": "grand-prize-evidence-ledger",
+        "volume_id": "eligible-volume",
+        "entries": [entry],
+    }
+
+    report = validate_evidence_ledger(
+        ledger,
+        expected_volume_id="eligible-volume",
+        expected_mesh_ids=["mesh:column-01"],
+        expected_mesh_sha256={"mesh:column-01": mesh_digest},
+        expected_mesh_paths={"mesh:column-01": "column_01.tifxyz"},
+        root_dir=tmp_path,
+        require_local_artifacts=True,
+    )
+    claim = next(
+        item for item in report["required_claims"]
+        if item["claim"] == "mesh-self-intersection"
+    )
+    assert report["status"] == "fail"
+    assert claim["status"] == "fail"
+    assert claim["failed_evidence_ids"] == ["wind:column-01:fail"]
+    assert report["error_count"] == 0
