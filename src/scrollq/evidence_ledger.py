@@ -20,7 +20,7 @@ from typing import Any
 
 from .package_hash import sha256_path
 from .evidence_adapters import (
-    APPROVED_PASS_ADAPTERS,
+    APPROVED_VERDICT_ADAPTERS,
     ASSESSORS,
     verify_native_mesh_identity,
     verify_normalized_entry,
@@ -398,7 +398,7 @@ def validate_evidence_ledger(
             else None
         )
         effective_status = status
-        approved = APPROVED_PASS_ADAPTERS.get(str(claim), frozenset())
+        approved = APPROVED_VERDICT_ADAPTERS.get(str(claim), frozenset())
         if status in {"pass", "fail"} and required_claim and adapter not in approved:
             warnings.append(
                 {
