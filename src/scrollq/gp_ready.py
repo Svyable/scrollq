@@ -126,11 +126,21 @@ def validate_readiness(
         for item in raw_meshes
         if isinstance(item, dict) and isinstance(item.get("id"), str) and item.get("id")
     ]
+    mesh_sha256 = {
+        str(item["id"]): str(item["sha256"])
+        for item in raw_meshes
+        if (
+            isinstance(item, dict)
+            and isinstance(item.get("id"), str)
+            and isinstance(item.get("sha256"), str)
+        )
+    }
 
     evidence_report = validate_evidence_ledger(
         ledger,
         expected_volume_id=volume_id if isinstance(volume_id, str) else None,
         expected_mesh_ids=mesh_ids,
+        expected_mesh_sha256=mesh_sha256,
         root_dir=root_dir,
         ledger_sha256=evidence_ledger_sha256,
         require_local_artifacts=True,
