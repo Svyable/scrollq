@@ -667,6 +667,20 @@ and [example ledger](examples/grand-prize-legibility.example.json).
 
 `scroliq-submission-image` turns final VC3D renders into the exact reviewer-facing image forms required by the prize. The `column` command derives the 1 cm scale-bar length from the eligible CT voxel size plus the same pyramid level and `--scale` parameters used by `vc_render_tifxyz`, appends the bar in a footer without touching papyrus pixels, and writes a SHA-pinned scale proof. The `banner` command assembles the frozen column images in numeric order and overlays every column number, rejecting gaps or duplicates. See [the submission-image contract](docs/grand-prize-images.md).
 
+### Deterministic Grand Prize reviewer package
+
+`scroliq-package` is the final fail-closed boundary. It will not build the
+reviewer ZIP unless the exact provenance manifest passes, mesh/render columns
+are contiguous, the human-input ledger reconciles at no more than eight hours,
+reviewer methodology/system/VC3D/false-positive materials are present, the
+Docker command uses the exact digest-pinned image, and the letter-by-letter
+legibility ledger passes every counted column at 70% or above.
+
+The builder generates provenance and legibility validation reports itself,
+SHA-256 indexes every archived member, writes a deterministic ZIP and sidecar
+digest, then immediately reopens and verifies the archive before returning
+PASS. See [the package contract](docs/grand-prize-package.md).
+
 ## First Letters target qualification
 
 The same qualifier covers the 22 First Letters scans with `--prize
