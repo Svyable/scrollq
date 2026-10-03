@@ -11,7 +11,12 @@ def _entry(ident, claim, *, status="pass", mesh_ids=None, adapter=None):
         "tool": "independent-tool",
         "artifact_url": "https://example.org/evidence/report.json",
         "sha256": "a" * 64,
-        "scope": {"mesh_ids": list(mesh_ids or [])},
+        "scope": {
+            "mesh_ids": list(mesh_ids or []),
+            "mesh_sha256": {
+                mesh_id: "c" * 64 for mesh_id in (mesh_ids or [])
+            },
+        },
         "producer": {
             "repository": "https://github.com/example/independent-tool",
             "commit": "b" * 40,
