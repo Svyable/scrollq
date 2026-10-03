@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://svyable.github.io/scrollq/schemas/segmentation-eval-spec-v1.json",
+  "title": "ScrolIQ held-out segmentation evaluation specification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dataset",
+    "dataset_manifest_sha256",
+    "volume_root",
+    "coordinate_system",
+    "tolerance_voxels",
+    "max_vertices_per_surface",
+    "regions"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "dataset": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "dataset_manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "volume_root": {"type": "string", "minLength": 1},
+    "coordinate_system": {"const": "base_voxel_xyz"},
+    "tolerance_voxels": {"type": "number", "exclusiveMinimum": 0},
+    "max_vertices_per_surface": {"type": "integer", "minimum": 1},
+    "regions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+          "max_prediction_components": {"type": "integer", "minimum": 1},
+          "min_largest_component_fraction": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    }
+  },
+  "description": "Public, preregistered metric contract. Truth paths are deliberately absent and live only in the private truth manifest."
+}
