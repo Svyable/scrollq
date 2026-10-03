@@ -264,6 +264,13 @@ produced with an exact `--volume-root` can be carried by
 `scroliq-passport --fiber-audit ...` as partial Fiber IQ evidence while still
 refusing to infer physical fiber or sheet identity.
 
+**CUDA TEASAR acceleration:** Brook is now tracked as an external accelerator
+candidate under a preregistered [backend equivalence gate](docs/brook-teasar-gate.md).
+The gate requires target-domain geometry/downstream comparisons before speed can
+justify substitution, and keeps Brook's current GPL-3.0-only dependency outside
+the permissively licensed submission path unless that licensing boundary is
+resolved.
+
 ## Ink-blind flattening comparison
 
 `scroliq-flatten-compare` is the generic promotion gate for alternative column
