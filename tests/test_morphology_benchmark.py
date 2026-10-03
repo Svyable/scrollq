@@ -223,6 +223,28 @@ def test_source_benchmark_roundtrip_is_partial_and_never_authorizes_target(tmp_p
     assert all(len(sample["hashes"]["raw_height_txt"]) == 64 for sample in result["samples"])
 
 
+
+def test_committed_benchmark_spec_binds_frozen_control_manifest():
+    root = Path(__file__).resolve().parents[1]
+    spec = json.loads(
+        (root / "artifacts/2026-10-03-morphology-benchmark-v1/spec.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    control_path = (
+        root
+        / "artifacts/2026-10-03-morphology-control/source-benchmark-manifest.json"
+    )
+    control_raw = control_path.read_bytes()
+    control = json.loads(control_raw)
+    assert spec["control_manifest_sha256"] == hashlib.sha256(control_raw).hexdigest()
+    config = mb._validate_spec(
+        spec,
+        control_sha256=spec["control_manifest_sha256"],
+        control=control,
+    )
+    assert config["expected_sample_count"] == 14
+
 def test_control_manifest_hash_mismatch_fails_before_benchmark(tmp_path):
     spec, control, dataset = _inputs(tmp_path)
     value = json.loads(spec.read_text())
