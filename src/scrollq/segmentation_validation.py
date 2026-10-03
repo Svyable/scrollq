@@ -834,10 +834,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.print_spec_hash:
             if not args.spec:
                 parser.error("--spec is required with --print-spec-hash")
-            if args.predictions or args.out or args.truth or args.truth_root:
+            if (
+                args.predictions
+                or args.prediction_root
+                or args.out
+                or args.truth
+                or args.truth_root
+            ):
                 parser.error(
                     "--print-spec-hash is public-only and cannot be combined with "
-                    "--truth/--truth-root/--predictions/--out"
+                    "--truth/--truth-root/--predictions/--prediction-root/--out"
                 )
             spec_document = _load_object(Path(args.spec), "segmentation spec")
             validate_spec(spec_document, dataset_document=dataset_document)
@@ -851,9 +857,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         truth_root = Path(args.truth_root) if args.truth_root else truth_path.parent
 
         if args.print_truth_commitment:
-            if args.predictions or args.out:
+            if args.spec or args.predictions or args.prediction_root or args.out:
                 parser.error(
-                    "--print-truth-commitment cannot be combined with --predictions/--out"
+                    "--print-truth-commitment cannot be combined with "
+                    "--spec/--predictions/--prediction-root/--out"
                 )
             result = compute_truth_commitment(
                 dataset_document=dataset_document,
