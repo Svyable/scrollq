@@ -92,9 +92,12 @@ The first real-data experiment should be frozen before tuning thresholds:
 2. sample identical-width CT cutouts centered on the submitted surface and at
    fixed normal offsets;
 3. run a predeclared sigma set and polarity;
-4. compare on-surface sheetness with offset controls;
-5. repeat on an intentionally wrong or broken surface;
-6. only after those results are frozen decide whether sheetness belongs in the
+4. compare on-surface sheetness with normal-offset controls;
+5. measure nearby wrong-wrap points separately as ambiguity evidence — another
+   papyrus winding should itself remain locally sheet-like, so it is not a
+   negative control for this detector;
+6. repeat on intentionally broken/off-sheet geometry;
+7. only after those results are frozen decide whether sheetness belongs in the
    passport or surface-growth objective.
 
 A useful result is either positive or negative. If correct surfaces do not
@@ -115,23 +118,33 @@ pre-registered falsification experiment. The benchmark spec must bind:
 - the exact `scroliq-sheetness` report SHA-256;
 - one known/high-confidence surface probe per group;
 - a reference surface normal;
-- at least one deliberate `normal-offset` control and one `wrong-wrap`
-  control per group;
+- at least one deliberate `normal-offset` control per group for localization;
+- at least one `wrong-wrap` probe per group as a separately reported ambiguity
+  measurement, **not** a negative control;
 - all pass/fail thresholds before evaluation.
 
-The version-2 evaluator verifies the provenance-bound cutout manifest before
-reading any probe score. It checks exact volume identity, ZPA metadata
-attestation (including audited ZYX axes), retained PASS ZPA-report hash,
-cutout SHA, global half-open bbox, local-to-global transform, source-chunk
-completeness, and cutout shape. Every emitted probe then carries
-both its local array coordinate and its derived global level-0 CT coordinate.
+The version-3 evaluator verifies the provenance-bound cutout manifest before
+reading any probe score. Probe coordinates are finite continuous ZYX values,
+matching TIFXYZ's floating-point geometry rather than forcing the surface onto
+nearest voxel centres. Sheetness is sampled trilinearly. Hessian eigenvector
+normals are also trilinearly combined after sign-aligning each contributing
+unit vector to the frozen reference normal, because eigenvector sign is
+arbitrary.
 
-It also verifies the response and normal-array hashes recorded by the
-sheetness report and measures four things without dropping failures: score
-completeness, the fraction of all groups where the surface beats every control,
-the median surface-minus-best-control margin, and absolute-cosine normal
-alignment. Missing, out-of-bounds, or non-finite probes remain in the group
-denominator rather than disappearing from the result.
+It checks exact volume identity, ZPA metadata attestation with audited ZYX
+axes, the retained PASS ZPA-report hash, cutout SHA, global half-open bbox,
+local-to-global transform, source-chunk completeness, and cutout shape. Every emitted probe carries both its continuous local array
+coordinate and its derived continuous global level-0 CT coordinate.
+
+The frozen decision rule is deliberately local. It measures completeness,
+the fraction of groups where the surface beats every **normal-offset** control,
+the median surface-minus-best-normal-offset margin, and absolute-cosine normal
+alignment. Wrong-wrap sheetness is reported separately, with its own
+completeness, because high response on a neighboring papyrus winding is
+expected rather than a failure. Global sheet identity belongs to winding/order,
+fiber, anchor, and later factor-graph constraints. Missing, out-of-bounds, or
+non-finite probes remain in their denominators rather than disappearing from
+the result.
 
 ```bash
 scroliq-sheetness-eval \
