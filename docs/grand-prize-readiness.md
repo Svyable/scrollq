@@ -2,7 +2,7 @@
 
 ScrolIQ separates three questions that are easy to collapse into one:
 
-1. **Does the package satisfy machine-checkable 2027 Grand Prize provenance and eligibility requirements?** `scroliq-provenance` answers this from the submission manifest.
+1. **Does the package satisfy machine-checkable 2027 Grand Prize provenance and eligibility requirements?** Schema-v5 `scroliq-provenance` answers this from the submission manifest, including the hash-pinned ZPA source attestation and model physical-input/preprocessing contract.
 2. **What do independent geometry diagnostics actually establish about the submitted meshes?** `scroliq-evidence` records immutable native reports and re-verifies adapter-backed conclusions.
 3. **Is every required proof strong enough to authorize a submission-ready verdict?** `scroliq-gp-ready` composes the two fail-closed.
 
