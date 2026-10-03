@@ -266,6 +266,35 @@ def _verify_prediction(
         raise ValueError("prediction CSV path is unavailable; pass --prediction-csv")
     if _sha256(csv_path) != declared_sha:
         raise ValueError("prediction CSV SHA-256 does not match prediction report")
+
+    with csv_path.open(newline="") as f:
+        reader = csv.DictReader(f)
+        if reader.fieldnames is None or not {"x", "y"}.issubset(reader.fieldnames):
+            raise ValueError("prediction CSV must contain x and y columns")
+        csv_points: dict[int, int] = {}
+        for line, row in enumerate(reader, start=2):
+            try:
+                x_float = float(row["x"])
+                y_float = float(row["y"])
+            except (TypeError, ValueError) as exc:
+                raise ValueError(
+                    f"prediction CSV line {line} has invalid x/y"
+                ) from exc
+            if (
+                not math.isfinite(x_float)
+                or not math.isfinite(y_float)
+                or int(x_float) != x_float
+                or int(y_float) != y_float
+            ):
+                raise ValueError(
+                    f"prediction CSV line {line} x/y must be integers"
+                )
+            x, y = int(x_float), int(y_float)
+            if x in csv_points:
+                raise ValueError(f"prediction CSV contains duplicate x={x}")
+            csv_points[x] = y
+    if csv_points != observed:
+        raise ValueError("prediction CSV path does not match prediction JSON points")
     return observed, csv_path
 
 
