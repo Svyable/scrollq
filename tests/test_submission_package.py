@@ -199,3 +199,58 @@ def test_package_archive_tampering_is_detected(tmp_path, monkeypatch):
         "duplicate member" in error or "sha256 mismatch" in error
         for error in report["errors"]
     )
+
+
+def test_package_builder_refuses_overwrite(tmp_path, monkeypatch):
+    root = tmp_path / "submission"
+    root.mkdir()
+    manifest_path = _write_tree(root)
+    monkeypatch.setattr(pkg, "validate_manifest", _passing_validation)
+
+    archive = tmp_path / "submission.zip"
+    pkg.build_package(
+        manifest_path=manifest_path,
+        root_dir=root,
+        out_path=archive,
+    )
+    original = archive.read_bytes()
+
+    with pytest.raises(pkg.PackageError, match="refusing to overwrite"):
+        pkg.build_package(
+            manifest_path=manifest_path,
+            root_dir=root,
+            out_path=archive,
+        )
+    assert archive.read_bytes() == original
+
+
+def test_verifier_rejects_nondeterministic_member_order_and_mode(tmp_path, monkeypatch):
+    root = tmp_path / "submission"
+    root.mkdir()
+    manifest_path = _write_tree(root)
+    monkeypatch.setattr(pkg, "validate_manifest", _passing_validation)
+
+    archive = tmp_path / "submission.zip"
+    pkg.build_package(
+        manifest_path=manifest_path,
+        root_dir=root,
+        out_path=archive,
+    )
+
+    rewritten = tmp_path / "rewritten.zip"
+    with zipfile.ZipFile(archive, "r") as src, zipfile.ZipFile(
+        rewritten, "w", compression=zipfile.ZIP_STORED
+    ) as dst:
+        names = src.namelist()
+        for i, name in enumerate(reversed(names)):
+            payload = src.read(name)
+            info = zipfile.ZipInfo(name, date_time=pkg.FIXED_ZIP_TIME)
+            info.compress_type = zipfile.ZIP_STORED
+            info.create_system = 3
+            info.external_attr = ((0o100600 if i == 0 else pkg.FILE_MODE) & 0xFFFF) << 16
+            dst.writestr(info, payload)
+
+    report = pkg.verify_package(rewritten)
+    assert report["valid"] is False
+    assert any("lexicographic order" in error for error in report["errors"])
+    assert any("file mode" in error for error in report["errors"])
