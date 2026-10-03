@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-10-03",
+  "purpose": "Close the shared input_integrity prerequisite for the frozen Grand Prize target cohort without changing target selection.",
+  "zpa": {
+    "repository": "https://github.com/Svyable/zarr-pyramid-audit",
+    "commit": "3edfd4bc50b4dab888ca7bc6e339f87b3e524a6a",
+    "tested_head": "c066b2f4ab67da541962685c761aa0d424259c2e",
+    "tree_sha": "34246b42a413884d3d0830b9e16d4ece0f3b8887",
+    "ci": [
+      {
+        "workflow": "CI",
+        "run_id": 37124362889,
+        "conclusion": "success"
+      },
+      {
+        "workflow": "audit-smoke",
+        "run_id": 37124362946,
+        "conclusion": "success"
+      }
+    ],
+    "note": "The canonical squash commit and CI-tested PR head have identical Git trees."
+  },
+  "base": "s3://vesuvius-challenge-open-data/",
+  "historical_context": {
+    "repository": "https://github.com/Svyable/zarr-pyramid-audit",
+    "artifact": "artifacts/2026-10-02-grand-prize-ct-preflight/summary.json",
+    "git_blob_sha1": "c648b18b16b68de27fd3d713447158de12666926",
+    "audit_as_of": "2026-09-29",
+    "observation": "The frozen cross-cut found all 13 exact prize CT roots with 6/6 levels present, no chunkless or unknown-presence levels, no read errors, and zero header findings.",
+    "limitation": "This is dated structural context only. It does not contain the current per-root source-attested gate report required for promotion."
+  },
+  "targets": [
+    {
+      "scroll": "PHerc0800",
+      "volume_id": "20250521135224",
+      "root": "PHerc0800/volumes/20250521135224-8.640um-1.2m-116keV-masked.zarr",
+      "expected_voxel_size_um": 8.64,
+      "report": "PHerc0800.zpa-gate.json"
+    },
+    {
+      "scroll": "PHerc0813",
+      "volume_id": "20250821151723",
+      "root": "PHerc0813/volumes/20250821151723-9.362um-1.2m-113keV-masked.zarr",
+      "expected_voxel_size_um": 9.362,
+      "report": "PHerc0813.zpa-gate.json"
+    },
+    {
+      "scroll": "PHerc1447",
+      "volume_id": "20250521151220",
+      "root": "PHerc1447/volumes/20250521151220-8.640um-1.2m-116keV-masked.zarr",
+      "expected_voxel_size_um": 8.64,
+      "report": "PHerc1447.zpa-gate.json"
+    }
+  ],
+  "promotion_requirements": [
+    "gate output parses and contains exactly one result",
+    "top-level n_fail is 0 and n_roots is 1",
+    "result root exactly matches the planned prize root",
+    "result verdict is pass and result integrity is PASS",
+    "embedded ZPA report passes zpa.report.validate_report",
+    "embedded report root exactly matches the planned prize root",
+    "voxel_size_check status is match and expected_um equals the planned eligible voxel size",
+    "source_attestation algorithm is zpa-metadata-semantics-v1",
+    "source_attestation state is PRESENT",
+    "source_attestation axes are exactly [z,y,x]",
+    "source_attestation metadata_semantics_sha256 is lowercase 64-hex"
+  ],
+  "claim_boundary": "Passing this plan closes only the exact-input integrity/provenance prerequisite. It does not establish correct sheet identity, held-out fit performance, ink, legibility, or Grand Prize readiness."
+}
