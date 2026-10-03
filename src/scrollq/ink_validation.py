@@ -23,7 +23,17 @@ import numpy as np
 import tifffile
 
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+REQUIRED_CONTROL_NAMES = (
+    "normal-minus-3",
+    "normal-plus-3",
+    "adjacent-winding",
+    "geometry-perturbation",
+)
+INDEPENDENT_CONTROL_NAMES = (
+    "independent-checkpoint",
+    "independent-fold",
+)
 
 
 def _sha256_file(path: Path) -> str:
@@ -222,6 +232,21 @@ def _evaluated_digest(
     return h.hexdigest()
 
 
+def _control_contract(control_names: Sequence[str]) -> dict[str, Any]:
+    names = set(control_names)
+    missing = [name for name in REQUIRED_CONTROL_NAMES if name not in names]
+    independent = [
+        name for name in INDEPENDENT_CONTROL_NAMES if name in names
+    ]
+    return {
+        "required": list(REQUIRED_CONTROL_NAMES),
+        "independent_alternatives": list(INDEPENDENT_CONTROL_NAMES),
+        "missing_required": missing,
+        "independent_present": independent,
+        "complete": not missing and bool(independent),
+    }
+
+
 def build_report(
     *,
     prediction: np.ndarray,
@@ -286,6 +311,10 @@ def build_report(
             }
         )
 
+    control_contract = _control_contract(
+        [str(row["name"]) for row in control_rows]
+    )
+
     readiness_reasons: list[str] = []
     if not held_out:
         readiness_reasons.append("validation split is not declared held-out")
@@ -295,6 +324,15 @@ def build_report(
         readiness_reasons.append("validation mask does not contain both ink and background")
     if not control_rows:
         readiness_reasons.append("no falsification-control prediction was evaluated")
+    elif control_contract["missing_required"]:
+        readiness_reasons.append(
+            "missing required falsification controls: "
+            + ", ".join(control_contract["missing_required"])
+        )
+    if not control_contract["independent_present"]:
+        readiness_reasons.append(
+            "missing independent-checkpoint or independent-fold control"
+        )
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -313,6 +351,7 @@ def build_report(
         },
         "evaluation": primary,
         "controls": control_rows,
+        "control_contract": control_contract,
         "evaluated_arrays_sha256": _evaluated_digest(
             prediction, labels, validation_mask, controls or {}
         ),
@@ -378,7 +417,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         metavar="NAME=PATH",
         help=(
             "falsification-control prediction evaluated against the same "
-            "ground truth; repeat for +normal/-normal/adjacent winding/etc."
+            "ground truth. Prize-ready evidence requires canonical names "
+            "normal-minus-3, normal-plus-3, adjacent-winding, "
+            "geometry-perturbation, and either independent-checkpoint or "
+            "independent-fold."
         ),
     )
     ap.add_argument("--out", required=True)
