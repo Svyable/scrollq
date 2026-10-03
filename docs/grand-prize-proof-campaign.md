@@ -41,6 +41,15 @@ A target can be frozen only when one exact prize-listed volume has a dated artif
 
 There is deliberately no blended "best scroll" score. A candidate either clears these prerequisites or stays provisional.
 
+## Spiral baseline execution gate
+
+Before treating a consumer-GPU Spiral run as the campaign baseline, apply the
+[consumer-GPU Spiral adapter equivalence gate](spiral-consumer-gpu-gate.md).
+It pins both the external adapter and official `villa` revisions, requires
+exact cache/linker parity before a real fit, and then subjects the bounded A/B
+to the existing held-out geometry evaluator. Faster execution alone is not
+evidence and cannot compensate for changed geometry semantics.
+
 ## Minimum proof package
 
 The first competitive proof should be small enough to finish and strong enough to falsify. It is complete only when the repository contains:
