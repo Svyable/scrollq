@@ -223,20 +223,28 @@ refusing to infer physical fiber or sheet identity.
 
 ## Ink-blind flattening comparison
 
-`scroliq-flatten-compare` is the promotion gate for alternative column
-parameterizations. It compares two OBJ UV layouts only when their ordered 3-D
+`scroliq-flatten-compare` is the generic promotion gate for alternative column
+parameterizations. Grand Prize experiments use `scroliq-flatten-plan` to seal
+the baseline, implementation identity/license, and thresholds before candidate
+evaluation. It compares two OBJ UV layouts only when their ordered 3-D
 vertices/faces are identical, reuses `scroliq-obj`'s Jacobian-stretch and
 foldover metrics, requires a permissively licensed pinned implementation, and
 never consumes ink or legibility signals.
 
 ```bash
-scroliq-flatten-compare \
+scroliq-flatten-plan seal \
   --baseline-obj out/column_01.vc3d.obj \
-  --candidate-obj out/column_01.beltrami.obj \
+  --experiment-id column_01-beltrami-v1 \
   --candidate-method beltrami-coefficient-prolongation \
   --source-ref doi:10.1111/cgf.70341 \
-  --implementation-ref git:<pinned-commit> \
+  --implementation-ref git:<pinned-permissive-commit> \
   --implementation-license MIT \
+  --out prereg/column_01.flatten-spec.json
+
+scroliq-flatten-plan evaluate \
+  --spec prereg/column_01.flatten-spec.json \
+  --baseline-obj out/column_01.vc3d.obj \
+  --candidate-obj out/column_01.beltrami.obj \
   --out out/column_01.flatten-compare.json \
   --require-promote
 ```
