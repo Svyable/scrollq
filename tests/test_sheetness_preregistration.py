@@ -223,6 +223,13 @@ def test_wrong_wrap_must_be_different_hash_pinned_surface():
         pre.validate_preregistration(p)
 
     p = _prereg()
+    p["groups"][0]["controls"][2]["source"]["coordinate_sha256"] = dict(
+        p["groups"][0]["surface"]["source"]["coordinate_sha256"]
+    )
+    with pytest.raises(pre.PreregistrationError, match="different coordinate bytes"):
+        pre.validate_preregistration(p)
+
+    p = _prereg()
     p["groups"][0]["controls"][2]["source"]["coordinate_sha256"]["x.tif"] = "bad"
     with pytest.raises(pre.PreregistrationError, match="lowercase 64-hex"):
         pre.validate_preregistration(p)
@@ -361,6 +368,7 @@ def test_cli_validate_and_finalize_are_create_only(tmp_path, capsys):
 
     assert pre.main(["validate", "--prereg", str(prereg), "--out", str(receipt)]) == 0
     assert json.loads(receipt.read_text())["status"] == "valid"
+    capsys.readouterr()
     assert pre.main(["validate", "--prereg", str(prereg), "--out", str(receipt)]) == 2
     assert json.loads(capsys.readouterr().out)["status"] == "invalid"
 
