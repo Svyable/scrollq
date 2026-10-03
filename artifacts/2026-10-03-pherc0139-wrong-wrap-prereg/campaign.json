@@ -1,0 +1,34 @@
+{
+  "schema": "scroliq-wrong-wrap-campaign-prereg/1",
+  "status": "freeze-only-before-geometry-read",
+  "date": "2026-10-03",
+  "issue": "https://github.com/Svyable/scrollq/issues/105",
+  "reference_plan": "artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json",
+  "volume_root": "PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+  "geometry_source": {
+    "kind": "published-surface-prediction",
+    "model_id": "20260413222639",
+    "url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/representations/predictions/surfaces/20250728140407-surface-20260413222639-surface-m7-L0-th0.2.zarr",
+    "binding_url": "https://scrollprize.org/data_browser/PHerc0139",
+    "ct_support_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr"
+  },
+  "algorithm": {
+    "name": "normal-ray-supported-surface-v1",
+    "ray_step_voxels": 1,
+    "min_distance_voxels": 12,
+    "max_distance_voxels": 64,
+    "min_gap_voxels": 3,
+    "min_run_voxels": 2,
+    "stored_value_threshold": 127,
+    "tie_break": "negative-normal direction",
+    "stochastic": false,
+    "seed": null,
+    "uses_sheetness_response": false
+  },
+  "forbidden_before_spec_commit": [
+    "read prediction voxels at or near the frozen 32 probes",
+    "run scroliq-wrong-wrap-plan run",
+    "run scroliq-sheetness",
+    "change constants after observing proposal completeness"
+  ]
+}
