@@ -74,17 +74,112 @@ jobs:
           set -euxo pipefail
           export AWS_ENDPOINT_URL_S3="https://s3.us-east-1.amazonaws.com"
           root="PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr"
-          zpa-gate             --base s3://vesuvius-challenge-open-data             --root "$root"             --expected-voxel-size-um 9.362             --out gate.json
+          # Keep ScrolIQ's immutable ZPA pin. The pinned gate predates the
+          # newer --expected-voxel-size-um CLI flag, so exact physical scale
+          # is checked fail-closed from the gate's embedded source attestation.
+          zpa-gate \
+            --base s3://vesuvius-challenge-open-data \
+            --root "$root" \
+            --out gate.json
           python - <<'PY'
           import json
+          import math
           from pathlib import Path
+
+          expected_root = (
+              "PHerc0139/volumes/"
+              "20250728140407-9.362um-1.2m-113keV-masked.zarr"
+          )
+          expected_um = 9.362
+          tolerance_um = 0.001
+          unit_to_um = {
+              "um": 1.0,
+              "µm": 1.0,
+              "μm": 1.0,
+              "micron": 1.0,
+              "microns": 1.0,
+              "micrometer": 1.0,
+              "micrometers": 1.0,
+              "micrometre": 1.0,
+              "micrometres": 1.0,
+              "nm": 1e-3,
+              "nanometer": 1e-3,
+              "nanometers": 1e-3,
+              "nanometre": 1e-3,
+              "nanometres": 1e-3,
+              "mm": 1e3,
+              "millimeter": 1e3,
+              "millimeters": 1e3,
+              "millimetre": 1e3,
+              "millimetres": 1e3,
+          }
+
           gate = json.loads(Path("gate.json").read_text())
           if gate.get("n_pass") != 1 or gate.get("n_fail") != 0:
               raise SystemExit("exact CT gate did not pass")
           rows = gate.get("results")
           if not isinstance(rows, list) or len(rows) != 1 or "report" not in rows[0]:
               raise SystemExit("gate output missing embedded full audit report")
-          Path("zpa.json").write_text(json.dumps(rows[0]["report"], indent=2) + "\n")
+          report = rows[0]["report"]
+          if report.get("root") != expected_root:
+              raise SystemExit("ZPA report root is not the exact frozen CT")
+          if report.get("integrity") != "PASS":
+              raise SystemExit("ZPA report integrity is not PASS")
+
+          att = report.get("source_attestation")
+          if not isinstance(att, dict):
+              raise SystemExit("ZPA report lacks source_attestation")
+          if att.get("algorithm") != "zpa-metadata-semantics-v1":
+              raise SystemExit("unexpected ZPA source-attestation algorithm")
+          if att.get("state") != "PRESENT":
+              raise SystemExit("ZPA source attestation is not PRESENT")
+          if att.get("axes") != ["z", "y", "x"]:
+              raise SystemExit("exact CT axes are not unambiguous ZYX")
+
+          scale = att.get("base_declared_scale")
+          spatial = att.get("spatial_axes")
+          if not isinstance(scale, list) or not isinstance(spatial, list):
+              raise SystemExit("ZPA source attestation lacks physical-scale evidence")
+          observed = {}
+          for axis in spatial:
+              if not isinstance(axis, dict):
+                  raise SystemExit("malformed spatial-axis evidence")
+              name = str(axis.get("name", "")).lower()
+              index = axis.get("index")
+              unit = axis.get("unit")
+              if (
+                  name not in {"z", "y", "x"}
+                  or not isinstance(index, int)
+                  or isinstance(index, bool)
+                  or index < 0
+                  or index >= len(scale)
+                  or not isinstance(unit, str)
+              ):
+                  raise SystemExit("unusable spatial-axis scale evidence")
+              factor = unit_to_um.get(unit.strip().lower())
+              value = scale[index]
+              if (
+                  factor is None
+                  or isinstance(value, bool)
+                  or not isinstance(value, (int, float))
+                  or not math.isfinite(float(value))
+                  or float(value) <= 0
+              ):
+                  raise SystemExit("unsupported or invalid physical-scale evidence")
+              value_um = float(value) * factor
+              if not math.isclose(
+                  value_um, expected_um, rel_tol=0.0, abs_tol=tolerance_um
+              ):
+                  raise SystemExit(
+                      f"physical scale mismatch on {name}: "
+                      f"{value_um:g} µm != {expected_um:g} µm"
+                  )
+              observed[name] = value_um
+
+          if set(observed) != {"z", "y", "x"}:
+              raise SystemExit("did not verify all three spatial axes")
+          print("physical-size fence PASS:", observed)
+          Path("zpa.json").write_text(json.dumps(report, indent=2) + "\n")
           PY
 
       - name: Freeze geometry-only reference plan
