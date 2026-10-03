@@ -17,6 +17,32 @@ That distinction matters because the public ecosystem already contains strong pr
 The next milestone is therefore intentionally narrow: **one exact 2027 Grand Prize volume, one held-out surface/fit/ink improvement, one evidence passport that makes the result independently checkable.** See the [Grand Prize proof campaign](docs/grand-prize-proof-campaign.md). The consumer-GPU Spiral path is preregistered separately in the [Spiral adapter equivalence gate](docs/spiral-consumer-gpu-gate.md); it must reproduce cache/linker semantics before it can accelerate the baseline. External ink methods enter through the [external ink-control process](docs/external-ink-control-process.md), which freezes evaluation regions before inference and fails pseudo-label provenance closed. Independent physical falsification experiments enter through the [morphology-based ink control](docs/morphology-ink-control.md), which currently permits source-only benchmarking and blocks CT transfer while the public profilometry sampling discrepancy is unresolved.
 
 
+
+## ScrollFiesta release evidence
+
+`scroliq-scrollfiesta` imports ScrollFiesta's public `results.json` ledger as
+producer-reported evidence without converting a successful local software run
+into a stronger geometry, whole-scroll, or Grand Prize claim. The adapter
+preserves source-area coverage, overlap and seam counts, CT-bake completeness,
+build/test results, configuration hashes, and ScrollFiesta's own
+`geometry_qualified` / `whole_scroll_qualified` flags.
+
+```bash
+scroliq-scrollfiesta \
+  --results path/to/scrollfiesta/submission_update/release/results.json \
+  --expected-scroll PHerc0139 \
+  --expected-region 4x5x5 \
+  --commit <scrollfiesta-commit> \
+  --out out/PHerc0139.scrollfiesta-evidence.json
+```
+
+Unknown schemas and scroll/region mismatches fail closed. A bounded regional
+result is never promoted to whole-scroll evidence, and producer hashes are not
+treated as a content binding to a ScrolIQ TIFXYZ artifact without a separate
+cross-format identity proof. This is the interoperability pattern ScrolIQ aims
+to provide for community unrolling pipelines: retain their strongest measured
+claims and their failures in the same submission-grade evidence graph.
+
 ## Model evaluation harness
 
 `scroliq-eval` is the common fail-closed envelope for held-out community-model
