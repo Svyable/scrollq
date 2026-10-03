@@ -463,7 +463,7 @@ def test_cli_fail_on_findings_is_opt_in(tmp_path):
 
 def test_review_queue_localizes_edge_jumps_as_vc3d_points(tmp_path):
     surface = _write_tifxyz(tmp_path)
-    x = np.asarray(Image.open(surface / "x.tif"), dtype=np.float32)
+    x = np.asarray(Image.open(surface / "x.tif"), dtype=np.float32).copy()
     x[2, 3] = 50.0
     Image.fromarray(x).save(surface / "x.tif")
 
