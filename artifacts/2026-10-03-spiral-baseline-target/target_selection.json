@@ -5,7 +5,8 @@
   "software": {
     "villa_repository": "https://github.com/ScrollPrize/villa",
     "villa_commit": "5a4388f08cc547e6a1a037f949173e731a3e7aa2",
-    "dataset_assembler_repository": "https://github.com/ttendoscopie-creator/eligible-spiral-dataset"
+    "dataset_assembler_repository": "https://github.com/ttendoscopie-creator/eligible-spiral-dataset",
+    "dataset_assembler_commit": "96d4f61da958ca79a7be970c5cd1a726964dfc69"
   },
   "bringup_target": {
     "scroll": "PHerc0826",
@@ -23,6 +24,15 @@
       "documented_fit_z_range_half_open": [11000, 12000],
       "documented_fit_iterations": 30000,
       "documented_gpu": "RTX 3090"
+    },
+    "known_source_risks": {
+      "surface_prediction_ct_support_audit": {
+        "status": "independent_public_audit",
+        "certain_phantom_chunks": 9524,
+        "stored_prediction_chunks": 46715,
+        "share_percent": 20.4,
+        "interpretation": "A candidate source-contamination ablation only. This does not establish that the published track DBM is wrong and must not replace the published-track baseline."
+      }
     },
     "selection_reason": "Complete published Spiral input stack plus a documented real fit path reduce baseline bring-up uncertainty."
   },
@@ -48,13 +58,19 @@
     },
     {
       "url": "https://github.com/ttendoscopie-creator/eligible-spiral-dataset",
+      "commit": "96d4f61da958ca79a7be970c5cd1a726964dfc69",
       "claim": "Published-input survey and PHerc0826 assembly/execution evidence."
+    },
+    {
+      "url": "https://github.com/Schurkai/vesuvius-phantom-audit",
+      "claim": "Independent CT-support audit used only to preregister a possible cleaned-surface/track ablation after the published baseline."
     }
   ],
   "policy": {
     "ink_used_for_target_selection": false,
     "pherc0800_held_out_geometry_allowed_as_fit_input": false,
     "invent_missing_umbilicus": false,
+    "replace_published_tracks_before_baseline": false,
     "single_composite_quality_score": false
   }
 }
