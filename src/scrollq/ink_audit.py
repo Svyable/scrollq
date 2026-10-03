@@ -99,7 +99,7 @@ def _is_cc_by_nc_4(value: Any) -> bool:
         .replace("_", "-")
         .replace(" ", "")
     )
-    return "cc-by-nc-4.0" in normalized or "ccby-nc4.0" in normalized
+    return any(token in normalized for token in ("cc-by-nc-4.0", "cc-by-nc4.0", "ccby-nc4.0"))
 
 
 def _external_method_provenance(
