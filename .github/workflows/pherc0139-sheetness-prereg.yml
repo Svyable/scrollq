@@ -2,6 +2,8 @@ name: PHerc0139 w035 sheetness preregistration
 
 # Issue #105, Phase A. This workflow freezes geometry-only probes before any
 # sheetness response is read. It is intentionally create-only.
+# Once reference-plan.json exists, later verification runs stop at the guard
+# and cannot regenerate or overwrite the frozen campaign output.
 on:
   pull_request:
     paths:
