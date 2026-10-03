@@ -49,8 +49,8 @@ jobs:
           mkdir -p out/flattening-tier0/reports
           for obj in out/flattening-tier0/*.obj; do
             id="$(basename "$obj" .obj)"
-            candidate="out/flattening-tier0/\${id}.control.obj"
-            report="out/flattening-tier0/reports/\${id}.compare.json"
+            candidate="out/flattening-tier0/${id}.control.obj"
+            report="out/flattening-tier0/reports/${id}.compare.json"
 
             python artifacts/2026-10-03-flattening-tier0/roundtrip_control.py \
               --source "$obj" \
@@ -61,7 +61,7 @@ jobs:
               --candidate-obj "$candidate" \
               --candidate-method canonical-obj-roundtrip-negative-control \
               --source-ref scrollq:artifacts/2026-10-03-flattening-tier0 \
-              --implementation-ref "git:\${GITHUB_SHA}" \
+              --implementation-ref "git:${GITHUB_SHA}" \
               --implementation-license MIT \
               --min-p95-improvement-fraction 0.01 \
               --out "$report"
