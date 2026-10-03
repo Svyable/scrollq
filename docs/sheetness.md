@@ -117,9 +117,10 @@ pre-registered falsification experiment. The benchmark spec must bind:
 - a reference surface normal;
 - at least one deliberate `normal-offset` control and one `wrong-wrap`
   control per group;
-- all pass/fail thresholds before evaluation.
+- pass/fail thresholds for completeness, normal-offset separation, and normal
+  alignment before evaluation; wrong-wrap response is frozen but descriptive.
 
-The version-2 evaluator verifies the provenance-bound cutout manifest before
+The version-3 evaluator verifies the provenance-bound cutout manifest before
 reading any probe score. It checks exact volume identity, ZPA metadata
 attestation (including audited ZYX axes), retained PASS ZPA-report hash,
 cutout SHA, global half-open bbox, local-to-global transform, source-chunk
@@ -127,10 +128,10 @@ completeness, and cutout shape. Every emitted probe then carries
 both its local array coordinate and its derived global level-0 CT coordinate.
 
 It also verifies the response and normal-array hashes recorded by the
-sheetness report and measures four things without dropping failures: score
-completeness, the fraction of all groups where the surface beats every control,
-the median surface-minus-best-control margin, and absolute-cosine normal
-alignment. Missing, out-of-bounds, or non-finite probes remain in the group
+sheetness report and measures the preregistered pass/fail evidence without
+dropping failures: score completeness, the fraction of groups where the surface
+beats every **normal-offset** control, the median surface-minus-best-normal-offset
+margin, and absolute-cosine normal alignment. Missing, out-of-bounds, or non-finite probes remain in the group
 denominator rather than disappearing from the result.
 
 ```bash
@@ -150,8 +151,16 @@ invalid/tampered bundle exits 2. The output records both the raw spec-file hash
 and a canonical semantic spec hash, the engine parameters, every probe result,
 and each frozen decision-rule check.
 
-The evaluator now requires the `scroliq-ct-cutout` lineage artifact, so the
-local bytes and every frozen probe are traceable to one exact audited level-0
-CT box. That strengthens source/coordinate provenance; it still does not prove
-that the chosen surface belongs to the correct physical winding, that topology
-is globally correct, or that ink is present or readable.
+The evaluator still requires at least one `wrong-wrap` / competing-sheet probe
+per group, but version 3 reports that evidence **descriptively rather than using
+it as a pass/fail threshold**. A genuine neighboring papyrus sheet is itself a
+plate-like object, so a Hessian sheet detector may correctly score it highly.
+Requiring the nominated surface to beat it would silently turn a sheetness test
+into a sheet-identity claim. The wrong-wrap gap therefore measures a known
+specificity limit that later winding/factor-graph evidence must resolve.
+
+The evaluator requires the `scroliq-ct-cutout` lineage artifact, so the local
+bytes and every frozen probe are traceable to one exact audited level-0 CT box.
+That strengthens source/coordinate provenance; it still does not prove that the
+chosen surface belongs to the correct physical winding, that topology is
+globally correct, or that ink is present or readable.
