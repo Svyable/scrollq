@@ -291,7 +291,7 @@ def _build_reviewer_contract(
     human_input_log_path: str,
     vc3d_workflow_path: str,
     false_positive_mitigation_path: str,
-    docker_run_command: str,
+    docker_run_command: str | None,
 ) -> tuple[dict[str, Any], dict[str, Path]]:
     materials: dict[str, dict[str, Any]] = {}
     sources: dict[str, Path] = {}
