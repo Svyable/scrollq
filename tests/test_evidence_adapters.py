@@ -1,3 +1,5 @@
+import hashlib
+
 import pytest
 
 from scrollq.evidence_adapters import (
@@ -7,6 +9,7 @@ from scrollq.evidence_adapters import (
     assess_flatcheck,
     assess_windcheck,
     normalize_native_report,
+    verify_native_mesh_identity,
     verify_normalized_entry,
 )
 
@@ -30,9 +33,51 @@ def _flatcheck(*, passes=True, collapsed=False, folds=0, window=False):
     }
 
 
-def _windcheck(*, clean=True):
+def _manifest_rows(mesh):
+    rows = []
+    for name in ("x.tif", "y.tif", "z.tif", "mask.tif", "mask.png", "meta.json"):
+        path = mesh / name
+        if path.is_file():
+            payload = path.read_bytes()
+            rows.append({
+                "path": name,
+                "present": True,
+                "size": len(payload),
+                "sha256": hashlib.sha256(payload).hexdigest(),
+            })
+        else:
+            rows.append({
+                "path": name,
+                "present": False,
+                "size": None,
+                "sha256": None,
+            })
+    return rows
+
+
+def _manifest_digest(rows):
+    lines = []
+    for row in sorted(rows, key=lambda item: item["path"]):
+        if row["present"]:
+            lines.append(f"{row['path']}\0{row['size']}\0{row['sha256']}")
+        else:
+            lines.append(f"{row['path']}\0absent\0absent")
+    return hashlib.sha256(("\n".join(lines) + "\n").encode()).hexdigest()
+
+
+def _mesh(tmp_path):
+    mesh = tmp_path / "column_01.tifxyz"
+    mesh.mkdir()
+    (mesh / "x.tif").write_bytes(b"x")
+    (mesh / "y.tif").write_bytes(b"y")
+    (mesh / "z.tif").write_bytes(b"z")
+    (mesh / "meta.json").write_bytes(b'{"format":"tifxyz"}')
+    return mesh
+
+
+def _windcheck(*, clean=True, mesh=None):
     d0 = d1 = 0 if clean else 2
-    return {
+    report = {
         "tool": "windcheck check",
         "schema": "windcheck_check/v1",
         "report_only": True,
@@ -46,6 +91,17 @@ def _windcheck(*, clean=True):
             "CLEAN means zero transverse contacts under BOTH quad triangulations"
         ),
     }
+    if mesh is not None:
+        rows = _manifest_rows(mesh)
+        report["mesh"] = {
+            "path": str(mesh),
+            "hashes": {
+                "schema": "windcheck_mesh_manifest/v1",
+                "files": rows,
+                "digest": _manifest_digest(rows),
+            },
+        }
+    return report
 
 
 def test_flatcheck_whole_grid_can_authorize_pass():
@@ -106,6 +162,36 @@ def test_normalized_entry_is_recomputable_from_native_report():
 
     entry["status"] = "fail"
     assert verify_normalized_entry(entry, report)
+
+
+def test_windcheck_exact_semantic_manifest_binds_submitted_bytes(tmp_path):
+    mesh = _mesh(tmp_path)
+    report = _windcheck(mesh=mesh)
+
+    binding = verify_native_mesh_identity(WINDCHECK_ADAPTER, report, mesh)
+    assert binding["status"] == "exact"
+
+    (mesh / "x.tif").write_bytes(b"changed")
+    binding = verify_native_mesh_identity(WINDCHECK_ADAPTER, report, mesh)
+    assert binding["status"] == "mismatch"
+    assert "x.tif" in binding["reason"]
+
+
+def test_windcheck_manifest_digest_must_match_rows(tmp_path):
+    mesh = _mesh(tmp_path)
+    report = _windcheck(mesh=mesh)
+    report["mesh"]["hashes"]["digest"] = "0" * 64
+
+    binding = verify_native_mesh_identity(WINDCHECK_ADAPTER, report, mesh)
+    assert binding["status"] == "mismatch"
+    assert "digest" in binding["reason"]
+
+
+def test_flatcheck_native_report_is_not_content_bound(tmp_path):
+    mesh = _mesh(tmp_path)
+    binding = verify_native_mesh_identity(FLATCHECK_ADAPTER, _flatcheck(), mesh)
+    assert binding["status"] == "unbound"
+    assert "does not content-hash" in binding["reason"]
 
 
 def test_windcheck_adapter_name_is_distinct_and_supported():
