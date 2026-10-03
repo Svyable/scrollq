@@ -179,6 +179,10 @@ def test_clips_requested_box_to_volume_bounds():
         (lambda m: m.update(data_type="float32"), "expected uint8"),
         (lambda m: m.update(fill_value=-1), "unsupported fill_value"),
         (lambda m: m.update(codecs=[]), "not a volcomp"),
+        (
+            lambda m: m["codecs"][0]["configuration"].update(index_location="start"),
+            "index_location",
+        ),
     ],
 )
 def test_unsupported_metadata_fails_closed(mutator, message):
