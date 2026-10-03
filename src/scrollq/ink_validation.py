@@ -23,7 +23,7 @@ import numpy as np
 import tifffile
 
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 def _sha256_file(path: Path) -> str:
@@ -273,12 +273,18 @@ def build_report(
     ground_truth_source_url: str,
     model_checkpoint_sha256: str,
     model_window_voxels: Sequence[int],
+    label_ancestry: str = "unknown",
+    label_source_sha256: str | None = None,
     controls: dict[str, np.ndarray] | None = None,
     input_records: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build one deterministic held-out validation evidence record."""
     if training_overlap not in {"none", "present", "unknown"}:
         raise ValueError("training_overlap must be one of none/present/unknown")
+    if label_ancestry not in {"independent", "related", "unknown"}:
+        raise ValueError("label_ancestry must be one of independent/related/unknown")
+    if label_source_sha256 is not None and not SHA256_RE.fullmatch(label_source_sha256):
+        raise ValueError("label_source_sha256 must be lowercase 64-hex")
     if not isinstance(split_id, str) or not split_id.strip():
         raise ValueError("split_id is required")
     if not isinstance(ground_truth_source_url, str) or not ground_truth_source_url.startswith(
@@ -334,6 +340,10 @@ def build_report(
         readiness_reasons.append("validation split is not declared held-out")
     if training_overlap != "none":
         readiness_reasons.append("training/prediction overlap is not explicitly none")
+    if label_ancestry != "independent":
+        readiness_reasons.append(
+            "label ancestry is not explicitly independent of the evaluated model"
+        )
     if not primary["both_classes_present"]:
         readiness_reasons.append("validation mask does not contain both ink and background")
     if not control_rows:
@@ -349,6 +359,8 @@ def build_report(
             "training_overlap": training_overlap,
             "known_ground_truth": True,
             "ground_truth_source_url": ground_truth_source_url,
+            "label_ancestry": label_ancestry,
+            "label_source_sha256": label_source_sha256,
         },
         "model": {
             "checkpoint_sha256": model_checkpoint_sha256,
@@ -411,6 +423,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         default="unknown",
     )
     ap.add_argument("--ground-truth-source-url", required=True)
+    ap.add_argument(
+        "--label-ancestry",
+        choices=("independent", "related", "unknown"),
+        default="unknown",
+        help=(
+            "relationship between validation-label ancestry and the evaluated "
+            "model/teacher lineage; prize evidence requires independent"
+        ),
+    )
+    ap.add_argument(
+        "--label-source-sha256",
+        help="optional digest of the label source/teacher artifact or provenance record",
+    )
     ap.add_argument("--model-checkpoint-sha256", required=True)
     ap.add_argument("--model-window", type=_parse_window, required=True)
     ap.add_argument(
@@ -462,6 +487,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         ground_truth_source_url=args.ground_truth_source_url,
         model_checkpoint_sha256=args.model_checkpoint_sha256,
         model_window_voxels=args.model_window,
+        label_ancestry=args.label_ancestry,
+        label_source_sha256=args.label_source_sha256,
         controls=control_arrays,
         input_records={
             "prediction": {
