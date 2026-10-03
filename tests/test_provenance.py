@@ -460,6 +460,48 @@ def test_higher_resolution_same_scroll_training_source_is_rejected():
     assert "GP_HIGHER_RES_SAME_SCROLL_SOURCE" in _codes(report)
 
 
+def test_model_source_voxel_must_match_eligible_volume():
+    manifest = _manifest()
+    manifest["models"][0]["input_contract"]["source_voxel_size_um"] = 9.0
+
+    report = validate_manifest(manifest)
+
+    assert "GP_MODEL_SOURCE_VOXEL" in _codes(report)
+
+
+def test_model_axes_must_match_audited_source():
+    manifest = _manifest()
+    manifest["models"][0]["input_contract"]["axes"] = ["x", "y", "z"]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_MODEL_INPUT_AXES" in _codes(report)
+
+
+def test_held_out_window_must_match_model_contract():
+    manifest = _manifest()
+    manifest["models"][0]["input_contract"]["window_voxels_zyx"] = [9, 32, 32]
+
+    report = validate_manifest(manifest)
+
+    assert "GP_INK_EVIDENCE_WINDOW" in _codes(report)
+
+
+def test_local_zpa_attestation_mismatch_fails_closed(tmp_path):
+    manifest = _manifest()
+    report_payload = _zpa_report(manifest)
+    report_payload["source_attestation"]["metadata_semantics_sha256"] = "9" * 64
+    payload = json.dumps(report_payload, sort_keys=True).encode("utf-8")
+    (tmp_path / "zpa-report.json").write_bytes(payload)
+    manifest["ct_volume"]["zarr_audit"]["sha256"] = hashlib.sha256(
+        payload
+    ).hexdigest()
+
+    result = validate_manifest(manifest, root_dir=tmp_path)
+
+    assert "GP_CT_SOURCE_ATTESTATION_MISMATCH" in _codes(result)
+
+
 def test_package_file_hashes_are_verified(tmp_path):
     manifest = _manifest()
     payloads = {
@@ -485,6 +527,7 @@ def test_package_file_hashes_are_verified(tmp_path):
     manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
         payloads["held_out_validation.json"]
     ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
 
     report = validate_manifest(manifest, root_dir=tmp_path)
     assert report["eligible"] is True
@@ -522,6 +565,7 @@ def test_tifxyz_directory_tree_hash_is_verified(tmp_path):
     manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
         ink_payload
     ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
 
     report = validate_manifest(manifest, root_dir=tmp_path)
     assert report["eligible"] is True
@@ -703,6 +747,7 @@ def test_local_ink_report_mismatch_fails_closed(tmp_path):
     manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
         payload
     ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
 
     result = validate_manifest(manifest, root_dir=tmp_path)
 
