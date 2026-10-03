@@ -36,6 +36,8 @@ def _villa(tmp_path, *, exporter_mode="tifxyz"):
     (spiral / "fit_spiral.py").write_text(
         "import os, pathlib\n"
         "run=pathlib.Path(os.environ['FIT_SPIRAL_RUN_DIR'])\n"
+        "print('loaded 480117 tracks within z-roi [11000, 12000)')\n"
+        "print('fitting 0 patches')\n"
         "(run/'checkpoint_fitted.ckpt').write_bytes(b'checkpoint-v1')\n"
     )
     if exporter_mode == "tifxyz":
@@ -138,6 +140,9 @@ def _dataset_and_recipe(tmp_path, villa_commit):
             "z_range_half_open": [11000, 12000],
             "optimizer_num_training_steps": 30000,
             "optimizer_random_seed": 1,
+            "expected_reference_context": {
+                "documented_tracks_loaded_with_input_use_tracks_true": 480117,
+            },
             "config_overrides": {
                 "z_begin": 11000,
                 "z_end": 12000,
