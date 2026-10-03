@@ -27,26 +27,44 @@ makes a letterform look more convincing.
 The comparison therefore consumes only Wavefront OBJ geometry and UVs.
 It does not read CT, ink probabilities, images, OCR, or text.
 
-## Command
+## Sealed command path
 
-Both OBJs must contain the **exact same ordered 3-D vertices and triangle
-faces**. Only the UV parameterization may differ.
+For exploratory use, `scroliq-flatten-compare` remains the generic comparator.
+Grand Prize evidence must use `scroliq-flatten-plan` so the baseline bytes,
+candidate implementation identity/license, and all decision thresholds are
+frozen **before** candidate evaluation.
+
+First seal the plan:
 
 ```bash
-scroliq-flatten-compare \
+scroliq-flatten-plan seal \
   --baseline-obj out/column_01.vc3d.obj \
-  --candidate-obj out/column_01.beltrami.obj \
+  --experiment-id column_01-beltrami-v1 \
   --candidate-method beltrami-coefficient-prolongation \
   --source-ref doi:10.1111/cgf.70341 \
-  --implementation-ref git:<pinned-commit> \
+  --implementation-ref git:<pinned-permissive-commit> \
   --implementation-license MIT \
+  --corpus-role ordinary-curved-column \
+  --source-mesh-ref <immutable-source-ref> \
   --min-p95-improvement-fraction 0.01 \
+  --out prereg/column_01.flatten-spec.json
+```
+
+Commit or otherwise publish that spec before running or inspecting the candidate.
+Then evaluate with no metadata/threshold override surface:
+
+```bash
+scroliq-flatten-plan evaluate \
+  --spec prereg/column_01.flatten-spec.json \
+  --baseline-obj out/column_01.vc3d.obj \
+  --candidate-obj out/column_01.beltrami.obj \
   --out out/column_01.flatten-compare.json \
   --require-promote
 ```
 
-The output is deterministic JSON and includes hashes of both OBJ files plus a
-UV-independent hash of the ordered 3-D geometry.
+The result records the spec SHA-256 and rejects a baseline whose bytes or
+UV-independent ordered 3-D geometry differ from the sealed spec. Thresholds and
+candidate implementation metadata are read only from the spec.
 
 ## Promotion contract
 
@@ -92,11 +110,17 @@ The first experiment should:
 
 - freeze the 3-D column meshes before either parameterization is inspected;
 - run the existing VC3D/current flattening baseline;
+- seal one `scroliq-flatten-plan` spec per corpus mesh and commit those specs;
 - run one pinned, permissively licensed Beltrami-prolongation implementation;
-- compare only with `scroliq-flatten-compare`;
+- evaluate only through `scroliq-flatten-plan evaluate`;
 - keep ink inaccessible until the winner and report hash are frozen;
 - publish every `PROMOTE`, `HOLD`, and `REJECT` result rather than keeping
   only favorable meshes.
+
+The spec tool cannot prove chronology by itself. Git history (or another
+immutable publication record) is the temporal proof that the sealed spec
+predated candidate evaluation; the tool proves that the later evaluation used
+the exact frozen baseline and rule set.
 
 If a candidate is promoted here, it still has to be converted through the
 normal VC3D/TIFXYZ path and pass the existing Mesh IQ, CT support/preflight,
@@ -113,3 +137,14 @@ test and improves the predeclared distortion metric without changing geometry.
 
 That narrow claim is intentional: flattening can improve the submission only
 after the surface itself is already physically defensible.
+
+
+## Current implementation-license decision
+
+As of 2026-10-03, the 2026 paper is the scientific method reference but no
+explicit permissive software license has been verified for its implementation.
+The authors' publicly indexed GIF (2022) and LMF (2025) implementations state
+that use is limited to academic use. Those repositories therefore must not be
+vendored into or made dependencies of the Grand Prize pipeline. Issue #114
+tracks an independent MIT implementation (or a separately verified permissive
+implementation) for the sealed papyrus A/B experiment.
