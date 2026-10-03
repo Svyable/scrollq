@@ -40,6 +40,14 @@ ineligible for ranking. Private truth is intentionally scored in a separate
 trusted phase so model-author PR code never receives hidden labels or truth
 meshes. See [the model-evaluation protocol](docs/model-evaluation.md).
 
+**Held-out surface recovery:** `scroliq-segmentation-validate` is now the
+segmentation adapter for that harness. It freezes a public exact-volume metric
+spec, binds it to a salted commitment over private TIFXYZ truth, and scores the
+minimum of prediction→truth and truth→prediction coverage within a preregistered
+voxel tolerance. Every valid vertex is used up to a hard public cap; missing,
+oversized, malformed, or topology-gated regions fail rather than disappearing.
+See [the segmentation validation protocol](docs/segmentation-validation.md).
+
 
 ## Diagnostic passport
 
