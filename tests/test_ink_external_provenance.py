@@ -43,8 +43,12 @@ def _manifest():
             "revision": "1" * 40,
             "code_license": "MIT",
             "checkpoint_license": "MIT",
-            "license_evidence": "https://example.org/license",
+            "license_evidence": [
+                "https://example.org/code-license",
+                "https://example.org/checkpoint-license",
+            ],
             "data_license": "CC-BY-NC 4.0",
+            "data_license_evidence": "https://example.org/data-license",
             "intended_use_permitted": True,
             "grand_prize_role": "control_only",
             "inference_only": True,
