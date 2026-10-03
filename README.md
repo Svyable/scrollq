@@ -8,6 +8,15 @@ ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](h
 
 > The existing 0–100 ScrolIQ score is a **scan-health triage signal, not a readability or Grand Prize readiness score**. ScrolIQ treats unmeasured downstream stages as unknown rather than inferring them from CT quality.
 
+## What ScrolIQ adds
+
+ScrolIQ does **not** replace the community's geometry, winding, scan-quality, data-integrity, or ink-validation tools. Its strongest claim is the layer between them: **make their evidence composable and submission-grade**. Every result should be bound to the exact CT / mesh / model / evaluation region it measures; cross-volume or stale evidence is excluded; leakage and missing evidence fail closed; and a failed control remains a published failure instead of silently becoming confidence.
+
+That distinction matters because the public ecosystem already contains strong prior art such as [TIFXYZ Doctor](https://github.com/aviad12g/tifxyz-doctor), [tifxyz-repair](https://github.com/Nieuwlaar/tifxyz-repair), [windcheck](https://github.com/joe-carr-data/windcheck), [spiralcheck](https://github.com/Nicodol/spiralcheck), [scroll-data-audit](https://github.com/Bullo27/scroll-data-audit), and [gp13-ink-detectability](https://github.com/flummoxjr/gp13-ink-detectability). ScrolIQ's differentiation is the **provenance/falsification contract across those stages**, plus derived campaigns that measure where the contract holds and where it fails.
+
+The next milestone is therefore intentionally narrow: **one exact 2027 Grand Prize volume, one held-out surface/fit/ink improvement, one evidence passport that makes the result independently checkable.** See the [Grand Prize proof campaign](docs/grand-prize-proof-campaign.md).
+
+
 ## Diagnostic passport
 
 **Held-out geometry evaluation:** `scroliq-geometry-validate` compares a frozen
