@@ -2,6 +2,7 @@ import copy
 import hashlib
 import json
 
+from scrollq.artifact_hash import artifact_sha256
 from scrollq.provenance import validate_manifest
 
 
@@ -381,8 +382,17 @@ def test_higher_resolution_same_scroll_training_source_is_rejected():
 
 def test_package_file_hashes_are_verified(tmp_path):
     manifest = _manifest()
+    mesh_dir = tmp_path / "column_01.tifxyz"
+    mesh_dir.mkdir()
+    for name, payload in {
+        "meta.json": b"{\"format\":\"tifxyz\"}",
+        "x.tif": b"x-plane",
+        "y.tif": b"y-plane",
+        "z.tif": b"z-plane",
+    }.items():
+        (mesh_dir / name).write_bytes(payload)
+
     payloads = {
-        "column_01.tifxyz": b"mesh",
         "column_01.tif": b"render",
         "banner.tif": b"banner",
         "held_out_validation.json": (
@@ -392,9 +402,7 @@ def test_package_file_hashes_are_verified(tmp_path):
     for name, payload in payloads.items():
         (tmp_path / name).write_bytes(payload)
 
-    manifest["meshes"][0]["sha256"] = hashlib.sha256(
-        payloads["column_01.tifxyz"]
-    ).hexdigest()
+    manifest["meshes"][0]["sha256"] = artifact_sha256(mesh_dir)
     manifest["renders"][0]["sha256"] = hashlib.sha256(
         payloads["column_01.tif"]
     ).hexdigest()
@@ -571,15 +579,23 @@ def test_local_ink_report_mismatch_fails_closed(tmp_path):
     report_payload["model"]["window_voxels_zyx"] = [99, 99, 99]
     payload = json.dumps(report_payload, sort_keys=True).encode("utf-8")
 
+    mesh_dir = tmp_path / "column_01.tifxyz"
+    mesh_dir.mkdir()
     for name, data in {
-        "column_01.tifxyz": b"mesh",
+        "meta.json": b"{\"format\":\"tifxyz\"}",
+        "x.tif": b"x-plane",
+        "y.tif": b"y-plane",
+        "z.tif": b"z-plane",
+    }.items():
+        (mesh_dir / name).write_bytes(data)
+    for name, data in {
         "column_01.tif": b"render",
         "banner.tif": b"banner",
         "held_out_validation.json": payload,
     }.items():
         (tmp_path / name).write_bytes(data)
 
-    manifest["meshes"][0]["sha256"] = hashlib.sha256(b"mesh").hexdigest()
+    manifest["meshes"][0]["sha256"] = artifact_sha256(mesh_dir)
     manifest["renders"][0]["sha256"] = hashlib.sha256(b"render").hexdigest()
     manifest["banner"]["sha256"] = hashlib.sha256(b"banner").hexdigest()
     manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
