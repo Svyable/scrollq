@@ -4,6 +4,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>October 2026 update — ScrolIQ</title>
 <meta name="description" content="ScrolIQ October 2026 monthly update: every result added after the September Progress Prize submission, with its committed evidence.">
+<meta name="theme-color" content="#0d0b08">
+<meta name="color-scheme" content="dark">
+<link rel="canonical" href="https://svyable.github.io/scrollq/october-2026-update.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ScrolIQ — October 2026 Vesuvius Progress Prize update">
+<meta property="og:description" content="Real-data mesh, winding and fiber diagnostics; fail-closed health; a pre-registered stability failure acted on; and an explicit 2027 Grand Prize evidence path.">
+<meta property="og:url" content="https://svyable.github.io/scrollq/october-2026-update.html">
+<meta property="og:image" content="https://svyable.github.io/scrollq/favicon.svg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ScrolIQ — October 2026 Progress Prize update">
+<meta name="twitter:description" content="Judge-oriented evidence path: what changed, what failed, what is reproducible, and what remains unproven.">
 <style>
 :root{--bg:#0d0b08;--panel:#161310;--panel2:#1c1813;--line:#2c251b;
 --ink:#ece3d2;--muted:#a89880;--dim:#6f6350;
@@ -58,6 +69,29 @@ border-radius:12px;padding:1.1rem 1.25rem}
 footer{border-top:1px solid var(--line);margin-top:1rem;padding:1.4rem 0 3rem;color:var(--dim);font-size:.82rem}
 footer a{color:var(--muted)}
 
+.topnav{position:sticky;top:0;z-index:20;background:rgba(13,11,8,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.topnav .wrap{display:flex;gap:.35rem;align-items:center;overflow-x:auto;padding-top:.55rem;padding-bottom:.55rem;scrollbar-width:none}
+.topnav .wrap::-webkit-scrollbar{display:none}
+.topnav a{white-space:nowrap;text-decoration:none;color:var(--muted);font-size:.78rem;border:1px solid transparent;border-radius:999px;padding:.32rem .62rem}
+.topnav a:hover,.topnav a:focus-visible{color:var(--ink);border-color:var(--line);outline:none}
+.kicker{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ember);font-weight:800}
+.review-panel{border-color:#4c3a24;background:linear-gradient(135deg,rgba(255,122,26,.08),rgba(255,209,102,.025))}
+.review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.7rem;margin-top:1rem}
+.review-card{display:block;text-decoration:none;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:1rem;min-height:122px}
+.review-card:hover,.review-card:focus-visible{border-color:#5b4934;outline:none;transform:translateY(-1px)}
+.review-card b{display:block;color:var(--ink);margin-bottom:.28rem}
+.review-card span{display:block;color:var(--muted);font-size:.85rem;line-height:1.45}
+.criteria-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.75rem;margin-top:1rem}
+.criterion{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:1rem}
+.criterion .state{display:inline-block;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;font-weight:800;border:1px solid var(--line);border-radius:999px;padding:.16rem .46rem;margin-bottom:.45rem}
+.criterion .state.strong{color:var(--good);border-color:#36583b}
+.criterion .state.partial{color:var(--gold);border-color:#5a4b24}
+.criterion .state.gap{color:var(--warn);border-color:#6a3b24}
+.criterion h3{font-size:1rem;margin:.1rem 0 .35rem}
+.criterion p{margin:.2rem 0}
+.panel[id]{scroll-margin-top:4rem}
+@media (max-width:620px){.hero{padding-top:2.6rem}.panel{padding:1.15rem}table{display:block;overflow-x:auto}}
+
 .goals{display:grid;gap:1rem}
 .goal{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.25rem}
 .goal h3{margin:0 0 .35rem;font-size:1.05rem}
@@ -75,7 +109,15 @@ footer a{color:var(--muted)}
 .week ul{margin:.2rem 0 0 1rem;padding:0;font-size:.88rem}
 @media (max-width:520px){.panel{padding:1.1rem}.goal{padding:.95rem 1rem}}
 </style></head><body>
-</head><body>
+<nav class="topnav" aria-label="Progress pages"><div class="wrap">
+<a href="./">Dashboard</a>
+<a href="#review">Reviewer path</a>
+<a href="#prize-fit">Prize fit</a>
+<a href="#evidence">Evidence</a>
+<a href="#comparison">Comparison</a>
+<a href="./grand-prize-readiness.html">2027 readiness</a>
+<a href="./progress.html">Progress tracker</a>
+</div></nav>
 
 <header class="hero"><div class="wrap">
 <div class="eyebrow">VESUVIUS CHALLENGE · OCTOBER 2026 PROGRESS PRIZE · MONTHLY UPDATE</div>
@@ -99,6 +141,32 @@ evidence stays <code>unknown</code>. No scan-health score in a frozen September 
 </div></header>
 
 <main class="wrap" style="margin-top:2.5rem">
+
+<div class="panel review-panel" id="review">
+<div class="kicker">Reviewer path · criteria checked 2026-10-03</div>
+<h2>Five minutes to verify the October contribution</h2>
+<p>The current <a href="https://scrollprize.org/prizes#progress-prizes">Progress Prize criteria</a> emphasize early open release, real-data evidence, actionable failure detection, documentation, standard community formats, and actual use. This is the shortest path through the claims that matter most.</p>
+<div class="review-grid">
+<a class="review-card" href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-corpus-mesh-audit"><b>1 · Real-data failure discovery</b><span>Corpus-wide TIFXYZ + OBJ mesh audit, deterministic review queue, positive controls, and explicit partial coverage.</span></a>
+<a class="review-card" href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-stability-v2"><b>2 · A failed gate changed the product</b><span>Pre-registered stability v2 failed; precise ranks were replaced by reproducible rank bands instead of hiding the result.</span></a>
+<a class="review-card" href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-03-paris4-winding-attachment"><b>3 · Geometry diagnostics with controls</b><span>Cross-collection winding inconsistencies localized on real PHercParis4 annotations, with an injection control.</span></a>
+<a class="review-card" href="./usage-by-format.html"><b>4 · Standard formats</b><span>OME-Zarr v2/v3, TIFXYZ, OBJ, PointCollections, native VC3D fiber JSON/CSV, and ink arrays mapped to tested commands.</span></a>
+<a class="review-card" href="./grand-prize-readiness.html"><b>5 · 2027 requirement map</b><span>See what is implemented, partial, or still undemonstrated without converting evidence gaps into a readiness score.</span></a>
+<a class="review-card" href="#prize-fit"><b>6 · Inspect the remaining gaps</b><span>Community adoption and a measured downstream improvement are still the most important missing award evidence.</span></a>
+</div>
+</div>
+
+<div class="panel" id="prize-fit"><h2>Progress Prize fit: evidence versus remaining gap</h2>
+<div class="criteria-grid">
+<div class="criterion"><span class="state strong">strong evidence</span><h3>Released early and reproducibly</h3><p>MIT source, dated artifacts, exact commands, input hashes, frozen protocols, and failures preserved rather than rewritten.</p></div>
+<div class="criterion"><span class="state strong">strong evidence</span><h3>Real-data, actionable diagnostics</h3><p>Mesh, winding, scan-health, integrity and fiber checks run on public Vesuvius data and emit reviewable locations or machine-readable failure states.</p></div>
+<div class="criterion"><span class="state strong">strong evidence</span><h3>Standard formats and modular integration</h3><p>The suite reads the formats the community already uses rather than requiring a bespoke data conversion path.</p></div>
+<div class="criterion"><span class="state strong">strong evidence</span><h3>Documentation and falsification discipline</h3><p>Usage guides, pre-registered protocols, negative controls, held-out checks, exact-volume binding, and explicit unknown states are part of the public interface.</p></div>
+<div class="criterion"><span class="state gap">gap</span><h3>Actual community use</h3><p>Reviewer queues exist, but external reviewer feedback or downstream adoption is not yet demonstrated. O6 is the direct path to this evidence.</p></div>
+<div class="criterion"><span class="state partial">partial</span><h3>Measured downstream improvement</h3><p>The tools find and localize failure candidates, but a verified improvement to an unwrapping or ink result attributable to ScrolIQ is not yet demonstrated. The Grand Prize proof campaign is designed to close that gap.</p></div>
+</div>
+<p class="meta">This matrix is descriptive, not a score. It mirrors the public prize criteria and keeps missing evidence visible.</p>
+</div>
 
 <div class="panel"><h2>Competitive thesis</h2>
 <p><b>ScrolIQ does not replace the community's geometry, winding, fiber, scan-quality or ink tools.</b> It makes their evidence composable and submission-grade: each result is bound to the exact CT / mesh / model / evaluation region it measures, leakage and missing evidence fail closed, and independent diagnostics can be carried into one reproducible Grand Prize evidence trail without silently becoming stronger claims than they support.</p>
@@ -203,7 +271,7 @@ PointCollections, fiber CSV/JSON and ink arrays to the command that reads each.<
 implemented evidence, partial, or not yet demonstrated, with links, and deliberately gives no readiness score.</li>
 </ul></div>
 
-<div class="panel"><h2>How ScrolIQ compares with existing tools</h2>
+<div class="panel" id="comparison"><h2>How ScrolIQ compares with existing tools</h2>
 <p>ScrolIQ does not replace the community's tools; it reads their outputs and checks them against the
 exact data they claim to describe. Where a tool already does a job well, ScrolIQ consumes its report
 instead of reimplementing it.</p>
@@ -225,7 +293,7 @@ comparison</td><td>A scan-health survey of all 64 volcomp volumes with sampling 
 stability failure with rank bands, and a weight-free Grand Prize frontier</td></tr>
 </tbody></table></div>
 
-<div class="panel"><h2>Evidence</h2>
+<div class="panel" id="evidence"><h2>Evidence</h2>
 <table><thead><tr><th>claim</th><th>evidence (in repo)</th></tr></thead><tbody>
 <tr><td><b>Real-segment mesh audit:</b> 21 Grand Prize meshes; PHerc0800 6/6 pass; PHerc1447 14/15 holes flagged
 for review, 1 broken</td>
@@ -266,7 +334,7 @@ evidence</td>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-public-fiber-audit"><code>artifacts/2026-10-01-public-fiber-audit/</code></a></td></tr>
 </tbody></table></div>
 
-<div class="panel"><h2>Honest scope</h2>
+<div class="panel" id="scope"><h2>Honest scope</h2>
 <p><b>The 0–100 ScrolIQ score is scan-health triage only.</b> It is not readability, surface quality, ink quality,
 or Grand Prize readiness, and its ranking failed our own stability gate twice. Mesh, winding and fiber flags are
 review candidates: none has been confirmed by a person in VC3D yet, and nothing has been filed upstream. Local mesh
@@ -274,7 +342,7 @@ checks do not prove a surface follows the papyrus sheet.</p></div>
 
 </main>
 <footer><div class="wrap">
-<a href="./">← live evaluator dashboard</a> · <a href="./october-2026.html">October 2026 goals</a> ·
+<a href="./">← live evaluator dashboard</a> · <a href="./progress.html">progress tracker</a> · <a href="./october-2026.html">October 2026 goals</a> ·
 <a href="./grand-prize-readiness.html">Grand Prize readiness</a> · <a href="./september-2026.html">September 2026 submission</a> ·
 <a href="https://github.com/Svyable/scrollq">source</a> · Built by Sven + Muse · October 2026
 </div></footer>
