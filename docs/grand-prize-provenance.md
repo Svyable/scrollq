@@ -53,7 +53,27 @@ The current validator rejects a manifest when any of these conditions is not pro
 - a render does not match its mesh filename stem/column, lacks a 1 cm scale-bar declaration, or is not tied to the pinned code commit;
 - training and prediction regions overlap on the same eligible volume;
 - the full-scroll banner does not enumerate all submitted renders with column numbers overlaid;
-- `--root-dir` is supplied and any package file is missing, escapes the package root, or has the wrong SHA-256.
+- `--root-dir` is supplied and any package artifact is missing, escapes the package root, has the wrong SHA-256, or a tifxyz mesh is not a directory.
+
+## Package artifact hashing
+
+Submission renders, banners and JSON reports are ordinary files, so their `sha256`
+is SHA-256 over the file bytes. A real `.tifxyz` mesh is a **directory**
+(`x.tif`, `y.tif`, `z.tif`, `meta.json`, and optional sidecars), so
+`scroliq-provenance` uses the deterministic `scroliq-tree-sha256-v1` tree
+digest for directory artifacts.
+
+Tree-hash v1 recursively enumerates regular files in sorted POSIX-relative-path
+order and commits to each relative path, byte length, and full file SHA-256.
+Symlinks and empty directories are refused. This makes the digest independent
+of filesystem enumeration order while still changing when any consumed tifxyz
+member changes.
+
+The validation report records the file and directory hashing schemes under
+`package_hashing`. This fixes an earlier v4 implementation defect where
+`--root-dir` treated `column_NN.tifxyz` as a regular file, making the
+strongest package-verification path impossible for actual directory-form
+tifxyz meshes.
 
 ## Region leakage semantics
 
