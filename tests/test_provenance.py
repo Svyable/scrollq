@@ -2,6 +2,7 @@ import copy
 import hashlib
 import json
 
+from scrollq.package_hash import sha256_path
 from scrollq.provenance import validate_manifest
 
 
@@ -409,6 +410,43 @@ def test_package_file_hashes_are_verified(tmp_path):
     assert report["eligible"] is True
 
     (tmp_path / "column_01.tif").write_bytes(b"tampered")
+    report = validate_manifest(manifest, root_dir=tmp_path)
+    assert "GP_HASH_MISMATCH" in _codes(report)
+
+
+def test_tifxyz_directory_tree_hash_is_verified(tmp_path):
+    manifest = _manifest()
+    mesh_dir = tmp_path / "column_01.tifxyz"
+    mesh_dir.mkdir()
+    (mesh_dir / "meta.json").write_text('{"format":"tifxyz"}', encoding="utf-8")
+    (mesh_dir / "x.tif").write_bytes(b"x")
+    (mesh_dir / "y.tif").write_bytes(b"y")
+    (mesh_dir / "z.tif").write_bytes(b"z")
+
+    ink_payload = json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
+    payloads = {
+        "column_01.tif": b"render",
+        "banner.tif": b"banner",
+        "held_out_validation.json": ink_payload,
+    }
+    for name, payload in payloads.items():
+        (tmp_path / name).write_bytes(payload)
+
+    manifest["meshes"][0]["sha256"] = sha256_path(mesh_dir)
+    manifest["renders"][0]["sha256"] = hashlib.sha256(
+        payloads["column_01.tif"]
+    ).hexdigest()
+    manifest["banner"]["sha256"] = hashlib.sha256(
+        payloads["banner.tif"]
+    ).hexdigest()
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        ink_payload
+    ).hexdigest()
+
+    report = validate_manifest(manifest, root_dir=tmp_path)
+    assert report["eligible"] is True
+
+    (mesh_dir / "x.tif").write_bytes(b"tampered")
     report = validate_manifest(manifest, root_dir=tmp_path)
     assert "GP_HASH_MISMATCH" in _codes(report)
 

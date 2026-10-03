@@ -148,6 +148,30 @@ report's split, checkpoint, window, array digest, control names or metrics
 differ from the manifest. Like the rest of the gate, this checks that the
 evidence is complete and consistent; it sets no performance threshold.
 
+## Package digests, including TIFXYZ directories
+
+The Grand Prize mesh artifact is normally a directory-format TIFXYZ surface
+(`column_NN.tifxyz/meta.json` plus `x.tif`, `y.tif`, and `z.tif`), not a
+single regular file. Schema v4 therefore accepts both regular files and
+directories for package paths.
+
+Generate the manifest digest with:
+
+```bash
+scroliq-hash submission/column_01.tifxyz submission/column_01.tif submission/banner.tif
+```
+
+Regular files use the ordinary SHA-256 of their bytes. Directories use the
+versioned `scroliq-directory-sha256-v1` tree digest: entries are sorted by
+relative POSIX path; directories and files are tagged separately; each file
+contributes its relative path, byte length, and ordinary SHA-256. Symlinks and
+special filesystem entries are rejected. This makes the digest independent of
+directory enumeration order while binding every file in the TIFXYZ surface.
+
+When `--root-dir` is supplied, `scroliq-provenance` recomputes the same
+digest directly from the unpacked submission directory and fails on any missing
+or tampered content inside a declared TIFXYZ path.
+
 ## CI gate
 
 A submission pipeline can make the manifest a release gate:
