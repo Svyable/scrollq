@@ -119,7 +119,10 @@ additional author attestation, not a substitute for the identifier check.
 
 For stronger protection, community-held private sets should publish immutable
 hashes of their public manifests before evaluation and keep a separate private
-truth manifest. Region IDs must stay stable across both halves.
+truth manifest. Region IDs must stay stable across both halves. The segmentation
+adapter goes further: it publishes a salted commitment to private truth-surface
+hashes before scoring, so the truth cannot be silently swapped later without
+publishing raw truth hashes that could leak benchmark membership.
 
 ## Uncertainty and ranking
 
@@ -139,9 +142,12 @@ The next implementation layer is intentionally narrow:
   label/mask region, preserving falsification-control evidence.
 - **Geometry:** adapter over `scroliq-geometry-validate`, with held-out targets
   and missing predictions kept in the denominator.
-- **Segmentation:** new held-out surface metric comparing predicted surfaces to
-  truth meshes, with explicit topology/coverage failure modes rather than a
-  single flattering distance statistic.
+- **Segmentation — implemented:** `scroliq-segmentation-validate` compares all
+  valid predicted/truth TIFXYZ vertices up to a preregistered hard cap. Its
+  primary metric is the minimum of prediction→truth and truth→prediction
+  tolerance coverage, with directional distance diagnostics, optional frozen
+  topology gates, and a salted hidden-truth commitment. See
+  `docs/segmentation-validation.md`.
 
 Once all three adapters emit the same region-results contract, CI can evaluate
 community models without changing the ranking/provenance layer.
