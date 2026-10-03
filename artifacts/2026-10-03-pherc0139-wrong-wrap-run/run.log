@@ -1,0 +1,1493 @@
+{
+  "algorithm": {
+    "candidate_rule": "candidate run: prediction > stored_value_threshold AND masked CT > 0; separation gap: in-bounds prediction <= stored_value_threshold",
+    "max_distance_voxels": 64,
+    "min_distance_voxels": 12,
+    "min_gap_voxels": 3,
+    "min_run_voxels": 2,
+    "name": "normal-ray-supported-surface-v1",
+    "normal_source": "frozen TIFXYZ centered-difference normal",
+    "ray_step_voxels": 1,
+    "seed": null,
+    "selection_rule": "nearest run midpoint by absolute normal distance; negative-normal direction wins exact ties",
+    "stochastic": false,
+    "uses_reference_ct_intensity": "mask-support only; no intensity ranking",
+    "uses_sheetness_response": false
+  },
+  "claim_boundary": "A found control is a CT-supported location proposed by an independent published surface-prediction volume along the frozen mesh normal. It is not physical ground truth for winding identity. No sheetness response was consulted.",
+  "coordinate_space": "level0-voxel-index-zyx",
+  "geometry_source": {
+    "binding_url": "https://scrollprize.org/data_browser/PHerc0139",
+    "ct_support_rule": "masked CT voxel value > 0",
+    "ct_support_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "kind": "published-surface-prediction",
+    "level": 0,
+    "model_id": "20260413222639",
+    "published_threshold": 0.2,
+    "stored_value_threshold": 127,
+    "url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/representations/predictions/surfaces/20250728140407-surface-20260413222639-surface-m7-L0-th0.2.zarr"
+  },
+  "groups": [
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 26,
+            "midpoint_distance_voxels": 24.5,
+            "start_distance_voxels": 23
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 15
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 19,
+            "midpoint_distance_voxels": 17.5,
+            "start_distance_voxels": 16
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 10
+        }
+      ],
+      "global_zyx": [
+        3123.9634192011777,
+        2331.4659766225113,
+        3237.06497990474
+      ],
+      "id": "surface-0001",
+      "nearest_voxel_zyx": [
+        3124,
+        2331,
+        3237
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 19,
+        "midpoint_distance_voxels": 17.5,
+        "start_distance_voxels": 16
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 17.5,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 26,
+            "midpoint_distance_voxels": 24.5,
+            "start_distance_voxels": 23
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 12
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 22,
+            "midpoint_distance_voxels": 20.5,
+            "start_distance_voxels": 19
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 17
+        }
+      ],
+      "global_zyx": [
+        3262.0800237395124,
+        3698.9771586961447,
+        3703.8991156204256
+      ],
+      "id": "surface-0002",
+      "nearest_voxel_zyx": [
+        3262,
+        3699,
+        3704
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 22,
+        "midpoint_distance_voxels": 20.5,
+        "start_distance_voxels": 19
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 20.5,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 17,
+            "midpoint_distance_voxels": 16.0,
+            "start_distance_voxels": 15
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 13
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 16,
+            "midpoint_distance_voxels": 15.0,
+            "start_distance_voxels": 14
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 9
+        }
+      ],
+      "global_zyx": [
+        3425.0048059545556,
+        3942.192548123948,
+        3068.2425937073026
+      ],
+      "id": "surface-0003",
+      "nearest_voxel_zyx": [
+        3425,
+        3942,
+        3068
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 16,
+        "midpoint_distance_voxels": 15.0,
+        "start_distance_voxels": 14
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 15.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 31,
+            "midpoint_distance_voxels": 29.5,
+            "start_distance_voxels": 28
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 14
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 26,
+            "midpoint_distance_voxels": 25.0,
+            "start_distance_voxels": 24
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 16
+        }
+      ],
+      "global_zyx": [
+        3610.5373616463853,
+        4064.0871413991345,
+        2448.588450514539
+      ],
+      "id": "surface-0004",
+      "nearest_voxel_zyx": [
+        3611,
+        4064,
+        2449
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 26,
+        "midpoint_distance_voxels": 25.0,
+        "start_distance_voxels": 24
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 25.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 14,
+            "midpoint_distance_voxels": 13.5,
+            "start_distance_voxels": 13
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 12
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 19,
+            "midpoint_distance_voxels": 17.5,
+            "start_distance_voxels": 16
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 17
+        }
+      ],
+      "global_zyx": [
+        3802.3451672356878,
+        3910.4137341058854,
+        1947.7751504051964
+      ],
+      "id": "surface-0005",
+      "nearest_voxel_zyx": [
+        3802,
+        3910,
+        1948
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 14,
+        "midpoint_distance_voxels": 13.5,
+        "start_distance_voxels": 13
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -13.5,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 15,
+            "midpoint_distance_voxels": 14.0,
+            "start_distance_voxels": 13
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 10
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 14,
+            "midpoint_distance_voxels": 13.0,
+            "start_distance_voxels": 12
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 13
+        }
+      ],
+      "global_zyx": [
+        3953.2580724059385,
+        2470.1159926814653,
+        3171.8666770887903
+      ],
+      "id": "surface-0006",
+      "nearest_voxel_zyx": [
+        3953,
+        2470,
+        3172
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 14,
+        "midpoint_distance_voxels": 13.0,
+        "start_distance_voxels": 12
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 13.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 31,
+            "midpoint_distance_voxels": 30.0,
+            "start_distance_voxels": 29
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 5
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 28,
+            "midpoint_distance_voxels": 27.5,
+            "start_distance_voxels": 27
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 12
+        }
+      ],
+      "global_zyx": [
+        4052.539612781352,
+        2741.314502955201,
+        4110.330842091861
+      ],
+      "id": "surface-0007",
+      "nearest_voxel_zyx": [
+        4053,
+        2741,
+        4110
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 28,
+        "midpoint_distance_voxels": 27.5,
+        "start_distance_voxels": 27
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 27.5,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 26,
+            "midpoint_distance_voxels": 25.0,
+            "start_distance_voxels": 24
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 9
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 27,
+            "midpoint_distance_voxels": 26.0,
+            "start_distance_voxels": 25
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 5
+        }
+      ],
+      "global_zyx": [
+        4129.329884005405,
+        3534.0840855751335,
+        4050.311872668538
+      ],
+      "id": "surface-0008",
+      "nearest_voxel_zyx": [
+        4129,
+        3534,
+        4050
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 26,
+        "midpoint_distance_voxels": 25.0,
+        "start_distance_voxels": 24
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -25.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 18,
+            "midpoint_distance_voxels": 17.0,
+            "start_distance_voxels": 16
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 14
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 28,
+            "midpoint_distance_voxels": 26.5,
+            "start_distance_voxels": 25
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 14
+        }
+      ],
+      "global_zyx": [
+        4288.238812577133,
+        4058.3094217638904,
+        3441.508162638358
+      ],
+      "id": "surface-0009",
+      "nearest_voxel_zyx": [
+        4288,
+        4058,
+        3442
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 18,
+        "midpoint_distance_voxels": 17.0,
+        "start_distance_voxels": 16
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -17.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 30,
+            "midpoint_distance_voxels": 29.0,
+            "start_distance_voxels": 28
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 15
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 33,
+            "midpoint_distance_voxels": 32.0,
+            "start_distance_voxels": 31
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 14
+        }
+      ],
+      "global_zyx": [
+        4490.9392908530945,
+        4084.274692960782,
+        2966.820544921784
+      ],
+      "id": "surface-0010",
+      "nearest_voxel_zyx": [
+        4491,
+        4084,
+        2967
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 30,
+        "midpoint_distance_voxels": 29.0,
+        "start_distance_voxels": 28
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -29.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 20,
+            "midpoint_distance_voxels": 19.5,
+            "start_distance_voxels": 19
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 10
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 35,
+            "midpoint_distance_voxels": 34.5,
+            "start_distance_voxels": 34
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 8
+        }
+      ],
+      "global_zyx": [
+        4709.963014371134,
+        4117.800574277805,
+        2430.2810213118596
+      ],
+      "id": "surface-0011",
+      "nearest_voxel_zyx": [
+        4710,
+        4118,
+        2430
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 20,
+        "midpoint_distance_voxels": 19.5,
+        "start_distance_voxels": 19
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -19.5,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 17,
+            "midpoint_distance_voxels": 15.5,
+            "start_distance_voxels": 14
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 17
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 14,
+            "midpoint_distance_voxels": 13.0,
+            "start_distance_voxels": 12
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 11
+        }
+      ],
+      "global_zyx": [
+        4885.091502499959,
+        4145.20752013793,
+        2162.707202805177
+      ],
+      "id": "surface-0012",
+      "nearest_voxel_zyx": [
+        4885,
+        4145,
+        2163
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 14,
+        "midpoint_distance_voxels": 13.0,
+        "start_distance_voxels": 12
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 13.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 15,
+            "midpoint_distance_voxels": 13.5,
+            "start_distance_voxels": 12
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 8
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 18,
+            "midpoint_distance_voxels": 17.0,
+            "start_distance_voxels": 16
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 12
+        }
+      ],
+      "global_zyx": [
+        5032.299891149181,
+        2767.4693454506214,
+        2900.6029948399214
+      ],
+      "id": "surface-0013",
+      "nearest_voxel_zyx": [
+        5032,
+        2767,
+        2901
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 15,
+        "midpoint_distance_voxels": 13.5,
+        "start_distance_voxels": 12
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -13.5,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 31,
+            "midpoint_distance_voxels": 29.5,
+            "start_distance_voxels": 28
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 13
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 27,
+            "midpoint_distance_voxels": 26.0,
+            "start_distance_voxels": 25
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 14
+        }
+      ],
+      "global_zyx": [
+        5195.864265545838,
+        2677.9595384364825,
+        3456.817825747225
+      ],
+      "id": "surface-0014",
+      "nearest_voxel_zyx": [
+        5196,
+        2678,
+        3457
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 27,
+        "midpoint_distance_voxels": 26.0,
+        "start_distance_voxels": 25
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 26.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 23,
+            "midpoint_distance_voxels": 21.5,
+            "start_distance_voxels": 20
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 8
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 16,
+            "midpoint_distance_voxels": 15.0,
+            "start_distance_voxels": 14
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 7
+        }
+      ],
+      "global_zyx": [
+        5320.311851089248,
+        2977.2913211927885,
+        4158.742134066229
+      ],
+      "id": "surface-0015",
+      "nearest_voxel_zyx": [
+        5320,
+        2977,
+        4159
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 16,
+        "midpoint_distance_voxels": 15.0,
+        "start_distance_voxels": 14
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 15.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 19,
+            "midpoint_distance_voxels": 18.0,
+            "start_distance_voxels": 17
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 14
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 53,
+            "midpoint_distance_voxels": 52.0,
+            "start_distance_voxels": 51
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 3
+        }
+      ],
+      "global_zyx": [
+        5370.450036746958,
+        3791.5572970444764,
+        4180.008520563305
+      ],
+      "id": "surface-0016",
+      "nearest_voxel_zyx": [
+        5370,
+        3792,
+        4180
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 19,
+        "midpoint_distance_voxels": 18.0,
+        "start_distance_voxels": 17
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -18.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 19,
+            "midpoint_distance_voxels": 18.0,
+            "start_distance_voxels": 17
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 12
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 33,
+            "midpoint_distance_voxels": 30.0,
+            "start_distance_voxels": 27
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 12
+        }
+      ],
+      "global_zyx": [
+        5531.474595186093,
+        4242.827429697618,
+        3665.9997274982243
+      ],
+      "id": "surface-0017",
+      "nearest_voxel_zyx": [
+        5531,
+        4243,
+        3666
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 19,
+        "midpoint_distance_voxels": 18.0,
+        "start_distance_voxels": 17
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -18.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 26,
+            "midpoint_distance_voxels": 25.0,
+            "start_distance_voxels": 24
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 15
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 24,
+            "midpoint_distance_voxels": 22.5,
+            "start_distance_voxels": 21
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 16
+        }
+      ],
+      "global_zyx": [
+        5739.681098073046,
+        4387.788390228193,
+        2994.452775696819
+      ],
+      "id": "surface-0018",
+      "nearest_voxel_zyx": [
+        5740,
+        4388,
+        2994
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 24,
+        "midpoint_distance_voxels": 22.5,
+        "start_distance_voxels": 21
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 22.5,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 22,
+            "midpoint_distance_voxels": 20.5,
+            "start_distance_voxels": 19
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 18
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 17,
+            "midpoint_distance_voxels": 16.0,
+            "start_distance_voxels": 15
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 14
+        }
+      ],
+      "global_zyx": [
+        5942.954147510071,
+        4332.856552669642,
+        2535.8078690842567
+      ],
+      "id": "surface-0019",
+      "nearest_voxel_zyx": [
+        5943,
+        4333,
+        2536
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 17,
+        "midpoint_distance_voxels": 16.0,
+        "start_distance_voxels": 15
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 16.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 18,
+            "midpoint_distance_voxels": 17.0,
+            "start_distance_voxels": 16
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 14
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 20,
+            "midpoint_distance_voxels": 19.0,
+            "start_distance_voxels": 18
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 14
+        }
+      ],
+      "global_zyx": [
+        6159.142885595447,
+        4091.6868464649046,
+        2115.3880718458636
+      ],
+      "id": "surface-0020",
+      "nearest_voxel_zyx": [
+        6159,
+        4092,
+        2115
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 18,
+        "midpoint_distance_voxels": 17.0,
+        "start_distance_voxels": 16
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -17.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 19,
+            "midpoint_distance_voxels": 17.0,
+            "start_distance_voxels": 15
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 18
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 31,
+            "midpoint_distance_voxels": 30.0,
+            "start_distance_voxels": 29
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 8
+        }
+      ],
+      "global_zyx": [
+        6238.998448970615,
+        2760.514339986218,
+        3119.8750744066833
+      ],
+      "id": "surface-0021",
+      "nearest_voxel_zyx": [
+        6239,
+        2761,
+        3120
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 19,
+        "midpoint_distance_voxels": 17.0,
+        "start_distance_voxels": 15
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -17.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 41,
+            "midpoint_distance_voxels": 40.5,
+            "start_distance_voxels": 40
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 6
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 25,
+            "midpoint_distance_voxels": 24.0,
+            "start_distance_voxels": 23
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 13
+        }
+      ],
+      "global_zyx": [
+        6385.045808929883,
+        2929.2586266663025,
+        3488.983086740305
+      ],
+      "id": "surface-0022",
+      "nearest_voxel_zyx": [
+        6385,
+        2929,
+        3489
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 25,
+        "midpoint_distance_voxels": 24.0,
+        "start_distance_voxels": 23
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 24.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 20,
+            "midpoint_distance_voxels": 19.0,
+            "start_distance_voxels": 18
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 13
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 21,
+            "midpoint_distance_voxels": 20.0,
+            "start_distance_voxels": 19
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 15
+        }
+      ],
+      "global_zyx": [
+        6545.726512326095,
+        2949.8402477339314,
+        3440.7897029850606
+      ],
+      "id": "surface-0023",
+      "nearest_voxel_zyx": [
+        6546,
+        2950,
+        3441
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 20,
+        "midpoint_distance_voxels": 19.0,
+        "start_distance_voxels": 18
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -19.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 31,
+            "midpoint_distance_voxels": 29.5,
+            "start_distance_voxels": 28
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 12
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 22,
+            "midpoint_distance_voxels": 21.0,
+            "start_distance_voxels": 20
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 14
+        }
+      ],
+      "global_zyx": [
+        6699.611606310131,
+        2909.036951010525,
+        3284.679084473773
+      ],
+      "id": "surface-0024",
+      "nearest_voxel_zyx": [
+        6700,
+        2909,
+        3285
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 22,
+        "midpoint_distance_voxels": 21.0,
+        "start_distance_voxels": 20
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 21.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 20,
+            "midpoint_distance_voxels": 19.0,
+            "start_distance_voxels": 18
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 3
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 19,
+            "midpoint_distance_voxels": 17.0,
+            "start_distance_voxels": 15
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 18
+        }
+      ],
+      "global_zyx": [
+        6845.704793349941,
+        2842.8285527906646,
+        2976.699871422681
+      ],
+      "id": "surface-0025",
+      "nearest_voxel_zyx": [
+        6846,
+        2843,
+        2977
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 19,
+        "midpoint_distance_voxels": 17.0,
+        "start_distance_voxels": 15
+      },
+      "selected_sign": 1,
+      "signed_distance_voxels": 17.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 22,
+            "midpoint_distance_voxels": 21.5,
+            "start_distance_voxels": 21
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 14
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 33,
+            "midpoint_distance_voxels": 32.0,
+            "start_distance_voxels": 31
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 11
+        }
+      ],
+      "global_zyx": [
+        7094.917153106496,
+        4137.319580331274,
+        2176.714908482229
+      ],
+      "id": "surface-0026",
+      "nearest_voxel_zyx": [
+        7095,
+        4137,
+        2177
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 22,
+        "midpoint_distance_voxels": 21.5,
+        "start_distance_voxels": 21
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -21.5,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 18,
+            "midpoint_distance_voxels": 16.5,
+            "start_distance_voxels": 15
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 11
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 27,
+            "midpoint_distance_voxels": 26.0,
+            "start_distance_voxels": 25
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 19
+        }
+      ],
+      "global_zyx": [
+        7173.192226371475,
+        4461.478172534633,
+        2717.6032087062263
+      ],
+      "id": "surface-0027",
+      "nearest_voxel_zyx": [
+        7173,
+        4461,
+        2718
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 18,
+        "midpoint_distance_voxels": 16.5,
+        "start_distance_voxels": 15
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -16.5,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 30,
+            "midpoint_distance_voxels": 29.0,
+            "start_distance_voxels": 28
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 14
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 30,
+            "midpoint_distance_voxels": 29.0,
+            "start_distance_voxels": 28
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 13
+        }
+      ],
+      "global_zyx": [
+        7287.509652312031,
+        4517.299457217294,
+        3232.6067898069714
+      ],
+      "id": "surface-0028",
+      "nearest_voxel_zyx": [
+        7288,
+        4517,
+        3233
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 30,
+        "midpoint_distance_voxels": 29.0,
+        "start_distance_voxels": 28
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -29.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 15,
+            "midpoint_distance_voxels": 13.5,
+            "start_distance_voxels": 12
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 15
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 16,
+            "midpoint_distance_voxels": 15.0,
+            "start_distance_voxels": 14
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 15
+        }
+      ],
+      "global_zyx": [
+        7427.903640847724,
+        4492.340282618468,
+        3609.1725925610986
+      ],
+      "id": "surface-0029",
+      "nearest_voxel_zyx": [
+        7428,
+        4492,
+        3609
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 15,
+        "midpoint_distance_voxels": 13.5,
+        "start_distance_voxels": 12
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -13.5,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 17,
+            "midpoint_distance_voxels": 15.5,
+            "start_distance_voxels": 14
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 12
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 38,
+            "midpoint_distance_voxels": 37.0,
+            "start_distance_voxels": 36
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 5
+        }
+      ],
+      "global_zyx": [
+        7577.089544043295,
+        4271.02253813274,
+        3994.780700946154
+      ],
+      "id": "surface-0030",
+      "nearest_voxel_zyx": [
+        7577,
+        4271,
+        3995
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 17,
+        "midpoint_distance_voxels": 15.5,
+        "start_distance_voxels": 14
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -15.5,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 29,
+            "midpoint_distance_voxels": 28.0,
+            "start_distance_voxels": 27
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 12
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 51,
+            "midpoint_distance_voxels": 49.5,
+            "start_distance_voxels": 48
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 4
+        }
+      ],
+      "global_zyx": [
+        7728.162123795326,
+        4068.9790340432783,
+        4118.64688872554
+      ],
+      "id": "surface-0031",
+      "nearest_voxel_zyx": [
+        7728,
+        4069,
+        4119
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 29,
+        "midpoint_distance_voxels": 28.0,
+        "start_distance_voxels": 27
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -28.0,
+      "status": "found"
+    },
+    {
+      "directions": [
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 26,
+            "midpoint_distance_voxels": 24.5,
+            "start_distance_voxels": 23
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": -1,
+          "supported_prediction_count": 11
+        },
+        {
+          "first_qualifying_run": {
+            "end_distance_voxels": 31,
+            "midpoint_distance_voxels": 30.5,
+            "start_distance_voxels": 30
+          },
+          "in_bounds_count": 64,
+          "sample_count": 64,
+          "sign": 1,
+          "supported_prediction_count": 19
+        }
+      ],
+      "global_zyx": [
+        7744.526940440557,
+        2779.6653536718654,
+        3872.7926711498976
+      ],
+      "id": "surface-0032",
+      "nearest_voxel_zyx": [
+        7745,
+        2780,
+        3873
+      ],
+      "prediction_run": {
+        "end_distance_voxels": 26,
+        "midpoint_distance_voxels": 24.5,
+        "start_distance_voxels": 23
+      },
+      "selected_sign": -1,
+      "signed_distance_voxels": -24.5,
+      "status": "found"
+    }
+  ],
+  "metrics": {
+    "ct_chunks_missing_as_zero": 0,
+    "group_count": 32,
+    "prediction_chunks_missing_as_zero": 0,
+    "wrong_wrap_completeness": 1.0,
+    "wrong_wrap_found_count": 32,
+    "wrong_wrap_missing_count": 0
+  },
+  "next_step": "If completeness is acceptable under the preregistered rule, bind these coordinates into the frozen CT cutout/benchmark specs before running scroliq-sheetness. Missing controls remain missing; do not hand-pick replacements.",
+  "reference_plan": {
+    "file_sha256": "8cc043205a72b9e8a285ed81ac46b09f6d2808e1483634b9030cb9dcfc12309d",
+    "group_count": 32
+  },
+  "schema": "scroliq-wrong-wrap-plan/1",
+  "sheetness_response_consulted": false,
+  "spec": {
+    "canonical_sha256": "dc82520b8081acd4c5ea3361648d684824d1a2e97052e7a457fe3d668fa157ef",
+    "file_sha256": "4e7cefffb59665c7b9551daf615ac5d68c26295f42ac0524ad1b865b0593db06"
+  },
+  "status": "complete",
+  "volume_root": "PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr"
+}
