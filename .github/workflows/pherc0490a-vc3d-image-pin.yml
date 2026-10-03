@@ -1,0 +1,34 @@
+name: Pin VC3D image for PHerc0490A
+
+on:
+  push:
+    branches:
+      - agent/pherc0490a-first-letter-hunt
+    paths:
+      - .github/workflows/pherc0490a-vc3d-image-pin.yml
+
+permissions:
+  contents: read
+
+jobs:
+  pin-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Pull official VC3D image
+        run: docker pull ghcr.io/scrollprize/villa/volume-cartographer:edge
+      - name: Record immutable digest and CLI surface
+        run: |
+          set -euo pipefail
+          IMAGE="$(docker image inspect ghcr.io/scrollprize/villa/volume-cartographer:edge --format '{{index .RepoDigests 0}}')"
+          echo "VC3D_IMAGE=$IMAGE"
+          mkdir -p out/pherc0490a-vc3d-image
+          printf '%s\n' "$IMAGE" > out/pherc0490a-vc3d-image/image.txt
+          docker run --rm "$IMAGE" vc_grow_seg_from_seed --help > out/pherc0490a-vc3d-image/grow-help.txt
+          sha256sum out/pherc0490a-vc3d-image/image.txt out/pherc0490a-vc3d-image/grow-help.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pherc0490a-vc3d-image-pin
+          path: out/pherc0490a-vc3d-image
+          if-no-files-found: error
+          retention-days: 30
