@@ -81,7 +81,7 @@ def test_policy_does_not_invent_passes_for_unresolved_claims():
     )
 
 
-def test_missing_mesh_coverage_stays_partial_not_clean():
+def test_unauthorized_mesh_evidence_satisfies_no_required_coverage():
     ledger = _ledger()
     ledger["entries"][0]["scope"]["mesh_ids"] = ["mesh:01"]
 
@@ -97,7 +97,7 @@ def test_missing_mesh_coverage_stays_partial_not_clean():
         item for item in report["required_claims"]
         if item["claim"] == "flattening-isometry"
     )
-    assert claim["missing_mesh_ids"] == ["mesh:02"]
+    assert claim["missing_mesh_ids"] == ["mesh:01", "mesh:02"]
 
 
 def test_explicit_failure_blocks_even_when_other_evidence_passes():
