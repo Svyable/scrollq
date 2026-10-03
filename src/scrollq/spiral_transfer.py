@@ -24,6 +24,7 @@ EXPECTED_REFERENCE_REPOSITORY = "https://github.com/pscamillo/vesuvius-eligible-
 EXPECTED_REFERENCE_COMMIT = "620769e2e1e70d1e61b588092229cb76d3af4804"
 EXPECTED_CONTRACT_BLOB = "abc10ffeb3ca3c5a3b2355403b0467ef0d971b5d"
 EXPECTED_SPLIT_BLOB = "86dd19ffa63e1db6dc610b30936b341aa4504591"
+EXPECTED_REFERENCE_MANIFEST_BLOB = "0ab14c3752279df36098700e119c64393fa631d2"
 MAX_POINTS = 1024
 MARGIN = 64.0
 
@@ -368,8 +369,14 @@ def evaluate(
     if volume_id != EXPECTED_VOLUME_ID:
         raise ValueError(f"exact-volume mismatch: expected {EXPECTED_VOLUME_ID}, got {volume_id}")
     contract, split = _verify_frozen_documents(contract_path, split_path)
-    manifest = _load_json(reference_blob_manifest)
-    if manifest.get("repository") != EXPECTED_REFERENCE_REPOSITORY or manifest.get("commit") != EXPECTED_REFERENCE_COMMIT:
+    manifest_bytes = reference_blob_manifest.read_bytes()
+    if _git_blob_sha1(manifest_bytes) != EXPECTED_REFERENCE_MANIFEST_BLOB:
+        raise ValueError("reference blob manifest differs from frozen Git blob")
+    manifest = json.loads(manifest_bytes)
+    if not isinstance(manifest, dict):
+        raise ValueError("reference blob manifest must be a JSON object")
+    source = manifest.get("source")
+    if not isinstance(source, dict) or source.get("repository") != EXPECTED_REFERENCE_REPOSITORY or source.get("commit") != EXPECTED_REFERENCE_COMMIT:
         raise ValueError("reference blob manifest repository/commit mismatch")
     predictions = _load_predictions(predictions_npz)
     by_path = _candidate_by_path(split)
@@ -444,6 +451,7 @@ def evaluate(
             "reference_commit": EXPECTED_REFERENCE_COMMIT,
             "contract_git_blob_sha1": EXPECTED_CONTRACT_BLOB,
             "split_git_blob_sha1": EXPECTED_SPLIT_BLOB,
+            "reference_manifest_git_blob_sha1": EXPECTED_REFERENCE_MANIFEST_BLOB,
             "predictions_sha256": hashlib.sha256(predictions_npz.read_bytes()).hexdigest(),
             "reference_blob_manifest_sha256": hashlib.sha256(reference_blob_manifest.read_bytes()).hexdigest(),
         },
