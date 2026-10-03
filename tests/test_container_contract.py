@@ -60,6 +60,8 @@ def test_ci_builds_and_smoke_tests_reviewer_container():
 
     assert "name: reviewer container" in workflow
     assert "docker build" in workflow
+    assert 'SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"' in workflow
+    assert '--build-arg SOURCE_DATE_EPOCH="$SOURCE_DATE_EPOCH"' in workflow
     assert 'test "$(docker run --rm "$IMAGE" id -u)" = "10001"' in workflow
     for command in (
         "scroliq-provenance --help",
@@ -77,6 +79,8 @@ def test_publish_workflow_uses_commit_tag_and_emits_immutable_digest():
     ).read_text()
 
     assert "packages: write" in workflow
+    assert "      - README.md" in workflow
+    assert "      - LICENSE" in workflow
     assert 'SHA_TAG="${IMAGE}:sha-${GITHUB_SHA}"' in workflow
     assert 'docker push "$SHA_TAG"' in workflow
     assert "docker buildx imagetools inspect" in workflow
