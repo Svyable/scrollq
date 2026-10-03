@@ -1,8 +1,8 @@
 # Grand Prize provenance manifest
 
-`scroliq-provenance` validates one machine-readable provenance graph for a 2027 Grand Prize submission. Schema v4 (current) requires deterministic held-out ink evidence from `scroliq-ink-validate` for every held-out validation; v3 bound the recto-coverage ledger into the fail-closed submission graph, and held-out validation introduced in v2 remains required. Manifests with an older `schema_version` are rejected. It is intentionally strict about facts that can be checked mechanically; it does **not** claim that text is legible, that the recto surface is complete, or that a reported metric is sufficient for the prize.
+`scroliq-provenance` validates one machine-readable provenance graph for a 2027 Grand Prize submission. Schema v5 (current) binds the eligible CT to a validated ZPA 1.3 source-attestation artifact and requires an explicit physical/model input contract for every model; v4 added deterministic held-out ink evidence, v3 bound the recto-coverage ledger, and held-out validation introduced in v2 remains required. Manifests with an older `schema_version` are rejected. It is intentionally strict about facts that can be checked mechanically; it does **not** claim that text is legible, that the recto surface is complete, or that a reported metric is sufficient for the prize.
 
-The graph ties each submitted render back through the exact eligible CT volume, declared full-recto coverage inventory, surface, numbered tifxyz mesh, ink model/checkpoint, training datasets, training/prediction regions, stochastic seeds, and public experiment runs. Each trained model must also carry public held-out validation evidence: public input and known-ground-truth URLs, an explicit validation region, a public evaluation run, numeric metrics, a hashed results artifact, and a machine-checkable training/validation exclusion proof. The graph also pins the code commit, Docker image digest, Zarr audit manifest digest, package file digests, documented human-input hours, and the full-scroll banner.
+The graph ties each submitted render back through the exact eligible CT volume, a hash-pinned and schema-validated ZPA source attestation, declared full-recto coverage inventory, surface, numbered tifxyz mesh, the model's physical input/preprocessing contract, ink checkpoint, training datasets, training/prediction regions, stochastic seeds, and public experiment runs. Each trained model must also carry public held-out validation evidence: public input and known-ground-truth URLs, an explicit validation region, a public evaluation run, numeric metrics, a hashed results artifact, and a machine-checkable training/validation exclusion proof. The graph also pins the code commit, Docker image digest, Zarr audit manifest digest, package file digests, documented human-input hours, and the full-scroll banner.
 
 ## Usage
 
@@ -39,13 +39,14 @@ eligible CT
 The current validator rejects a manifest when any of these conditions is not proven:
 
 - the scroll and exact CT volume do not match ScrolIQ's dated Grand Prize target manifest;
-- the CT URI or zarr-pyramid-audit provenance points at a different volume;
+- the CT URI or ZPA report points at a different volume, the ZPA artifact is missing/tampered/invalid, its integrity is not `PASS`, or its source-attestation declaration differs from the validated report;
 - code is not pinned to a public repository, immutable 40-hex commit, permissive license, and digest-pinned Docker image;
 - documented human annotation/input exceeds 8 hours;
 - a training dataset is not public under CC-BY-NC 4.0;
 - pseudo-labeled datasets do not name the released producer checkpoint, or that producer checkpoint is not CC-BY-NC 4.0;
 - a same-scroll alternate training source is higher resolution than the eligible scan, or omits the resolution needed to exclude that case;
-- a trained model lacks its checkpoint digest, dataset references, stochasticity declaration, required random seed, or public training/inference experiment run;
+- a trained model lacks its checkpoint digest, dataset references, physical input contract, hash-pinned public preprocessing profile, stochasticity declaration, required random seed, or public training/inference experiment run;
+- a trained model's declared source voxel size does not match the eligible scan, its axes do not match the audited ZPA source axes, `resampling: none` changes voxel size, or its held-out window differs from the submitted model window;
 - a trained model lacks public held-out validation against known ground truth, the validation protocol/results are incomplete, or same-volume training and held-out regions overlap;
 - the required recto-coverage ledger fails its own accounting checks, pins a different code commit/CT root, or its mesh-ID set differs from the submitted mesh set;
 - surfaces, meshes, or renders break lineage to `ct:eligible`;
@@ -54,6 +55,66 @@ The current validator rejects a manifest when any of these conditions is not pro
 - training and prediction regions overlap on the same eligible volume;
 - the full-scroll banner does not enumerate all submitted renders with column numbers overlaid;
 - `--root-dir` is supplied and any package file is missing, escapes the package root, or has the wrong SHA-256.
+
+## Eligible CT source attestation (schema v5)
+
+The `ct_volume.zarr_audit` record now names a package-relative ZPA artifact,
+its SHA-256, the exact report root, required `PASS` integrity, and the
+source-attestation values expected from that report:
+
+```json
+{
+  "tool": "zarr-pyramid-audit",
+  "path": "evidence/zpa-report.json",
+  "sha256": "<artifact sha256>",
+  "root": "PHerc0813/volumes/20250821151723.zarr",
+  "integrity": "PASS",
+  "source_attestation": {
+    "algorithm": "zpa-metadata-semantics-v1",
+    "state": "PRESENT",
+    "metadata_semantics_sha256": "<64 hex>",
+    "axes": ["z", "y", "x"]
+  }
+}
+```
+
+With `--root-dir`, ScrolIQ opens that exact artifact. It accepts either a
+single ZPA audit report or a ZPA gate report containing exactly one matching
+root, validates the embedded report using ZPA's own bundled schema, requires
+`integrity: PASS`, and compares the root, semantic metadata digest, evidence
+state, algorithm and axes to the provenance declaration.
+
+The ZPA digest binds the parsed metadata semantics that were audited. It is
+not represented as a raw CT-payload hash or object-store ETag. Payload/content
+evidence remains a separate layer.
+
+## Model physical input contract (schema v5)
+
+Every model declares the physical source it expects and the preprocessing
+artifact that turns that source into model input:
+
+```json
+{
+  "axes": ["z", "y", "x"],
+  "source_voxel_size_um": 9.362,
+  "model_voxel_size_um": 9.362,
+  "resampling": "none",
+  "window_voxels_zyx": [17, 64, 64],
+  "preprocessing_profile": {
+    "public_url": "https://…/preprocessing.json",
+    "sha256": "<64 hex>"
+  }
+}
+```
+
+The source voxel size must match ScrolIQ's dated eligible-volume manifest.
+The model axes must match the validated ZPA source-attestation axes. When
+`resampling` is `none`, model and source voxel sizes must be identical.
+When resampling is explicit, both source and model voxel sizes remain visible
+and the public hash-pinned preprocessing profile is the reproducible contract
+for how the conversion occurs. The held-out ink report's
+`model_window_voxels_zyx` must equal the submitted model window, preventing a
+different evaluation receptive field from being quietly substituted.
 
 ## Region leakage semantics
 
@@ -77,7 +138,7 @@ This deliberately uses a simple coordinate primitive that can be independently r
 
 ## Recto coverage binding
 
-Schema v3 (retained in v4) requires a nested `recto_coverage` manifest in the provenance graph. That object is validated by the same `audit_recto_coverage` implementation used by `scroliq-recto-coverage`.
+Schema v3 (retained in v5) requires a nested `recto_coverage` manifest in the provenance graph. That object is validated by the same `audit_recto_coverage` implementation used by `scroliq-recto-coverage`.
 
 The provenance gate then adds two cross-artifact invariants:
 
@@ -90,7 +151,7 @@ This still does not prove that the upstream reference inventory found every phys
 
 ## Held-out validation evidence
 
-Schema v2 introduced held-out validation; v3 and v4 retain it and require at least one held-out validation record for every trained model in the manifest. A minimal v4 record looks like:
+Schema v2 introduced held-out validation; v3-v5 retain it and require at least one held-out validation record for every trained model in the manifest. A minimal v5 held-out record looks like:
 
 ```json
 {
@@ -124,7 +185,7 @@ Schema v2 introduced held-out validation; v3 and v4 retain it and require at lea
 
 `protocol` may be `held-out` or `k-fold`; k-fold records must declare `fold_count >= 2`. The validator does not impose a prize-performance threshold on the metric names or values. It verifies that numeric results exist, that the evidence is public and tied to the pinned code commit, and that any same-volume training and validation boxes are disjoint.
 
-### Deterministic ink evidence (schema v4)
+### Deterministic ink evidence (retained from schema v4)
 
 Every held-out validation must carry an `ink_evidence` object produced by
 `scroliq-ink-validate` (see [ink-validation.md](ink-validation.md)). The
@@ -152,8 +213,7 @@ evidence is complete and consistent; it sets no performance threshold.
 
 The Grand Prize mesh artifact is normally a directory-format TIFXYZ surface
 (`column_NN.tifxyz/meta.json` plus `x.tif`, `y.tif`, and `z.tif`), not a
-single regular file. Schema v4 therefore accepts both regular files and
-directories for package paths.
+single regular file. Schema v5 accepts both regular files and directories for package paths.
 
 Generate the manifest digest with:
 

@@ -1,5 +1,5 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "rules": {
     "url": "https://scrollprize.org/prizes",
     "as_of": "2026-09-30"
@@ -22,8 +22,20 @@
     "uri": "s3://vesuvius-challenge-open-data/PHerc0813/volumes/20250821151723.zarr",
     "zarr_audit": {
       "tool": "zarr-pyramid-audit",
-      "manifest_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-      "root": "s3://vesuvius-challenge-open-data/PHerc0813/volumes/20250821151723.zarr"
+      "path": "evidence/zpa-report.json",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "root": "PHerc0813/volumes/20250821151723.zarr",
+      "integrity": "PASS",
+      "source_attestation": {
+        "algorithm": "zpa-metadata-semantics-v1",
+        "state": "PRESENT",
+        "metadata_semantics_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+        "axes": [
+          "z",
+          "y",
+          "x"
+        ]
+      }
     }
   },
   "region_sets": [
@@ -125,6 +137,25 @@
       "inference_run": {
         "url": "https://wandb.ai/OWNER/PROJECT/runs/INFER",
         "public": true
+      },
+      "input_contract": {
+        "axes": [
+          "z",
+          "y",
+          "x"
+        ],
+        "source_voxel_size_um": 9.362,
+        "model_voxel_size_um": 9.362,
+        "resampling": "none",
+        "window_voxels_zyx": [
+          17,
+          64,
+          64
+        ],
+        "preprocessing_profile": {
+          "public_url": "https://example.org/models/ink-v1/preprocessing.json",
+          "sha256": "6666666666666666666666666666666666666666666666666666666666666666"
+        }
       }
     }
   ],
