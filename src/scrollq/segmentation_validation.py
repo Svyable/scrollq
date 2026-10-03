@@ -601,20 +601,23 @@ def compute_truth_commitment(
     dataset_document: Mapping[str, Any],
     truth_document: Mapping[str, Any],
     truth_root: Path,
-    max_vertices: int | None = None,
 ) -> dict[str, Any]:
-    """Hash private truth surfaces into a salted public commitment."""
+    """Hash private truth surface bytes into a salted public commitment.
+
+    Commitment generation intentionally does not load coordinate arrays. The
+    full TIFXYZ contract and preregistered vertex cap are enforced later by the
+    trusted scorer; this stage only freezes the exact directory-format bytes.
+    """
     dataset = _validate_dataset(dataset_document)
     truth = validate_truth_manifest(truth_document, dataset=dataset)
     hashes: dict[str, str] = {}
-    counts: dict[str, int] = {}
-    cap = max_vertices if max_vertices is not None else 2**63 - 1
     for row in truth["regions"]:
-        surface = _load_tifxyz(
-            _resolve_under(truth_root, row["tifxyz"]), max_vertices=cap
-        )
-        hashes[row["id"]] = surface["sha256"]
-        counts[row["id"]] = surface["valid_vertices"]
+        surface_path = _resolve_under(truth_root, row["tifxyz"])
+        if not surface_path.is_dir():
+            raise SegmentationValidationError(
+                f"truth TIFXYZ surface is not a directory: {surface_path}"
+            )
+        hashes[row["id"]] = sha256_path(surface_path)
     commitment = _truth_commitment(
         salt_hex=truth["commitment_salt"],
         dataset_manifest_sha256=digest(dataset_document),
@@ -626,7 +629,6 @@ def compute_truth_commitment(
         "commitment_version": COMMITMENT_VERSION,
         "truth_commitment_sha256": commitment,
         "region_count": len(hashes),
-        "valid_vertices": counts,
     }
 
 
