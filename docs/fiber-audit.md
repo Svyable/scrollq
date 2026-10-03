@@ -129,3 +129,11 @@ as partial evidence and fails closed on missing or cross-volume bindings.
 The next Fiber IQ evidence step is to establish a defensible exact CT-volume
 mapping for public fibers, add CT-conditioned orientation/support diagnostics,
 and broaden the campaign toward cross-fiber connectivity.
+
+GPU TEASAR/skeletonization backends are evaluated separately from this persisted
+trace audit. Brook is tracked under the preregistered
+[CUDA TEASAR accelerator equivalence gate](brook-teasar-gate.md), which requires
+object/geometry parity and target-domain downstream evidence before an
+accelerated backend is accepted for the same use. The current Brook
+GPL-3.0-only license is also kept distinct from Grand Prize
+submission-eligibility.
