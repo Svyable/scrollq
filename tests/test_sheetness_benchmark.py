@@ -32,6 +32,39 @@ def _bundle(tmp_path: Path, *, bad_control=False, decision=None):
     np.save(normal_path, normals, allow_pickle=False)
 
     cutout_sha = "a" * 64
+    volume_root = "community-uploads/example/PHerc0813/eligible.zarr"
+    source_attestation = {
+        "algorithm": "zpa-metadata-semantics-v1",
+        "state": "PRESENT",
+        "metadata_semantics_sha256": "b" * 64,
+        "axes": ["z", "y", "x"],
+    }
+    cutout_manifest = {
+        "schema": "scroliq-ct-cutout/1",
+        "status": "measured",
+        "volume_root": volume_root,
+        "ct_url": f"https://example.test/{volume_root}",
+        "level": 0,
+        "coordinate_space": "level0-voxel-index",
+        "source_attestation": source_attestation,
+        "bbox_zyx_half_open": {
+            "start": [100, 200, 300],
+            "stop": [105, 205, 305],
+        },
+        "local_to_global": {
+            "kind": "integer-translation",
+            "start_zyx": [100, 200, 300],
+        },
+        "source_chunks": {"missing_count": 0},
+        "cutout": {
+            "sha256": cutout_sha,
+            "shape_zyx": [5, 5, 5],
+            "dtype": "uint8",
+        },
+    }
+    cutout_manifest_path = tmp_path / "cutout.json"
+    cutout_manifest_path.write_text(json.dumps(cutout_manifest, sort_keys=True))
+
     report = {
         "schema_version": 1,
         "kind": "sheetness",
@@ -53,14 +86,15 @@ def _bundle(tmp_path: Path, *, bad_control=False, decision=None):
         "min_median_abs_cosine": 0.99,
     }
     spec = {
-        "schema_version": 1,
-        "volume_root": "community-uploads/example/PHerc0813/eligible.zarr",
+        "schema_version": 2,
+        "volume_root": volume_root,
         "source_attestation": {
             "algorithm": "zpa-metadata-semantics-v1",
             "state": "PRESENT",
             "metadata_semantics_sha256": "b" * 64,
         },
         "input_sha256": cutout_sha,
+        "cutout_manifest_sha256": _sha(cutout_manifest_path),
         "sheetness_report_sha256": _sha(report_path),
         "decision_rule": rule,
         "groups": [
@@ -71,8 +105,16 @@ def _bundle(tmp_path: Path, *, bad_control=False, decision=None):
                     "reference_normal_zyx": [1, 0, 0],
                 },
                 "controls": [
-                    {"id": "g1-off", "role": "normal-offset", "zyx": [1, 2, 2]},
-                    {"id": "g1-wrong", "role": "wrong-wrap", "zyx": [3, 2, 2]},
+                    {
+                        "id": "g1-off",
+                        "role": "normal-offset",
+                        "zyx": [1, 2, 2],
+                    },
+                    {
+                        "id": "g1-wrong",
+                        "role": "wrong-wrap",
+                        "zyx": [3, 2, 2],
+                    },
                 ],
             },
             {
@@ -82,20 +124,35 @@ def _bundle(tmp_path: Path, *, bad_control=False, decision=None):
                     "reference_normal_zyx": [1, 0, 0],
                 },
                 "controls": [
-                    {"id": "g2-off", "role": "normal-offset", "zyx": [1, 3, 2]},
-                    {"id": "g2-wrong", "role": "wrong-wrap", "zyx": [3, 3, 2]},
+                    {
+                        "id": "g2-off",
+                        "role": "normal-offset",
+                        "zyx": [1, 3, 2],
+                    },
+                    {
+                        "id": "g2-wrong",
+                        "role": "wrong-wrap",
+                        "zyx": [3, 3, 2],
+                    },
                 ],
             },
         ],
     }
     spec_path = tmp_path / "spec.json"
     spec_path.write_text(json.dumps(spec, sort_keys=True))
-    return spec_path, report_path, response_path, normal_path
+    return (
+        spec_path,
+        cutout_manifest_path,
+        report_path,
+        response_path,
+        normal_path,
+    )
 
 
 def test_passes_frozen_surface_vs_control_benchmark(tmp_path):
     paths = _bundle(tmp_path)
     result = bench.run(*paths)
+    assert result["schema"] == "scroliq-sheetness-benchmark/2"
     assert result["status"] == "pass"
     assert result["metrics"]["group_count"] == 2
     assert result["metrics"]["surface_win_fraction"] == 1.0
@@ -104,6 +161,9 @@ def test_passes_frozen_surface_vs_control_benchmark(tmp_path):
     assert result["metrics"]["median_abs_cosine"] == pytest.approx(1.0)
     assert result["metrics"]["median_surface_minus_best_control"] == pytest.approx(0.55)
     assert result["engine"]["stochastic"] is False
+    assert result["inputs"]["global_bbox_zyx_half_open"]["start"] == [100, 200, 300]
+    assert result["groups"][0]["surface"]["global_zyx"] == [102, 202, 302]
+    assert result["groups"][0]["controls"][0]["global_zyx"] == [101, 202, 302]
     assert len(result["spec"]["canonical_sha256"]) == 64
 
 
@@ -121,21 +181,21 @@ def test_failed_probe_stays_in_denominator(tmp_path):
 
 
 def test_report_hash_is_bound_by_frozen_spec(tmp_path):
-    spec, report, response, normal = _bundle(tmp_path)
+    spec, cutout_manifest, report, response, normal = _bundle(tmp_path)
     payload = json.loads(report.read_text())
     payload["parameters"]["sigmas"] = [2.0]
     report.write_text(json.dumps(payload))
     with pytest.raises(ValueError, match="report sha256"):
-        bench.run(spec, report, response, normal)
+        bench.run(spec, cutout_manifest, report, response, normal)
 
 
 def test_array_hashes_are_bound_by_report(tmp_path):
-    spec, report, response, normal = _bundle(tmp_path)
+    spec, cutout_manifest, report, response, normal = _bundle(tmp_path)
     arr = np.load(response, allow_pickle=False)
     arr[0, 0, 0] = 0.5
     np.save(response, arr, allow_pickle=False)
     with pytest.raises(ValueError, match="response array sha256"):
-        bench.run(spec, report, response, normal)
+        bench.run(spec, cutout_manifest, report, response, normal)
 
 
 def test_surface_normal_sign_is_irrelevant(tmp_path):
@@ -147,7 +207,10 @@ def test_surface_normal_sign_is_irrelevant(tmp_path):
 @pytest.mark.parametrize(
     "mutator, message",
     [
-        (lambda s: s["groups"][0]["controls"].pop(), "missing required control roles"),
+        (
+            lambda s: s["groups"][0]["controls"].pop(),
+            "missing required control roles",
+        ),
         (lambda s: s["groups"][0].update(id="g2"), "duplicate group id"),
         (
             lambda s: s["source_attestation"].update(state="UNKNOWN"),
@@ -156,12 +219,49 @@ def test_surface_normal_sign_is_irrelevant(tmp_path):
     ],
 )
 def test_invalid_specs_fail_closed(tmp_path, mutator, message):
-    spec, report, response, normal = _bundle(tmp_path)
+    spec, cutout_manifest, report, response, normal = _bundle(tmp_path)
     payload = json.loads(spec.read_text())
     mutator(payload)
     spec.write_text(json.dumps(payload))
     with pytest.raises(ValueError, match=message):
-        bench.run(spec, report, response, normal)
+        bench.run(spec, cutout_manifest, report, response, normal)
+
+
+def test_cutout_manifest_is_frozen_and_spatially_bound(tmp_path):
+    spec, cutout_manifest, report, response, normal = _bundle(tmp_path)
+    payload = json.loads(cutout_manifest.read_text())
+    payload["bbox_zyx_half_open"]["start"] = [99, 200, 300]
+    cutout_manifest.write_text(json.dumps(payload, sort_keys=True))
+    with pytest.raises(ValueError, match="cutout manifest sha256"):
+        bench.run(spec, cutout_manifest, report, response, normal)
+
+
+def test_cutout_manifest_source_attestation_must_match_spec(tmp_path):
+    spec, cutout_manifest, report, response, normal = _bundle(tmp_path)
+    manifest = json.loads(cutout_manifest.read_text())
+    manifest["source_attestation"]["metadata_semantics_sha256"] = "c" * 64
+    cutout_manifest.write_text(json.dumps(manifest, sort_keys=True))
+
+    frozen = json.loads(spec.read_text())
+    frozen["cutout_manifest_sha256"] = _sha(cutout_manifest)
+    spec.write_text(json.dumps(frozen, sort_keys=True))
+
+    with pytest.raises(ValueError, match="source_attestation"):
+        bench.run(spec, cutout_manifest, report, response, normal)
+
+
+def test_cutout_manifest_bbox_and_shape_must_agree(tmp_path):
+    spec, cutout_manifest, report, response, normal = _bundle(tmp_path)
+    manifest = json.loads(cutout_manifest.read_text())
+    manifest["bbox_zyx_half_open"]["stop"] = [106, 205, 305]
+    cutout_manifest.write_text(json.dumps(manifest, sort_keys=True))
+
+    frozen = json.loads(spec.read_text())
+    frozen["cutout_manifest_sha256"] = _sha(cutout_manifest)
+    spec.write_text(json.dumps(frozen, sort_keys=True))
+
+    with pytest.raises(ValueError, match="bbox extent"):
+        bench.run(spec, cutout_manifest, report, response, normal)
 
 
 def test_cli_returns_one_for_valid_negative_result(tmp_path, capsys):
@@ -169,9 +269,10 @@ def test_cli_returns_one_for_valid_negative_result(tmp_path, capsys):
     code = bench.main(
         [
             "--spec", str(paths[0]),
-            "--report", str(paths[1]),
-            "--response", str(paths[2]),
-            "--normal", str(paths[3]),
+            "--cutout-manifest", str(paths[1]),
+            "--report", str(paths[2]),
+            "--response", str(paths[3]),
+            "--normal", str(paths[4]),
             "--require-pass",
         ]
     )
@@ -180,11 +281,12 @@ def test_cli_returns_one_for_valid_negative_result(tmp_path, capsys):
 
 
 def test_cli_returns_two_for_invalid_bundle(tmp_path, capsys):
-    spec, report, response, normal = _bundle(tmp_path)
+    spec, cutout_manifest, report, response, normal = _bundle(tmp_path)
     spec.write_text("{}")
     code = bench.main(
         [
             "--spec", str(spec),
+            "--cutout-manifest", str(cutout_manifest),
             "--report", str(report),
             "--response", str(response),
             "--normal", str(normal),
