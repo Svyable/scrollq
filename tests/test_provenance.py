@@ -350,6 +350,36 @@ def _write_zpa_report(tmp_path, manifest):
     return payload
 
 
+def _write_local_mesh(tmp_path, manifest, *, target_volume=None, scroll_source=None):
+    mesh_dir = tmp_path / "column_01.tifxyz"
+    mesh_dir.mkdir(exist_ok=True)
+    meta = {
+        "format": "tifxyz",
+        "scale": [1.0, 1.0],
+        "bbox": [[0, 0, 0], [1, 1, 1]],
+        "source": "vc_grow_seg_from_seed",
+        "target_volume": (
+            target_volume
+            if target_volume is not None
+            else manifest["submission"]["eligible_volume_id"] + ".zarr"
+        ),
+        "scroll_source": (
+            scroll_source
+            if scroll_source is not None
+            else manifest["submission"]["scroll_id"]
+        ),
+    }
+    (mesh_dir / "meta.json").write_text(
+        json.dumps(meta, sort_keys=True), encoding="utf-8"
+    )
+    for channel in "xyz":
+        path = mesh_dir / f"{channel}.tif"
+        if not path.exists():
+            path.write_bytes(channel.encode("ascii"))
+    manifest["meshes"][0]["sha256"] = sha256_path(mesh_dir)
+    return mesh_dir
+
+
 def test_valid_manifest_builds_a_complete_render_chain():
     report = validate_manifest(_manifest())
 
@@ -505,7 +535,6 @@ def test_local_zpa_attestation_mismatch_fails_closed(tmp_path):
 def test_package_file_hashes_are_verified(tmp_path):
     manifest = _manifest()
     payloads = {
-        "column_01.tifxyz": b"mesh",
         "column_01.tif": b"render",
         "banner.tif": b"banner",
         "held_out_validation.json": (
@@ -514,10 +543,8 @@ def test_package_file_hashes_are_verified(tmp_path):
     }
     for name, payload in payloads.items():
         (tmp_path / name).write_bytes(payload)
+    _write_local_mesh(tmp_path, manifest)
 
-    manifest["meshes"][0]["sha256"] = hashlib.sha256(
-        payloads["column_01.tifxyz"]
-    ).hexdigest()
     manifest["renders"][0]["sha256"] = hashlib.sha256(
         payloads["column_01.tif"]
     ).hexdigest()
@@ -537,14 +564,74 @@ def test_package_file_hashes_are_verified(tmp_path):
     assert "GP_HASH_MISMATCH" in _codes(report)
 
 
+def test_local_vc3d_target_context_is_bound_to_eligible_volume(tmp_path):
+    manifest = _manifest()
+    payloads = {
+        "column_01.tif": b"render",
+        "banner.tif": b"banner",
+        "held_out_validation.json": (
+            json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
+        ),
+    }
+    for name, payload in payloads.items():
+        (tmp_path / name).write_bytes(payload)
+    mesh_dir = _write_local_mesh(tmp_path, manifest)
+    manifest["renders"][0]["sha256"] = hashlib.sha256(
+        payloads["column_01.tif"]
+    ).hexdigest()
+    manifest["banner"]["sha256"] = hashlib.sha256(
+        payloads["banner.tif"]
+    ).hexdigest()
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        payloads["held_out_validation.json"]
+    ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
+
+    report = validate_manifest(manifest, root_dir=tmp_path)
+
+    assert report["eligible"] is True
+    proof = report["mesh_context_proofs"][0]
+    assert proof["checked"] is True
+    assert proof["target_volume"] == "20250821151723.zarr"
+    assert proof["scroll_source"] == "PHerc0813"
+    assert proof["source"] == "vc_grow_seg_from_seed"
+    assert proof["meta_sha256"] == hashlib.sha256(
+        (mesh_dir / "meta.json").read_bytes()
+    ).hexdigest()
+
+
+def test_local_vc3d_wrong_target_volume_fails_closed(tmp_path):
+    manifest = _manifest()
+    payloads = {
+        "column_01.tif": b"render",
+        "banner.tif": b"banner",
+        "held_out_validation.json": (
+            json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
+        ),
+    }
+    for name, payload in payloads.items():
+        (tmp_path / name).write_bytes(payload)
+    _write_local_mesh(tmp_path, manifest, target_volume="wrong-volume.zarr")
+    manifest["renders"][0]["sha256"] = hashlib.sha256(
+        payloads["column_01.tif"]
+    ).hexdigest()
+    manifest["banner"]["sha256"] = hashlib.sha256(
+        payloads["banner.tif"]
+    ).hexdigest()
+    manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
+        payloads["held_out_validation.json"]
+    ).hexdigest()
+    _write_zpa_report(tmp_path, manifest)
+
+    report = validate_manifest(manifest, root_dir=tmp_path)
+
+    assert report["eligible"] is False
+    assert "GP_MESH_TARGET_VOLUME" in _codes(report)
+
+
 def test_tifxyz_directory_tree_hash_is_verified(tmp_path):
     manifest = _manifest()
-    mesh_dir = tmp_path / "column_01.tifxyz"
-    mesh_dir.mkdir()
-    (mesh_dir / "meta.json").write_text('{"format":"tifxyz"}', encoding="utf-8")
-    (mesh_dir / "x.tif").write_bytes(b"x")
-    (mesh_dir / "y.tif").write_bytes(b"y")
-    (mesh_dir / "z.tif").write_bytes(b"z")
+    mesh_dir = _write_local_mesh(tmp_path, manifest)
 
     ink_payload = json.dumps(_ink_report(manifest), sort_keys=True).encode("utf-8")
     payloads = {
@@ -734,14 +821,13 @@ def test_local_ink_report_mismatch_fails_closed(tmp_path):
     payload = json.dumps(report_payload, sort_keys=True).encode("utf-8")
 
     for name, data in {
-        "column_01.tifxyz": b"mesh",
         "column_01.tif": b"render",
         "banner.tif": b"banner",
         "held_out_validation.json": payload,
     }.items():
         (tmp_path / name).write_bytes(data)
+    _write_local_mesh(tmp_path, manifest)
 
-    manifest["meshes"][0]["sha256"] = hashlib.sha256(b"mesh").hexdigest()
     manifest["renders"][0]["sha256"] = hashlib.sha256(b"render").hexdigest()
     manifest["banner"]["sha256"] = hashlib.sha256(b"banner").hexdigest()
     manifest["held_out_validations"][0]["sha256"] = hashlib.sha256(
