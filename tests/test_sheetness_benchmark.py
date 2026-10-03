@@ -12,18 +12,24 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _bundle(tmp_path: Path, *, bad_control=False, decision=None):
+def _bundle(
+    tmp_path: Path,
+    *,
+    bad_control=False,
+    high_wrong_wrap=False,
+    decision=None,
+):
     response = np.zeros((5, 5, 5), dtype=np.float32)
     normals = np.zeros((5, 5, 5, 3), dtype=np.float32)
 
     response[2, 2, 2] = 0.9
     response[1, 2, 2] = 0.4
-    response[3, 2, 2] = 0.3
+    response[3, 2, 2] = 0.95 if high_wrong_wrap else 0.3
     normals[2, 2, 2] = [1, 0, 0]
 
     response[2, 3, 2] = 0.8
     response[1, 3, 2] = np.nan if bad_control else 0.2
-    response[3, 3, 2] = 0.1
+    response[3, 3, 2] = 0.90 if high_wrong_wrap else 0.1
     normals[2, 3, 2] = [-1, 0, 0]
 
     response_path = tmp_path / "x.sheetness.npy"
@@ -79,9 +85,10 @@ def _bundle(tmp_path: Path, *, bad_control=False, decision=None):
     report_path.write_text(json.dumps(report))
 
     rule = decision or {
-        "min_score_completeness": 1.0,
-        "min_surface_win_fraction": 1.0,
-        "min_median_margin": 0.2,
+        "min_localization_completeness": 1.0,
+        "min_surface_beats_offset_fraction": 1.0,
+        "min_median_surface_offset_margin": 0.2,
+        "min_wrong_wrap_completeness": 1.0,
         "min_normal_completeness": 1.0,
         "min_median_abs_cosine": 0.99,
     }
@@ -155,11 +162,13 @@ def test_passes_frozen_surface_vs_control_benchmark(tmp_path):
     assert result["schema"] == "scroliq-sheetness-benchmark/3"
     assert result["status"] == "pass"
     assert result["metrics"]["group_count"] == 2
-    assert result["metrics"]["surface_win_fraction"] == 1.0
-    assert result["metrics"]["score_completeness"] == 1.0
+    assert result["metrics"]["surface_beats_offset_fraction"] == 1.0
+    assert result["metrics"]["localization_completeness"] == 1.0
+    assert result["metrics"]["wrong_wrap_completeness"] == 1.0
     assert result["metrics"]["normal_completeness"] == 1.0
     assert result["metrics"]["median_abs_cosine"] == pytest.approx(1.0)
-    assert result["metrics"]["median_surface_minus_best_control"] == pytest.approx(0.55)
+    assert result["metrics"]["median_surface_minus_best_normal_offset"] == pytest.approx(0.55)
+    assert result["metrics"]["median_wrong_wrap_sheetness"] == pytest.approx(0.2)
     assert result["engine"]["stochastic"] is False
     assert result["inputs"]["global_bbox_zyx_half_open"]["start"] == [100, 200, 300]
     assert result["groups"][0]["surface"]["global_zyx"] == [102, 202, 302]
@@ -171,13 +180,27 @@ def test_failed_probe_stays_in_denominator(tmp_path):
     paths = _bundle(tmp_path, bad_control=True)
     result = bench.run(*paths)
     assert result["status"] == "fail"
-    assert result["metrics"]["score_complete_count"] == 1
-    assert result["metrics"]["score_completeness"] == 0.5
-    assert result["metrics"]["surface_win_count"] == 1
-    assert result["metrics"]["surface_win_fraction"] == 0.5
+    assert result["metrics"]["localization_complete_count"] == 1
+    assert result["metrics"]["localization_completeness"] == 0.5
+    assert result["metrics"]["surface_beats_offset_count"] == 1
+    assert result["metrics"]["surface_beats_offset_fraction"] == 0.5
+    assert result["metrics"]["wrong_wrap_completeness"] == 1.0
     row = result["groups"][1]
-    assert row["score_complete"] is False
+    assert row["localization_complete"] is False
     assert row["controls"][0]["failure"] == "non-finite"
+
+
+def test_wrong_wrap_is_ambiguity_evidence_not_a_negative(tmp_path):
+    paths = _bundle(tmp_path, high_wrong_wrap=True)
+    result = bench.run(*paths)
+
+    assert result["status"] == "pass"
+    assert result["metrics"]["surface_beats_offset_fraction"] == 1.0
+    assert result["metrics"]["median_wrong_wrap_sheetness"] == pytest.approx(0.925)
+    assert all(
+        row["surface_beats_all_normal_offsets"]
+        for row in result["groups"]
+    )
 
 
 def test_report_hash_is_bound_by_frozen_spec(tmp_path):
