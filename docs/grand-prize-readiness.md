@@ -178,7 +178,7 @@ Do not weaken v1 just to obtain READY. Close the remaining claims with independe
 
 1. **Flattening:** either upstream a content-identity block into Flatcheck's native report or add a verifier-controlled rerun path; only then promote `flatcheck-grid/v1` to a PASS authority.
 2. **Handedness:** ingest `handcheck`'s decision, then bind its required correction to the exact final renderer command/output. Orientation knowledge alone is not proof that the submitted image applied it.
-3. **Spiral held-out quality:** ingest `spiralcheck` with `--manifest --fit-inputs`, require a non-empty unseen aggregate and clean hash/leakage audit, then calibrate and pre-register an acceptance rule on public reference surfaces before it may authorize PASS.
+3. **Spiral held-out quality:** use the existing hash-bound `scroliq-geometry-validate` + `scrollq-geometry-probe` foundation for frozen point correspondences, denominator completeness and spatial exclusion; add `spiralcheck --manifest --fit-inputs` as an independent whole-surface/leakage witness. A native fitter exporter, real held-out run and pre-registered acceptance rule are still required before `spiral-held-out` may authorize PASS.
 4. **Surface identity:** add `xsec`/physical-CT evidence for sheet jumps as an advisory channel first; promote only after a reproducible automated decision rule exists.
 5. **Ink/legibility:** keep separate from geometry readiness. Existing `scroliq-ink-validate` proves deterministic held-out signal evidence and controls, but the Grand Prize's character-level legibility bar still requires its own evidence.
 
