@@ -330,6 +330,37 @@ def _finite_quantile(values: np.ndarray, q: float) -> float | None:
     return None if not a.size else float(np.quantile(a, q))
 
 
+def _held_metrics(per_delta: dict[int, np.ndarray]) -> dict[str, Any]:
+    expected = np.asarray(per_delta[0], dtype=np.float64)
+    n = len(expected)
+    if n == 0 or any(len(np.asarray(per_delta[d])) != n for d in (-2, -1, 0, 1, 2)):
+        raise ValueError("held-out neighbor arrays must have the same nonzero sample count")
+    finite_expected = np.isfinite(expected)
+    counts = {str(d): 0 for d in (-2, -1, 0, 1, 2)}
+    expected_nearest = 0
+    classifiable = 0
+    for i in range(n):
+        choices = [(float(per_delta[d][i]), d) for d in (-2, -1, 0, 1, 2) if np.isfinite(per_delta[d][i])]
+        if not choices:
+            continue
+        _, winner = min(choices, key=lambda x: (x[0], abs(x[1]), x[1]))
+        counts[str(winner)] += 1
+        classifiable += 1
+        expected_nearest += int(winner == 0)
+    return {
+        "sample_count": n,
+        "expected_winding_median_distance_voxels": _finite_quantile(expected, 0.5),
+        "expected_winding_p95_distance_voxels": _finite_quantile(expected, 0.95),
+        "expected_winding_p99_distance_voxels": _finite_quantile(expected, 0.99),
+        "fraction_distance_le_5_voxels": float(np.count_nonzero(finite_expected & (expected <= 5.0)) / n),
+        "fraction_distance_le_10_voxels": float(np.count_nonzero(finite_expected & (expected <= 10.0)) / n),
+        "expected_winding_nearest_fraction_among_plus_minus_2": float(expected_nearest / n),
+        "nearest_winding_delta_counts": counts,
+        "neighbor_classifiable_samples": classifiable,
+        "missing_or_unscorable_samples": int(n - np.count_nonzero(finite_expected)),
+    }
+
+
 def evaluate(
     *, contract_path: Path, split_path: Path, reference_root: Path,
     reference_blob_manifest: Path, predictions_npz: Path, volume_id: str,
@@ -389,36 +420,12 @@ def evaluate(
             winding = spec["reference_winding"] + offset + delta
             surf = _surface(predictions, winding, spec["core"], cache)
             per_delta[delta] = np.full(len(points), np.nan) if surf is None else surf.distances(points)
-        expected = per_delta[0]
-        finite_expected = np.isfinite(expected)
-        nearest_counts = {str(d): 0 for d in (-2, -1, 0, 1, 2)}
-        expected_nearest = 0
-        classifiable = 0
-        for i in range(len(points)):
-            choices = [(float(per_delta[d][i]), d) for d in (-2, -1, 0, 1, 2) if np.isfinite(per_delta[d][i])]
-            if not choices:
-                continue
-            # Deterministic ties prefer expected, then smaller |delta|, then signed delta.
-            _, winner = min(choices, key=lambda x: (x[0], abs(x[1]), x[1]))
-            nearest_counts[str(winner)] += 1
-            classifiable += 1
-            if winner == 0:
-                expected_nearest += 1
-        n = len(points)
+        metrics = _held_metrics(per_delta)
         held_results.append({
             "mesh": spec["path"],
             "reference_winding": spec["reference_winding"],
             "aligned_expected_prediction_winding": spec["reference_winding"] + offset,
-            "sample_count": n,
-            "expected_winding_median_distance_voxels": _finite_quantile(expected, 0.5),
-            "expected_winding_p95_distance_voxels": _finite_quantile(expected, 0.95),
-            "expected_winding_p99_distance_voxels": _finite_quantile(expected, 0.99),
-            "fraction_distance_le_5_voxels": float(np.count_nonzero(finite_expected & (expected <= 5.0)) / n),
-            "fraction_distance_le_10_voxels": float(np.count_nonzero(finite_expected & (expected <= 10.0)) / n),
-            "expected_winding_nearest_fraction_among_plus_minus_2": float(expected_nearest / n),
-            "nearest_winding_delta_counts": nearest_counts,
-            "neighbor_classifiable_samples": classifiable,
-            "missing_or_unscorable_samples": int(n - np.count_nonzero(finite_expected)),
+            **metrics,
             "target_id_sha256": hashlib.sha256(("\n".join(ids) + "\n").encode()).hexdigest(),
         })
 
