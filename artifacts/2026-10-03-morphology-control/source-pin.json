@@ -1,0 +1,67 @@
+{
+  "schema": "scroliq-morphology-source-pin/1",
+  "created": "2026-10-03",
+  "status": "SOURCE_BENCHMARK_ONLY",
+  "dataset": {
+    "id": "scrollprize/profilometer",
+    "revision": "a806bead2f3b9100c20e19de37814fb285cfeefd",
+    "revision_url": "https://huggingface.co/datasets/scrollprize/profilometer/commit/a806bead2f3b9100c20e19de37814fb285cfeefd",
+    "license": "CC BY-NC 4.0",
+    "license_url": "https://huggingface.co/datasets/scrollprize/profilometer/blob/a806bead2f3b9100c20e19de37814fb285cfeefd/LICENSE",
+    "samples": {
+      "regions": 14,
+      "letters": 16,
+      "papyri": [
+        "PHerc. 248",
+        "PHerc. 250",
+        "PHerc. 500P2"
+      ]
+    },
+    "metadata_native_sampling_um_xy": [
+      0.68793625,
+      0.68793625
+    ],
+    "vertical_sensitivity_nm": 8
+  },
+  "paper": {
+    "doi": "10.1038/s41598-026-58467-1",
+    "url": "https://doi.org/10.1038/s41598-026-58467-1",
+    "license": "CC BY-NC-ND 4.0",
+    "license_evidence": "https://www.nature.com/articles/s41598-026-58467-1_reference.pdf",
+    "reported_native_sampling_um_xy": [
+      0.34,
+      0.34
+    ],
+    "reported_native_heldout_dice_approx": "0.88-0.90",
+    "leave_one_papyrus_out_transfer": "heterogeneous"
+  },
+  "sampling_discrepancy": {
+    "status": "unresolved",
+    "notice_date": "2026-09-03",
+    "notice_url": "https://huggingface.co/datasets/scrollprize/profilometer/commit/a806bead2f3b9100c20e19de37814fb285cfeefd",
+    "consequence": "No absolute-micron descriptor threshold and no optical-to-CT transfer claim until the source publishes a resolved physical sampling value."
+  },
+  "scroliq_policy": {
+    "first_stage": "source_benchmark",
+    "learned_classifier": false,
+    "required_split": "leave-one-papyrus-out",
+    "descriptors": [
+      "local-gradient-rank",
+      "curvature-rank",
+      "fiber-relative-roughness"
+    ],
+    "required_controls": [
+      "missingness-mask",
+      "label-permutation"
+    ],
+    "source_labels_used_for_target_training": false,
+    "paper_figures_or_adapted_material_in_repo": false,
+    "target_control_authorized": false
+  },
+  "prize_relevance": {
+    "gate": "ink false-positive / hallucinated-ink falsification",
+    "direct_ink_claim": false,
+    "direct_readability_claim": false,
+    "direct_surface_identity_claim": false
+  }
+}
