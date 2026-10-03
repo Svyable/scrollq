@@ -260,3 +260,54 @@ def test_verifier_detects_binary_tampering(tmp_path):
 
     assert report["valid"] is False
     assert any("binary" in error and "mismatch" in error for error in report["errors"])
+
+
+def test_render_rejects_receipt_inside_tiff_output_dir(tmp_path):
+    mesh = _write_mesh(tmp_path)
+    binary = _write_fake_vc(tmp_path)
+
+    with pytest.raises(VC3DError, match="receipt may not live inside"):
+        render_column(
+            root_dir=tmp_path,
+            binary=str(binary),
+            vc_commit="e" * 40,
+            volume=f"/eligible/{VOLUME_ID}.zarr",
+            volume_id=VOLUME_ID,
+            mesh=mesh,
+            column=1,
+            base_voxel_size_um=8.64,
+            group_idx=0,
+            scale=1.0,
+            tif_output_dir="raw",
+            receipt_path="raw/receipt.json",
+            log_path="render.log",
+        )
+
+
+def test_render_rejects_symlink_output_directory(tmp_path):
+    mesh = _write_mesh(tmp_path)
+    binary = _write_fake_vc(tmp_path)
+    target = tmp_path / "elsewhere"
+    target.mkdir()
+    link = tmp_path / "raw"
+    try:
+        link.symlink_to(target, target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlinks unavailable on this platform")
+
+    with pytest.raises(VC3DError, match="not a symlink"):
+        render_column(
+            root_dir=tmp_path,
+            binary=str(binary),
+            vc_commit="f" * 40,
+            volume=f"/eligible/{VOLUME_ID}.zarr",
+            volume_id=VOLUME_ID,
+            mesh=mesh,
+            column=1,
+            base_voxel_size_um=8.64,
+            group_idx=0,
+            scale=1.0,
+            tif_output_dir=link,
+            receipt_path="receipt.json",
+            log_path="render.log",
+        )
