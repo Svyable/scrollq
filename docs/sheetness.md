@@ -121,8 +121,9 @@ pre-registered falsification experiment. The benchmark spec must bind:
 
 The version-2 evaluator verifies the provenance-bound cutout manifest before
 reading any probe score. It checks exact volume identity, ZPA metadata
-attestation, cutout SHA, global half-open bbox, local-to-global transform,
-source-chunk completeness, and cutout shape. Every emitted probe then carries
+attestation (including audited ZYX axes), retained PASS ZPA-report hash,
+cutout SHA, global half-open bbox, local-to-global transform, source-chunk
+completeness, and cutout shape. Every emitted probe then carries
 both its local array coordinate and its derived global level-0 CT coordinate.
 
 It also verifies the response and normal-array hashes recorded by the
