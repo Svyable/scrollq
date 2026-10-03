@@ -89,7 +89,9 @@ def test_package_is_deterministic_and_only_contains_declared_artifacts(
     assert first.with_name("first.zip.sha256").is_file()
 
     with zipfile.ZipFile(first) as zf:
-        names = set(zf.namelist())
+        ordered_names = zf.namelist()
+        assert ordered_names == sorted(ordered_names)
+        names = set(ordered_names)
         assert "unrelated.txt" not in names
         assert "provenance.json" in names
         assert "evidence/zpa-report.json" in names
