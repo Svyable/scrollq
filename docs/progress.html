@@ -1,133 +1,609 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <link rel="icon" href="./favicon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Progress — ScrolIQ & zarr-pyramid-audit</title>
-<meta name="description" content="Visual progress tracker for the ScrolIQ and zarr-pyramid-audit October 2026 campaigns: goals, milestones, and key numbers.">
+<title>Road to the 2027 Grand Prize — ScrolIQ</title>
+<meta name="description" content="A live evidence board for ScrolIQ's path to a reproducible 2027 Vesuvius Challenge Grand Prize submission: requirements, measurements, bottlenecks, campaigns, and reproducibility.">
 <meta name="theme-color" content="#0d0b08">
 <meta name="color-scheme" content="dark">
 <link rel="canonical" href="https://svyable.github.io/scrollq/progress.html">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Progress — ScrolIQ & zarr-pyramid-audit">
-<meta property="og:description" content="October 2026 goals, milestones, and key numbers across both repos.">
+<meta property="og:title" content="Road to the 2027 Grand Prize — ScrolIQ">
+<meta property="og:description" content="What is measured, what is partial, what is blocked, and what must happen next for a qualifying Grand Prize submission.">
 <meta property="og:url" content="https://svyable.github.io/scrollq/progress.html">
 <meta property="og:image" content="https://svyable.github.io/scrollq/favicon.svg">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Progress — ScrolIQ & zarr-pyramid-audit">
-<meta name="twitter:description" content="October 2026 goals, milestones, and key numbers across both repos.">
+<meta name="twitter:title" content="Road to the 2027 Grand Prize — ScrolIQ">
+<meta name="twitter:description" content="A live Grand Prize evidence board: requirements, measurements, bottlenecks, campaigns, and reproduction paths.">
 <style>
-:root{--bg:#0d0b08;--panel:#161310;--panel2:#1c1813;--line:#2c251b;--ink:#ece3d2;--muted:#a89880;--dim:#6f6350;--ember:#ff7a1a;--gold:#ffd166;--amber:#ffb347;--green:#7bc96f;--red:#e06c5b;--blue:#6aa8e0}
-*{box-sizing:border-box}body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;margin:0;line-height:1.6}
-.wrap{max-width:56rem;margin:0 auto;padding:2rem 1.25rem}
-h1{font-size:2rem;margin:.2rem 0}.tagline{color:var(--muted);font-size:1.1rem;margin:.2rem 0 2rem}
-h2{color:var(--gold);font-size:1.35rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--line);padding-bottom:.4rem}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.25rem 1.4rem;margin:1rem 0}
-.timeline{position:relative;padding-left:1.8rem}
-.timeline::before{content:"";position:absolute;left:.55rem;top:.4rem;bottom:.4rem;width:2px;background:var(--line)}
-.event{position:relative;margin:0 0 1.4rem}
-.event::before{content:"";position:absolute;left:-1.55rem;top:.35rem;width:.7rem;height:.7rem;border-radius:50%;background:var(--ember);border:2px solid var(--bg)}
+:root{
+  --bg:#0d0b08;--panel:#161310;--panel2:#1c1813;--panel3:#211a13;
+  --line:#2c251b;--line2:#3a3023;--ink:#ece3d2;--muted:#a89880;--dim:#6f6350;
+  --ember:#ff7a1a;--gold:#ffd166;--amber:#ffb347;--green:#7bc96f;
+  --red:#e06c5b;--blue:#6aa8e0;--violet:#b796e8
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:
+    radial-gradient(circle at 50% -15%,rgba(255,122,26,.11),transparent 33rem),
+    var(--bg);
+  color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  margin:0;line-height:1.58
+}
+a{color:var(--amber);text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{color:var(--gold)}
+code{color:var(--amber);font-size:.92em}
+.wrap{max-width:72rem;margin:0 auto;padding:1.1rem 1.25rem 4rem}
+.top{
+  display:flex;gap:.5rem 1rem;align-items:center;flex-wrap:wrap;
+  position:sticky;top:0;z-index:20;padding:.85rem 0;
+  background:linear-gradient(to bottom,rgba(13,11,8,.97),rgba(13,11,8,.9),rgba(13,11,8,0));
+  backdrop-filter:blur(6px)
+}
+.top a{font-size:.83rem;color:var(--muted);text-decoration:none}
+.top a:hover{color:var(--ink)}
+.brand{font-weight:800!important;color:var(--ink)!important;margin-right:auto}
+.brand b{color:var(--ember)}
+.hero{padding:4.3rem 0 2.5rem}
+.eyebrow{
+  color:var(--ember);font-size:.78rem;font-weight:800;letter-spacing:.16em;
+  text-transform:uppercase;margin-bottom:.55rem
+}
+h1{
+  font-size:clamp(2.5rem,7vw,5.2rem);line-height:.97;letter-spacing:-.045em;
+  margin:.1rem 0 .9rem;max-width:13ch
+}
+.hero .lede{font-size:1.17rem;color:var(--muted);max-width:50rem;margin:0 0 1.2rem}
+.hero .lede strong{color:var(--ink)}
+.hero-meta{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem}
+.pill{
+  display:inline-flex;align-items:center;gap:.4rem;border:1px solid var(--line);
+  border-radius:999px;padding:.3rem .65rem;font-size:.76rem;color:var(--muted);background:rgba(28,24,19,.72)
+}
+.pill .dot{width:.43rem;height:.43rem;border-radius:50%;background:var(--ember)}
+.section{margin-top:3.5rem;scroll-margin-top:4rem}
+.section-head{display:flex;gap:1rem;align-items:end;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:.65rem;margin-bottom:1rem}
+.section h2{font-size:1.45rem;line-height:1.15;margin:0;color:var(--gold)}
+.section-kicker{color:var(--dim);font-size:.78rem;letter-spacing:.11em;text-transform:uppercase;font-weight:700}
+.section-note{color:var(--muted);font-size:.87rem;max-width:36rem;text-align:right}
+.panel{background:linear-gradient(180deg,var(--panel),#13100d);border:1px solid var(--line);border-radius:14px;padding:1.15rem}
+.requirements{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}
+.req{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1rem 1rem 1.05rem;position:relative;overflow:hidden}
+.req::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--dim)}
+.req.measured::before{background:var(--green)}
+.req.partial::before{background:var(--amber)}
+.req.ready::before{background:var(--blue)}
+.req.blocked::before{background:var(--red)}
+.req-head{display:flex;align-items:start;gap:.75rem;justify-content:space-between}
+.req-title{font-weight:760;font-size:1rem;line-height:1.3}
+.req-num{font-size:.7rem;color:var(--dim);font-weight:800;letter-spacing:.1em}
+.state{
+  display:inline-block;white-space:nowrap;border:1px solid currentColor;border-radius:999px;
+  padding:.12rem .5rem;font-size:.68rem;font-weight:850;letter-spacing:.07em;text-transform:uppercase
+}
+.state.measured{color:var(--green)}.state.partial{color:var(--amber)}
+.state.ready{color:var(--blue)}.state.blocked{color:var(--red)}
+.state.unknown{color:var(--dim)}
+.req p{color:var(--muted);font-size:.88rem;margin:.65rem 0 0}
+.req .evidence{font-size:.78rem;margin-top:.7rem;color:var(--dim)}
+.change-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.7rem}
+.change{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:.95rem;min-height:10rem}
+.change .date{color:var(--gold);font-size:.73rem;font-weight:800;letter-spacing:.06em}
+.change h3{font-size:.93rem;line-height:1.25;margin:.35rem 0 .5rem}
+.change p{font-size:.81rem;color:var(--muted);margin:0}
+.stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.7rem}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:1rem;min-height:8rem}
+.stat .n{font-size:1.85rem;line-height:1;font-weight:850;color:var(--gold);font-variant-numeric:tabular-nums}
+.stat .l{font-size:.78rem;color:var(--muted);margin-top:.5rem;line-height:1.35}
+.stat .why{font-size:.68rem;color:var(--dim);margin-top:.6rem;line-height:1.35}
+.stat.zero .n{color:var(--red)}
+.timeline{position:relative;padding-left:1.65rem}
+.timeline::before{content:"";position:absolute;left:.48rem;top:.35rem;bottom:.35rem;width:2px;background:var(--line)}
+.event{position:relative;padding:0 0 1.4rem .25rem}
+.event:last-child{padding-bottom:0}
+.event::before{content:"";position:absolute;left:-1.54rem;top:.32rem;width:.7rem;height:.7rem;border-radius:50%;background:var(--ember);border:2px solid var(--bg)}
 .event.zpa::before{background:var(--blue)}
-.event .date{color:var(--gold);font-weight:600;font-size:.9rem}
-.event .title{font-weight:600;margin:.1rem 0}
-.event .detail{color:var(--muted);font-size:.93rem}
-.event .detail a{color:var(--amber)}
-.goal{margin:0 0 1rem}
-.goal .ghead{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap}
-.goal .gid{font-weight:700;color:var(--gold);min-width:2.2rem}
-.goal .gtitle{font-weight:600}
-.chip{display:inline-block;font-size:.78rem;padding:.1rem .55rem;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
-.chip.done{color:var(--green);border-color:var(--green)}
-.chip.progress{color:var(--amber);border-color:var(--amber)}
-.chip.planned{color:var(--dim)}
-.chip.fail{color:var(--red);border-color:var(--red)}
-.bar{height:.55rem;background:var(--panel2);border-radius:99px;margin:.45rem 0 .2rem;overflow:hidden}
-.bar>i{display:block;height:100%;border-radius:99px;background:var(--ember)}
-.bar>i.full{background:var(--green)}
-.bar>i.half{background:var(--amber)}
-.goal .gdetail{color:var(--muted);font-size:.9rem}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin:1rem 0}
-.stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.8rem;text-align:center}
-.stat .n{font-size:1.5rem;font-weight:700;color:var(--gold)}
-.stat .l{font-size:.82rem;color:var(--muted)}
-a{color:var(--amber)}
-footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);color:var(--dim);font-size:.88rem}
-nav.top{margin-bottom:1rem;font-size:.92rem}
-nav.top a{margin-right:1rem}
+.event .date{color:var(--gold);font-weight:700;font-size:.8rem}
+.event .title{font-weight:750;margin:.05rem 0 .2rem}
+.event .detail{color:var(--muted);font-size:.87rem;max-width:62rem}
+.bottleneck{
+  border:1px solid rgba(224,108,91,.5);border-radius:16px;
+  background:
+    linear-gradient(110deg,rgba(224,108,91,.13),rgba(255,122,26,.035) 55%,transparent),
+    var(--panel);
+  padding:1.4rem 1.5rem
+}
+.bottleneck .label{color:var(--red);font-size:.74rem;text-transform:uppercase;font-weight:900;letter-spacing:.14em}
+.bottleneck .big{font-size:clamp(1.25rem,3vw,1.9rem);line-height:1.25;font-weight:800;margin:.5rem 0 .75rem;max-width:48rem}
+.bottleneck p{color:var(--muted);margin:.5rem 0 0;max-width:58rem}
+.next{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;margin-top:1rem}
+.next-item{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:.8rem}
+.next-item b{display:block;font-size:.78rem;color:var(--gold);margin-bottom:.25rem}
+.next-item span{font-size:.78rem;color:var(--muted)}
+.backlog-wrap{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.backlog{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:.95rem}
+.backlog h3{margin:.05rem 0 .8rem;font-size:.95rem;color:var(--ink)}
+.goal{padding:.72rem 0;border-top:1px solid var(--line)}
+.goal:first-of-type{border-top:0}
+.ghead{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.gid{font-size:.72rem;font-weight:900;color:var(--gold);width:2rem}
+.gtitle{font-size:.84rem;font-weight:700;flex:1;min-width:12rem}
+.gdetail{font-size:.76rem;color:var(--muted);margin:.35rem 0 0 2.5rem}
+.verify-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}
+.verify{border:1px solid var(--line);border-radius:12px;padding:1rem;background:var(--panel)}
+.verify .vtag{color:var(--ember);font-size:.7rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.verify h3{font-size:.95rem;margin:.3rem 0 .4rem}
+.verify p{font-size:.8rem;color:var(--muted);margin:0 0 .55rem}
+.verify a{font-size:.8rem;font-weight:700}
+.principle{
+  margin-top:1rem;border-left:3px solid var(--ember);padding:.85rem 1rem;background:rgba(255,122,26,.055);
+  color:var(--muted);font-size:.86rem
+}
+.principle b{color:var(--ink)}
+footer{margin-top:4rem;padding-top:1.3rem;border-top:1px solid var(--line);color:var(--dim);font-size:.78rem}
+footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
+@media(max-width:1000px){
+  .change-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .verify-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .wrap{padding-left:1rem;padding-right:1rem}
+  .top{position:static}
+  .hero{padding-top:2.4rem}
+  .requirements,.backlog-wrap,.next{grid-template-columns:1fr}
+  .change-grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .verify-grid{grid-template-columns:1fr}
+  .section-head{display:block}
+  .section-note{text-align:left;margin-top:.4rem}
+}
 </style>
 </head>
-<body><div class="wrap">
+<body>
+<div class="wrap">
 
-<nav class="top"><a href="./">← Leaderboard</a><a href="./october-2026.html">October goals</a><a href="./october-2026-update.html">October update</a><a href="./september-2026.html">September writeup</a></nav>
+<nav class="top" aria-label="Progress navigation">
+  <a class="brand" href="./">Scrol<b>IQ</b></a>
+  <a href="#road">Road to 2027</a>
+  <a href="#changes">This week</a>
+  <a href="#numbers">Measurements</a>
+  <a href="#bottleneck">Bottleneck</a>
+  <a href="#backlog">Backlog</a>
+  <a href="#reproduce">Reproduce</a>
+</nav>
 
-<h1>Progress</h1>
-<p class="tagline">Where the two repos stand — goals, milestones, and key numbers. Updated 2026-10-03.</p>
+<header class="hero">
+  <div class="eyebrow">Live Grand Prize evidence board · updated 2026-10-03</div>
+  <h1>Road to the 2027 Grand Prize</h1>
+  <p class="lede">
+    ScrolIQ is not counting commits toward a prize. It is tracking the evidence required to turn an exact
+    Herculaneum CT volume into a <strong>complete, reproducible, VC3D-compatible, held-out-validated virtual unrolling</strong>.
+    Every stage stays measured, partial, unknown, or blocked until the evidence exists.
+  </p>
+  <div class="hero-meta">
+    <span class="pill"><span class="dot"></span> ScrolIQ = evidence + evaluation layer</span>
+    <span class="pill">zarr-pyramid-audit = input-integrity dependency</span>
+    <span class="pill">No readiness score from unknown stages</span>
+  </div>
+</header>
 
-<h2>Key numbers</h2>
-<div class="stats">
-  <div class="stat"><div class="n">957</div><div class="l">S3 roots audited</div></div>
-  <div class="stat"><div class="n">64</div><div class="l">dl volcomp volumes</div></div>
-  <div class="stat"><div class="n">2,008</div><div class="l">shards CRC-checked</div></div>
-  <div class="stat"><div class="n">445</div><div class="l">zpa tests passing</div></div>
-  <div class="stat"><div class="n">1,717</div><div class="l">ScrolIQ tests passing</div></div>
-  <div class="stat"><div class="n">16.5%</div><div class="l">shard CRC mismatch rate</div></div>
-</div>
+<section class="section" id="road">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">01 · Prize contract</div>
+      <h2>Road to 2027 Grand Prize</h2>
+    </div>
+    <div class="section-note">Six requirements that matter for a qualifying end-to-end result. States describe evidence, not optimism.</div>
+  </div>
 
-<h2>Timeline</h2>
-<div class="panel"><div class="timeline">
+  <div class="requirements">
+    <article class="req blocked">
+      <div class="req-head">
+        <div><div class="req-num">GP-01</div><div class="req-title">100% recto surface recovered on one exact eligible scroll</div></div>
+        <span class="state blocked">Blocked</span>
+      </div>
+      <p>No exact 2027 Grand Prize volume currently has a ScrolIQ-backed whole-scroll recto segmentation/unroll. Detached or broken patches are not yet closed out either.</p>
+      <div class="evidence">Needed: exact-volume surface prediction → held-out validation → complete coverage accounting.</div>
+    </article>
 
-<div class="event zpa"><div class="date">2026-09-29</div><div class="title">zarr-pyramid-audit published</div><div class="detail">Public MIT fork of sgsllc-jr/zarr-pyramid-audit. First header-only audit of the S3 bucket: 957 roots, 956 clean, 1 live defect (PHerc0814). 20-day dl regression: 18 defective pyramids, zero new findings.</div></div>
+    <article class="req partial">
+      <div class="req-head">
+        <div><div class="req-num">GP-02</div><div class="req-title">Column-scale TIFXYZ meshes with low-distortion flattening</div></div>
+        <span class="state partial">Partial</span>
+      </div>
+      <p>Native TIFXYZ/OBJ auditing, isometry checks, self-cross binding, flattening comparison, package hashing, and column traceability exist. A complete sequential column set does not.</p>
+      <div class="evidence"><a href="./grand-prize-package.html">Packaging contract</a> · <a href="https://github.com/Svyable/scrollq/blob/main/docs/flattening-benchmark.md">Flattening benchmark</a></div>
+    </article>
 
-<div class="event"><div class="date">2026-09-30</div><div class="title">ScrollQ created · volcomp breakthrough</div><div class="detail">Second September entry. Vendored libvolcomp decoder parses sharding_indexed indexes over HTTP; 64 volcomp volumes content-probed (548 chunks real content, 0 present-but-empty).</div></div>
+    <article class="req partial">
+      <div class="req-head">
+        <div><div class="req-num">GP-03</div><div class="req-title">Ink renders with visible, letter-by-letter legible text</div></div>
+        <span class="state partial">Partial</span>
+      </div>
+      <p>Leakage audits, held-out ink scoring, falsification controls, legibility interfaces, and submission-image traceability exist. No full-scroll sequence of qualifying readable column renders exists yet.</p>
+      <div class="evidence"><a href="https://github.com/Svyable/scrollq/blob/main/docs/ink-validation.md">Held-out ink protocol</a> · <a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-legibility.md">Legibility contract</a></div>
+    </article>
 
-<div class="event"><div class="date">2026-10-01</div><div class="title">Both entries submitted · truly-disjoint stability</div><div class="detail">Sven submitted both September Progress Prize entries. Two-phase exclusion protocol: ρ=0.63 on truly disjoint chunks (honest number, below the 0.85 gate). Rebranded ScrollQ → <b>ScrolIQ</b>.</div></div>
+    <article class="req ready">
+      <div class="req-head">
+        <div><div class="req-num">GP-04</div><div class="req-title">No train/prediction overlap + blind held-out validation</div></div>
+        <span class="state ready">Ready to test</span>
+      </div>
+      <p><code>scroliq-eval</code> now provides model/dataset/result contracts, checkpoint and code hashing, overlap blocking, fixed seeds, region-level failures, and deterministic 95% bootstrap CIs.</p>
+      <div class="evidence">Infrastructure is merged. Real community model adapters and blind benchmark runs are the next step.</div>
+    </article>
 
-<div class="event zpa"><div class="date">2026-10-02</div><div class="title">G2 CRC campaign · stability v2 FAIL</div><div class="detail">2,008 shards CRC-checked: 58% verified, <b>16.5% mismatch</b>, 25% n/a. Pre-registered stability v2: ρ=0.750, FAIL → leaderboard shows rank bands.</div></div>
+    <article class="req partial">
+      <div class="req-head">
+        <div><div class="req-num">GP-05</div><div class="req-title">Seamless VC3D integration and inspectable geometry</div></div>
+        <span class="state partial">Partial</span>
+      </div>
+      <p>ScrolIQ reads native TIFXYZ, VC3D fiber JSON, PointCollections, upstream self-cross reports, and emits review queues in native coordinates. End-to-end automated unrolling inside VC3D is not yet demonstrated.</p>
+      <div class="evidence"><a href="https://github.com/Svyable/scrollq/blob/main/docs/SUBMISSION.md">Reviewer map</a> · <a href="https://github.com/Svyable/scrollq/blob/main/docs/usage-by-format.md">Formats</a></div>
+    </article>
 
-<div class="event zpa"><div class="date">2026-10-03</div><div class="title">G2 done: writer proven non-conforming</div><div class="detail">Independent bit-by-bit CRC-32C confirms the 331 mismatches are real writer defects. Severity <code>low</code> → <code>medium</code> (Contract 1.3.1). <a href="https://github.com/Svyable/zarr-pyramid-audit/tree/main/artifacts/2026-10-03-crc-byte-verification">Evidence →</a></div></div>
+    <article class="req partial">
+      <div class="req-head">
+        <div><div class="req-num">GP-06</div><div class="req-title">Reproducible pipeline, provenance, Docker, and submission package</div></div>
+        <span class="state partial">Partial</span>
+      </div>
+      <p>The repo is MIT licensed; CI builds the wheel and reviewer container; exact-source hashes, create-only artifacts, provenance manifests, images, scale-bar rules, and package validation are explicit. The missing piece is reproducing a qualifying full-scroll result.</p>
+      <div class="evidence"><a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-container.md">Container contract</a> · <a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-provenance.md">Provenance</a></div>
+    </article>
+  </div>
+</section>
 
-<div class="event"><div class="date">2026-10-03</div><div class="title">Model evaluation foundation</div><div class="detail">ScrolIQ gains <code>scroliq-eval</code> scaffolding: model registry schema, dataset schema, results schema — the first step toward community benchmark evaluation inside ScrolIQ.</div></div>
+<section class="section" id="changes">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">02 · Consequential changes</div>
+      <h2>What changed this week</h2>
+    </div>
+    <div class="section-note">Capabilities and falsified assumptions, not commit volume.</div>
+  </div>
 
-</div></div>
+  <div class="change-grid">
+    <article class="change">
+      <div class="date">OCT 03</div>
+      <h3>Blind model evaluation became a first-class ScrolIQ contract</h3>
+      <p><code>scroliq-eval</code> merged with fail-closed model registry, held-out dataset/results schemas, deterministic CIs, failure accounting, and provenance.</p>
+    </article>
+    <article class="change">
+      <div class="date">OCT 03</div>
+      <h3>Winding consistency moved from intuition to measurable constraints</h3>
+      <p>2,111 / 2,232 points attached to verified patches; 6 / 16,074 constraints flagged; the +2 injection control detected 194 / 200 corruptions.</p>
+    </article>
+    <article class="change">
+      <div class="date">OCT 02</div>
+      <h3>Precise scan ranking failed its own preregistered stability gate</h3>
+      <p>Stability v2 produced Spearman ρ = 0.750, below the 0.85 gate. The site now uses rank bands instead of pretending close ranks are exact.</p>
+    </article>
+    <article class="change">
+      <div class="date">OCT 03</div>
+      <h3>CRC mismatches were independently confirmed as writer defects</h3>
+      <p>Bit-by-bit CRC-32C verification confirmed the 331 live-shard mismatches rather than treating them as an audit-tool artifact.</p>
+    </article>
+    <article class="change">
+      <div class="date">OCT 03</div>
+      <h3>Physical sheetness moved behind a frozen preregistration</h3>
+      <p>The PHerc0139 reference campaign freezes source identity, probes, parameters, and evaluation before reading the result, ready for exact-volume transfer.</p>
+    </article>
+  </div>
+</section>
 
-<h2>ScrolIQ October goals (O1–O6)</h2>
-<div class="panel">
+<section class="section" id="numbers">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">03 · Measurements</div>
+      <h2>Numbers that matter</h2>
+    </div>
+    <div class="section-note">Scientific and prize-facing quantities only. Passing test counts are intentionally omitted.</div>
+  </div>
 
-<div class="goal"><div class="ghead"><span class="gid">O1</span><span class="gtitle">Mesh IQ: how often are flags real defects?</span><span class="chip progress">pre-registered · sample drawn</span></div><div class="bar"><i class="half" style="width:50%"></i></div><div class="gdetail">Blinded sample of 54 segments drawn. Awaiting VC3D review; no precision yet.</div></div>
+  <div class="stats">
+    <article class="stat">
+      <div class="n">16,074</div>
+      <div class="l">cross-collection winding constraints checked</div>
+      <div class="why">6 flagged for review on PHercParis4</div>
+    </article>
+    <article class="stat">
+      <div class="n">194/200</div>
+      <div class="l">injected +2 winding errors detected</div>
+      <div class="why">positive control for the attachment audit</div>
+    </article>
+    <article class="stat">
+      <div class="n">2,166/2,232</div>
+      <div class="l">annotated points with comparable winding neighbours</div>
+      <div class="why">97% ray-order coverage on PHercParis4</div>
+    </article>
+    <article class="stat">
+      <div class="n">ρ 0.750</div>
+      <div class="l">pre-registered scan-rank stability v2</div>
+      <div class="why">below the 0.85 gate → precise ranks retired</div>
+    </article>
+    <article class="stat">
+      <div class="n">2,008</div>
+      <div class="l">live shards CRC-checked</div>
+      <div class="why">331 mismatches independently confirmed</div>
+    </article>
+    <article class="stat zero">
+      <div class="n">0</div>
+      <div class="l">published blind community-model evaluations</div>
+      <div class="why">the harness exists; real benchmark runs are next</div>
+    </article>
+  </div>
 
-<div class="goal"><div class="ghead"><span class="gid">O2</span><span class="gtitle">Winding IQ: patch attachment & cross-collection consistency</span><span class="chip done">done</span></div><div class="bar"><i class="full" style="width:100%"></i></div><div class="gdetail">6 / 16,074 winding pairs flagged. Merged with reproducible PHerc0139 review queue.</div></div>
+  <div class="principle"><b>Why show zero?</b> Because missing evidence is part of the result. ScrolIQ should never turn “not yet measured” into a positive readiness signal.</div>
+</section>
 
-<div class="goal"><div class="ghead"><span class="gid">O3</span><span class="gtitle">Spiral IQ: score a fit on constraints it never saw</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">Held-out geometry evaluator exists as foundation. Needs a real GPU fit run.</div></div>
+<section class="section" id="timeline">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">04 · Evidence history</div>
+      <h2>Evidence timeline</h2>
+    </div>
+    <div class="section-note">Failures remain visible because they change what the project is allowed to claim.</div>
+  </div>
 
-<div class="goal"><div class="ghead"><span class="gid">O4</span><span class="gtitle">Fiber IQ: whole public corpus, then CT support</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">8-fiber pilot done. Full-corpus audit + CT support check with positive control outstanding.</div></div>
+  <div class="panel">
+    <div class="timeline">
+      <div class="event zpa">
+        <div class="date">2026-09-29</div>
+        <div class="title">zarr-pyramid-audit published</div>
+        <div class="detail">Public MIT fork of sgsllc-jr/zarr-pyramid-audit. First header-only audit of the S3 bucket: 957 roots, 956 clean, one live defect (PHerc0814). zpa becomes the integrity dependency underneath ScrolIQ.</div>
+      </div>
 
-<div class="goal"><div class="ghead"><span class="gid">O5</span><span class="gtitle">Stability gate: pass or retire the ranking</span><span class="chip fail">done · FAIL → rank bands</span></div><div class="bar"><i class="full" style="width:100%"></i></div><div class="gdetail">Pre-registered v2: ρ=0.750 &lt; 0.85 gate. Leaderboard now shows rank bands, not precise orders.</div></div>
+      <div class="event">
+        <div class="date">2026-09-30</div>
+        <div class="title">ScrolIQ created · volcomp content became directly measurable</div>
+        <div class="detail">Vendored libvolcomp decoding made 64 dl.ash2txt.org volcomp volumes content-probeable over HTTP, establishing the first corpus-scale scan-health layer.</div>
+      </div>
 
-<div class="goal"><div class="ghead"><span class="gid">O6</span><span class="gtitle">Get review queues into reviewers' hands</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">Reviewer map linked from README. Queues being built.</div></div>
+      <div class="event">
+        <div class="date">2026-10-01</div>
+        <div class="title">Truly-disjoint stability exposed ranking noise</div>
+        <div class="detail">Two-phase exclusion produced ρ = 0.63 on truly disjoint chunks. Rather than hide the failure, ScrolIQ tightened the experiment and stopped treating close rank positions as precise.</div>
+      </div>
 
-</div>
+      <div class="event">
+        <div class="date">2026-10-01</div>
+        <div class="title">Winding ray-order audit validated on real geometry</div>
+        <div class="detail">2,166 / 2,232 annotations gained comparable neighbours; only two sub-0.1-voxel inversions appeared among 13,700 comparable pairs. Injection controls established where the detector works and where it does not.</div>
+      </div>
 
-<h2>zpa October goals (G1–G7)</h2>
-<div class="panel">
+      <div class="event zpa">
+        <div class="date">2026-10-02</div>
+        <div class="title">CRC campaign + stability v2</div>
+        <div class="detail">2,008 live shards were CRC-checked; 331 mismatches emerged. Separately, the preregistered balanced sampling design produced ρ = 0.750, still below the 0.85 stability gate → rank bands stayed.</div>
+      </div>
 
-<div class="goal"><div class="ghead"><span class="gid">G1</span><span class="gtitle">October regression: S3 + dl</span><span class="chip progress">S3 done · dl unblocked</span></div><div class="bar"><i class="half" style="width:50%"></i></div><div class="gdetail">S3: 957 roots, 956 clean, 1 defective (PHerc0814 still live). dl host reachable; full rerun pending.</div></div>
+      <div class="event">
+        <div class="date">2026-10-02</div>
+        <div class="title">Mesh evidence became cross-tool and byte-bound</div>
+        <div class="detail">Same-byte validation against TIFXYZ Doctor reached 10 / 10 agreement on the frozen hole/component benchmark, while external mesh evidence gained coordinate-hash binding instead of name-based trust.</div>
+      </div>
 
-<div class="goal"><div class="ghead"><span class="gid">G2</span><span class="gtitle">CRC32C validation on live shards</span><span class="chip done">done</span></div><div class="bar"><i class="full" style="width:100%"></i></div><div class="gdetail">2,008 shards: 58% verified, 16.5% mismatch (writer non-conforming, proven 2026-10-03), 25% n/a. Severity → medium.</div></div>
+      <div class="event zpa">
+        <div class="date">2026-10-03</div>
+        <div class="title">CRC writer defect independently reproduced</div>
+        <div class="detail">Independent bit-by-bit CRC-32C confirmed the mismatches as real non-conforming writer output. <a href="https://github.com/Svyable/zarr-pyramid-audit/tree/main/artifacts/2026-10-03-crc-byte-verification">Evidence →</a></div>
+      </div>
 
-<div class="goal"><div class="ghead"><span class="gid">G3</span><span class="gtitle">Surface evidence tools</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">TIFXYZ target-volume guard landed (#34). Scope decision pending.</div></div>
+      <div class="event">
+        <div class="date">2026-10-03</div>
+        <div class="title">Winding attachment campaign closed with a working positive control</div>
+        <div class="detail">2,111 / 2,232 points attached; 6 / 16,074 constraints flagged; +2 corruption control detected 194 / 200. Flags remain review cues, not automatic defect verdicts.</div>
+      </div>
 
-<div class="goal"><div class="ghead"><span class="gid">G4</span><span class="gtitle">Validator comparisons</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">After G3 scope decision.</div></div>
+      <div class="event">
+        <div class="date">2026-10-03</div>
+        <div class="title">Model evaluation foundation merged</div>
+        <div class="detail"><code>scroliq-eval</code> is now an installed evaluation harness, not scaffolding: versioned model/data/results contracts, checkpoint and code hashing, overlap blocking, deterministic bootstrap CIs, explicit failed regions, and a two-trust-domain blind-evaluation design.</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<div class="goal"><div class="ghead"><span class="gid">G5</span><span class="gtitle">Publish-time gate adoption</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">After G6. The villa upstream proposal (#1760).</div></div>
+<section class="section" id="bottleneck">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">05 · Limiting dependency</div>
+      <h2>Current bottleneck</h2>
+    </div>
+    <div class="section-note">The one sentence that should change as soon as the project genuinely advances.</div>
+  </div>
 
-<div class="goal"><div class="ghead"><span class="gid">G6</span><span class="gtitle">Release hardening</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">Release first, then G5.</div></div>
+  <div class="bottleneck">
+    <div class="label">Blocks a qualifying result today</div>
+    <div class="big">No exact 2027 Grand Prize volume has 100% of its recto surface segmented and unrolled into column-scale meshes with full-column legible ink renders.</div>
+    <p>The highest-leverage next move is therefore not another dashboard metric. It is an exact-volume physical surface campaign that produces held-out surface predictions, validates them against truth without leakage, and then scales the successful geometry into complete recto coverage.</p>
 
-<div class="goal"><div class="ghead"><span class="gid">G7</span><span class="gtitle">Dashboard & docs refresh</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">After G1+G2 refresh. Dashboard current as of 2026-10-03.</div></div>
+    <div class="next">
+      <div class="next-item"><b>1 · Prove surface recovery</b><span>Transfer the frozen physical-sheet experiment to an exact prize-eligible volume and score held-out surface predictions.</span></div>
+      <div class="next-item"><b>2 · Scale to coverage</b><span>Turn validated local surface recovery into sequential column-scale TIFXYZ meshes plus detached-patch accounting.</span></div>
+      <div class="next-item"><b>3 · Prove reading</b><span>Render ink on held-out geometry, quantify falsification controls, then demonstrate letter-by-letter legibility across complete columns.</span></div>
+    </div>
+  </div>
+</section>
 
-</div>
+<section class="section" id="backlog">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">06 · Campaign backlog</div>
+      <h2>October campaigns</h2>
+    </div>
+    <div class="section-note">No percentage-complete bars. Each item states the evidence state and the remaining dependency.</div>
+  </div>
+
+  <div class="backlog-wrap">
+    <div class="backlog">
+      <h3>ScrolIQ · O1–O6</h3>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">O1</span><span class="gtitle">Mesh IQ: how often are flags real defects?</span><span class="state partial">Partial</span></div>
+        <div class="gdetail">Blinded sample of 54 segments drawn. VC3D review is still needed before a precision claim exists.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">O2</span><span class="gtitle">Winding IQ: patch attachment & consistency</span><span class="state measured">Measured</span></div>
+        <div class="gdetail">Real-data campaign complete with positive control: 6 / 16,074 constraints flagged; 194 / 200 injected +2 errors detected.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">O3</span><span class="gtitle">Spiral IQ: score a fit on constraints it never saw</span><span class="state ready">Ready to test</span></div>
+        <div class="gdetail">Held-out geometry evaluator exists. The missing input is a real fit/export produced without the evaluation targets.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">O4</span><span class="gtitle">Fiber IQ: whole public corpus, then CT support</span><span class="state partial">Partial</span></div>
+        <div class="gdetail">Eight-fiber public pilot is frozen. Full-corpus coverage and exact-volume CT support with a positive control remain open.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">O5</span><span class="gtitle">Stability gate: pass or retire precise ranks</span><span class="state measured">Measured</span></div>
+        <div class="gdetail">ρ = 0.750 failed the 0.85 gate. Result accepted; presentation changed to rank bands.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">O6</span><span class="gtitle">Put review queues in reviewers' hands</span><span class="state partial">Partial</span></div>
+        <div class="gdetail">Native-coordinate review queues and reviewer map exist. Human review throughput and feedback loops remain incomplete.</div>
+      </div>
+    </div>
+
+    <div class="backlog">
+      <h3>zarr-pyramid-audit · G1–G7</h3>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">G1</span><span class="gtitle">October regression: S3 + dl</span><span class="state partial">Partial</span></div>
+        <div class="gdetail">S3 rerun complete: 957 roots, 956 clean, PHerc0814 still defective. Full dl regression remains pending.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">G2</span><span class="gtitle">CRC32C validation on live shards</span><span class="state measured">Measured</span></div>
+        <div class="gdetail">2,008 shards checked; 331 mismatches independently reproduced as writer non-conformance.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">G3</span><span class="gtitle">Surface evidence tools</span><span class="state partial">Partial</span></div>
+        <div class="gdetail">Target-volume guarding exists. Scope remains subordinate to ScrolIQ's exact-volume surface campaign.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">G4</span><span class="gtitle">Validator comparisons</span><span class="state unknown">Unmeasured</span></div>
+        <div class="gdetail">No comparative result yet. Keep unknown until a frozen cross-validator campaign exists.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">G5</span><span class="gtitle">Publish-time gate adoption</span><span class="state unknown">Unmeasured</span></div>
+        <div class="gdetail">Upstream adoption is not evidence until a real publishing workflow consumes the gate.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">G6</span><span class="gtitle">Release hardening</span><span class="state partial">Partial</span></div>
+        <div class="gdetail">Core audit behavior is exercised in CI; release hardening remains a distribution task rather than a Grand Prize scientific blocker.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">G7</span><span class="gtitle">Dashboard & docs refresh</span><span class="state measured">Measured</span></div>
+        <div class="gdetail">Current evidence and campaign state are published here; scientific claims still trace to committed artifacts rather than the dashboard itself.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="reproduce">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">07 · Reproduce / verify</div>
+      <h2>Do not trust the dashboard</h2>
+    </div>
+    <div class="section-note">The page is an index. The evidence lives in code, frozen artifacts, hashes, protocols, and containers.</div>
+  </div>
+
+  <div class="verify-grid">
+    <article class="verify">
+      <div class="vtag">Container</div>
+      <h3>Build the reviewer environment</h3>
+      <p>The repository Dockerfile is exercised by CI with revision labels, non-root execution, installed CLI smoke tests, and pinned dependencies.</p>
+      <a href="https://github.com/Svyable/scrollq/blob/main/Dockerfile">Dockerfile →</a>
+    </article>
+
+    <article class="verify">
+      <div class="vtag">Prize protocol</div>
+      <h3>Read the proof campaign</h3>
+      <p>The current strategy is explicitly to produce one independently reproducible held-out result on one exact prize-eligible volume before broadening claims.</p>
+      <a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-proof-campaign.md">Grand Prize proof campaign →</a>
+    </article>
+
+    <article class="verify">
+      <div class="vtag">Model evaluation</div>
+      <h3>Inspect the blind evaluation contract</h3>
+      <p>Model cards, dataset manifests, per-region outputs, leakage blocking, checkpoint hashes, CIs, and the trusted/untrusted evaluation boundary are documented.</p>
+      <a href="https://github.com/Svyable/scrollq/blob/main/docs/model-evaluation.md">Model evaluation protocol →</a>
+    </article>
+
+    <article class="verify">
+      <div class="vtag">Winding evidence</div>
+      <h3>Reproduce the real-data winding campaigns</h3>
+      <p>Ray-order and patch-attachment results are frozen with commands, input identities, controls, and review queues.</p>
+      <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-03-paris4-winding-attachment">Winding attachment artifacts →</a>
+    </article>
+
+    <article class="verify">
+      <div class="vtag">Physical surface</div>
+      <h3>Inspect the frozen sheetness preregistration</h3>
+      <p>The PHerc0139 reference campaign freezes geometry-only probes and source provenance before any sheetness result is read.</p>
+      <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-03-pherc0139-sheetness-prereg">Sheetness preregistration →</a>
+    </article>
+
+    <article class="verify">
+      <div class="vtag">Data integrity</div>
+      <h3>Verify the CRC finding independently</h3>
+      <p>zarr-pyramid-audit's byte-verification artifact demonstrates that the live shard CRC mismatches are not an implementation-specific false alarm.</p>
+      <a href="https://github.com/Svyable/zarr-pyramid-audit/tree/main/artifacts/2026-10-03-crc-byte-verification">CRC byte verification →</a>
+    </article>
+
+    <article class="verify">
+      <div class="vtag">Submission</div>
+      <h3>Trace meshes, images, hashes, and provenance</h3>
+      <p>Grand Prize package, image, legibility, and provenance contracts define how an eventual qualifying result stays tied to exact source geometry and CT data.</p>
+      <a href="https://github.com/Svyable/scrollq/blob/main/docs/SUBMISSION.md">Reviewer map →</a>
+    </article>
+
+    <article class="verify">
+      <div class="vtag">Source</div>
+      <h3>Inspect the complete repository</h3>
+      <p>MIT-licensed implementation, tests, dated evidence, command-line interfaces, and current campaign state live in one public repository.</p>
+      <a href="https://github.com/Svyable/scrollq">ScrolIQ on GitHub →</a>
+    </article>
+
+    <article class="verify">
+      <div class="vtag">Integrity dependency</div>
+      <h3>Audit the CT before trusting downstream evidence</h3>
+      <p>ScrolIQ delegates Zarr structural integrity to zarr-pyramid-audit instead of silently assuming that published volume bytes are trustworthy.</p>
+      <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit →</a>
+    </article>
+  </div>
+
+  <div class="principle"><b>ScrolIQ's rule:</b> if a number cannot be traced to an exact command, exact inputs, a dated artifact, and a stated limitation or control, it does not graduate into Grand Prize evidence.</div>
+</section>
 
 <footer>
-Built from committed evidence in both repos, 2026-10-03. Numbers trace to artifacts; goal states match the October pages.<br>
-<a href="https://github.com/Svyable/scrollq">ScrolIQ repo</a> · <a href="https://github.com/Svyable/zarr-pyramid-audit">zpa repo</a> · <a href="https://discord.com/invite/V4fJhvtaQn">Vesuvius Discord</a>
+  Built from committed ScrolIQ and zarr-pyramid-audit evidence. Updated 2026-10-03.
+  This page is a navigation layer, not a source of truth.
+  <div class="links">
+    <a href="./">ScrolIQ overview</a>
+    <a href="./grand-prize-readiness.html">Grand Prize readiness</a>
+    <a href="./october-2026-update.html">October evidence update</a>
+    <a href="https://github.com/Svyable/scrollq">Repository</a>
+    <a href="https://scrollprize.org/">Vesuvius Challenge</a>
+  </div>
 </footer>
 
-</div></body></html>
+</div>
+</body>
+</html>
