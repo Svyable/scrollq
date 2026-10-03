@@ -19,6 +19,12 @@ A version-1 specification contains:
   "schema_version": 1,
   "coordinate_system": "score_map_xy",
   "protocol_id": "phercXXXX-slice-042-v1",
+  "volume_root": "exact-prize-volume.zarr",
+  "source_attestation": {
+    "algorithm": "zpa-metadata-semantics-v1",
+    "state": "PRESENT",
+    "metadata_semantics_sha256": "<64 lowercase hex>"
+  },
   "shape_yx": [512, 768],
   "score_sha256": "<64 lowercase hex>",
   "truth_sha256": "<64 lowercase hex>",
@@ -44,8 +50,11 @@ A version-1 specification contains:
 
 The truth CSV must contain `x,y` columns and its exact bytes must match
 `truth_sha256`. The score map used by the tracker must match
-`score_sha256`. Choose the tolerance, anchor-exclusion radius, tracker
-parameters, and success-rate threshold before generating the prediction.
+`score_sha256`. The spec also binds the exact prize-volume root and requires
+a PRESENT ZPA `zpa-metadata-semantics-v1` attestation digest; this makes source
+substitution visible when the experiment is carried into the wider provenance
+graph. Choose the tolerance, anchor-exclusion radius, tracker parameters, and
+success-rate threshold before generating the prediction.
 
 Calculate the canonical protocol hash:
 
@@ -112,8 +121,9 @@ The preregistered verdict is:
 PASS iff within_tolerance_rate >= minimum_within_tolerance_rate
 ```
 
-Equality passes. The CLI exits 0 for PASS, 1 for FAIL, and 2 for invalid
-inputs through argparse.
+Equality passes. A valid negative experiment remains publishable: the CLI exits
+0 for either PASS or FAIL by default. Add `--require-pass` when using the
+frozen rule as a CI gate; then FAIL exits 1. Invalid/tampered inputs exit 2.
 
 ## What the result proves
 
