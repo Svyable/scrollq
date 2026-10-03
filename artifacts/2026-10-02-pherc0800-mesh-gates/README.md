@@ -35,10 +35,29 @@ Bindings: 190 records hash-verified (windcheck, scroliq-mesh), 285
 path-declared (flatcheck, tifxyz-doctor, tifxyz-repair). No mesh is `ready`
 under this policy; every blocker is listed per mesh.
 
+## Re-flattening (`reflattening.json`)
+
+flatcheck can also re-flatten each surface (SLIM, ARAP) and score the result
+against the same bar. This separates "the stored parametrization is poor"
+from "the surface cannot be flattened well".
+
+| parametrization | meshes | pass 93.1 % bar | median % quads within ±5 % | notes |
+|---|---|---|---|---|
+| stored tifxyz grid | 95 | **0** | 66.0 | no fold-overs |
+| SLIM re-flattening | 95 | **21** | 87.5 | no fold-overs, no collapse |
+| ARAP re-flattening | 93 | 21 | 87.9 | 1 mesh with fold-overs/collapse; ARAP crashed in libigl on z17072_w040 and z17072_w080 |
+
+Re-flattening raises the share of quads within ±5 % by a median of 17.5
+points (range 7.4–65.4) and brings 21 / 95 meshes over the bar; the same 21
+pass whichever method is used. The other 74 stay below it even when
+re-flattened, which points at the surfaces themselves (curvature or
+tracing), not only at how they were stored.
+
 ## What this does and does not say
 
 - The surfaces are geometrically clean in the self-intersection sense.
-- The **stored parametrizations** do not meet flatcheck's low-distortion bar.
+- The **stored parametrizations** do not meet flatcheck's low-distortion bar;
+  re-flattening fixes that for 21 of 95.
   The 93.1 % bar is flatcheck's default, not a prize rule; the prize asks for
   a "low-distortion isometric 2D parametrization" without a number.
 - The metadata finding is a one-field fix for the publisher.
