@@ -1,0 +1,174 @@
+name: Freeze PHerc0139 sheetness campaign
+
+# Issue #105: final preregistration before any Phase-A sheetness response.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/pherc0139-sheetness-freeze.yml"
+      - "artifacts/2026-10-03-pherc0139-sheetness-campaign/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Guard frozen output
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="artifacts/2026-10-03-pherc0139-sheetness-campaign/campaign-plan.json"
+          if [ -e "$out" ]; then
+            echo "PHerc0139 sheetness campaign already frozen"
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install frozen campaign code
+        if: steps.guard.outputs.skip != '1'
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+          python -m pip install -e .
+
+      - name: Record upstream hashes
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-pherc0139-sheetness-campaign"
+          mkdir -p "$outdir"
+          sha256sum \
+            artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json \
+            artifacts/2026-10-03-pherc0139-wrong-wrap-prereg/wrong-wrap-spec.json \
+            artifacts/2026-10-03-pherc0139-wrong-wrap-run/wrong-wrap-result.json \
+            > "$outdir/inputs.sha256"
+
+      - name: Freeze campaign before sheetness
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          outdir="artifacts/2026-10-03-pherc0139-sheetness-campaign"
+          scroliq-sheetness-campaign freeze \
+            --reference-plan artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json \
+            --wrong-wrap-spec artifacts/2026-10-03-pherc0139-wrong-wrap-prereg/wrong-wrap-spec.json \
+            --wrong-wrap-result artifacts/2026-10-03-pherc0139-wrong-wrap-run/wrong-wrap-result.json \
+            --code-revision 65bb493b87795011e1bed1ed0b2e0272e0f5a733 \
+            --sigmas 0.8,1.2,1.8 \
+            --beta 0.5 \
+            --gamma 0.1 \
+            --bright-object \
+            --no-scale-objectness \
+            --normalize \
+            --normalize-low 1 \
+            --normalize-high 99 \
+            --max-voxels 2500000 \
+            --min-score-completeness 1 \
+            --min-normal-offset-win-fraction 0.75 \
+            --min-median-normal-offset-margin 0 \
+            --min-normal-completeness 1 \
+            --min-median-abs-cosine 0.70 \
+            --out "$outdir/campaign-plan.json" \
+            | tee "$outdir/run.log"
+
+      - name: Verify frozen scientific contract
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          plan = json.loads(
+              Path(
+                  "artifacts/2026-10-03-pherc0139-sheetness-campaign/campaign-plan.json"
+              ).read_text()
+          )
+          assert plan["schema"] == "scroliq-sheetness-campaign/1"
+          assert plan["status"] == "frozen-before-sheetness"
+          assert plan["summary"]["group_count"] == 32
+          assert plan["summary"]["ready_group_count"] == 32
+          assert plan["summary"]["blocked_group_count"] == 0
+          assert plan["engine"]["code_revision"] == (
+              "65bb493b87795011e1bed1ed0b2e0272e0f5a733"
+          )
+          assert plan["engine"]["parameters"] == {
+              "sigmas": [0.8, 1.2, 1.8],
+              "beta": 0.5,
+              "gamma": 0.1,
+              "bright_object": True,
+              "scale_objectness": False,
+          }
+          assert plan["engine"]["normalization"] == {
+              "enabled": True,
+              "lower_percentile": 1.0,
+              "upper_percentile": 99.0,
+          }
+          assert plan["campaign_decision_rule"] == {
+              "min_score_completeness": 1.0,
+              "min_normal_offset_win_fraction": 0.75,
+              "min_median_normal_offset_margin": 0.0,
+              "min_normal_completeness": 1.0,
+              "min_median_abs_cosine": 0.7,
+          }
+          for group in plan["groups"]:
+              assert group["status"] == "ready"
+              roles = [row["role"] for row in group["controls"]]
+              assert roles.count("normal-offset") == 4
+              assert roles.count("wrong-wrap") == 1
+              assert group["voxels"] <= 2_500_000
+
+          print(
+              "freeze PASS:",
+              plan["summary"]["group_count"],
+              "groups;",
+              plan["summary"]["total_cutout_voxels"],
+              "total planned voxels;",
+              plan["summary"]["max_cutout_voxels"],
+              "max group voxels",
+          )
+          PY
+
+      - name: Record environment
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-pherc0139-sheetness-campaign"
+          {
+            git rev-parse HEAD
+            python --version
+            python -m pip freeze
+          } > "$outdir/environment.txt"
+
+      - name: Commit frozen plan to campaign branch
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/2026-10-03-pherc0139-sheetness-campaign
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Freeze PHerc0139 sheetness campaign"
+          branch="${{ github.head_ref || github.ref_name }}"
+          if [ "$branch" = main ]; then
+            branch=campaign/pherc0139-sheetness-freeze
+          fi
+          git push origin "HEAD:$branch"
