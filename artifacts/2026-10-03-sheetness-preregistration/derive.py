@@ -7,6 +7,7 @@ from artifacts that existed before the campaign was run.
 """
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -72,7 +73,7 @@ def mesh_record(row: dict) -> dict:
     }
 
 
-def main() -> None:
+def build_protocol() -> dict:
     summary = load(CORPUS_SUMMARY)
     manifest = load(PRIZE_MANIFEST)
     p800 = target(manifest, "PHerc0800")
