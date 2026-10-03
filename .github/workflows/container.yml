@@ -1,0 +1,89 @@
+name: Grand Prize reviewer container
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - constraints-container.txt
+      - pyproject.toml
+      - requirements-ci.txt
+      - README.md
+      - LICENSE
+      - src/**
+      - .github/workflows/container.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+      - name: Build and push immutable reviewer image
+        id: image
+        run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
+          SHA_TAG="${IMAGE}:sha-${GITHUB_SHA}"
+          MAIN_TAG="${IMAGE}:main"
+          BUILD_DATE="$(git show -s --format=%cI HEAD)"
+          SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"
+
+          docker build \
+            --build-arg VCS_REF="$GITHUB_SHA" \
+            --build-arg BUILD_DATE="$BUILD_DATE" \
+            --build-arg SOURCE_DATE_EPOCH="$SOURCE_DATE_EPOCH" \
+            -t "$SHA_TAG" \
+            -t "$MAIN_TAG" \
+            .
+
+          docker push "$SHA_TAG"
+          docker push "$MAIN_TAG"
+
+          DIGEST="$(
+            docker buildx imagetools inspect "$SHA_TAG" \
+              | awk '$1 == "Digest:" {print $2; exit}'
+          )"
+          test -n "$DIGEST"
+          PINNED="${IMAGE}@${DIGEST}"
+
+          echo "pinned=$PINNED" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$PINNED" | tee container-digest.txt
+
+          {
+            echo "## Grand Prize reviewer image"
+            echo
+            echo 'Use this immutable value in `code.docker_image`:'
+            echo
+            echo '```text'
+            echo "$PINNED"
+            echo '```'
+            echo
+            echo "Commit: `$GITHUB_SHA`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Smoke-test pushed digest
+        run: |
+          PINNED="${{ steps.image.outputs.pinned }}"
+          docker pull "$PINNED"
+          test "$(docker run --rm "$PINNED" id -u)" = "10001"
+          docker run --rm "$PINNED" scroliq-provenance --help >/dev/null
+          docker run --rm "$PINNED" scroliq-package --help >/dev/null
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: grand-prize-container-digest
+          path: container-digest.txt
+          if-no-files-found: error
