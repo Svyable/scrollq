@@ -347,9 +347,74 @@ def _ray_order_summary(section: Any) -> dict[str, Any]:
     return summary
 
 
+def _external_mesh_evidence(
+    volume_root: str,
+    dossier: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if dossier is None:
+        return {
+            "status": "unknown",
+            "reason": "no binding-aware external mesh evidence dossier was supplied",
+        }
+    if dossier.get("diagnostic") != "external-mesh-evidence-dossier":
+        return {
+            "status": "excluded",
+            "reason": "artifact is not a ScrolIQ external-mesh-evidence-dossier",
+        }
+
+    surface = dossier.get("surface") if isinstance(dossier.get("surface"), dict) else {}
+    if surface.get("volume_root") != volume_root:
+        return {
+            "status": "excluded",
+            "reason": "external mesh dossier names a different volume root",
+        }
+
+    binding = dossier.get("binding") if isinstance(dossier.get("binding"), dict) else {}
+    level = binding.get("level")
+    if level not in {"semantic-exact", "coordinate-exact"}:
+        return {
+            "status": "excluded",
+            "binding": dict(binding),
+            "reason": (
+                "external evidence is not content-bound strongly enough to attach "
+                f"to this surface: {level!r}"
+            ),
+        }
+
+    measurement = (
+        dossier.get("external_measurement")
+        if isinstance(dossier.get("external_measurement"), dict)
+        else {}
+    )
+    if (
+        measurement.get("status") != "included"
+        or measurement.get("subject") != "same-published-original"
+    ):
+        return {
+            "status": "partial",
+            "binding": dict(binding),
+            "source": dict(dossier.get("external_source") or {}),
+            "measurement": dict(measurement),
+            "reason": (
+                "surface identity is content-bound, but the external measurement "
+                "is not established on the same published original"
+            ),
+        }
+
+    return {
+        "status": "measured",
+        "binding": dict(binding),
+        "source": dict(dossier.get("external_source") or {}),
+        "measurement": dict(measurement),
+        "claims": dict(dossier.get("claims") or {}),
+        "limitations": list(dossier.get("limitations") or []),
+    }
+
+
 def _mesh_stage(
     volume_root: str,
     audit: dict[str, Any] | None,
+    external_evidence: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if audit is None:
         return {
@@ -402,10 +467,12 @@ def _mesh_stage(
     if not selfcross_pass:
         gaps.append("freedom from nonlocal transverse self-intersections")
 
+    external = _external_mesh_evidence(volume_root, external_evidence)
     result = {
         "status": "blocked" if audit_status == "fail" else "partial",
         "open_problem": "mesh-connectivity",
         "audit_status": audit_status,
+        "external_evidence": external,
         "tifxyz_path": audit.get("tifxyz_path"),
         "grid": dict(audit.get("grid") or {}),
         "bbox": dict(audit.get("bbox") or {}),
@@ -493,6 +560,7 @@ def build_passport(
     scan_map: dict[str, Any] | None = None,
     winding_audit: dict[str, Any] | None = None,
     mesh_audit: dict[str, Any] | None = None,
+    external_mesh_evidence: dict[str, Any] | None = None,
     fiber_audit: dict[str, Any] | None = None,
     ink_audit: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -505,7 +573,7 @@ def build_passport(
             "surface-topology",
             "no surface-prediction or surface-support diagnostic was supplied",
         ),
-        "mesh": _mesh_stage(root, mesh_audit),
+        "mesh": _mesh_stage(root, mesh_audit, external_mesh_evidence),
         "fibers": _fiber_stage(root, fiber_audit),
         "winding": _winding_stage(root, winding_audit),
         "spiral": _unknown_stage(
@@ -713,6 +781,27 @@ def build_passport(
             }
         )
 
+    external_mesh = stages["mesh"].get("external_evidence") or {}
+    external_measurement = external_mesh.get("measurement") or {}
+    external_contacts = external_measurement.get("input_transverse_total")
+    if (
+        external_mesh.get("status") == "measured"
+        and isinstance(external_contacts, int)
+        and external_contacts > 0
+    ):
+        actions.append(
+            {
+                "priority": "high",
+                "action": (
+                    f"independently content-bound nonlocal census reports "
+                    f"{external_contacts} transverse contacts on this published original; "
+                    "inspect/repair the surface and run the official VC3D self-cross "
+                    "validator before downstream use"
+                ),
+                "open_problem": "mesh-connectivity",
+            }
+        )
+
     ink_status = stages["ink"]["status"]
     if ink_status in {"unknown", "excluded"}:
         actions.append(
@@ -796,6 +885,11 @@ def main() -> None:
         help="optional volume-bound scroliq-winding JSON artifact",
     )
     ap.add_argument("--mesh-audit", default=None, help="optional volume-bound scroliq-mesh JSON artifact")
+    ap.add_argument(
+        "--external-mesh-evidence",
+        default=None,
+        help="optional binding-aware scroliq-evidence-bind JSON dossier",
+    )
     ap.add_argument("--fiber-audit", default=None, help="optional volume-bound scroliq-fiber JSON artifact")
     ap.add_argument("--ink-audit", default=None, help="optional volume-bound scroliq-ink-audit JSON artifact")
     ap.add_argument("--out", required=True)
@@ -824,6 +918,11 @@ def main() -> None:
         if args.mesh_audit
         else None
     )
+    external_mesh_evidence = (
+        json.loads(Path(args.external_mesh_evidence).read_text(encoding="utf-8"))
+        if args.external_mesh_evidence
+        else None
+    )
     fiber_audit = (
         json.loads(Path(args.fiber_audit).read_text(encoding="utf-8"))
         if args.fiber_audit
@@ -840,6 +939,7 @@ def main() -> None:
         scan_map=scan_map,
         winding_audit=winding_audit,
         mesh_audit=mesh_audit,
+        external_mesh_evidence=external_mesh_evidence,
         fiber_audit=fiber_audit,
         ink_audit=ink_audit,
     )
