@@ -119,11 +119,18 @@ pre-registered falsification experiment. The benchmark spec must bind:
   control per group;
 - all pass/fail thresholds before evaluation.
 
-The version-2 evaluator verifies the provenance-bound cutout manifest before
-reading any probe score. It checks exact volume identity, ZPA metadata
+The version-3 evaluator verifies the provenance-bound cutout manifest before
+reading any probe score. Probe coordinates are finite continuous ZYX values,
+matching TIFXYZ's floating-point geometry rather than forcing the surface onto
+nearest voxel centres. Sheetness is sampled trilinearly. Hessian eigenvector
+normals are also trilinearly combined after sign-aligning each contributing
+unit vector to the frozen reference normal, because eigenvector sign is
+arbitrary.
+
+ It checks exact volume identity, ZPA metadata
 attestation, cutout SHA, global half-open bbox, local-to-global transform,
-source-chunk completeness, and cutout shape. Every emitted probe then carries
-both its local array coordinate and its derived global level-0 CT coordinate.
+source-chunk completeness, and cutout shape. Every emitted probe carries both its continuous local array coordinate and its
+derived continuous global level-0 CT coordinate.
 
 It also verifies the response and normal-array hashes recorded by the
 sheetness report and measures four things without dropping failures: score
