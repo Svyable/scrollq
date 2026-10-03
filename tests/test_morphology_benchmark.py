@@ -251,6 +251,24 @@ def test_raw_txt_row_count_mismatch_fails_closed(tmp_path):
         )
 
 
+
+def test_raw_txt_raster_order_mismatch_fails_closed(tmp_path):
+    spec, control, dataset = _inputs(tmp_path)
+    rows = list(csv.DictReader(dataset.open()))
+    raw = tmp_path / rows[0]["raw_height_txt"]
+    lines = raw.read_text(encoding="utf-8").splitlines()
+    # Swap two parseable rows inside the first raster row so X is no longer
+    # monotonic. Missingness-to-pixel binding must fail rather than guess.
+    lines[2], lines[3] = lines[3], lines[2]
+    raw.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    with pytest.raises(mb.BenchmarkError, match="not monotonic"):
+        mb.run_benchmark(
+            spec_path=spec,
+            control_manifest_path=control,
+            dataset_manifest_path=dataset,
+            data_root=tmp_path,
+        )
+
 def test_cli_create_only_output(tmp_path, capsys):
     spec, control, dataset = _inputs(tmp_path)
     out = tmp_path / "result.json"
