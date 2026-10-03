@@ -62,6 +62,8 @@ COPY --from=builder /wheels /wheels
 RUN python -m pip install \
       --no-index \
       --find-links=/wheels \
+      Pillow \
+      tifffile \
       zarr-pyramid-audit \
     && python -m pip install \
       --no-index \
