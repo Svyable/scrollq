@@ -28,8 +28,13 @@ from typing import Any, Iterable
 
 from .legibility import LEGIBILITY_THRESHOLD, audit_legibility
 from .provenance import validate_manifest
+from .submission_image import (
+    SCHEMA_VERSION as SUBMISSION_IMAGE_SCHEMA_VERSION,
+    TOOL as SUBMISSION_IMAGE_TOOL,
+)
+from .vc3d_replay import VC3D_RECEIPT_SCHEMA_VERSION, VC3D_RECEIPT_TOOL
 
-PACKAGE_SCHEMA_VERSION = 3
+PACKAGE_SCHEMA_VERSION = 4
 PACKAGE_TOOL = "scroliq-package"
 ARCHIVE_FORMAT = "zip-stored-deterministic-v1"
 INDEX_PATH = "_scroliq/submission-package.json"
@@ -97,6 +102,12 @@ def _declared_paths(manifest: dict[str, Any]) -> list[str]:
                     and isinstance(scale_proof.get("path"), str)
                 ):
                     raw.append(scale_proof["path"])
+                vc3d_receipt = row.get("vc3d_receipt")
+                if (
+                    isinstance(vc3d_receipt, dict)
+                    and isinstance(vc3d_receipt.get("path"), str)
+                ):
+                    raw.append(vc3d_receipt["path"])
 
     banner = manifest.get("banner")
     if isinstance(banner, dict) and isinstance(banner.get("path"), str):
@@ -106,6 +117,363 @@ def _declared_paths(manifest: dict[str, Any]) -> list[str]:
             raw.append(proof["path"])
 
     return sorted(set(_normalise_rel(path) for path in raw))
+
+
+def _vc3d_package_records(
+    manifest: dict[str, Any],
+    root: Path,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Load verified VC3D receipts and return index records + raw/log paths."""
+
+    rows = manifest.get("renders")
+    if not isinstance(rows, list) or not rows:
+        raise PackageError("renders must contain VC3D receipt-bound columns")
+
+    records: list[dict[str, Any]] = []
+    extra_paths: list[str] = []
+    seen_columns: set[int] = set()
+    seen_assets: set[str] = set()
+
+    for i, render in enumerate(rows):
+        if not isinstance(render, dict):
+            raise PackageError(f"renders[{i}] must be an object")
+        column = render.get("column")
+        if isinstance(column, bool) or not isinstance(column, int) or column < 1:
+            raise PackageError(f"renders[{i}].column must be a positive integer")
+        if column in seen_columns:
+            raise PackageError(f"duplicate VC3D receipt column {column}")
+        seen_columns.add(column)
+
+        declared = render.get("vc3d_receipt")
+        if not isinstance(declared, dict):
+            raise PackageError(f"renders[{i}] is missing vc3d_receipt")
+        receipt_rel = _normalise_rel(declared.get("path"))
+        receipt_path = _path_under_root(root, receipt_rel)
+        if receipt_path.is_symlink() or not receipt_path.is_file():
+            raise PackageError(f"VC3D receipt must be a regular file: {receipt_rel}")
+        receipt_raw = receipt_path.read_bytes()
+        receipt_sha = _sha256(receipt_raw)
+        if receipt_sha != declared.get("sha256"):
+            raise PackageError(f"VC3D receipt hash mismatch: {receipt_rel}")
+        try:
+            receipt = json.loads(receipt_raw)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise PackageError(f"cannot parse VC3D receipt {receipt_rel}: {exc}") from exc
+        if not isinstance(receipt, dict):
+            raise PackageError(f"VC3D receipt must be an object: {receipt_rel}")
+        if (
+            receipt.get("schema_version") != VC3D_RECEIPT_SCHEMA_VERSION
+            or receipt.get("tool") != VC3D_RECEIPT_TOOL
+            or receipt.get("operation") != "render-column"
+            or receipt.get("column") != column
+        ):
+            raise PackageError(f"unsupported/mismatched VC3D receipt: {receipt_rel}")
+        if receipt.get("receipt_path") != receipt_rel:
+            raise PackageError(f"VC3D receipt_path mismatch: {receipt_rel}")
+
+        output = receipt.get("output")
+        log = receipt.get("log")
+        if not isinstance(output, dict) or not isinstance(log, dict):
+            raise PackageError(f"VC3D receipt lacks output/log records: {receipt_rel}")
+        raw_rel = _normalise_rel(output.get("path"))
+        log_rel = _normalise_rel(log.get("path"))
+        render_call = receipt.get("render")
+        if not isinstance(render_call, dict):
+            raise PackageError(f"VC3D receipt lacks render record: {receipt_rel}")
+        tif_dir = _normalise_rel(render_call.get("tif_output_dir"))
+        if raw_rel != (PurePosixPath(tif_dir) / "00.tif").as_posix():
+            raise PackageError(
+                f"VC3D receipt raw output is not tif_output_dir/00.tif: {receipt_rel}"
+            )
+
+        for rel, item, label in (
+            (raw_rel, output, "raw render"),
+            (log_rel, log, "render log"),
+        ):
+            target = _path_under_root(root, rel)
+            if target.is_symlink() or not target.is_file():
+                raise PackageError(f"VC3D {label} must be a regular file: {rel}")
+            actual_sha = _sha256_file(target)
+            if actual_sha != item.get("sha256"):
+                raise PackageError(f"VC3D {label} hash mismatch: {rel}")
+            if target.stat().st_size != item.get("size"):
+                raise PackageError(f"VC3D {label} size mismatch: {rel}")
+            if rel in seen_assets:
+                raise PackageError(f"VC3D artifact reused across columns: {rel}")
+            seen_assets.add(rel)
+            extra_paths.append(rel)
+
+        scale = render.get("scale_proof")
+        if not isinstance(scale, dict):
+            raise PackageError(f"renders[{i}] is missing scale_proof")
+        scale_rel = _normalise_rel(scale.get("path"))
+
+        inputs = receipt.get("inputs")
+        receipt_mesh = inputs.get("mesh") if isinstance(inputs, dict) else None
+        vc3d = receipt.get("vc3d")
+        binary = vc3d.get("binary") if isinstance(vc3d, dict) else None
+        records.append(
+            {
+                "column": column,
+                "receipt_path": receipt_rel,
+                "receipt_sha256": receipt_sha,
+                "raw_render_path": raw_rel,
+                "raw_render_sha256": output.get("sha256"),
+                "log_path": log_rel,
+                "log_sha256": log.get("sha256"),
+                "scale_proof_path": scale_rel,
+                "mesh_path": (
+                    receipt_mesh.get("path")
+                    if isinstance(receipt_mesh, dict)
+                    else None
+                ),
+                "mesh_sha256": (
+                    receipt_mesh.get("sha256")
+                    if isinstance(receipt_mesh, dict)
+                    else None
+                ),
+                "villa_commit": (
+                    vc3d.get("commit") if isinstance(vc3d, dict) else None
+                ),
+                "binary_sha256": (
+                    binary.get("sha256") if isinstance(binary, dict) else None
+                ),
+            }
+        )
+
+    records.sort(key=lambda row: row["column"])
+    return records, sorted(set(extra_paths))
+
+
+def _numbers_match(left: Any, right: Any, *, abs_tol: float = 1e-9) -> bool:
+    if (
+        isinstance(left, bool)
+        or isinstance(right, bool)
+        or not isinstance(left, (int, float))
+        or not isinstance(right, (int, float))
+    ):
+        return left == right
+    return abs(float(left) - float(right)) <= max(
+        abs_tol,
+        1e-9 * max(abs(float(left)), abs(float(right)), 1.0),
+    )
+
+
+def _verify_embedded_vc3d_bindings(
+    zf: zipfile.ZipFile,
+    *,
+    manifest: dict[str, Any] | None,
+    index: dict[str, Any],
+    actual_names: set[str],
+    verified_hashes: dict[str, str],
+    errors: list[str],
+) -> None:
+    """Recompute VC3D receipt/raw/log/scale bindings from archive contents."""
+
+    indexed = index.get("vc3d_receipts")
+    if not isinstance(indexed, list) or not indexed:
+        errors.append("package index vc3d_receipts must be a non-empty list")
+        indexed = []
+    if not isinstance(manifest, dict):
+        errors.append("cannot verify VC3D bindings without embedded manifest")
+        return
+
+    renders = manifest.get("renders")
+    meshes_raw = manifest.get("meshes")
+    submission = manifest.get("submission")
+    if not isinstance(renders, list) or not isinstance(meshes_raw, list):
+        errors.append("embedded manifest lacks render/mesh records for VC3D binding")
+        return
+    meshes = {
+        row.get("id"): row
+        for row in meshes_raw
+        if isinstance(row, dict) and isinstance(row.get("id"), str)
+    }
+    eligible_volume_id = (
+        submission.get("eligible_volume_id")
+        if isinstance(submission, dict)
+        else None
+    )
+
+    recomputed: list[dict[str, Any]] = []
+    for i, render in enumerate(renders):
+        if not isinstance(render, dict):
+            errors.append(f"embedded renders[{i}] is not an object")
+            continue
+        column = render.get("column")
+        declared = render.get("vc3d_receipt")
+        scale_decl = render.get("scale_proof")
+        if not isinstance(declared, dict) or not isinstance(scale_decl, dict):
+            errors.append(f"column {column}: missing VC3D receipt or scale proof")
+            continue
+        try:
+            receipt_rel = _normalise_rel(declared.get("path"))
+            scale_rel = _normalise_rel(scale_decl.get("path"))
+        except PackageError as exc:
+            errors.append(f"column {column}: {exc}")
+            continue
+        if receipt_rel not in actual_names:
+            errors.append(f"column {column}: VC3D receipt missing from archive")
+            continue
+        if verified_hashes.get(receipt_rel) != declared.get("sha256"):
+            errors.append(f"column {column}: VC3D receipt hash differs from manifest")
+
+        try:
+            receipt = json.loads(zf.read(receipt_rel))
+        except (KeyError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            errors.append(f"column {column}: cannot parse VC3D receipt: {exc}")
+            continue
+        if not isinstance(receipt, dict):
+            errors.append(f"column {column}: VC3D receipt is not an object")
+            continue
+        if (
+            receipt.get("schema_version") != VC3D_RECEIPT_SCHEMA_VERSION
+            or receipt.get("tool") != VC3D_RECEIPT_TOOL
+            or receipt.get("operation") != "render-column"
+            or receipt.get("column") != column
+            or receipt.get("receipt_path") != receipt_rel
+        ):
+            errors.append(f"column {column}: unsupported/mismatched VC3D receipt")
+
+        inputs = receipt.get("inputs")
+        volume = inputs.get("volume") if isinstance(inputs, dict) else None
+        receipt_mesh = inputs.get("mesh") if isinstance(inputs, dict) else None
+        if not isinstance(volume, dict) or not isinstance(receipt_mesh, dict):
+            errors.append(f"column {column}: VC3D receipt input records are missing")
+            continue
+        if volume.get("volume_id") != eligible_volume_id:
+            errors.append(f"column {column}: VC3D receipt uses another eligible volume")
+
+        mesh = meshes.get(render.get("mesh_id"))
+        if not isinstance(mesh, dict):
+            errors.append(f"column {column}: referenced mesh is missing")
+        else:
+            if receipt_mesh.get("path") != mesh.get("path"):
+                errors.append(f"column {column}: VC3D receipt mesh path mismatch")
+            if receipt_mesh.get("sha256") != mesh.get("sha256"):
+                errors.append(f"column {column}: VC3D receipt mesh hash mismatch")
+
+        render_call = receipt.get("render")
+        output = receipt.get("output")
+        log = receipt.get("log")
+        if (
+            not isinstance(render_call, dict)
+            or not isinstance(output, dict)
+            or not isinstance(log, dict)
+        ):
+            errors.append(f"column {column}: VC3D receipt render/output/log is missing")
+            continue
+        if render_call.get("num_slices") != 1 or render_call.get("exit_code") != 0:
+            errors.append(f"column {column}: VC3D receipt is not one successful slice")
+        try:
+            raw_rel = _normalise_rel(output.get("path"))
+            log_rel = _normalise_rel(log.get("path"))
+            tif_dir = _normalise_rel(render_call.get("tif_output_dir"))
+        except PackageError as exc:
+            errors.append(f"column {column}: {exc}")
+            continue
+        if raw_rel != (PurePosixPath(tif_dir) / "00.tif").as_posix():
+            errors.append(f"column {column}: raw VC3D path is not tif_output_dir/00.tif")
+        for rel, item, label in (
+            (raw_rel, output, "raw VC3D render"),
+            (log_rel, log, "VC3D render log"),
+        ):
+            if rel not in actual_names:
+                errors.append(f"column {column}: {label} is missing from archive")
+            elif verified_hashes.get(rel) != item.get("sha256"):
+                errors.append(f"column {column}: {label} hash mismatch")
+
+        if scale_rel not in actual_names:
+            errors.append(f"column {column}: scale proof is missing from archive")
+            scale_proof = None
+        else:
+            if verified_hashes.get(scale_rel) != scale_decl.get("sha256"):
+                errors.append(f"column {column}: scale proof hash differs from manifest")
+            try:
+                scale_proof = json.loads(zf.read(scale_rel))
+            except (KeyError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+                errors.append(f"column {column}: cannot parse scale proof: {exc}")
+                scale_proof = None
+        if isinstance(scale_proof, dict):
+            if (
+                scale_proof.get("schema_version") != SUBMISSION_IMAGE_SCHEMA_VERSION
+                or scale_proof.get("tool") != SUBMISSION_IMAGE_TOOL
+                or scale_proof.get("operation") != "column"
+                or scale_proof.get("column") != column
+            ):
+                errors.append(f"column {column}: unsupported/mismatched scale proof")
+            scale_input = scale_proof.get("input")
+            physical = scale_proof.get("vc_render_tifxyz")
+            if not isinstance(scale_input, dict) or not isinstance(physical, dict):
+                errors.append(f"column {column}: scale proof input/physical record missing")
+            else:
+                if scale_input.get("sha256") != output.get("sha256"):
+                    errors.append(
+                        f"column {column}: scale proof input hash differs from raw VC3D render"
+                    )
+                if scale_input.get("path") != PurePosixPath(raw_rel).name:
+                    errors.append(
+                        f"column {column}: scale proof input name differs from raw VC3D render"
+                    )
+                checks = (
+                    (
+                        volume.get("base_voxel_size_um"),
+                        scale_decl.get("base_voxel_size_um"),
+                        physical.get("base_voxel_size_um"),
+                        "base voxel size",
+                    ),
+                    (
+                        render_call.get("group_idx"),
+                        scale_decl.get("group_idx"),
+                        physical.get("group_idx"),
+                        "group index",
+                    ),
+                    (
+                        render_call.get("scale"),
+                        scale_decl.get("render_scale"),
+                        physical.get("render_scale"),
+                        "render scale",
+                    ),
+                )
+                for receipt_value, manifest_value, proof_value, label in checks:
+                    if not (
+                        _numbers_match(receipt_value, manifest_value, abs_tol=1e-6)
+                        and _numbers_match(receipt_value, proof_value, abs_tol=1e-6)
+                    ):
+                        errors.append(
+                            f"column {column}: VC3D/manifest/scale-proof {label} mismatch"
+                        )
+
+        vc3d = receipt.get("vc3d")
+        binary = vc3d.get("binary") if isinstance(vc3d, dict) else None
+        recomputed.append(
+            {
+                "column": column,
+                "receipt_path": receipt_rel,
+                "receipt_sha256": verified_hashes.get(receipt_rel),
+                "raw_render_path": raw_rel,
+                "raw_render_sha256": verified_hashes.get(raw_rel),
+                "log_path": log_rel,
+                "log_sha256": verified_hashes.get(log_rel),
+                "scale_proof_path": scale_rel,
+                "mesh_path": receipt_mesh.get("path"),
+                "mesh_sha256": receipt_mesh.get("sha256"),
+                "villa_commit": (
+                    vc3d.get("commit") if isinstance(vc3d, dict) else None
+                ),
+                "binary_sha256": (
+                    binary.get("sha256") if isinstance(binary, dict) else None
+                ),
+            }
+        )
+
+    recomputed.sort(key=lambda row: row.get("column", -1))
+    normalized_indexed = sorted(
+        [row for row in indexed if isinstance(row, dict)],
+        key=lambda row: row.get("column", -1),
+    )
+    if recomputed != normalized_indexed:
+        errors.append("package VC3D receipt index does not match embedded artifacts")
 
 
 def _path_under_root(root: Path, rel: str) -> Path:
@@ -514,7 +882,8 @@ def build_package(
         "excluded_columns": legibility_validation["summary"]["excluded_columns"],
     }
 
-    declared = _declared_paths(manifest)
+    vc3d_records, vc3d_extra_paths = _vc3d_package_records(manifest, root)
+    declared = sorted(set(_declared_paths(manifest) + vc3d_extra_paths))
     if manifest_rel in declared:
         declared.remove(manifest_rel)
 
@@ -564,6 +933,7 @@ def build_package(
         "legibility_validation_path": LEGIBILITY_VALIDATION_PATH,
         "legibility_validation_sha256": _sha256(legibility_validation_bytes),
         "graph_sha256": validation.get("graph_sha256"),
+        "vc3d_receipts": vc3d_records,
         "file_count": len(inventory),
         "files": inventory,
     }
@@ -944,6 +1314,15 @@ def verify_package(archive_path: str | Path) -> dict[str, Any]:
                 errors.append(
                     "legibility_validation_path is missing from archive"
                 )
+
+            _verify_embedded_vc3d_bindings(
+                zf,
+                manifest=embedded_manifest,
+                index=index,
+                actual_names=actual_names,
+                verified_hashes=verified_hashes,
+                errors=errors,
+            )
 
             if index.get("file_count") != len(expected):
                 errors.append("file_count does not match indexed file rows")
