@@ -120,19 +120,26 @@ pre-registered falsification experiment. The benchmark spec must bind:
 - pass/fail thresholds for completeness, normal-offset separation, and normal
   alignment before evaluation; wrong-wrap response is frozen but descriptive.
 
-The version-3 evaluator verifies the provenance-bound cutout manifest before
+The version-4 evaluator verifies the provenance-bound cutout manifest before
 reading any probe score. It checks exact volume identity, ZPA metadata
 attestation (including audited ZYX axes), retained PASS ZPA-report hash,
 cutout SHA, global half-open bbox, local-to-global transform, source-chunk
-completeness, and cutout shape. Every emitted probe then carries
-both its local array coordinate and its derived global level-0 CT coordinate.
+completeness, and cutout shape.
 
-It also verifies the response and normal-array hashes recorded by the
-sheetness report and measures the preregistered pass/fail evidence without
-dropping failures: score completeness, the fraction of groups where the surface
-beats every **normal-offset** control, the median surface-minus-best-normal-offset
-margin, and absolute-cosine normal alignment. Missing, out-of-bounds, or non-finite probes remain in the group
-denominator rather than disappearing from the result.
+Probe coordinates are continuous floating-point ZYX values matching native
+TIFXYZ geometry. The scalar sheetness field is sampled with deterministic
+trilinear interpolation rather than rounding probes to voxel centres. Hessian
+normal vectors are also trilinearly combined, but every contributing unit
+eigenvector is first sign-aligned to the frozen reference normal because
+eigenvector sign is arbitrary. Every emitted probe preserves its fractional
+local coordinate and exact translated global level-0 CT coordinate.
+
+The preregistered pass/fail evidence is localization completeness, the fraction
+of groups where the surface beats every **normal-offset** control, the median
+surface-minus-best-normal-offset margin, wrong-wrap measurement completeness,
+normal completeness, and absolute-cosine normal alignment. Missing,
+out-of-bounds, or non-finite probes remain in their denominators rather than
+disappearing from the result.
 
 ```bash
 scroliq-sheetness-eval \
@@ -152,7 +159,7 @@ and a canonical semantic spec hash, the engine parameters, every probe result,
 and each frozen decision-rule check.
 
 The evaluator still requires at least one `wrong-wrap` / competing-sheet probe
-per group, but version 3 reports that evidence **descriptively rather than using
+per group, but version 4 reports its **score evidence descriptively rather than using
 it as a pass/fail threshold**. A genuine neighboring papyrus sheet is itself a
 plate-like object, so a Hessian sheet detector may correctly score it highly.
 Requiring the nominated surface to beat it would silently turn a sheetness test
