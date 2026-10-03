@@ -1,0 +1,90 @@
+# Exploratory research index
+
+**Status:** living research notebook. Created 2026-10-03.
+
+This folder consolidates the high-upside ideas explored independently of the
+primary Grand Prize dependency-order pipeline. It is intentionally not a second
+roadmap. The main execution campaign remains authoritative; research here may
+feed it only after evidence clears an explicit promotion gate.
+
+The operating rule is simple:
+
+- **INCLUDE** — evidence is strong enough to justify integration or the change
+  closes a concrete reproducibility/evidence gap with low scientific risk.
+- **EXPERIMENT FURTHER** — plausible and potentially valuable, but requires a
+  frozen experiment on held-out/public data before entering the production
+  path.
+- **DISMISS** — redundant, leakage-prone, tautological, weakly motivated, or
+  too costly relative to expected evidence. Keep the negative decision so the
+  same idea is not repeatedly reintroduced under a new name.
+
+Promotion decisions must remain ink-blind for geometry, held-out for model
+evaluation, hash-bound where configuration matters, and explicit about negative
+results. Nothing in this folder is allowed to block the primary Grand Prize
+campaign.
+
+## Current research portfolio
+
+| Idea | Current status | Primary value | Next evidence |
+|---|---|---|---|
+| Surface-normal ink response / surface-lock profiles | EXPERIMENT FURTHER; basic offset controls already supported | Physical falsification of surface-bound ink | Held-out continuous offset curves across checkpoints and negative controls |
+| Causal context ablation | EXPERIMENT FURTHER | Detect predictions that survive destruction of local CT evidence | Held-out central-vs-distant intervention study |
+| Morphology/topography corroboration | INCLUDE as source-control framework; target transfer EXPERIMENT FURTHER | Independent physical support for ink | Resolve source scale discrepancy, then validate transfer conservatively |
+| Acquisition-physics normalization and conditioning | EXPERIMENT FURTHER | Reduce cross-scan/domain shift without larger semantic context | Leave-one-acquisition-regime-out benchmark |
+| Cross-parameterization inference invariance | EXPERIMENT FURTHER | Detect representation-sensitive ink predictions | Real detector + second valid UV parameterization |
+| Stride/blend/seam invariance | EXPERIMENT FURTHER | Detect stitching/crop-grid false positives | Held-out nuisance sweep using existing Villa controls |
+| Exact inference-configuration binding | INCLUDE, merged in PR #142 | Reproducible model evaluation | Maintain as part of the evaluation contract |
+| Scored-result run identity binding | INCLUDE, merged in PR #147 | Prevent stale score files from masquerading as current results | Maintain adapter compliance |
+| Independent recto coverage witnesses | EXPERIMENT FURTHER | Falsify omitted surface outside a declared inventory | Real-papyrus deliberate deletion/wrong-winding controls |
+| Fiber-texture fingerprints for sheet identity | EXPERIMENT FURTHER | Detect smooth but wrong-winding sheet switches | Adjacent-winding controls on real CT |
+| Fiber-coordinate canonicalization as a model architecture | DISMISS for now | Possible orientation normalization | Reconsider only if an ablation inside another experiment supports it |
+| Global histogram matching | DISMISS | Superficial domain normalization | None; retain only as a negative control |
+| Transport-only UV invariance | DISMISS | Coordinate arithmetic check | None; material-attached false positives persist too |
+| Ink-selected flattening | DISMISS | Could maximize visual persistence | None; creates geometry-selection leakage |
+| Immediate tile-origin backend | DISMISS pending Stage-A evidence | True crop-phase intervention | Reconsider only if stride/blend sensitivity is material |
+| Generic prediction hashing layer for ink | DISMISS as redundant | Artifact provenance | Existing ink validator already binds exact evaluated arrays |
+
+## Files
+
+- [Ink and false-positive research](ink-and-false-positive-research.md)
+- [Geometry, coverage, and sheet-identity research](geometry-and-coverage-research.md)
+- [Reproducibility and proof-chain research](reproducibility-research.md)
+- [Dismissed and deferred ideas](dismissed-and-deferred.md)
+
+## Existing tracked work
+
+- [Issue #137 — ink coordinate-invariance across independent flattenings](https://github.com/Svyable/scrollq/issues/137)
+- [Issue #143 — tile-phase and seam invariance for ink inference](https://github.com/Svyable/scrollq/issues/143)
+- [Issue #151 — independent coverage witnesses](https://github.com/Svyable/scrollq/issues/151)
+- [PR #142 — exact inference configuration binding](https://github.com/Svyable/scrollq/pull/142)
+- [PR #147 — scored-result run identity binding](https://github.com/Svyable/scrollq/pull/147)
+
+Related production/evidence documents remain in the parent `docs/` directory,
+including [the Grand Prize proof campaign](../grand-prize-proof-campaign.md),
+[morphology ink control](../morphology-ink-control.md),
+[model evaluation](../model-evaluation.md),
+[fiber audit](../fiber-audit.md), and
+[the ink-blind flattening benchmark](../flattening-benchmark.md).
+
+## Shared evaluation rubric
+
+Every new research proposal should be judged against the same questions:
+
+1. **Prize impact:** can it materially improve legibility, reliable coverage,
+   validation credibility, automation, VC3D handoff, or reproducibility?
+2. **Technical plausibility:** does a physical, geometric, statistical, or
+   systems mechanism justify the experiment?
+3. **Evidence burden:** what result would actually distinguish the hypothesis
+   from a convenient artifact?
+4. **Implementation cost:** can the hypothesis be tested without first building
+   a new subsystem?
+5. **Reproducibility burden:** can inputs, configuration, seeds, outputs, and
+   decisions be frozen and independently reproduced?
+6. **Hallucination / invalid-evaluation risk:** could the idea manufacture
+   attractive text, leak target information, or make a circular claim?
+7. **VC3D / pipeline compatibility:** can a successful result flow into the
+   existing toolchain without a bespoke format?
+8. **Surface area:** if the experiment fails, can the code be discarded cleanly?
+
+The default is not to accumulate research machinery. A failed gate is a useful
+result.
