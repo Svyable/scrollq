@@ -10,7 +10,7 @@ from typing import Any
 
 import numpy as np
 
-SCHEMA = "scroliq-sheetness-benchmark/2"
+SCHEMA = "scroliq-sheetness-benchmark/3"
 REQUIRED_CONTROL_ROLES = ("normal-offset", "wrong-wrap")
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
@@ -96,8 +96,8 @@ def _validate_rule(rule: Any) -> dict[str, float]:
         raise ValueError("decision_rule is required")
     names = {
         "min_score_completeness": (0.0, 1.0),
-        "min_surface_win_fraction": (0.0, 1.0),
-        "min_median_margin": (None, None),
+        "min_normal_offset_win_fraction": (0.0, 1.0),
+        "min_median_normal_offset_margin": (None, None),
         "min_normal_completeness": (0.0, 1.0),
         "min_median_abs_cosine": (0.0, 1.0),
     }
@@ -212,8 +212,8 @@ def evaluate(
     cutout_manifest: dict[str, Any],
     cutout_manifest_file_sha256: str,
 ) -> dict[str, Any]:
-    if spec.get("schema_version") != 2:
-        raise ValueError("spec.schema_version must be 2")
+    if spec.get("schema_version") != 3:
+        raise ValueError("spec.schema_version must be 3")
     volume_root = spec.get("volume_root")
     if not isinstance(volume_root, str) or not volume_root.strip():
         raise ValueError("spec.volume_root is required")
@@ -284,11 +284,13 @@ def evaluate(
 
     ids: set[str] = set()
     rows: list[dict[str, Any]] = []
-    margins: list[float] = []
+    normal_offset_margins: list[float] = []
+    wrong_wrap_margins: list[float] = []
     cosines: list[float] = []
     score_complete_count = 0
     normal_complete_count = 0
-    surface_win_count = 0
+    normal_offset_win_count = 0
+    wrong_wrap_win_count = 0
 
     for index, group in enumerate(groups):
         path = f"groups[{index}]"
@@ -316,7 +318,10 @@ def evaluate(
         seen_roles: set[str] = set()
         seen_control_ids: set[str] = set()
         control_rows: list[dict[str, Any]] = []
-        control_scores: list[float] = []
+        control_scores_by_role: dict[str, list[float]] = {
+            "normal-offset": [],
+            "wrong-wrap": [],
+        }
         control_complete = True
         for c_index, control in enumerate(controls):
             cpath = f"{path}.controls[{c_index}]"
@@ -339,7 +344,7 @@ def evaluate(
             if score is None:
                 control_complete = False
             else:
-                control_scores.append(score)
+                control_scores_by_role[str(role)].append(score)
             control_rows.append(
                 {
                     "id": cid,
@@ -358,15 +363,26 @@ def evaluate(
 
         surface_score, surface_failure = _value_at(response, surface_coord)
         score_complete = surface_score is not None and control_complete
-        margin = None
-        surface_beats_all = False
+        normal_offset_margin = None
+        wrong_wrap_margin = None
+        surface_beats_normal_offsets = False
+        surface_beats_wrong_wraps = False
         if score_complete:
             score_complete_count += 1
-            margin = float(surface_score - max(control_scores))
-            margins.append(margin)
-            surface_beats_all = bool(surface_score > max(control_scores))
-            if surface_beats_all:
-                surface_win_count += 1
+
+            normal_scores = control_scores_by_role["normal-offset"]
+            wrong_scores = control_scores_by_role["wrong-wrap"]
+            normal_offset_margin = float(surface_score - max(normal_scores))
+            wrong_wrap_margin = float(surface_score - max(wrong_scores))
+            normal_offset_margins.append(normal_offset_margin)
+            wrong_wrap_margins.append(wrong_wrap_margin)
+
+            surface_beats_normal_offsets = bool(surface_score > max(normal_scores))
+            surface_beats_wrong_wraps = bool(surface_score > max(wrong_scores))
+            if surface_beats_normal_offsets:
+                normal_offset_win_count += 1
+            if surface_beats_wrong_wraps:
+                wrong_wrap_win_count += 1
 
         cosine, normal_failure = _normal_at(normals, surface_coord, reference)
         if cosine is not None:
@@ -389,25 +405,32 @@ def evaluate(
                 },
                 "controls": control_rows,
                 "score_complete": score_complete,
-                "surface_beats_all_controls": surface_beats_all,
-                "surface_minus_best_control": margin,
+                "surface_beats_all_normal_offsets": surface_beats_normal_offsets,
+                "surface_minus_best_normal_offset": normal_offset_margin,
+                "surface_beats_all_wrong_wraps": surface_beats_wrong_wraps,
+                "surface_minus_best_wrong_wrap": wrong_wrap_margin,
             }
         )
 
     total = len(rows)
     score_completeness = score_complete_count / total
     normal_completeness = normal_complete_count / total
-    surface_win_fraction = surface_win_count / total
-    median_margin = _median(margins)
+    normal_offset_win_fraction = normal_offset_win_count / total
+    wrong_wrap_win_fraction = wrong_wrap_win_count / total
+    median_normal_offset_margin = _median(normal_offset_margins)
+    median_wrong_wrap_margin = _median(wrong_wrap_margins)
     median_abs_cosine = _median(cosines)
 
     metrics = {
         "group_count": total,
         "score_complete_count": score_complete_count,
         "score_completeness": score_completeness,
-        "surface_win_count": surface_win_count,
-        "surface_win_fraction": surface_win_fraction,
-        "median_surface_minus_best_control": median_margin,
+        "normal_offset_win_count": normal_offset_win_count,
+        "normal_offset_win_fraction": normal_offset_win_fraction,
+        "median_surface_minus_best_normal_offset": median_normal_offset_margin,
+        "wrong_wrap_win_count_descriptive": wrong_wrap_win_count,
+        "wrong_wrap_win_fraction_descriptive": wrong_wrap_win_fraction,
+        "median_surface_minus_best_wrong_wrap_descriptive": median_wrong_wrap_margin,
         "normal_complete_count": normal_complete_count,
         "normal_completeness": normal_completeness,
         "median_abs_cosine": median_abs_cosine,
@@ -415,9 +438,12 @@ def evaluate(
 
     checks = {
         "score_completeness": score_completeness >= rule["min_score_completeness"],
-        "surface_win_fraction": surface_win_fraction >= rule["min_surface_win_fraction"],
-        "median_margin": (
-            median_margin is not None and median_margin >= rule["min_median_margin"]
+        "normal_offset_win_fraction": (
+            normal_offset_win_fraction >= rule["min_normal_offset_win_fraction"]
+        ),
+        "median_normal_offset_margin": (
+            median_normal_offset_margin is not None
+            and median_normal_offset_margin >= rule["min_median_normal_offset_margin"]
         ),
         "normal_completeness": normal_completeness >= rule["min_normal_completeness"],
         "median_abs_cosine": (
@@ -460,13 +486,19 @@ def evaluate(
         },
         "metrics": metrics,
         "decision_checks": checks,
+        "wrong_wrap_interpretation": (
+            "descriptive-only: a genuine competing papyrus sheet is also expected "
+            "to be sheet-like, so wrong-wrap response measures the method's sheet-"
+            "identity limitation and is not a pass/fail criterion"
+        ),
         "groups": rows,
         "claim_boundary": (
-            "This result compares a frozen sheetness field against frozen surface, "
-            "normal-offset, and wrong-wrap probes on a declared exact CT volume. "
-            "The cutout is hash- and coordinate-bound to an exact audited level-0 "
-            "volume through scroliq-ct-cutout. This still does not establish physical "
-            "sheet identity/topology or demonstrate readable ink."
+            "This result tests whether a frozen sheetness field localizes a candidate "
+            "surface relative to deliberate normal offsets on an exact audited CT "
+            "volume. Wrong-wrap/competing-sheet probes are retained as mandatory "
+            "descriptive controls, not a pass/fail target, because another papyrus "
+            "sheet is itself sheet-like. This does not establish physical sheet "
+            "identity/topology or demonstrate readable ink."
         ),
     }
 
