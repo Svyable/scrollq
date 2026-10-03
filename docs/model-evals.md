@@ -38,11 +38,17 @@ The registry schema is `models/schema.json`; the held-out dataset contract is `e
 
 ## Model registry contract
 
-Each model entry records the task, checkpoint SHA-256, inference-script
-SHA-256, full declared training-dataset inventory, optional exact training
-region IDs, a declaration that the inventory is complete, the required
+Each model entry records the task, checkpoint SHA-256 **and public checkpoint
+URL**, inference-script SHA-256, full declared training-dataset inventory, a
+public source URL for every training dataset, optional exact training region
+IDs, a declaration that the inventory is complete, the required
 CC-BY-NC-4.0 training-data license, a fixed random seed, and a public experiment
 tracking URL. The model's code license is recorded separately.
+
+Pseudo-labeling is explicit. `pseudo_labeling_used: true` requires a non-empty
+stage ledger, and every stage binds the published dataset, checkpoint, and
+experiment run by URL plus SHA-256. Declaring pseudo-labeling unused requires
+that stage ledger to be empty.
 
 The current overlap proof is exact-identifier based. It can demonstrate that a
 published inventory is internally disjoint from the held-out manifest, but it
