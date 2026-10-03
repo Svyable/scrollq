@@ -10,14 +10,20 @@ import scrollq.submission_package as pkg
 def _package_manifest():
     return {
         "schema_version": 5,
+        "submission": {
+            "human_input_hours": 1.5,
+        },
+        "code": {
+            "docker_image": "ghcr.io/example/pipeline@sha256:" + "b" * 64,
+        },
         "ct_volume": {
             "zarr_audit": {
                 "path": "evidence/zpa-report.json",
             }
         },
         "surfaces": [],
-        "meshes": [{"path": "column_01.tifxyz"}],
-        "renders": [{"path": "column_01.tif"}],
+        "meshes": [{"path": "column_01.tifxyz", "column": 1}],
+        "renders": [{"path": "column_01.tif", "column": 1}],
         "held_out_validations": [{"path": "validation/heldout.json"}],
         "banner": {"path": "banner.tif"},
     }
@@ -35,6 +41,38 @@ def _write_tree(root):
     (root / "column_01.tif").write_bytes(b"render")
     (root / "banner.tif").write_bytes(b"banner")
     (root / "unrelated.txt").write_bytes(b"must not be packaged")
+    (root / "METHODOLOGY.md").write_text(
+        "# Methodology\nReproduce the CT-to-surface-to-render pipeline.\n",
+        encoding="utf-8",
+    )
+    (root / "SYSTEM_REQUIREMENTS.md").write_text(
+        "# System requirements\nLinux, Docker, sufficient disk and GPU memory.\n",
+        encoding="utf-8",
+    )
+    (root / "VC3D_WORKFLOW.md").write_text(
+        "# VC3D workflow\nOpen the exact eligible volume and submitted TIFXYZ meshes.\n",
+        encoding="utf-8",
+    )
+    (root / "FALSE_POSITIVES.md").write_text(
+        "# False-positive mitigation\nUse held-out evidence and falsification controls.\n",
+        encoding="utf-8",
+    )
+    (root / "human-input.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "entries": [
+                    {
+                        "description": "Review surface handoff",
+                        "hours": 1.5,
+                    }
+                ],
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (mesh / "meta.json").write_bytes(b"{}")
     (mesh / "x.tif").write_bytes(b"x")
     (mesh / "y.tif").write_bytes(b"y")
@@ -103,7 +141,21 @@ def test_package_is_deterministic_and_only_contains_declared_artifacts(
         assert "validation/heldout.json" in names
         assert "banner.tif" in names
         assert pkg.VALIDATION_PATH in names
+        assert pkg.REVIEWER_CONTRACT_PATH in names
         assert pkg.INDEX_PATH in names
+        assert "METHODOLOGY.md" in names
+        assert "SYSTEM_REQUIREMENTS.md" in names
+        assert "human-input.json" in names
+        assert "VC3D_WORKFLOW.md" in names
+        assert "FALSE_POSITIVES.md" in names
+        reviewer = json.loads(zf.read(pkg.REVIEWER_CONTRACT_PATH))
+        assert reviewer["columns"]["meshes"] == [1]
+        assert reviewer["columns"]["renders"] == [1]
+        assert reviewer["human_input"]["ledger_hours"] == 1.5
+        assert (
+            reviewer["reproduction"]["docker_image"]
+            in reviewer["reproduction"]["docker_run_command"]
+        )
 
 
 def test_package_verifier_rejects_extra_unindexed_member(tmp_path, monkeypatch):
@@ -254,3 +306,81 @@ def test_verifier_rejects_nondeterministic_member_order_and_mode(tmp_path, monke
     assert report["valid"] is False
     assert any("lexicographic order" in error for error in report["errors"])
     assert any("file mode" in error for error in report["errors"])
+
+
+
+def test_package_builder_rejects_human_input_ledger_mismatch(tmp_path, monkeypatch):
+    root = tmp_path / "submission"
+    root.mkdir()
+    manifest_path = _write_tree(root)
+    monkeypatch.setattr(pkg, "validate_manifest", _passing_validation)
+    (root / "human-input.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "entries": [{"description": "Unlogged extra review", "hours": 2.0}],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(pkg.PackageError, match="does not match"):
+        pkg.build_package(
+            manifest_path=manifest_path,
+            root_dir=root,
+            out_path=tmp_path / "bad-hours.zip",
+        )
+
+
+def test_package_builder_rejects_noncontiguous_columns(tmp_path, monkeypatch):
+    root = tmp_path / "submission"
+    root.mkdir()
+    manifest_path = _write_tree(root)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["meshes"].append({"path": "column_03.tifxyz", "column": 3})
+    manifest["renders"].append({"path": "column_03.tif", "column": 3})
+    manifest_path.write_text(
+        json.dumps(manifest, sort_keys=True, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(pkg, "validate_manifest", _passing_validation)
+
+    with pytest.raises(pkg.PackageError, match="consecutive starting at 1"):
+        pkg.build_package(
+            manifest_path=manifest_path,
+            root_dir=root,
+            out_path=tmp_path / "gapped-columns.zip",
+        )
+
+
+def test_package_builder_requires_exact_pinned_docker_image_in_command(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "submission"
+    root.mkdir()
+    manifest_path = _write_tree(root)
+    monkeypatch.setattr(pkg, "validate_manifest", _passing_validation)
+
+    with pytest.raises(pkg.PackageError, match="exact digest-pinned"):
+        pkg.build_package(
+            manifest_path=manifest_path,
+            root_dir=root,
+            out_path=tmp_path / "wrong-image.zip",
+            docker_run_command="docker run --rm ghcr.io/example/pipeline:latest",
+        )
+
+
+def test_package_builder_rejects_empty_reviewer_material(tmp_path, monkeypatch):
+    root = tmp_path / "submission"
+    root.mkdir()
+    manifest_path = _write_tree(root)
+    monkeypatch.setattr(pkg, "validate_manifest", _passing_validation)
+    (root / "METHODOLOGY.md").write_text("   \n", encoding="utf-8")
+
+    with pytest.raises(pkg.PackageError, match="non-whitespace"):
+        pkg.build_package(
+            manifest_path=manifest_path,
+            root_dir=root,
+            out_path=tmp_path / "empty-method.zip",
+        )
