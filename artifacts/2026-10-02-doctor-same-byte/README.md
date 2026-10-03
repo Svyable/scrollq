@@ -9,8 +9,11 @@ The workflow pins TIFXYZ Doctor at
 real-data benchmark, verifies every input file against the rival manifest, and
 then runs the current `audit_tifxyz()` on those exact bytes.
 
-Frozen run: GitHub Actions `37095038435`, commit
-`fba4743a4dc8958b0bdd0e72f9b9517f7a5bd7e1`.
+Frozen measurement run: GitHub Actions `37095038435`, commit
+`fba4743a4dc8958b0bdd0e72f9b9517f7a5bd7e1`. A later workflow run
+(`37095165144`) regenerated the same pinned-byte campaign and passed
+`verify.py` against this frozen summary after ignoring only the run timestamp
+and ScrolIQ commit SHA.
 
 ## Result
 
