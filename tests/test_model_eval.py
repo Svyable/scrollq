@@ -26,11 +26,17 @@ def _write_inputs(tmp_path):
         "author": "Example Author",
         "task": "ink_detection",
         "checkpoint_sha256": hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+        "checkpoint_url": "https://example.org/checkpoints/demo-ink-v1.ckpt",
         "training_data": ["training-set-v1"],
+        "training_data_sources": {
+            "training-set-v1": "https://example.org/datasets/training-set-v1"
+        },
         "training_regions": ["other-set:r9"],
         "training_inventory_complete": True,
         "training_data_license": "CC-BY-NC-4.0",
         "held_out_excluded": True,
+        "pseudo_labeling_used": False,
+        "pseudo_label_stages": [],
         "inference_script": "models/demo/infer.py",
         "inference_sha256": hashlib.sha256(script.read_bytes()).hexdigest(),
         "license": "MIT",
@@ -135,6 +141,37 @@ def test_incomplete_training_inventory_is_unknown_and_blocked(tmp_path):
     )
     assert report["status"] == "fail"
     assert report["checks"]["training_overlap"]["status"] == "unknown"
+
+
+def test_missing_public_training_source_blocks_preflight(tmp_path):
+    root, _, checkpoint, card, dataset, model_path, dataset_path = _write_inputs(tmp_path)
+    card["training_data_sources"] = {}
+    report = build_preflight_report(
+        card=card,
+        dataset=dataset,
+        model_path=model_path,
+        dataset_path=dataset_path,
+        checkpoint_path=checkpoint,
+        root_dir=root,
+    )
+    assert report["status"] == "fail"
+    assert any("training_data_sources" in item for item in report["rank_blockers"])
+
+
+def test_pseudo_labeling_requires_every_stage_provenance(tmp_path):
+    root, _, checkpoint, card, dataset, model_path, dataset_path = _write_inputs(tmp_path)
+    card["pseudo_labeling_used"] = True
+    card["pseudo_label_stages"] = []
+    report = build_preflight_report(
+        card=card,
+        dataset=dataset,
+        model_path=model_path,
+        dataset_path=dataset_path,
+        checkpoint_path=checkpoint,
+        root_dir=root,
+    )
+    assert report["status"] == "fail"
+    assert any("pseudo_label_stages" in item for item in report["rank_blockers"])
 
 
 def test_inference_hash_mismatch_fails_closed(tmp_path):
