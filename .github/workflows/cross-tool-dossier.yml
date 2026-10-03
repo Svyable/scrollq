@@ -1,0 +1,45 @@
+name: Cross-tool mesh dossier
+
+on:
+  push:
+    paths:
+      - "src/scrollq/external_mesh_evidence.py"
+      - "tests/test_external_mesh_evidence.py"
+      - "artifacts/2026-10-02-cross-tool-mesh-dossier/**"
+      - "artifacts/2026-10-01-corpus-mesh-audit/reports/PHerc0139.20260306000001-w051_2026030600.20260306000001-on-20250728140407-9.362um.json"
+      - ".github/workflows/cross-tool-dossier.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ScrolIQ
+        run: python -m pip install .
+      - name: Regenerate dossier
+        run: |
+          cp artifacts/2026-10-02-cross-tool-mesh-dossier/summary.json /tmp/expected.json 2>/dev/null || true
+          python artifacts/2026-10-02-cross-tool-mesh-dossier/derive.py
+          cp artifacts/2026-10-02-cross-tool-mesh-dossier/summary.json /tmp/actual.json
+      - name: Verify frozen evidence when present
+        run: |
+          if [ -s /tmp/expected.json ]; then
+            diff -u /tmp/expected.json /tmp/actual.json
+          fi
+      - name: Print dossier
+        run: |
+          echo "=== CROSS_TOOL_DOSSIER ==="
+          cat /tmp/actual.json
+      - name: Upload dossier
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross-tool-mesh-dossier
+          path: /tmp/actual.json
+          if-no-files-found: error
