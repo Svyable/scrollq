@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "tool": "scroliq-morphology-benchmark",
+  "experiment_id": "profilometer-lopo-descriptors-v1",
+  "created": "2026-10-03",
+  "control_manifest_sha256": "9542bdd1e924e0b28685805fd378ee1c0d4617667ebefa5d99a59eb3bef769d8",
+  "source_revision": "a806bead2f3b9100c20e19de37814fb285cfeefd",
+  "source_split": "leave-one-papyrus-out",
+  "descriptors": [
+    "local-gradient-rank",
+    "curvature-rank",
+    "fiber-relative-roughness"
+  ],
+  "sampling": {
+    "policy": "label-blind-interior-grid-v1",
+    "max_sampled_pixels_per_sample": 250000,
+    "border_pixels": 1,
+    "min_sampled_ink_pixels": 100,
+    "min_sampled_papyrus_pixels": 100
+  },
+  "direction_rule": "median-training-sample-mean-rank-delta",
+  "heldout_metric": "pooled-pixel-auroc",
+  "controls": {
+    "label_permutation": {
+      "method": "deterministic-toroidal-label-roll-v1",
+      "seed": 20261003
+    },
+    "missingness": {
+      "source": "raw-height-nonfinite-z",
+      "metric": "discriminative-auroc=max(auc,1-auc)"
+    }
+  },
+  "advance_rule": {
+    "min_heldout_auc_each_papyrus": 0.55,
+    "max_label_permutation_abs_auc_from_chance": 0.05,
+    "max_missingness_discriminative_auc": 0.6
+  },
+  "selection_contract": {
+    "learned_classifier": false,
+    "uses_absolute_micron_thresholds": false,
+    "heldout_labels_choose_descriptor_direction": false,
+    "candidate_renders_or_ocr_consumed": false,
+    "target_ct_consumed": false
+  },
+  "consequence": {
+    "pass": "source morphology descriptor signal worth retaining as future physical control candidate",
+    "fail": "do not promote descriptor beyond source benchmark",
+    "target_transfer_authorized": false
+  },
+  "expected_sample_count": 14
+}
