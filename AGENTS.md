@@ -42,6 +42,7 @@ weight-free Pareto frontier (triage, not a readability claim).
     (phantom = prediction > 127 on masked CT == 0) with bootstrap 95% CI
   - `model_eval.py` → `scroliq-eval`: task-neutral model registry/evaluation envelope; fail-closed provenance, held-out overlap checks, deterministic bootstrap CIs, and region failure accounting. Contracts live in `models/` and `docs/model-evaluation.md`
   - `segmentation_validation.py` → `scroliq-segmentation-validate`: trusted blind TIFXYZ surface scorer using preregistered bidirectional coverage, salted hidden-truth commitments, exact vertex distances, topology gates, and common `scroliq-eval` region results
+  - `sheetness_campaign.py` → `scroliq-sheetness-campaign`: freezes dispersed per-probe CT boxes, exact Hessian-engine bytes/config, and one campaign-level decision rule before inference; seals one provenance-bound v3 spec per cutout and aggregates all frozen groups without dropping failures
   - evidence layers, each its own `scroliq-*` script: `passport.py`,
     `scan_map.py`, `provenance.py`, `recto_coverage.py`, `tifxyz_audit.py`
     (`scroliq-mesh`), `ink_audit.py`, `ink_validation.py`, `winding_audit.py`;

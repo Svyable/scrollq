@@ -48,6 +48,15 @@ voxel tolerance. Every valid vertex is used up to a hard public cap; missing,
 oversized, malformed, or topology-gated regions fail rather than disappearing.
 See [the segmentation validation protocol](docs/segmentation-validation.md).
 
+**Physical sheetness campaign:** `scroliq-sheetness-campaign` freezes a
+dispersed set of small exact-volume CT cutouts, exact Hessian engine
+configuration/source hashes, and one campaign-level falsification rule before
+any sheetness response is computed. After deterministic inference it seals each
+cutout into a provenance-bound v3 measurement spec and aggregates every frozen
+group without dropping failures. Wrong-wrap controls remain mandatory but
+descriptive, because another papyrus sheet is itself sheet-like. See
+[the dispersed sheetness campaign protocol](docs/sheetness-campaign.md).
+
 
 ## Diagnostic passport
 
