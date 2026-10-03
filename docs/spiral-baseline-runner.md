@@ -52,9 +52,23 @@ Missing, contradictory, zero-track, or unexpected-patch observations fail the
 run receipt even when Villa exits 0 and writes a checkpoint. Failed runs still
 retain logs/receipts.
 
-After a successful bounded reproduction, use the pinned villa
-`flatten_spiral_checkpoint.py` path for checkpoint-to-TIFXYZ export; do not
-replace it with a ScrolIQ-specific exporter.
+After the runner's supervision checks pass, verify that the fit also matches
+the published structured PHerc0826 satisfaction context before exporting:
+
+```bash
+scroliq-spiral-reproduction-check \
+  --run-dir /runs/pherc0826-bounded-01 \
+  --out /runs/pherc0826-bounded-01/reproduction-check.json
+```
+
+This hash-verifies Villa's `satisfaction_metrics_fitted.json` and requires the
+published one-decimal 12.6% satisfied-track and 41.6% satisfied-track-point
+measurements to match. These are reproduction diagnostics, not correctness
+metrics. See [`spiral-reproduction-check.md`](spiral-reproduction-check.md).
+
+After a successful bounded reproduction **and sanity-match**, use the pinned
+villa `flatten_spiral_checkpoint.py` path for checkpoint-to-TIFXYZ export; do
+not replace it with a ScrolIQ-specific exporter.
 
 
 ## Official checkpoint -> TIFXYZ receipt
@@ -67,12 +81,14 @@ scroliq-spiral-export \
   --run-dir /runs/pherc0826-bounded-01 \
   --dataset /data/ds0826 \
   --villa-root /src/villa \
+  --reproduction-check /runs/pherc0826-bounded-01/reproduction-check.json \
   --output /runs/pherc0826-bounded-01.tifxyz \
   --evidence-dir /runs/pherc0826-bounded-01-export
 ```
 
 This command does **not** implement an exporter. It re-verifies the successful
-fit receipt and exact clean Villa checkout, then executes that checkout's
+fit receipt, requires a passing reproduction check bound to that exact run,
+verifies the exact clean Villa checkout, then executes that checkout's
 `spiral-fitting/flatten_spiral_checkpoint.py`.
 
 The wrapper explicitly passes `--voxel-size-um 9.362`. This is important:
@@ -82,7 +98,7 @@ is 9.362 um. A recipe drift to the generic default fails closed.
 The export receipt binds:
 
 - exact Grand Prize volume `20250821151701`;
-- final checkpoint bytes and successful fit receipt;
+- final checkpoint bytes, successful fit receipt, and passing reproduction-check bytes;
 - frozen recipe/preflight and fitted umbilicus bytes;
 - Villa commit, Spiral tree, fitter, official flattener, Lasagna service and
   `flatten_fast_nofilter.json` hashes;

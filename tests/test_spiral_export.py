@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 from scrollq.spiral_export import SpiralExportError, export_checkpoint, prepare_export
+from scrollq.spiral_reproduction_check import evaluate_run
 from scrollq.spiral_run import run_baseline
 
 
@@ -34,10 +35,13 @@ def _villa(tmp_path, *, exporter_mode="tifxyz"):
     lasagna.mkdir(parents=True)
 
     (spiral / "fit_spiral.py").write_text(
-        "import os, pathlib\n"
+        "import json, os, pathlib\n"
         "run=pathlib.Path(os.environ['FIT_SPIRAL_RUN_DIR'])\n"
         "print('loaded 480117 tracks within z-roi [11000, 12000)')\n"
         "print('fitting 0 patches')\n"
+        "(run/'satisfaction_metrics_fitted.json').write_text(json.dumps({'summary':{"
+        "'total_tracks':480117,'satisfied_tracks_fraction':0.12604,"
+        "'satisfied_track_points_fraction':0.41596}}))\n"
         "(run/'checkpoint_fitted.ckpt').write_bytes(b'checkpoint-v1')\n"
     )
     if exporter_mode == "tifxyz":
@@ -141,7 +145,13 @@ def _dataset_and_recipe(tmp_path, villa_commit):
             "optimizer_num_training_steps": 30000,
             "optimizer_random_seed": 1,
             "expected_reference_context": {
+                "documented_gpu": "RTX 3090",
                 "documented_tracks_loaded_with_input_use_tracks_true": 480117,
+                "comparison_only_not_correctness_metrics": {
+                    "dr_per_winding_voxels": 14.8851,
+                    "satisfied_tracks_percent": 12.6,
+                    "satisfied_track_points_percent": 41.6,
+                },
             },
             "config_overrides": {
                 "z_begin": 11000,
@@ -174,11 +184,15 @@ def _successful_fit(tmp_path, *, exporter_mode="tifxyz"):
         python_executable=sys.executable,
     )
     assert fit["success"] is True
-    return villa, dataset, run_dir
+    reproduction = evaluate_run(run_dir)
+    assert reproduction["baseline_reproduction_ready_for_export"] is True
+    reproduction_path = run_dir / "reproduction-check.json"
+    reproduction_path.write_text(json.dumps(reproduction))
+    return villa, dataset, run_dir, reproduction_path
 
 
 def test_official_export_receipts_exact_fit_and_tifxyz(tmp_path):
-    villa, dataset, run_dir = _successful_fit(tmp_path)
+    villa, dataset, run_dir, reproduction_check = _successful_fit(tmp_path)
     output = tmp_path / "baseline.tifxyz"
     evidence = tmp_path / "export-evidence"
 
@@ -188,6 +202,7 @@ def test_official_export_receipts_exact_fit_and_tifxyz(tmp_path):
         villa_root=villa,
         output=output,
         evidence_dir=evidence,
+        reproduction_check=reproduction_check,
         python_executable=sys.executable,
         device="cpu",
     )
@@ -206,7 +221,7 @@ def test_official_export_receipts_exact_fit_and_tifxyz(tmp_path):
 
 
 def test_tampered_checkpoint_blocks_before_export(tmp_path):
-    villa, dataset, run_dir = _successful_fit(tmp_path)
+    villa, dataset, run_dir, reproduction_check = _successful_fit(tmp_path)
     (run_dir / "checkpoint_fitted.ckpt").write_bytes(b"tampered")
     with pytest.raises(SpiralExportError, match="checkpoint bytes"):
         prepare_export(
@@ -215,6 +230,7 @@ def test_tampered_checkpoint_blocks_before_export(tmp_path):
             villa_root=villa,
             output=tmp_path / "out.tifxyz",
             evidence_dir=tmp_path / "evidence",
+            reproduction_check=reproduction_check,
             python_executable=sys.executable,
             device="cpu",
             chunk_size=65536,
@@ -224,7 +240,7 @@ def test_tampered_checkpoint_blocks_before_export(tmp_path):
 
 
 def test_recipe_voxel_drift_to_villa_default_is_rejected(tmp_path):
-    villa, dataset, run_dir = _successful_fit(tmp_path)
+    villa, dataset, run_dir, reproduction_check = _successful_fit(tmp_path)
     recipe_path = run_dir / "spiral-run.recipe.json"
     recipe = json.loads(recipe_path.read_text())
     recipe["scroll_spec_expected"]["voxel_size_um"] = 9.6
@@ -233,6 +249,9 @@ def test_recipe_voxel_drift_to_villa_default_is_rejected(tmp_path):
     run_receipt = json.loads(run_receipt_path.read_text())
     run_receipt["recipe"]["copy_sha256"] = _sha256(recipe_path)
     run_receipt_path.write_text(json.dumps(run_receipt))
+    # Refresh the reproduction proof so this test reaches the independent
+    # physical voxel-size guard instead of failing earlier on stale binding.
+    reproduction_check.write_text(json.dumps(evaluate_run(run_dir)))
     with pytest.raises(SpiralExportError, match="9.362"):
         prepare_export(
             run_dir=run_dir,
@@ -240,6 +259,7 @@ def test_recipe_voxel_drift_to_villa_default_is_rejected(tmp_path):
             villa_root=villa,
             output=tmp_path / "out.tifxyz",
             evidence_dir=tmp_path / "evidence",
+            reproduction_check=reproduction_check,
             python_executable=sys.executable,
             device="cpu",
             chunk_size=65536,
@@ -247,7 +267,7 @@ def test_recipe_voxel_drift_to_villa_default_is_rejected(tmp_path):
 
 
 def test_zero_exit_without_usable_tifxyz_is_failed_receipt(tmp_path):
-    villa, dataset, run_dir = _successful_fit(tmp_path, exporter_mode="no-output")
+    villa, dataset, run_dir, reproduction_check = _successful_fit(tmp_path, exporter_mode="no-output")
     evidence = tmp_path / "evidence"
     receipt = export_checkpoint(
         run_dir=run_dir,
@@ -255,6 +275,7 @@ def test_zero_exit_without_usable_tifxyz_is_failed_receipt(tmp_path):
         villa_root=villa,
         output=tmp_path / "out.tifxyz",
         evidence_dir=evidence,
+        reproduction_check=reproduction_check,
         python_executable=sys.executable,
         device="cpu",
     )
@@ -265,7 +286,7 @@ def test_zero_exit_without_usable_tifxyz_is_failed_receipt(tmp_path):
 
 
 def test_export_refuses_existing_output_or_evidence(tmp_path):
-    villa, dataset, run_dir = _successful_fit(tmp_path)
+    villa, dataset, run_dir, reproduction_check = _successful_fit(tmp_path)
     output = tmp_path / "existing.tifxyz"
     output.mkdir()
     with pytest.raises(SpiralExportError, match="overwrite existing TIFXYZ"):
@@ -275,6 +296,71 @@ def test_export_refuses_existing_output_or_evidence(tmp_path):
             villa_root=villa,
             output=output,
             evidence_dir=tmp_path / "evidence",
+            reproduction_check=reproduction_check,
+            python_executable=sys.executable,
+            device="cpu",
+            chunk_size=65536,
+        )
+
+
+
+def test_export_requires_passing_reproduction_check(tmp_path):
+    villa, dataset, run_dir, reproduction_check = _successful_fit(tmp_path)
+    report = json.loads(reproduction_check.read_text())
+    report["status"] = "drift"
+    report["baseline_reproduction_ready_for_export"] = False
+    reproduction_check.write_text(json.dumps(report))
+    with pytest.raises(SpiralExportError, match="passing sanity-match"):
+        prepare_export(
+            run_dir=run_dir,
+            dataset=dataset,
+            villa_root=villa,
+            output=tmp_path / "out.tifxyz",
+            evidence_dir=tmp_path / "evidence",
+            reproduction_check=reproduction_check,
+            python_executable=sys.executable,
+            device="cpu",
+            chunk_size=65536,
+        )
+
+
+def test_export_rejects_reproduction_check_for_other_run(tmp_path):
+    villa, dataset, run_dir, reproduction_check = _successful_fit(tmp_path)
+    report = json.loads(reproduction_check.read_text())
+    report["run_receipt"]["sha256"] = "0" * 64
+    reproduction_check.write_text(json.dumps(report))
+    with pytest.raises(SpiralExportError, match="fresh recomputation"):
+        prepare_export(
+            run_dir=run_dir,
+            dataset=dataset,
+            villa_root=villa,
+            output=tmp_path / "out.tifxyz",
+            evidence_dir=tmp_path / "evidence",
+            reproduction_check=reproduction_check,
+            python_executable=sys.executable,
+            device="cpu",
+            chunk_size=65536,
+        )
+
+
+
+def test_export_recomputes_reproduction_check_instead_of_trusting_json(tmp_path):
+    villa, dataset, run_dir, reproduction_check = _successful_fit(tmp_path)
+    report = json.loads(reproduction_check.read_text())
+    report["reference_context"]["tracks_loaded"] = 1
+    # Keep the asserted pass fields intact: export must still detect that the
+    # supplied report differs from what the run bytes actually recompute to.
+    assert report["status"] == "sanity-match"
+    assert report["baseline_reproduction_ready_for_export"] is True
+    reproduction_check.write_text(json.dumps(report))
+    with pytest.raises(SpiralExportError, match="fresh recomputation"):
+        prepare_export(
+            run_dir=run_dir,
+            dataset=dataset,
+            villa_root=villa,
+            output=tmp_path / "out.tifxyz",
+            evidence_dir=tmp_path / "evidence",
+            reproduction_check=reproduction_check,
             python_executable=sys.executable,
             device="cpu",
             chunk_size=65536,
