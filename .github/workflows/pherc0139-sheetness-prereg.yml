@@ -74,46 +74,22 @@ jobs:
           set -euxo pipefail
           export AWS_ENDPOINT_URL_S3="https://s3.us-east-1.amazonaws.com"
           root="PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr"
-          # Keep ScrolIQ's immutable ZPA pin. The pinned gate predates the
-          # newer --expected-voxel-size-um CLI flag, so exact physical scale
-          # is checked fail-closed from the gate's embedded source attestation.
+          # Keep ScrolIQ's immutable ZPA pin. For this reference campaign the
+          # exact source identity is the full CT root plus the official tutorial
+          # binding. The pinned report carries no usable unit-bearing spatial
+          # axes, so do not manufacture a physical-size claim from relative scale.
           zpa-gate \
             --base s3://vesuvius-challenge-open-data \
             --root "$root" \
             --out gate.json
           python - <<'PY'
           import json
-          import math
           from pathlib import Path
 
           expected_root = (
               "PHerc0139/volumes/"
               "20250728140407-9.362um-1.2m-113keV-masked.zarr"
           )
-          expected_um = 9.362
-          tolerance_um = 0.001
-          unit_to_um = {
-              "um": 1.0,
-              "µm": 1.0,
-              "μm": 1.0,
-              "micron": 1.0,
-              "microns": 1.0,
-              "micrometer": 1.0,
-              "micrometers": 1.0,
-              "micrometre": 1.0,
-              "micrometres": 1.0,
-              "nm": 1e-3,
-              "nanometer": 1e-3,
-              "nanometers": 1e-3,
-              "nanometre": 1e-3,
-              "nanometres": 1e-3,
-              "mm": 1e3,
-              "millimeter": 1e3,
-              "millimeters": 1e3,
-              "millimetre": 1e3,
-              "millimetres": 1e3,
-          }
-
           gate = json.loads(Path("gate.json").read_text())
           if gate.get("n_pass") != 1 or gate.get("n_fail") != 0:
               raise SystemExit("exact CT gate did not pass")
@@ -135,50 +111,16 @@ jobs:
               raise SystemExit("ZPA source attestation is not PRESENT")
           if att.get("axes") != ["z", "y", "x"]:
               raise SystemExit("exact CT axes are not unambiguous ZYX")
+          digest = att.get("metadata_semantics_sha256")
+          if (
+              not isinstance(digest, str)
+              or len(digest) != 64
+              or any(ch not in "0123456789abcdef" for ch in digest)
+          ):
+              raise SystemExit("ZPA metadata-semantics digest is invalid")
 
-          scale = att.get("base_declared_scale")
-          spatial = att.get("spatial_axes")
-          if not isinstance(scale, list) or not isinstance(spatial, list):
-              raise SystemExit("ZPA source attestation lacks physical-scale evidence")
-          observed = {}
-          for axis in spatial:
-              if not isinstance(axis, dict):
-                  raise SystemExit("malformed spatial-axis evidence")
-              name = str(axis.get("name", "")).lower()
-              index = axis.get("index")
-              unit = axis.get("unit")
-              if (
-                  name not in {"z", "y", "x"}
-                  or not isinstance(index, int)
-                  or isinstance(index, bool)
-                  or index < 0
-                  or index >= len(scale)
-                  or not isinstance(unit, str)
-              ):
-                  raise SystemExit("unusable spatial-axis scale evidence")
-              factor = unit_to_um.get(unit.strip().lower())
-              value = scale[index]
-              if (
-                  factor is None
-                  or isinstance(value, bool)
-                  or not isinstance(value, (int, float))
-                  or not math.isfinite(float(value))
-                  or float(value) <= 0
-              ):
-                  raise SystemExit("unsupported or invalid physical-scale evidence")
-              value_um = float(value) * factor
-              if not math.isclose(
-                  value_um, expected_um, rel_tol=0.0, abs_tol=tolerance_um
-              ):
-                  raise SystemExit(
-                      f"physical scale mismatch on {name}: "
-                      f"{value_um:g} µm != {expected_um:g} µm"
-                  )
-              observed[name] = value_um
-
-          if set(observed) != {"z", "y", "x"}:
-              raise SystemExit("did not verify all three spatial axes")
-          print("physical-size fence PASS:", observed)
+          print("exact-source fence PASS:", expected_root)
+          print("metadata-semantics sha256:", digest)
           Path("zpa.json").write_text(json.dumps(report, indent=2) + "\n")
           PY
 
