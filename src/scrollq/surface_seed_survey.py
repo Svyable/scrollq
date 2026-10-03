@@ -184,6 +184,7 @@ def survey_seed_boxes(
     xs = _spread_indices(grid[2], per_dim)
 
     phase1: list[dict[str, Any]] = []
+    positive_masks: dict[tuple[int, int, int], np.ndarray] = {}
     prediction_reads = 0
     for pz in range(pz0, pz1 + 1):
         for py in ys:
@@ -201,6 +202,7 @@ def survey_seed_boxes(
                 positives = int(pos.sum())
                 if positives == 0:
                     continue
+                positive_masks[idx] = pos
                 phase1.append(
                     {
                         "prediction_chunk_zyx": list(idx),
@@ -222,18 +224,15 @@ def survey_seed_boxes(
         phase1 if prefilter == 0
         else phase1[: min(prefilter, len(phase1))]
     )
-    ct_cache: dict[tuple[int, int, int], np.ndarray | None] = {}
+    ct_chunk_reads = 0
 
     for row in measured:
         idx = tuple(row["prediction_chunk_zyx"])
         lo, hi = row["bbox_zyx_half_open"]
-        pbox = _prediction_box(pred, idx, lo, hi)
-        prediction_reads += 1
-        if pbox is None:
-            row["measurement_status"] = "prediction-disappeared"
-            continue
-        pos = pbox > threshold
-        ctbox = _read_bbox(ct, lo, hi, cache=ct_cache)
+        pos = positive_masks[idx]
+        row_cache: dict[tuple[int, int, int], np.ndarray | None] = {}
+        ctbox = _read_bbox(ct, lo, hi, cache=row_cache)
+        ct_chunk_reads += len(row_cache)
         positives = int(pos.sum())
         phantom = int((pos & (ctbox == 0)).sum())
         row.update(
@@ -290,7 +289,8 @@ def survey_seed_boxes(
             "top_k": top_k,
             "min_chunk_distance": min_chunk_distance,
             "prediction_chunk_reads": prediction_reads,
-            "unique_ct_chunk_reads": len(ct_cache),
+            "ct_chunk_reads": ct_chunk_reads,
+            "peak_ct_chunk_cache_scope": "one measured box",
         },
         "ranking_rule": (
             "phase 1 prefilter by prediction-positive voxels; phase 2 rank by local "
@@ -317,12 +317,11 @@ def write_selected_cutouts(
 ) -> None:
     """Write exact selected CT cutouts and binary prediction masks with hashes."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    ct_cache: dict[tuple[int, int, int], np.ndarray | None] = {}
     for row in report.get("selected", []):
         rank = int(row["rank"])
         idx = tuple(row["prediction_chunk_zyx"])
         lo, hi = row["bbox_zyx_half_open"]
-        ctbox = _read_bbox(ct, lo, hi, cache=ct_cache)
+        ctbox = _read_bbox(ct, lo, hi, cache={})
         pbox = _prediction_box(pred, idx, lo, hi)
         if pbox is None:
             raise SeedSurveyError(
