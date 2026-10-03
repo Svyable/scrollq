@@ -50,7 +50,7 @@ The current validator rejects a manifest when any of these conditions is not pro
 - a trained model lacks public held-out validation against known ground truth, the validation protocol/results are incomplete, or same-volume training and held-out regions overlap;
 - the required recto-coverage ledger fails its own accounting checks, pins a different code commit/CT root, or its mesh-ID set differs from the submitted mesh set;
 - surfaces, meshes, or renders break lineage to `ct:eligible`;
-- a mesh is not named `column_NN.tifxyz`, lacks the low-distortion-isometric flattening declaration, or duplicates a column;
+- a mesh is not named `column_NN.tifxyz`, lacks the low-distortion-isometric flattening declaration, duplicates a column, or—when `--root-dir` is supplied—is not an unpacked TIFXYZ directory whose `meta.json` `target_volume` identifies the exact eligible CT;
 - a render does not match its mesh filename stem/column, lacks a 1 cm scale-bar declaration, or is not tied to the pinned code commit;
 - training and prediction regions overlap on the same eligible volume;
 - the full-scroll banner does not enumerate all submitted renders with column numbers overlaid;
@@ -231,6 +231,8 @@ directory enumeration order while binding every file in the TIFXYZ surface.
 When `--root-dir` is supplied, `scroliq-provenance` recomputes the same
 digest directly from the unpacked submission directory and fails on any missing
 or tampered content inside a declared TIFXYZ path.
+
+For every unpacked TIFXYZ mesh, the local package gate also opens `meta.json` and records a `mesh_context_proofs` entry. The mesh must declare `format: "tifxyz"`, a positive finite 2D `scale`, and a VC3D `target_volume` containing the exact prize-eligible volume ID. A contradictory `scroll_source` is also rejected. These fields are evidence carried by the mesh itself, not inferred from the submission filename. This directly catches a column copied from another scan even if its manifest IDs and package filename were edited to look correct.
 
 ## CI gate
 
