@@ -6,7 +6,7 @@ on:
       - "src/scrollq/tifxyz_audit.py"
       - "tests/test_tifxyz_audit.py"
       - "scripts/pherc0139_mesh_review_queue.py"
-      - "artifacts/2026-10-02-pherc0139-review-queue/**"
+      - "artifacts/2026-10-03-pherc0139-review-queue/**"
       - ".github/workflows/pherc0139-review-queue.yml"
   workflow_dispatch:
 
@@ -27,8 +27,8 @@ jobs:
       - name: Generate pinned real-data review queue
         run: |
           mkdir -p /tmp/expected
-          cp artifacts/2026-10-02-pherc0139-review-queue/summary.json /tmp/expected/summary.json 2>/dev/null || true
-          cp artifacts/2026-10-02-pherc0139-review-queue/review-points.json /tmp/expected/review-points.json 2>/dev/null || true
+          cp artifacts/2026-10-03-pherc0139-review-queue/summary.json /tmp/expected/summary.json 2>/dev/null || true
+          cp artifacts/2026-10-03-pherc0139-review-queue/review-points.json /tmp/expected/review-points.json 2>/dev/null || true
           python scripts/pherc0139_mesh_review_queue.py --out-dir /tmp/actual
       - name: Verify frozen artifacts when present
         run: |

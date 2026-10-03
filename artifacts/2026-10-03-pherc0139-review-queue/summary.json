@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "campaign": "PHerc0139-mesh-iq-vc3d-review-queue",
+  "surface": {
+    "scroll": "PHerc0139",
+    "segment": "20260306000001-w051_2026030600",
+    "volume_id": "20250728140407",
+    "volume_root": "community-uploads/forrest/volcomp/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "source_url": "https://vesuvius-challenge-open-data.s3.us-east-1.amazonaws.com/PHerc0139/segments/20260306000001-w051_2026030600/mesh/20260306000001-on-20250728140407-9.362um.tifxyz",
+    "files": {
+      "meta.json": {
+        "bytes": 419,
+        "sha256": "c0f12d62261968b901df9aa672a65f70133ccf1339dda9ad0cb0cc3b3a158163"
+      },
+      "x.tif": {
+        "bytes": 727814,
+        "sha256": "dff240d4c984da3223020562a83ee96d34da9f02787b3b2409adc0b3a5d12215"
+      },
+      "y.tif": {
+        "bytes": 727814,
+        "sha256": "a73d4c247505e123a9dfe923c6f7fe53ee9ca7ab9ce7bddecb5405f1014c5c6c"
+      },
+      "z.tif": {
+        "bytes": 727814,
+        "sha256": "233bc07b57ed6447e19482785905ebdf41031bf979ca859390de79a2f569237e"
+      }
+    }
+  },
+  "audit": {
+    "status": "partial",
+    "finding_kinds": [
+      "edge-jump",
+      "normal-reversal"
+    ],
+    "total_candidates_by_kind": {
+      "edge-jump": 15,
+      "normal-reversal": 173
+    },
+    "emitted_by_kind": {
+      "edge-jump": 15,
+      "normal-reversal": 20
+    },
+    "review_limit_per_kind": 20
+  },
+  "vc3d": {
+    "schema": "1",
+    "collections": 2,
+    "points": 35,
+    "review_points_sha256": "a20935bd428d940f70ddf62836cbf92f5a2d2eaa8db4c923e5a4782d88a6ba93"
+  },
+  "claim_boundary": [
+    "Review points localize local geometry cues; they are not defect verdicts.",
+    "The queue does not establish physical sheet identity or freedom from nonlocal self-intersections.",
+    "Use the independently bound Windcheck dossier and official VC3D self-cross validation for nonlocal topology evidence."
+  ]
+}

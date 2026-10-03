@@ -149,7 +149,30 @@ The report's `ray_order` section records the umbilicus and input SHA-256s, every
 
 The ±2 row is a **limit of the design, not a tuning miss**: with the minimum compared gap of 2, a shifted point can only invert against a neighbour whose true winding lies strictly between its old and new label, which needs |s| ≥ 3 (`tests/test_ray_order_control.py` pins this). At ±3 the corrupted point and its one inverted partner are often indistinguishable, hence the lower rank-1 share. Absolute points are only 5 of each 200-point sample, too few for a role-specific figure. The ranking was not tuned on this control.
 
-What it does not establish: patch attachment, CT support, relative-winding graph holonomy across collections, ±1/±2 errors, or held-out spiral-fit accuracy. Those remain the next Winding IQ / Spiral IQ layers.
+What it does not establish: CT support, ±1 errors, or held-out spiral-fit accuracy. Patch attachment and cross-collection consistency are the next layer, below.
+
+### Cross-collection consistency through verified patches
+
+[`bin/winding_attach.py`](bin/winding_attach.py), pre-registered in [`docs/winding-attachment-protocol.md`](docs/winding-attachment-protocol.md), works in four steps:
+
+1. It attaches each absolute or relative point to the verified patch surfaces within 8 voxels.
+2. It unwraps each patch around the umbilicus.
+3. It turns every attachment into an integer constraint between a patch and a collection offset.
+4. It flags constraints that disagree by two or more windings.
+
+A +2 injection control must catch at least 90% of the errors it injects; below that the result is `UNVERIFIED`.
+
+**First run, on PHercParis4** ([`artifacts/2026-10-03-paris4-winding-attachment/`](artifacts/2026-10-03-paris4-winding-attachment/)):
+
+- All 20,765 candidate patches were read.
+- **2,111 of 2,232** points attached.
+- **206 of 254** relative collections are tied to the absolute frame.
+- There are 6,165 independent cycles.
+- **6 of 16,074** constraints are flagged, so the verdict is INCONSISTENT. The flagged points are listed with VC3D coordinates.
+- The control detected **194 / 200** injected errors.
+- The spiral sense is decided by the data (524 against 2,120 nonzero residuals). The branch-cut angle is not well identified.
+
+Flags are review cues: a patch traced onto a neighbouring winding gives the same signal as a mis-numbered annotation.
 
 ## Fiber IQ: native VC3D + trace continuity audit
 
@@ -251,7 +274,7 @@ Windcheck's same-original census reports 3,333 transverse contacts. The
 passport accepts this as content-bound external evidence while still asking for
 the official VC3D self-cross validator before downstream use.
 
-For local review, `--review-points` emits native VC3D PointCollections with the strongest edge-jump and neighbouring-normal-reversal sites ranked in the audit JSON. The frozen [PHerc0139 review-queue campaign](artifacts/2026-10-02-pherc0139-review-queue/) produces 35 directly loadable points (15/15 edge jumps plus the top 20/173 normal reversals) on the same public surface used by the binding-aware Windcheck dossier. These coordinates are inspection targets, not defect verdicts.
+For local review, `--review-points` emits native VC3D PointCollections with the strongest edge-jump and neighbouring-normal-reversal sites ranked in the audit JSON. The frozen [PHerc0139 review-queue campaign](artifacts/2026-10-03-pherc0139-review-queue/) produces 35 directly loadable points (15/15 edge jumps plus the top 20/173 normal reversals) on the same public surface used by the binding-aware Windcheck dossier. These coordinates are inspection targets, not defect verdicts.
 
 For nonlocal self-intersections, ScrolIQ does not duplicate VC3D's geometry kernel. Generate a deterministic upstream report with `vc_tifxyz_selfcross <surface.tifxyz> -o report.json --collection sites.json` and pass it with `--selfcross-report`. ScrolIQ validates the report against the exact local surface path and grid, blocks on transverse contacts, preserves coplanar/grazing contacts as non-crossings, and keeps a nominally clean census partial when upstream skipped long-edge quads under `maxedge`. The optional `sites.json` remains directly loadable in VC3D for inspection.
 
@@ -338,6 +361,7 @@ The repository includes the exact outputs behind the September 30, 2026 campaign
 | Scan metrics vs documented protocol quality (pre-registered) | **Negative**: `otsu_eta` reverses in 3/4 registered pairs, `edge_sharpness` in 2/4 — do not compare scores across scans of one scroll — [`protocol-pairs/`](artifacts/2026-10-01-protocol-pairs/) |
 | Hand-entered prize manifests match official sources | Grand Prize **13 / 13**, First Letters **22 / 22** — [`prize-targets/`](artifacts/2026-10-01-prize-targets/), `tests/test_prize_manifest.py` |
 | Published PHercParis4 winding annotations are radially consistent | **2 / 13,700** comparable pairs inverted around the umbilicus, both sub-voxel; injection control catches **179 / 200** ±3 and **171 / 200** ±5 single-point mis-numberings (±2 undetectable by design) — [`paris4-winding-ray-order/`](artifacts/2026-10-01-paris4-winding-ray-order/) |
+| PHercParis4 winding annotations agree across collections through verified patches | **6 / 16,074** patch-collection constraints off by ≥ 2 windings; 206 / 254 relative collections tied to the absolute frame; injection control detects **194 / 200** +2 errors — [`paris4-winding-attachment/`](artifacts/2026-10-03-paris4-winding-attachment/) |
 | Fiber IQ runs on public VC3D fibers | **8** SHA-256-pinned PHercParis4 fibers (53,828 points): **11** gap and **26** sharp-turn review candidates, **0** control-line offsets / order inversions; subset, not passport evidence — [`public-fiber-audit/`](artifacts/2026-10-01-public-fiber-audit/) |
 | `scrollq-health` fails closed on missing integrity evidence | A non-existent root is **DO NOT TRAIN** (integrity UNKNOWN); the three published live verdicts are unchanged — [`health-verdicts-fail-closed/`](artifacts/2026-10-01-health-verdicts-fail-closed/) |
 

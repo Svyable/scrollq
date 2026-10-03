@@ -193,3 +193,17 @@ def test_run_end_to_end_with_fake_fetch(tmp_path):
     assert result["inputs"]["patch_read_errors"] == 1  # gone/ has a bbox but no grids
     assert result["inputs"]["points_attached_primary"] == len(points)
     assert result["decision"]["verdict"] == "CONSISTENT"
+
+
+def test_review_context_separates_far_patch_conflicts_from_annotation_errors():
+    spec_r = importlib.util.spec_from_file_location("winding_attach_review", ROOT / "bin" / "winding_attach_review.py")
+    review = importlib.util.module_from_spec(spec_r)
+    spec_r.loader.exec_module(review)
+    specs = [s if s[:2] != ("relative:b", "1") else ("relative:b", "1", 2.35, 50, 0) for s in SPECS]
+    points = make_points(specs)
+    rows = review.review_context(attachments_for(points), points, sense=1, cut=0)
+    flagged = {r["point"]: r for r in rows}
+    assert "relative:b/1" in flagged
+    assert flagged["relative:b/1"]["flagged"] >= 1
+    assert all(r["reading"] for r in rows)
+    assert review.review_context(attachments_for(make_points(SPECS)), make_points(SPECS), 1, 0) == []

@@ -95,6 +95,9 @@ def main() -> int:
             volume_root=VOLUME_ROOT,
             review_limit_per_kind=20,
         )
+        # The audit ran on a random temp copy; record the pinned public source
+        # instead, so the outputs (and their hashes) are reproducible.
+        report["tifxyz_path"] = BASE
         queue = report["review_queue"]
         totals = queue["total_candidates_by_kind"]
         if totals != {"edge-jump": 15, "normal-reversal": 173}:
