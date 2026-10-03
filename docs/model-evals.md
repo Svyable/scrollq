@@ -34,7 +34,7 @@ Example:
       --root-dir . \
       --out out/example.preflight.json
 
-The registry schema is `models/schema.json`.
+The registry schema is `models/schema.json`; the held-out dataset contract is `evals/dataset.schema.json`.
 
 ## Model registry contract
 
@@ -100,8 +100,9 @@ Use a two-stage protocol instead:
 2. A trusted evaluator takes the immutable PR commit/checkpoint digest and runs
    inference in an isolated container or runner with no repository write token,
    no unrelated secrets, and preferably no outbound network. Only the evaluator
-   receives the private held-out inputs. It publishes the signed/hashed result,
-   not the truth labels.
+   receives the private held-out inputs. The dataset manifest binds the private
+   truth with `truth_commitment_sha256`; a public source URL is optional. The
+   evaluator publishes the hashed result, not the truth labels.
 
 This preserves blind evaluation while keeping the "submit by PR" workflow
 safe enough for community code.
