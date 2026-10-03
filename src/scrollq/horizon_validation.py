@@ -90,6 +90,23 @@ def validate_spec(spec: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(protocol_id, str) or not protocol_id.strip():
         raise ValueError("protocol_id must be a non-empty string")
 
+    volume_root = spec.get("volume_root")
+    if not isinstance(volume_root, str) or not volume_root.strip():
+        raise ValueError("volume_root must be a non-empty string")
+    source = spec.get("source_attestation")
+    if not isinstance(source, dict):
+        raise ValueError("source_attestation is required")
+    if source.get("algorithm") != "zpa-metadata-semantics-v1":
+        raise ValueError(
+            "source_attestation.algorithm must be zpa-metadata-semantics-v1"
+        )
+    if source.get("state") != "PRESENT":
+        raise ValueError("source_attestation.state must be PRESENT")
+    metadata_sha = _hex64(
+        source.get("metadata_semantics_sha256"),
+        "source_attestation.metadata_semantics_sha256",
+    )
+
     shape = spec.get("shape_yx")
     if (
         not isinstance(shape, list)
@@ -147,6 +164,12 @@ def validate_spec(spec: dict[str, Any]) -> dict[str, Any]:
         "schema_version": 1,
         "coordinate_system": "score_map_xy",
         "protocol_id": protocol_id,
+        "volume_root": volume_root,
+        "source_attestation": {
+            "algorithm": source["algorithm"],
+            "state": source["state"],
+            "metadata_semantics_sha256": metadata_sha,
+        },
         "shape_yx": [rows, cols],
         "score_sha256": score_sha,
         "truth_sha256": truth_sha,
@@ -387,6 +410,8 @@ def evaluate(
         "verdict": verdict,
         "coordinate_system": "score_map_xy",
         "protocol_id": spec["protocol_id"],
+        "volume_root": spec["volume_root"],
+        "source_attestation": spec["source_attestation"],
         "spec_sha256": digest(spec_document),
         "prediction_sha256": digest(prediction),
         "prediction_csv_sha256": _sha256(resolved_csv),
@@ -431,6 +456,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--prediction-csv")
     parser.add_argument("--print-spec-hash", action="store_true")
     parser.add_argument("--out", help="new report path; refuses overwrite")
+    parser.add_argument(
+        "--require-pass",
+        action="store_true",
+        help="exit 1 when the frozen decision rule fails; valid negative results otherwise exit 0",
+    )
     return parser
 
 
@@ -457,7 +487,7 @@ def main(argv: list[str] | None = None) -> int:
             with Path(args.out).open("x") as f:
                 f.write(text)
         print(text, end="")
-        return 0 if result["verdict"] == "PASS" else 1
+        return int(args.require_pass and result["verdict"] != "PASS")
     except (ValueError, OSError, json.JSONDecodeError) as exc:
         parser.error(str(exc))
 
