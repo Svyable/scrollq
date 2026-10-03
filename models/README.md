@@ -15,6 +15,12 @@ A minimal entry:
   "training_data": ["PHercParis4-fragments/train-v2"],
   "held_out_excluded": true,
   "inference_script": "models/nader-ink-v2/infer.py",
+  "inference_config": {
+    "overlap": 0.5,
+    "blend_mode": "hann",
+    "layer_start": 0,
+    "layer_end": 64
+  },
   "license": "MIT",
   "tasks": ["ink"],
   "stochastic": true,
@@ -30,8 +36,9 @@ checkpoints, CI/evaluators pass the downloaded file with `scroliq-eval
 ## Fail-closed rules
 
 A model is not rank-eligible if the checkpoint cannot be hash-verified, the
-inference script is missing, the requested task is undeclared, held-out
-exclusion is not explicitly true, a declared training-data identifier overlaps
+inference script is missing, output-affecting `inference_config` is not
+hash-bound, the requested task is undeclared, held-out exclusion is not
+explicitly true, a declared training-data identifier overlaps
 the held-out manifest, a stochastic model lacks a fixed seed, or any expected
 evaluation region is failed/missing.
 

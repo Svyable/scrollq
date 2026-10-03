@@ -32,6 +32,12 @@ def _fixture(tmp_path):
         "training_data": ["train-a"],
         "held_out_excluded": True,
         "inference_script": "models/demo/infer.py",
+        "inference_config": {
+            "overlap": 0.5,
+            "blend_mode": "hann",
+            "layer_start": 0,
+            "layer_end": 64
+        },
         "license": "MIT",
         "tasks": ["ink"],
         "stochastic": True,
@@ -86,6 +92,55 @@ def test_stochastic_model_requires_seed(tmp_path):
     _, model, *_ = _fixture(tmp_path)
     model.pop("random_seed")
     with pytest.raises(ValidationError, match="random_seed"):
+        validate_model_card(model)
+
+
+def test_missing_inference_configuration_blocks_ranking(tmp_path):
+    root, model, dataset, model_path, dataset_path = _fixture(tmp_path)
+    model.pop("inference_config")
+    model_path.write_text(json.dumps(model))
+    report = build_report(
+        model_document=model,
+        dataset_document=dataset,
+        model_path=model_path,
+        dataset_path=dataset_path,
+        root=root,
+    )
+    check = next(
+        c for c in report["preflight"]["checks"]
+        if c["name"] == "inference_configuration"
+    )
+    assert check["ok"] is False
+    assert report["preflight"]["rank_eligible"] is False
+
+
+def test_inference_configuration_is_canonical_hash_bound(tmp_path):
+    _, model, *_ = _fixture(tmp_path)
+    first = validate_model_card(model)
+    reordered = dict(model)
+    reordered["inference_config"] = {
+        "layer_end": 64,
+        "layer_start": 0,
+        "blend_mode": "hann",
+        "overlap": 0.5,
+    }
+    second = validate_model_card(reordered)
+    assert first["inference_config_sha256"] == second["inference_config_sha256"]
+
+    changed = dict(model)
+    changed["inference_config"] = dict(model["inference_config"])
+    changed["inference_config"]["overlap"] = 0.25
+    third = validate_model_card(changed)
+    assert first["inference_config_sha256"] != third["inference_config_sha256"]
+
+
+def test_inference_configuration_rejects_empty_or_nonfinite(tmp_path):
+    _, model, *_ = _fixture(tmp_path)
+    model["inference_config"] = {}
+    with pytest.raises(ValidationError, match="non-empty JSON object"):
+        validate_model_card(model)
+    model["inference_config"] = {"overlap": float("nan")}
+    with pytest.raises(ValidationError, match="finite JSON values"):
         validate_model_card(model)
 
 
