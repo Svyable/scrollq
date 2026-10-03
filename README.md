@@ -90,6 +90,27 @@ ink, or readability verdict. The exact mathematical contract, ITK attribution,
 synthetic controls, memory guard, and predeclared real-data falsification plan
 are in [`docs/sheetness.md`](docs/sheetness.md).
 
+## Seismic-style horizon path baseline
+
+`scroliq-horizon-path` tests whether sparse anchors plus a globally constrained
+path can follow one layer through a 2-D score field, including local evidence
+gaps:
+
+```bash
+scroliq-horizon-path sheetness-slice.npy \
+  --out-prefix out/slice-042 \
+  --max-step 2 \
+  --smoothness 0.20 \
+  --anchor 0:137 --anchor 220:141 --anchor 511:128
+```
+
+The implementation is independent NumPy code inspired by seismic-horizon
+tracking: hard anchors, bounded adjacent motion, and a smoothness penalty are
+solved by deterministic dynamic programming. It emits a hash-pinned CSV/JSON
+path and explicitly remains **2-D evidence only**, not a 3-D surface or winding
+verdict. See [`docs/horizon-path.md`](docs/horizon-path.md) for the adjacent-field
+references, falsification tests, and held-out real-segment protocol.
+
 ## Winding annotation audit
 
 `scroliq-winding` audits the conventional VC3D / spiral-fitting point-collection inputs before they are trusted as geometry evidence:
