@@ -123,8 +123,9 @@ directory. It checks that:
 - the embedded reviewer contract and all six reviewer materials match their
   recorded hashes;
 - the legibility ledger and generated validation hashes agree with each other
-  and the exact provenance-manifest hash, and the validation passes the 70%
-  per-counted-column contract;
+  and the exact provenance-manifest hash, the validation passes the 70%
+  per-counted-column contract, and the verifier independently recomputes that
+  validation from the embedded manifest and ledger;
 - reviewer human-hours accounting is internally consistent and no more than
   eight hours;
 - the reviewer Docker command uses its digest-pinned image;
