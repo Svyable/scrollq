@@ -82,6 +82,40 @@ On the upstream file at Git blob `26d66ccac89a880a73a4bc8a9727097679d014fb`, thi
 
 That only chooses *z*. Within this band, candidate surfaces still have to be grown/seated against CT, audited, rendered, and passed through the controls above. No candidate is called a letter until a human can identify the character letter-by-letter and the physical-control evidence survives.
 
+## Deterministic x/y seed survey
+
+The frozen z-band is converted into local GrowPatch starting points with `scroliq-surface-seeds`. The survey reads the exact eligible masked CT and its matching released m7 surface prediction on the same voxel grid. It samples a fixed 12 x 12 grid of prediction chunks across y/x, measures every nonempty sampled box against CT (`--prefilter 0`), ranks by local CT support, and greedily removes neighboring boxes so the first campaign is spatially distributed.
+
+For PHerc0490A the preregistered command is:
+
+```bash
+scroliq-surface-seeds \
+  --pred-url https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0490A/representations/predictions/surfaces/20250521151210-surface-20260413222639-surface-m7-L0-th0.2.zarr \
+  --ct-url https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0490A/volumes/20250521151210-8.640um-1.2m-116keV-masked.zarr \
+  --expected-volume-id 20250521151210 \
+  --z-range 9274,9338 \
+  --per-dim 12 \
+  --prefilter 0 \
+  --top-k 12 \
+  --min-chunk-distance 1 \
+  --threshold 127 \
+  --cutout-dir out/pherc0490a-seeds/cutouts \
+  --out out/pherc0490a-seeds/seed-survey.json
+```
+
+The exact-volume guard rejects mismatched CT or prediction URLs, and the command also rejects differing CT/prediction shapes. Selected CT and binary surface-mask cutouts are SHA-256 pinned. With the currently published m7 chunk geometry, a 64-slice selected box is at most 64 x 192 x 192 = 2,359,296 voxels, fitting under the default 2.5-million-voxel guard of `scroliq-sheetness`.
+
+The seed survey is still not a seating verdict. Each selected CT cutout should be passed to the deterministic sheetness baseline to expose a local CT plate response and normal field before surface growth:
+
+```bash
+scroliq-sheetness seed-01.ct.npy \
+  --out-prefix out/pherc0490a-seeds/sheetness/seed-01 \
+  --sigmas 0.8,1.2,1.8 \
+  --write-normal
+```
+
+Those outputs are independent geometry observations, not proof that m7 chose the correct winding. The actual surface still has to be grown and tested for CT continuity, sheet switches, and normal-offset behavior before a `surface_seating.state = pass` artifact may be issued.
+
 ### Why surface seating is a hard gate on PHerc0490A
 
 A high surface-support fraction is not sufficient. The public `ShribyrLabs/vesuvius-reports` orientation-bias report (repository state `81e043bc4e2383f134597f0b7a05458f0bc47d02`, `03-m7-orientation-bias/`) demonstrates a crushed PHerc0490A box where the released m7 map draws structures across CT layers when sheets lie nearly perpendicular to the pose seen in training. The report measures hosted-track tangent/CT-normal disagreement of 0.377 in that box and 0.188 after an orientation-aware fine-tune, while also documenting that the fine-tune increases merged sheets.
