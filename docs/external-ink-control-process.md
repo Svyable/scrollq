@@ -1,6 +1,6 @@
 # External ink-control process — zero-training ink9um ensemble
 
-**Status:** incorporated process; experiment not yet run. Set 2026-10-03.
+**Status:** incorporated process; experiment not yet run. Set 2026-10-03. Machine-readable source pin: [`artifacts/2026-10-03-ink9um-control/source-pin.json`](../artifacts/2026-10-03-ink9um-control/source-pin.json).
 
 This process defines how ScrolIQ may use a newly relevant external ink method
 without turning a promising model into an unearned ink claim. The first method
@@ -170,14 +170,21 @@ producer on that frozen region. It does not prove that visible marks are text,
 does not establish whole-scroll readability, and does not substitute for
 Grand Prize train/prediction separation.
 
-## WATCH: dense-native pseudo-label checkpoint
+## WATCH, blocked under current public evidence: dense-native pseudo-label checkpoint
 
-The dense-native checkpoint is not rejected; it is deferred. Its reported
-held-out performance makes it worth a later experiment, but ScrolIQ should
-only admit it after independently binding the full pseudo-label lineage to the
-Grand Prize publication requirements. If that evidence clears, instantiate a
-new dated manifest and never reuse the zero-training experiment's acceptance
-thresholds automatically.
+The dense-native checkpoint is not admitted to a prize-relevant ScrollQ run
+yet. Its reported held-out performance makes it worth revisiting, but the
+pinned `training/REPRODUCE.md` states that the raw training checkpoints are
+not in that repository and only the stripped step-16k state dict ships. The
+current Grand Prize rules require pseudo-label datasets and checkpoints at
+every stage to be public under CC-BY-NC 4.0. I did not verify a separate public
+location containing every required intermediate checkpoint or a complete
+public tracking record.
+
+That is a provenance blocker, not a claim that the model is technically weak.
+If the missing stage artifacts and tracking become publicly verifiable under
+the required terms, instantiate a new dated manifest and never reuse the
+zero-training experiment's acceptance thresholds automatically.
 
 ## Proof gate strengthened
 
