@@ -66,6 +66,22 @@ def test_model_and_dataset_contracts(tmp_path):
     assert validate_dataset_manifest(dataset)["primary_metric"]["failure_value"] == 0.0
 
 
+def test_undeclared_tasks_fail_closed(tmp_path):
+    root, model, dataset, model_path, dataset_path = _fixture(tmp_path)
+    model.pop("tasks")
+    model_path.write_text(json.dumps(model))
+    report = build_report(
+        model_document=model,
+        dataset_document=dataset,
+        model_path=model_path,
+        dataset_path=dataset_path,
+        root=root,
+    )
+    check = next(c for c in report["preflight"]["checks"] if c["name"] == "task_supported")
+    assert check["ok"] is False
+    assert report["preflight"]["rank_eligible"] is False
+
+
 def test_stochastic_model_requires_seed(tmp_path):
     _, model, *_ = _fixture(tmp_path)
     model.pop("random_seed")
