@@ -6,6 +6,7 @@ import pytest
 
 from scrollq.spiral_transfer import (
     TriangleSurface,
+    EXPECTED_REFERENCE_MANIFEST_BLOB,
     _git_blob_sha1,
     _midpoint_ranks,
     _choose_offset,
@@ -147,3 +148,27 @@ def test_neighbor_classification_and_missing_expected_stay_in_denominator():
     assert m["nearest_winding_delta_counts"]["0"] == 2
     assert m["nearest_winding_delta_counts"]["-2"] == 1
     assert m["neighbor_classifiable_samples"] == 3
+
+
+def test_frozen_reference_manifest_binds_all_candidate_coordinate_blobs():
+    root = Path(__file__).resolve().parents[1]
+    path = root / "artifacts/2026-10-03-spiral-baseline-target/pherc0800_reference_blobs.json"
+    raw = path.read_bytes()
+    assert _git_blob_sha1(raw) == EXPECTED_REFERENCE_MANIFEST_BLOB
+    manifest = json.loads(raw)
+    assert manifest["source"]["commit"] == "620769e2e1e70d1e61b588092229cb76d3af4804"
+    assert len(manifest["files"]) == 24 * 4
+    assert all(len(value) == 40 for value in manifest["files"].values())
+
+
+def test_frozen_manifest_matches_preregistered_held_out_blobs():
+    root = Path(__file__).resolve().parents[1]
+    manifest = json.loads(
+        (root / "artifacts/2026-10-03-spiral-baseline-target/pherc0800_reference_blobs.json").read_text()
+    )
+    contract = json.loads(
+        (root / "artifacts/2026-10-03-spiral-baseline-target/pherc0800_transfer_evaluation.json").read_text()
+    )
+    for mesh in contract["held_out_meshes"]:
+        for key, filename in (("meta", "meta.json"), ("x", "x.tif"), ("y", "y.tif"), ("z", "z.tif")):
+            assert manifest["files"][f"{mesh['path']}/{filename}"] == mesh["blobs"][key]
