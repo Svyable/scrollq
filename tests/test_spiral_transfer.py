@@ -85,10 +85,9 @@ def test_npz_key_must_be_winding(tmp_path):
 
 
 def test_git_blob_hash_matches_git_object_definition():
-    data = b"hello\\n"
+    data = bytes([104, 101, 108, 108, 111, 10])
     import hashlib
-    expected = hashlib.sha1(b"blob 6\0hello
-").hexdigest()
+    expected = hashlib.sha1(b"blob 6" + bytes([0]) + data).hexdigest()
     assert _git_blob_sha1(data) == expected
 
 
@@ -125,8 +124,8 @@ def test_offset_choice_has_no_held_out_input_surface():
 
 def test_repeat_report_serialization_can_be_byte_identical():
     report = {"b": [2, 1], "a": {"value": 3.5}}
-    one = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\\n"
-    two = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\\n"
+    one = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + chr(10)
+    two = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + chr(10)
     assert one.encode() == two.encode()
     assert "timestamp" not in one
 
