@@ -111,6 +111,26 @@ scroliq-sheetness-campaign freeze \
 
 The output is create-only. A rerun after the plan exists must stop at the guard.
 
+## Frozen plan produced
+
+The create-only workflow produced a plan with:
+
+- **32 / 32** groups ready;
+- **0** blocked groups;
+- **823,643** voxels across all planned cutouts;
+- largest individual cutout: **46,464 voxels**;
+- frozen 8-voxel halo satisfying the planner's support/context check;
+- sheetness engine SHA-256:
+  `d04c84aaadad5d3b42f372b9702c3980ae4dad8cc895fa0b02c9264d44473a51`;
+- v3 benchmark SHA-256:
+  `0c0b3b5c4eeedfc8a5002b356439c874849301588c5a1c2ee53e9cf43eb88e79`;
+- campaign planner SHA-256:
+  `6ba6a78cb5ab45c8ddb462df59f99034ce0697617d3e3502e61b5f57b411a243`.
+
+These are descriptive properties of the already-frozen plan. No sheetness
+response, response summary, or Hessian normal field was generated or inspected
+during this freeze.
+
 ## What may happen after this freeze
 
 Only after `campaign-plan.json` is committed may the execution campaign:
