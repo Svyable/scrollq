@@ -401,8 +401,10 @@ def audit_ink_manifest(
         "warnings": warnings,
         "limitation": (
             "This audit verifies declared spatial separation and validation provenance. "
-            "It does not establish that model output is ink, that the scan contains an ink signal, "
-            "or that the manifest is complete without independently reproducible upstream data generation."
+            "External license, publication, and tracking fields are declarations that still require "
+            "their cited public evidence to be checked independently. It does not establish that "
+            "model output is ink, that the scan contains an ink signal, or that the manifest is "
+            "complete without independently reproducible upstream data generation."
         ),
     }
 
