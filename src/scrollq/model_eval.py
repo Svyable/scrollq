@@ -130,7 +130,7 @@ def validate_model_card(document: Mapping[str, Any]) -> dict[str, Any]:
 
     tasks = document.get("tasks")
     if tasks is None:
-        normalized_tasks = sorted(TASKS)
+        normalized_tasks = []
     else:
         normalized_tasks = _unique_strings(tasks, "model.tasks")
         unknown = sorted(set(normalized_tasks) - TASKS)
