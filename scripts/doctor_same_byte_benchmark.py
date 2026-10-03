@@ -144,12 +144,31 @@ def _row(
             "valid_vertex_components": mesh_components,
             "enclosed_invalid_components": mesh_holes,
             "finding_kinds": findings,
+            "isometry_normalization": (
+                mesh.get("quads", {}).get("isometry", {}).get("normalization", {})
+                if isinstance(mesh.get("quads"), dict)
+                else {}
+            ),
+            "symmetric_stretch_p95": (
+                mesh.get("quads", {})
+                .get("isometry", {})
+                .get("symmetric_stretch_distortion", {})
+                .get("p95")
+                if isinstance(mesh.get("quads"), dict)
+                else None
+            ),
         },
         "tifxyz_doctor": {
             "contract_status": doctor.get("contract_status"),
             "review_cues": doctor.get("review_cues", []),
             "valid_face_components": doctor_components,
             "enclosed_face_holes": doctor_holes,
+            "symmetric_stretch_p95": (
+                doctor.get("distributions", {})
+                .get("symmetric_stretch_p95")
+                if isinstance(doctor.get("distributions"), dict)
+                else None
+            ),
         },
         "shared_topology": {
             "hole_presence_match": (mesh_holes > 0) == (doctor_holes > 0),
@@ -204,6 +223,15 @@ def run() -> dict[str, Any]:
     positive = sum(r["tifxyz_doctor"]["enclosed_face_holes"] > 0 for r in rows)
     null = n - positive
     gp_rows = [r for r in rows if r["scroll_id"] in {"PHerc0800", "PHerc1447"}]
+    doctor_clean_stretch = [
+        r for r in rows
+        if r["tifxyz_doctor"]["symmetric_stretch_p95"] is not None
+        and r["tifxyz_doctor"]["symmetric_stretch_p95"] < 2.0
+    ]
+    mesh_isometry_false_positive_candidates = [
+        r["id"] for r in doctor_clean_stretch
+        if "isometry-distortion" in r["mesh_iq"]["finding_kinds"]
+    ]
 
     # Positive + null controls are required so a vacuous always-clean comparison
     # cannot pass. The benchmark is not a quality-label benchmark.
@@ -249,13 +277,20 @@ def run() -> dict[str, Any]:
             "grand_prize_exact_hole_count_matches": sum(
                 r["shared_topology"]["hole_count_match"] for r in gp_rows
             ),
+            "doctor_cases_below_stretch_threshold": len(doctor_clean_stretch),
+            "mesh_iq_isometry_false_positive_candidates": (
+                mesh_isometry_false_positive_candidates
+            ),
         },
         "rows": rows,
         "interpretation": (
             "The two tools are run/read on the same SHA-256-pinned TIFXYZ bytes. "
             "Concordance is reported only for directly comparable local topology facts. "
             "TIFXYZ Doctor benchmark roles are provenance labels, not geometry ground truth; "
-            "agreement does not establish sheet identity or correctness."
+            "agreement does not establish sheet identity or correctness. Exact enclosed-hole "
+            "counts are descriptive only because the tools count different lattice objects. "
+            "Mesh IQ isometry uses observed directional median spacing unless an explicit "
+            "expected spacing contract is supplied."
         ),
     }
 
