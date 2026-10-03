@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 SUMMARY = ROOT / "artifacts/2026-10-01-corpus-mesh-audit/summary.json"
-SUMMARY_SHA = "7f52098438dcb397c3cbcb0eec1d95bf2e7e5016"
+SUMMARY_SHA = "194561344ba1d998a3ae0fba9f16e2b3185bce54"
 REPORT_SHAS = {
   "reports/PHerc1447.20250703025628-auto_grown_20250703025628283.20250703025628-on-20250521151220-8.64um.json": "2d74fc9e10c87e8215168a745f678c6c4e79ee48",
   "reports/PHerc1447.20250703034159-auto_grown_20250703034159599.20250703034159-on-20250521151220-8.64um.json": "41497145f86d293738fb9aeabf6a3de108055f67",
