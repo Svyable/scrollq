@@ -21,6 +21,7 @@ from typing import Any
 from .evidence_adapters import (
     APPROVED_PASS_ADAPTERS,
     ASSESSORS,
+    verify_native_mesh_identity,
     verify_normalized_entry,
 )
 
@@ -173,6 +174,7 @@ def validate_evidence_ledger(
     expected_volume_id: str | None = None,
     expected_mesh_ids: list[str] | set[str] | tuple[str, ...] | None = None,
     expected_mesh_sha256: dict[str, str] | None = None,
+    expected_mesh_paths: dict[str, str] | None = None,
     root_dir: Path | None = None,
     ledger_sha256: str | None = None,
     require_local_artifacts: bool = False,
@@ -225,6 +227,7 @@ def validate_evidence_ledger(
     seen_ids: set[str] = set()
     expected_mesh_set = set(expected_mesh_ids or ())
     expected_mesh_digests = dict(expected_mesh_sha256 or {})
+    expected_paths = dict(expected_mesh_paths or {})
 
     for i, raw in enumerate(raw_entries):
         path = f"entries[{i}]"
@@ -408,6 +411,7 @@ def validate_evidence_ledger(
             )
             effective_status = "unknown"
 
+        native_report: dict[str, Any] | None = None
         if target is not None and isinstance(adapter, str) and adapter in ASSESSORS:
             try:
                 native_report = json.loads(target.read_text(encoding="utf-8"))
@@ -427,6 +431,81 @@ def validate_evidence_ledger(
                         path,
                         mismatch,
                     )
+
+        # A native diagnostic may authorize PASS only if its own format binds
+        # the measurement to the exact submitted mesh bytes. The ledger's
+        # current-mesh digest alone cannot prove a stale report consumed them.
+        if (
+            effective_status == "pass"
+            and claim in MESH_CLAIMS
+            and adapter in APPROVED_PASS_ADAPTERS.get(str(claim), frozenset())
+        ):
+            if native_report is None:
+                if require_local_artifacts:
+                    _error(
+                        errors,
+                        "EVIDENCE_NATIVE_BINDING_REQUIRED",
+                        path,
+                        "approved mesh PASS requires a locally re-verifiable native report",
+                    )
+                else:
+                    effective_status = "unknown"
+                    warnings.append(
+                        {
+                            "code": "EVIDENCE_NATIVE_BINDING_UNVERIFIED",
+                            "path": path,
+                            "message": (
+                                "approved mesh PASS was not byte-bound because local "
+                                "native evidence was not re-verified"
+                            ),
+                        }
+                    )
+            else:
+                bindings: list[dict[str, Any]] = []
+                for mesh_id in mesh_ids:
+                    rel_mesh = expected_paths.get(mesh_id)
+                    if root_dir is None or not isinstance(rel_mesh, str) or not rel_mesh:
+                        bindings.append(
+                            {
+                                "mesh_id": mesh_id,
+                                "status": "unbound",
+                                "reason": "submission mesh path is unavailable",
+                            }
+                        )
+                        continue
+                    mesh_target = (root_dir.resolve() / rel_mesh).resolve()
+                    try:
+                        mesh_target.relative_to(root_dir.resolve())
+                    except ValueError:
+                        bindings.append(
+                            {
+                                "mesh_id": mesh_id,
+                                "status": "mismatch",
+                                "reason": "submission mesh path escapes package root",
+                            }
+                        )
+                        continue
+                    result = verify_native_mesh_identity(
+                        str(adapter), native_report, mesh_target
+                    )
+                    bindings.append({"mesh_id": mesh_id, **result})
+
+                non_exact = [b for b in bindings if b.get("status") != "exact"]
+                if non_exact:
+                    effective_status = "unknown"
+                    for binding in non_exact:
+                        _error(
+                            errors,
+                            "EVIDENCE_NATIVE_MESH_BINDING",
+                            path,
+                            (
+                                f"{binding.get('mesh_id')}: "
+                                f"{binding.get('reason', 'native report is not byte-bound')}"
+                            ),
+                        )
+                if isinstance(normalization, dict):
+                    normalization = dict(normalization)
+                    normalization["verified_mesh_binding"] = bindings
 
         normalized.append(
             {
