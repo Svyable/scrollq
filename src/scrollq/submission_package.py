@@ -19,6 +19,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import stat
 import sys
 import zipfile
@@ -253,11 +254,18 @@ def build_package(
         with zipfile.ZipFile(
             tmp, mode="w", compression=zipfile.ZIP_STORED, allowZip64=True
         ) as zf:
-            for member in sorted(members):
-                source = members[member]
-                payload = source if isinstance(source, bytes) else source.read_bytes()
-                zf.writestr(_zip_info(member), payload)
-            zf.writestr(_zip_info(INDEX_PATH), index_bytes)
+            archive_members: dict[str, Path | bytes] = dict(members)
+            archive_members[INDEX_PATH] = index_bytes
+            for member in sorted(archive_members):
+                source = archive_members[member]
+                info = _zip_info(member)
+                if isinstance(source, bytes):
+                    zf.writestr(info, source)
+                    continue
+                with source.open("rb") as src, zf.open(
+                    info, mode="w", force_zip64=True
+                ) as dst:
+                    shutil.copyfileobj(src, dst, length=1024 * 1024)
         os.replace(tmp, out)
     finally:
         if tmp.exists():
@@ -286,6 +294,16 @@ def build_package(
         "file_count": len(inventory),
         "index": index,
     }
+
+
+def _zip_member_sha256(zf: zipfile.ZipFile, name: str) -> tuple[int, str]:
+    digest = hashlib.sha256()
+    size = 0
+    with zf.open(name, "r") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            size += len(chunk)
+            digest.update(chunk)
+    return size, digest.hexdigest()
 
 
 def verify_package(archive_path: str | Path) -> dict[str, Any]:
@@ -372,12 +390,13 @@ def verify_package(archive_path: str | Path) -> dict[str, Any]:
                     f"archive/index member mismatch: missing={missing}, extra={extra}"
                 )
 
+            verified_hashes: dict[str, str] = {}
             for name, row in sorted(expected.items()):
                 if name not in actual_names:
                     continue
                 try:
                     info = zf.getinfo(name)
-                    payload = zf.read(name)
+                    size, payload_sha = _zip_member_sha256(zf, name)
                 except (KeyError, OSError, zipfile.BadZipFile) as exc:
                     errors.append(f"cannot read {name}: {exc}")
                     continue
@@ -385,15 +404,15 @@ def verify_package(archive_path: str | Path) -> dict[str, Any]:
                     errors.append(f"{name}: member is not ZIP_STORED")
                 if info.date_time != FIXED_ZIP_TIME:
                     errors.append(f"{name}: timestamp is not deterministic")
-                if row.get("size") != len(payload):
+                if row.get("size") != size:
                     errors.append(f"{name}: size mismatch")
-                if row.get("sha256") != _sha256(payload):
+                if row.get("sha256") != payload_sha:
                     errors.append(f"{name}: sha256 mismatch")
+                verified_hashes[name] = payload_sha
 
             manifest_rel = index.get("manifest_path")
             if isinstance(manifest_rel, str) and manifest_rel in actual_names:
-                manifest_raw = zf.read(manifest_rel)
-                if _sha256(manifest_raw) != index.get("manifest_sha256"):
+                if verified_hashes.get(manifest_rel) != index.get("manifest_sha256"):
                     errors.append("manifest_sha256 does not match manifest bytes")
             else:
                 errors.append("manifest_path is missing from archive")
