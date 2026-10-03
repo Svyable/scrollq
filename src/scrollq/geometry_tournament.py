@@ -59,7 +59,7 @@ def _count(value: Any, field: str) -> int:
 def _validate_report(report: dict[str, Any], *, candidate_id: str) -> dict[str, Any]:
     if not isinstance(report, dict):
         raise GeometryTournamentError(f"{candidate_id}: report must be a JSON object")
-    if report.get("schema_version") != 1 or report.get("tool") != REPORT_TOOL:
+    if type(report.get("schema_version")) is not int or report.get("schema_version") != 1 or report.get("tool") != REPORT_TOOL:
         raise GeometryTournamentError(
             f"{candidate_id}: report must be schema_version 1 from {REPORT_TOOL}"
         )
@@ -131,9 +131,31 @@ def _validate_report(report: dict[str, Any], *, candidate_id: str) -> dict[str, 
                 f"{candidate_id}: target within_tolerance must be boolean"
             )
         if status == "ok":
+            predicted_xyz = row.get("xyz")
+            if (
+                not isinstance(predicted_xyz, list)
+                or len(predicted_xyz) != 3
+                or any(
+                    isinstance(v, bool) or not isinstance(v, (int, float))
+                    for v in predicted_xyz
+                )
+            ):
+                raise GeometryTournamentError(
+                    f"{candidate_id}: predicted xyz must be three numbers"
+                )
+            predicted_tuple = tuple(float(v) for v in predicted_xyz)
+            if not all(math.isfinite(v) for v in predicted_tuple):
+                raise GeometryTournamentError(
+                    f"{candidate_id}: predicted xyz must be finite"
+                )
             error = _finite_number(
                 row.get("error_voxels"), f"{candidate_id}: target error_voxels", lower=0.0
             )
+            coordinate_error = math.dist(xyz_tuple, predicted_tuple)
+            if not math.isclose(error, coordinate_error, rel_tol=0, abs_tol=1e-12):
+                raise GeometryTournamentError(
+                    f"{candidate_id}: target error_voxels does not match coordinates"
+                )
             ok_errors.append(error)
             should_be_within = error <= tolerance
             if within_row != should_be_within:
@@ -143,12 +165,20 @@ def _validate_report(report: dict[str, Any], *, candidate_id: str) -> dict[str, 
             recomputed_within += int(should_be_within)
         elif status == "failed":
             recomputed_failed += 1
+            if row.get("xyz") is not None:
+                raise GeometryTournamentError(
+                    f"{candidate_id}: failed target cannot supply xyz"
+                )
             if within_row:
                 raise GeometryTournamentError(
                     f"{candidate_id}: failed target cannot be within tolerance"
                 )
         elif status == "missing":
             recomputed_missing += 1
+            if row.get("xyz") is not None:
+                raise GeometryTournamentError(
+                    f"{candidate_id}: missing target cannot supply xyz"
+                )
             if within_row:
                 raise GeometryTournamentError(
                     f"{candidate_id}: missing target cannot be within tolerance"
