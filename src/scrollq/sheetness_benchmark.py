@@ -125,6 +125,8 @@ def _validate_cutout_manifest(
     expected_input_sha: str,
     manifest_file_sha256: str,
 ) -> dict[str, Any]:
+    if not isinstance(manifest, dict):
+        raise ValueError("cutout manifest must be a JSON object")
     expected_manifest_sha = _require_sha(
         spec.get("cutout_manifest_sha256"), "spec.cutout_manifest_sha256"
     )
