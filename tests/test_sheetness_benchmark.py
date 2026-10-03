@@ -89,14 +89,15 @@ def _bundle(
     report_path.write_text(json.dumps(report))
 
     rule = decision or {
-        "min_score_completeness": 1.0,
+        "min_localization_completeness": 1.0,
         "min_normal_offset_win_fraction": 1.0,
         "min_median_normal_offset_margin": 0.2,
+        "min_wrong_wrap_completeness": 1.0,
         "min_normal_completeness": 1.0,
         "min_median_abs_cosine": 0.99,
     }
     spec = {
-        "schema_version": 3,
+        "schema_version": 4,
         "volume_root": volume_root,
         "source_attestation": {
             "algorithm": "zpa-metadata-semantics-v1",
@@ -162,11 +163,12 @@ def _bundle(
 def test_passes_frozen_surface_vs_control_benchmark(tmp_path):
     paths = _bundle(tmp_path)
     result = bench.run(*paths)
-    assert result["schema"] == "scroliq-sheetness-benchmark/3"
+    assert result["schema"] == "scroliq-sheetness-benchmark/4"
     assert result["status"] == "pass"
     assert result["metrics"]["group_count"] == 2
     assert result["metrics"]["normal_offset_win_fraction"] == 1.0
-    assert result["metrics"]["score_completeness"] == 1.0
+    assert result["metrics"]["localization_completeness"] == 1.0
+    assert result["metrics"]["wrong_wrap_completeness"] == 1.0
     assert result["metrics"]["normal_completeness"] == 1.0
     assert result["metrics"]["median_abs_cosine"] == pytest.approx(1.0)
     assert result["metrics"]["median_surface_minus_best_normal_offset"] == pytest.approx(0.55)
@@ -193,13 +195,70 @@ def test_failed_probe_stays_in_denominator(tmp_path):
     paths = _bundle(tmp_path, bad_control=True)
     result = bench.run(*paths)
     assert result["status"] == "fail"
-    assert result["metrics"]["score_complete_count"] == 1
-    assert result["metrics"]["score_completeness"] == 0.5
+    assert result["metrics"]["localization_complete_count"] == 1
+    assert result["metrics"]["localization_completeness"] == 0.5
+    assert result["metrics"]["wrong_wrap_completeness"] == 1.0
     assert result["metrics"]["normal_offset_win_count"] == 1
     assert result["metrics"]["normal_offset_win_fraction"] == 0.5
     row = result["groups"][1]
-    assert row["score_complete"] is False
+    assert row["localization_complete"] is False
+    assert row["wrong_wrap_complete"] is True
     assert row["controls"][0]["failure"] == "non-finite"
+
+
+def test_continuous_probe_uses_trilinear_sampling():
+    response = np.zeros((3, 3, 3), dtype=np.float64)
+    for z in range(3):
+        for y in range(3):
+            for x in range(3):
+                response[z, y, x] = 100 * z + 10 * y + x
+
+    value, failure = bench._value_at(response, (0.5, 1.25, 1.75))
+    assert failure is None
+    assert value == pytest.approx(0.5 * 100 + 1.25 * 10 + 1.75)
+
+
+def test_continuous_sampling_fails_if_any_weighted_corner_is_nonfinite():
+    response = np.ones((2, 2, 2), dtype=np.float64)
+    response[1, 1, 1] = np.nan
+    value, failure = bench._value_at(response, (0.5, 0.5, 0.5))
+    assert value is None
+    assert failure == "non-finite"
+
+
+def test_continuous_normal_interpolation_is_eigenvector_sign_safe():
+    normals = np.zeros((2, 2, 2, 3), dtype=np.float64)
+    normals[:] = [1.0, 0.0, 0.0]
+    normals[0, 0, 0] = [-1.0, 0.0, 0.0]
+    normals[1, 1, 1] = [-1.0, 0.0, 0.0]
+
+    cosine, failure = bench._normal_at(
+        normals,
+        (0.5, 0.5, 0.5),
+        np.asarray([1.0, 0.0, 0.0]),
+    )
+    assert failure is None
+    assert cosine == pytest.approx(1.0)
+
+
+def test_fractional_probe_coordinates_emit_fractional_global_coordinates(tmp_path):
+    spec, cutout_manifest, report, response, normal = _bundle(tmp_path)
+    payload = json.loads(spec.read_text())
+    payload["groups"][0]["surface"]["zyx"] = [2.25, 2.5, 2.75]
+    payload["groups"][0]["controls"][0]["zyx"] = [1.25, 2.5, 2.75]
+    spec.write_text(json.dumps(payload, sort_keys=True))
+
+    result = bench.run(spec, cutout_manifest, report, response, normal)
+    assert result["groups"][0]["surface"]["global_zyx"] == [
+        102.25,
+        202.5,
+        302.75,
+    ]
+    assert result["groups"][0]["controls"][0]["global_zyx"] == [
+        101.25,
+        202.5,
+        302.75,
+    ]
 
 
 def test_report_hash_is_bound_by_frozen_spec(tmp_path):
