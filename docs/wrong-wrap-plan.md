@@ -23,8 +23,8 @@ surface on the wrong side. The planner therefore:
   volume;
 - requires the live prediction and CT arrays to match the frozen level-0 shape;
 - uses the TIFXYZ-derived reference normal, never a sheetness-derived normal;
-- requires prediction support **and** a non-zero masked-CT voxel;
-- requires an explicit gap after the reference sheet before a candidate run;
+- requires prediction support **and** a non-zero masked-CT voxel for the candidate run;
+- requires an explicit **prediction** gap after the reference sheet before a candidate run; CT masking cannot manufacture that gap;
 - leaves any group with no qualifying run missing rather than hand-picking a
   substitute.
 
