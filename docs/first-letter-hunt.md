@@ -4,6 +4,7 @@
 
 A candidate only enters the `review` queue when all of the following are true:
 
+- a separate local surface-seating/orientation artifact is present, SHA-256 pinned, and declares `state: pass`;
 - at least two primary prediction maps are present and carry two distinct checkpoint SHA-256 values;
 - the same 2D window has `-3` and `+3` voxel normal-offset controls;
 - adjacent-winding and geometry-perturbation controls are present;
@@ -25,6 +26,11 @@ Paths are relative to the manifest unless absolute.
       "id": "z9274-window-001",
       "bbox_zyx_half_open": [[9274, 1000, 2000], [9338, 1400, 2400]],
       "surface_support_frac": 0.97,
+      "surface_seating": {
+        "state": "pass",
+        "path": "geometry/z9274-window-001.seating.json",
+        "method": "local-ct-sheet-continuity-v1"
+      },
       "primary_predictions": [
         {
           "path": "pred/fold0.npy",
@@ -58,7 +64,7 @@ scroliq-first-letter-hunt hunt.json \
   --out review-queue.json
 ```
 
-Every input array is SHA-256 hashed into the report. The tool accepts 2D `.npy`, `.tif`, and `.tiff` predictions, normalizing unit floats, uint8, or uint16 data under the same fail-closed rules used by the held-out ink validator.
+Every input array and the surface-seating artifact are SHA-256 hashed into the report. The tool accepts 2D `.npy`, `.tif`, and `.tiff` predictions, normalizing unit floats, uint8, or uint16 data under the same fail-closed rules used by the held-out ink validator. The seating artifact is an admission gate, not something this command independently validates; its method and evidence must remain reproducible.
 
 ## PHerc0490A preregistration
 
@@ -75,6 +81,12 @@ The frozen band-selection rule is:
 On the upstream file at Git blob `26d66ccac89a880a73a4bc8a9727097679d014fb`, this selects **z=9274..9337 inclusive** (half-open `[9274, 9338)`): 848,531,539 prediction-positive voxels, 213,573,919 phantom voxels, and pooled CT support **0.7483017316578494**. The frozen derivation receipt lives in `artifacts/2026-10-02-pherc0490a-first-letter-hunt/`.
 
 That only chooses *z*. Within this band, candidate surfaces still have to be grown/seated against CT, audited, rendered, and passed through the controls above. No candidate is called a letter until a human can identify the character letter-by-letter and the physical-control evidence survives.
+
+### Why surface seating is a hard gate on PHerc0490A
+
+A high surface-support fraction is not sufficient. The public `ShribyrLabs/vesuvius-reports` orientation-bias report (repository state `81e043bc4e2383f134597f0b7a05458f0bc47d02`, `03-m7-orientation-bias/`) demonstrates a crushed PHerc0490A box where the released m7 map draws structures across CT layers when sheets lie nearly perpendicular to the pose seen in training. The report measures hosted-track tangent/CT-normal disagreement of 0.377 in that box and 0.188 after an orientation-aware fine-tune, while also documenting that the fine-tune increases merged sheets.
+
+For this hunt, that result is treated as a failure-mode warning, not as a replacement surface model. A local candidate must therefore show CT sheet continuity/orientation support independently of the global m7 support map before ink inference can promote it. In particular, a strong ink map on an m7-only surface that has not passed this seating gate remains `hold`.
 
 ## Relationship to the other ink tools
 
