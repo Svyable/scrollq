@@ -78,7 +78,7 @@ def test_publish_workflow_uses_commit_tag_and_emits_immutable_digest():
 
     assert "packages: write" in workflow
     assert 'SHA_TAG="${IMAGE}:sha-${GITHUB_SHA}"' in workflow
-    assert "docker push \" in workflow
+    assert 'docker push "$SHA_TAG"' in workflow
     assert "docker buildx imagetools inspect" in workflow
     assert 'PINNED="${IMAGE}@${DIGEST}"' in workflow
     assert "grand-prize-container-digest" in workflow
