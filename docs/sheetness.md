@@ -110,6 +110,8 @@ pre-registered falsification experiment. The benchmark spec must bind:
 - the exact eligible `volume_root`;
 - the ZPA `zpa-metadata-semantics-v1` digest for that source;
 - the exact CT cutout SHA-256;
+- the exact `scroliq-ct-cutout` manifest SHA-256, which binds that local
+  array to one global level-0 ZYX box;
 - the exact `scroliq-sheetness` report SHA-256;
 - one known/high-confidence surface probe per group;
 - a reference surface normal;
@@ -117,7 +119,13 @@ pre-registered falsification experiment. The benchmark spec must bind:
   control per group;
 - all pass/fail thresholds before evaluation.
 
-The evaluator then verifies the response and normal-array hashes recorded by the
+The version-2 evaluator verifies the provenance-bound cutout manifest before
+reading any probe score. It checks exact volume identity, ZPA metadata
+attestation, cutout SHA, global half-open bbox, local-to-global transform,
+source-chunk completeness, and cutout shape. Every emitted probe then carries
+both its local array coordinate and its derived global level-0 CT coordinate.
+
+It also verifies the response and normal-array hashes recorded by the
 sheetness report and measures four things without dropping failures: score
 completeness, the fraction of all groups where the surface beats every control,
 the median surface-minus-best-control margin, and absolute-cosine normal
@@ -127,6 +135,7 @@ denominator rather than disappearing from the result.
 ```bash
 scroliq-sheetness-eval \
   --spec campaign/sheetness-spec.json \
+  --cutout-manifest out/cutout.json \
   --report out/cutout.sheetness.json \
   --response out/cutout.sheetness.npy \
   --normal out/cutout.normal-zyx.npy \
@@ -140,8 +149,8 @@ invalid/tampered bundle exits 2. The output records both the raw spec-file hash
 and a canonical semantic spec hash, the engine parameters, every probe result,
 and each frozen decision-rule check.
 
-This evaluator deliberately does **not** prove that the cutout bytes came from
-the declared remote CT merely because the spec names that volume. The ZPA
-attestation and cutout hash make substitution visible once the benchmark is
-bound into the wider `scroliq-provenance` graph; they do not replace that
-end-to-end source lineage proof.
+The evaluator now requires the `scroliq-ct-cutout` lineage artifact, so the
+local bytes and every frozen probe are traceable to one exact audited level-0
+CT box. That strengthens source/coordinate provenance; it still does not prove
+that the chosen surface belongs to the correct physical winding, that topology
+is globally correct, or that ink is present or readable.
