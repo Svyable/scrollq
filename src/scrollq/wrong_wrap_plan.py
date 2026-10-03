@@ -296,8 +296,8 @@ def freeze_spec(
             "min_gap_voxels": min_gap_voxels,
             "min_run_voxels": min_run_voxels,
             "candidate_rule": (
-                "prediction > stored_value_threshold AND masked CT > 0; "
-                "candidate run must be preceded by min_gap_voxels false samples"
+                "candidate run: prediction > stored_value_threshold AND masked CT > 0; "
+                "separation gap: in-bounds prediction <= stored_value_threshold"
             ),
             "selection_rule": (
                 "nearest run midpoint by absolute normal distance; "
@@ -359,23 +359,31 @@ class _NearestSampler:
 
 
 def _first_separated_run(
-    hits: np.ndarray,
+    run_hits: np.ndarray,
     *,
+    gap_clear: np.ndarray,
     min_distance: int,
     min_gap: int,
     min_run: int,
 ) -> dict[str, float | int] | None:
-    hit = np.asarray(hits, dtype=bool).reshape(-1)
-    max_distance = len(hit)
+    run_hit = np.asarray(run_hits, dtype=bool).reshape(-1)
+    clear = np.asarray(gap_clear, dtype=bool).reshape(-1)
+    if clear.shape != run_hit.shape:
+        raise WrongWrapError("gap-clear mask must match candidate-run mask")
+    max_distance = len(run_hit)
     for start in range(min_distance, max_distance - min_run + 2):
         i = start - 1
         gap_start = i - min_gap
-        if gap_start < 0 or hit[gap_start:i].any():
+        # Separation is defined by the independent geometry source itself:
+        # every required preceding sample must be an in-bounds prediction
+        # absence. CT masking can reject a candidate run but cannot create
+        # an apparent separation gap.
+        if gap_start < 0 or not clear[gap_start:i].all():
             continue
-        if not hit[i : i + min_run].all():
+        if not run_hit[i : i + min_run].all():
             continue
         end = start + min_run - 1
-        while end < max_distance and hit[end]:
+        while end < max_distance and run_hit[end]:
             end += 1
         center = (start + end) / 2.0
         return {
@@ -408,14 +416,12 @@ def _propose_group(
         coords = surface[None, :] + (sign * distances)[:, None] * normal[None, :]
         pred_values, pred_valid = pred_sampler.sample(coords)
         ct_values, ct_valid = ct_sampler.sample(coords)
-        supported = (
-            pred_valid
-            & ct_valid
-            & (pred_values > threshold)
-            & (ct_values > 0)
-        )
+        prediction_present = pred_valid & (pred_values > threshold)
+        gap_clear = pred_valid & (pred_values <= threshold)
+        supported = prediction_present & ct_valid & (ct_values > 0)
         run = _first_separated_run(
             supported,
+            gap_clear=gap_clear,
             min_distance=min_distance,
             min_gap=min_gap,
             min_run=min_run,
