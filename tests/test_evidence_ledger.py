@@ -154,3 +154,20 @@ def test_duplicate_evidence_ids_fail():
     assert "EVIDENCE_DUPLICATE_ID" in {
         item["code"] for item in report["errors"]
     }
+
+
+def test_mesh_digest_must_match_provenance_manifest():
+    report = validate_evidence_ledger(
+        _ledger(),
+        expected_volume_id="eligible-volume",
+        expected_mesh_ids=["mesh:01", "mesh:02"],
+        expected_mesh_sha256={
+            "mesh:01": "d" * 64,
+            "mesh:02": "c" * 64,
+        },
+    )
+
+    assert report["status"] == "fail"
+    assert "EVIDENCE_SCOPE_MESH_HASH_MISMATCH" in {
+        item["code"] for item in report["errors"]
+    }
