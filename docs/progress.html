@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Progress — ScrolIQ & zarr-pyramid-audit</title>
+<meta name="description" content="Visual progress tracker for the ScrolIQ and zarr-pyramid-audit October 2026 campaigns: goals, milestones, and key numbers.">
+<meta name="theme-color" content="#0d0b08">
+<meta name="color-scheme" content="dark">
+<link rel="canonical" href="https://svyable.github.io/scrollq/progress.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Progress — ScrolIQ & zarr-pyramid-audit">
+<meta property="og:description" content="October 2026 goals, milestones, and key numbers across both repos.">
+<meta property="og:url" content="https://svyable.github.io/scrollq/progress.html">
+<meta property="og:image" content="https://svyable.github.io/scrollq/favicon.svg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Progress — ScrolIQ & zarr-pyramid-audit">
+<meta name="twitter:description" content="October 2026 goals, milestones, and key numbers across both repos.">
+<style>
+:root{--bg:#0d0b08;--panel:#161310;--panel2:#1c1813;--line:#2c251b;--ink:#ece3d2;--muted:#a89880;--dim:#6f6350;--ember:#ff7a1a;--gold:#ffd166;--amber:#ffb347;--green:#7bc96f;--red:#e06c5b;--blue:#6aa8e0}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;margin:0;line-height:1.6}
+.wrap{max-width:56rem;margin:0 auto;padding:2rem 1.25rem}
+h1{font-size:2rem;margin:.2rem 0}.tagline{color:var(--muted);font-size:1.1rem;margin:.2rem 0 2rem}
+h2{color:var(--gold);font-size:1.35rem;margin:2.5rem 0 1rem;border-bottom:1px solid var(--line);padding-bottom:.4rem}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.25rem 1.4rem;margin:1rem 0}
+.timeline{position:relative;padding-left:1.8rem}
+.timeline::before{content:"";position:absolute;left:.55rem;top:.4rem;bottom:.4rem;width:2px;background:var(--line)}
+.event{position:relative;margin:0 0 1.4rem}
+.event::before{content:"";position:absolute;left:-1.55rem;top:.35rem;width:.7rem;height:.7rem;border-radius:50%;background:var(--ember);border:2px solid var(--bg)}
+.event.zpa::before{background:var(--blue)}
+.event .date{color:var(--gold);font-weight:600;font-size:.9rem}
+.event .title{font-weight:600;margin:.1rem 0}
+.event .detail{color:var(--muted);font-size:.93rem}
+.event .detail a{color:var(--amber)}
+.goal{margin:0 0 1rem}
+.goal .ghead{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap}
+.goal .gid{font-weight:700;color:var(--gold);min-width:2.2rem}
+.goal .gtitle{font-weight:600}
+.chip{display:inline-block;font-size:.78rem;padding:.1rem .55rem;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.chip.done{color:var(--green);border-color:var(--green)}
+.chip.progress{color:var(--amber);border-color:var(--amber)}
+.chip.planned{color:var(--dim)}
+.chip.fail{color:var(--red);border-color:var(--red)}
+.bar{height:.55rem;background:var(--panel2);border-radius:99px;margin:.45rem 0 .2rem;overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px;background:var(--ember)}
+.bar>i.full{background:var(--green)}
+.bar>i.half{background:var(--amber)}
+.goal .gdetail{color:var(--muted);font-size:.9rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin:1rem 0}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.8rem;text-align:center}
+.stat .n{font-size:1.5rem;font-weight:700;color:var(--gold)}
+.stat .l{font-size:.82rem;color:var(--muted)}
+a{color:var(--amber)}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);color:var(--dim);font-size:.88rem}
+nav.top{margin-bottom:1rem;font-size:.92rem}
+nav.top a{margin-right:1rem}
+</style>
+</head>
+<body><div class="wrap">
+
+<nav class="top"><a href="./">← Leaderboard</a><a href="./october-2026.html">October goals</a><a href="./october-2026-update.html">October update</a><a href="./september-2026.html">September writeup</a></nav>
+
+<h1>Progress</h1>
+<p class="tagline">Where the two repos stand — goals, milestones, and key numbers. Updated 2026-10-03.</p>
+
+<h2>Key numbers</h2>
+<div class="stats">
+  <div class="stat"><div class="n">957</div><div class="l">S3 roots audited</div></div>
+  <div class="stat"><div class="n">64</div><div class="l">dl volcomp volumes</div></div>
+  <div class="stat"><div class="n">2,008</div><div class="l">shards CRC-checked</div></div>
+  <div class="stat"><div class="n">445</div><div class="l">zpa tests passing</div></div>
+  <div class="stat"><div class="n">1,717</div><div class="l">ScrolIQ tests passing</div></div>
+  <div class="stat"><div class="n">16.5%</div><div class="l">shard CRC mismatch rate</div></div>
+</div>
+
+<h2>Timeline</h2>
+<div class="panel"><div class="timeline">
+
+<div class="event zpa"><div class="date">2026-09-29</div><div class="title">zarr-pyramid-audit published</div><div class="detail">Public MIT fork of sgsllc-jr/zarr-pyramid-audit. First header-only audit of the S3 bucket: 957 roots, 956 clean, 1 live defect (PHerc0814). 20-day dl regression: 18 defective pyramids, zero new findings.</div></div>
+
+<div class="event"><div class="date">2026-09-30</div><div class="title">ScrollQ created · volcomp breakthrough</div><div class="detail">Second September entry. Vendored libvolcomp decoder parses sharding_indexed indexes over HTTP; 64 volcomp volumes content-probed (548 chunks real content, 0 present-but-empty).</div></div>
+
+<div class="event"><div class="date">2026-10-01</div><div class="title">Both entries submitted · truly-disjoint stability</div><div class="detail">Sven submitted both September Progress Prize entries. Two-phase exclusion protocol: ρ=0.63 on truly disjoint chunks (honest number, below the 0.85 gate). Rebranded ScrollQ → <b>ScrolIQ</b>.</div></div>
+
+<div class="event zpa"><div class="date">2026-10-02</div><div class="title">G2 CRC campaign · stability v2 FAIL</div><div class="detail">2,008 shards CRC-checked: 58% verified, <b>16.5% mismatch</b>, 25% n/a. Pre-registered stability v2: ρ=0.750, FAIL → leaderboard shows rank bands.</div></div>
+
+<div class="event zpa"><div class="date">2026-10-03</div><div class="title">G2 done: writer proven non-conforming</div><div class="detail">Independent bit-by-bit CRC-32C confirms the 331 mismatches are real writer defects. Severity <code>low</code> → <code>medium</code> (Contract 1.3.1). <a href="https://github.com/Svyable/zarr-pyramid-audit/tree/main/artifacts/2026-10-03-crc-byte-verification">Evidence →</a></div></div>
+
+<div class="event"><div class="date">2026-10-03</div><div class="title">Model evaluation foundation</div><div class="detail">ScrolIQ gains <code>scroliq-eval</code> scaffolding: model registry schema, dataset schema, results schema — the first step toward community benchmark evaluation inside ScrolIQ.</div></div>
+
+</div></div>
+
+<h2>ScrolIQ October goals (O1–O6)</h2>
+<div class="panel">
+
+<div class="goal"><div class="ghead"><span class="gid">O1</span><span class="gtitle">Mesh IQ: how often are flags real defects?</span><span class="chip progress">pre-registered · sample drawn</span></div><div class="bar"><i class="half" style="width:50%"></i></div><div class="gdetail">Blinded sample of 54 segments drawn. Awaiting VC3D review; no precision yet.</div></div>
+
+<div class="goal"><div class="ghead"><span class="gid">O2</span><span class="gtitle">Winding IQ: patch attachment & cross-collection consistency</span><span class="chip done">done</span></div><div class="bar"><i class="full" style="width:100%"></i></div><div class="gdetail">6 / 16,074 winding pairs flagged. Merged with reproducible PHerc0139 review queue.</div></div>
+
+<div class="goal"><div class="ghead"><span class="gid">O3</span><span class="gtitle">Spiral IQ: score a fit on constraints it never saw</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">Held-out geometry evaluator exists as foundation. Needs a real GPU fit run.</div></div>
+
+<div class="goal"><div class="ghead"><span class="gid">O4</span><span class="gtitle">Fiber IQ: whole public corpus, then CT support</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">8-fiber pilot done. Full-corpus audit + CT support check with positive control outstanding.</div></div>
+
+<div class="goal"><div class="ghead"><span class="gid">O5</span><span class="gtitle">Stability gate: pass or retire the ranking</span><span class="chip fail">done · FAIL → rank bands</span></div><div class="bar"><i class="full" style="width:100%"></i></div><div class="gdetail">Pre-registered v2: ρ=0.750 &lt; 0.85 gate. Leaderboard now shows rank bands, not precise orders.</div></div>
+
+<div class="goal"><div class="ghead"><span class="gid">O6</span><span class="gtitle">Get review queues into reviewers' hands</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">Reviewer map linked from README. Queues being built.</div></div>
+
+</div>
+
+<h2>zpa October goals (G1–G7)</h2>
+<div class="panel">
+
+<div class="goal"><div class="ghead"><span class="gid">G1</span><span class="gtitle">October regression: S3 + dl</span><span class="chip progress">S3 done · dl unblocked</span></div><div class="bar"><i class="half" style="width:50%"></i></div><div class="gdetail">S3: 957 roots, 956 clean, 1 defective (PHerc0814 still live). dl host reachable; full rerun pending.</div></div>
+
+<div class="goal"><div class="ghead"><span class="gid">G2</span><span class="gtitle">CRC32C validation on live shards</span><span class="chip done">done</span></div><div class="bar"><i class="full" style="width:100%"></i></div><div class="gdetail">2,008 shards: 58% verified, 16.5% mismatch (writer non-conforming, proven 2026-10-03), 25% n/a. Severity → medium.</div></div>
+
+<div class="goal"><div class="ghead"><span class="gid">G3</span><span class="gtitle">Surface evidence tools</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">TIFXYZ target-volume guard landed (#34). Scope decision pending.</div></div>
+
+<div class="goal"><div class="ghead"><span class="gid">G4</span><span class="gtitle">Validator comparisons</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">After G3 scope decision.</div></div>
+
+<div class="goal"><div class="ghead"><span class="gid">G5</span><span class="gtitle">Publish-time gate adoption</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">After G6. The villa upstream proposal (#1760).</div></div>
+
+<div class="goal"><div class="ghead"><span class="gid">G6</span><span class="gtitle">Release hardening</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">Release first, then G5.</div></div>
+
+<div class="goal"><div class="ghead"><span class="gid">G7</span><span class="gtitle">Dashboard & docs refresh</span><span class="chip planned">planned</span></div><div class="bar"><i style="width:5%"></i></div><div class="gdetail">After G1+G2 refresh. Dashboard current as of 2026-10-03.</div></div>
+
+</div>
+
+<footer>
+Built from committed evidence in both repos, 2026-10-03. Numbers trace to artifacts; goal states match the October pages.<br>
+<a href="https://github.com/Svyable/scrollq">ScrolIQ repo</a> · <a href="https://github.com/Svyable/zarr-pyramid-audit">zpa repo</a> · <a href="https://discord.com/invite/V4fJhvtaQn">Vesuvius Discord</a>
+</footer>
+
+</div></body></html>
