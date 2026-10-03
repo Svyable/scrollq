@@ -11,7 +11,7 @@ This is a **ScrolIQ policy**, not an official Scroll Prize eligibility decision.
 ## Verdicts
 
 - **READY** — provenance is eligible and every required independent claim has an authorized, re-verifiable PASS over the full submitted scope.
-- **BLOCKED** — provenance fails, a native evidence artifact is inconsistent/tampered, or a required independent diagnostic explicitly fails.
+- **BLOCKED** — provenance fails, a native evidence artifact is inconsistent/tampered, or an authorized and exact-input-bound required diagnostic explicitly fails.
 - **UNKNOWN** — provenance passes, but one or more required independent claims are missing, partial, unsupported by the current policy, or do not cover every submitted mesh.
 
 UNKNOWN is deliberately non-zero at the CLI. Missing evidence never becomes a clean result.
@@ -38,7 +38,7 @@ Therefore **policy v1 is expected to remain UNKNOWN at full-package level** even
 
 ## Native evidence, not copied conclusions
 
-A required PASS must come from an approved adapter. The normalized ledger is not the authority; the native report is.
+A required geometry verdict—PASS **or FAIL**—must come from an approved adapter. The normalized ledger is not the authority; the native report is. Unapproved or input-unbound diagnostics remain evidence, but they cannot clear or convict the submitted mesh.
 
 For Grand Prize readiness, `--root-dir` is mandatory. ScrolIQ:
 
@@ -49,7 +49,7 @@ For Grand Prize readiness, `--root-dir` is mandatory. ScrolIQ:
 5. verifies the native diagnostic's own input identity against the submitted mesh when that format supports content identity;
 6. fails on any mismatch.
 
-A hand-edited `"status": "pass"` therefore cannot authorize a required claim.
+A hand-edited `"status": "pass"` or `"status": "fail"` therefore cannot authorize a required claim.
 Mesh-scoped entries also carry the canonical tifxyz tree digest; `scroliq-gp-ready`
 compares it to the mesh digest in the provenance manifest, so evidence from a
 different mesh cannot be relabeled onto the submitted mesh ID.
@@ -182,4 +182,4 @@ Do not weaken v1 just to obtain READY. Close the remaining claims with independe
 4. **Surface identity:** add `xsec`/physical-CT evidence for sheet jumps as an advisory channel first; promote only after a reproducible automated decision rule exists.
 5. **Ink/legibility:** keep separate from geometry readiness. Existing `scroliq-ink-validate` proves deterministic held-out signal evidence and controls, but the Grand Prize's character-level legibility bar still requires its own evidence.
 
-An adapter must never infer PASS from a missing field, parser error, unsupported version, windowed/partial report, or a metric with no pre-registered acceptance rule.
+An adapter must never infer a submission verdict from a missing field, parser error, unsupported version, windowed/partial report, stale input, or a metric with no pre-registered acceptance rule.
