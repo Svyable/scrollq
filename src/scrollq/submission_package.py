@@ -87,10 +87,20 @@ def _declared_paths(manifest: dict[str, Any]) -> list[str]:
         for row in rows:
             if isinstance(row, dict) and isinstance(row.get("path"), str):
                 raw.append(row["path"])
+            if key == "renders" and isinstance(row, dict):
+                scale_proof = row.get("scale_proof")
+                if (
+                    isinstance(scale_proof, dict)
+                    and isinstance(scale_proof.get("path"), str)
+                ):
+                    raw.append(scale_proof["path"])
 
     banner = manifest.get("banner")
     if isinstance(banner, dict) and isinstance(banner.get("path"), str):
         raw.append(banner["path"])
+        proof = banner.get("proof")
+        if isinstance(proof, dict) and isinstance(proof.get("path"), str):
+            raw.append(proof["path"])
 
     return sorted(set(_normalise_rel(path) for path in raw))
 
