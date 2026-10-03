@@ -907,6 +907,22 @@ def _verify_ink_evidence(
             "positive integer [z,y,x] model window is required",
         )
 
+    contract = model.get("input_contract")
+    contract_window = (
+        contract.get("window_voxels_zyx") if isinstance(contract, dict) else None
+    )
+    if (
+        isinstance(window, list)
+        and isinstance(contract_window, list)
+        and window != contract_window
+    ):
+        _error(
+            errors,
+            "GP_INK_EVIDENCE_WINDOW",
+            f"{p}.model_window_voxels_zyx",
+            "held-out evaluation window must match the submitted model input contract",
+        )
+
     control_names = evidence.get("control_names")
     if (
         not isinstance(control_names, list)
