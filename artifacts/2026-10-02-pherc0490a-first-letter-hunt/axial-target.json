@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "campaign": "PHerc0490A first-letter hunt",
+  "as_of": "2026-10-02",
+  "scroll": "PHerc0490A",
+  "eligible_volume_id": "20250521151210",
+  "volume_root": "PHerc0490A/volumes/20250521151210-8.640um-1.2m-116keV-masked.zarr",
+  "source": {
+    "repository": "axiosdevs/herculaneum-scroll-tools",
+    "path": "ct_support/survey_PHerc0490A.json",
+    "git_blob_sha": "26d66ccac89a880a73a4bc8a9727097679d014fb",
+    "mode": "slabs",
+    "slab_stride": 12,
+    "overall_sampled_support_frac": 0.7407448073112333
+  },
+  "selection_rule": {
+    "window_slices": 64,
+    "exclude_first_slices": 1000,
+    "exclude_last_slices": 1000,
+    "require_contiguous_measured_rows": true,
+    "primary": "maximize pooled_support = 1 - sum(phantom) / sum(positives)",
+    "tie_breakers": ["maximize mean positives", "minimize z0"]
+  },
+  "selected": {
+    "z_half_open": [9274, 9338],
+    "planes": 64,
+    "prediction_positive_voxels": 848531539,
+    "phantom_voxels": 213573919,
+    "phantom_frac": 0.2516982683421506,
+    "pooled_support_frac": 0.7483017316578494,
+    "mean_prediction_positive_voxels_per_plane": 13258305.296875
+  },
+  "claims": {
+    "ink_detected": false,
+    "letter_identified": false,
+    "surface_seated": false
+  },
+  "next_gate": "Select CT-supported local surface windows inside the frozen z band, then run distinct-checkpoint ink inference plus normal-offset, adjacent-winding, and geometry-perturbation controls."
+}
