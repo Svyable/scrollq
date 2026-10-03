@@ -180,6 +180,9 @@ def build_package(
         raise PackageError(f"package root is not a directory: {root}")
     if out.suffix.lower() != ".zip":
         raise PackageError("--out must end in .zip")
+    sidecar = out.with_name(out.name + ".sha256")
+    if out.exists() or sidecar.exists():
+        raise PackageError("refusing to overwrite existing archive or sha256 sidecar")
 
     if manifest_path.is_symlink():
         raise PackageError("provenance manifest may not be a symlink")
@@ -280,7 +283,6 @@ def build_package(
         )
 
     archive_sha = verification["archive_sha256"]
-    sidecar = out.with_name(out.name + ".sha256")
     sidecar.write_text(
         f"{archive_sha}  {out.name}\n", encoding="utf-8", newline="\n"
     )
@@ -324,6 +326,8 @@ def verify_package(archive_path: str | Path) -> dict[str, Any]:
             names = zf.namelist()
             if len(names) != len(set(names)):
                 errors.append("archive contains duplicate member names")
+            if names != sorted(names):
+                errors.append("archive members are not in deterministic lexicographic order")
             if INDEX_PATH not in names:
                 errors.append(f"archive is missing {INDEX_PATH}")
                 return {
@@ -336,6 +340,8 @@ def verify_package(archive_path: str | Path) -> dict[str, Any]:
                 errors.append(f"{INDEX_PATH}: member is not ZIP_STORED")
             if index_info.date_time != FIXED_ZIP_TIME:
                 errors.append(f"{INDEX_PATH}: timestamp is not deterministic")
+            if (index_info.external_attr >> 16) != FILE_MODE:
+                errors.append(f"{INDEX_PATH}: POSIX file mode is not deterministic")
             try:
                 index = json.loads(zf.read(INDEX_PATH))
             except (UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -404,6 +410,8 @@ def verify_package(archive_path: str | Path) -> dict[str, Any]:
                     errors.append(f"{name}: member is not ZIP_STORED")
                 if info.date_time != FIXED_ZIP_TIME:
                     errors.append(f"{name}: timestamp is not deterministic")
+                if (info.external_attr >> 16) != FILE_MODE:
+                    errors.append(f"{name}: POSIX file mode is not deterministic")
                 if row.get("size") != size:
                     errors.append(f"{name}: size mismatch")
                 if row.get("sha256") != payload_sha:
