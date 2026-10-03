@@ -283,6 +283,14 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
     cases have no Mesh IQ isometry finding, with nearly identical p95 stretch on the Villa controls.
     Rival benchmark roles are provenance labels, not geometry ground truth.
     <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-02-doctor-same-byte">Frozen same-byte evidence →</a></p></div>
+  <div class="card"><h3>Cross-tool evidence, content-bound</h3>
+    <p>On PHerc0139 segment <code>20260306000001-w051_2026030600</code>, ScrolIQ and Windcheck
+    independently name the <b>same published coordinate bytes</b>: full x/y/z SHA-256s, no mask,
+    379×480 grid, and 164,096 valid vertices agree. Mesh IQ reports <b>15 edge jumps</b> and
+    <b>173 normal reversals</b>; Windcheck's same-original nonlocal census reports
+    <b>3,333 transverse contacts</b>. Binding stops at <b>coordinate-exact</b>, not semantic-exact,
+    because the external release-index projection does not expose the original meta.json hash.
+    <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-02-cross-tool-mesh-dossier">Frozen binding-aware dossier →</a></p></div>
   <div class="card"><h3>Winding check with measured sensitivity</h3>
     <p>On public PHercParis4 annotations, the ray-order audit found <b>2 inversions / 13,700 comparable pairs</b>.
     In a seeded injection control, deliberate &plusmn;3 winding errors were detected in <b>179 / 200</b>
