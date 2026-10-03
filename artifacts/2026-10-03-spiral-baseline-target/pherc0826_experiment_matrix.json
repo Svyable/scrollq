@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-10-03",
+  "objective": "Reproduce the strongest published fully automatic PHerc0826 spiral variants, test deterministic sheet snapping, then transfer the frozen geometry method to PHerc0800 independent held-out geometry.",
+  "scroll": "PHerc0826",
+  "prize_volume_id": "20250821151701",
+  "external_method": {
+    "repository": "https://github.com/Jashann/vesuvius-scrolling",
+    "commit": "4f4997adcccaa9124ab5af02605233f7e3388c69",
+    "code_license": "MIT",
+    "derived_data_license": "CC-BY-NC-SA-4.0 per upstream"
+  },
+  "historical_villa_reproduction": {
+    "villa_commit": "6bbe6e2",
+    "z_range_half_open": [
+      8500,
+      9500
+    ],
+    "optimizer_num_training_steps": 12000,
+    "optimizer_random_seed": 1,
+    "stages": [
+      {
+        "id": "A0",
+        "script": "kaggle/pcu-0826/pcu_0826.py",
+        "inputs": [
+          "published tracks",
+          "Lasagna nx/ny/grad_mag group 2",
+          "published umbilicus"
+        ],
+        "human_input": false,
+        "pcu_relative_constraints": false,
+        "reported_heldout_pcu_ladder_disagreement_percent": 50.1,
+        "reported_unassigned_ladder_points": 1750,
+        "interpretation": "Baseline whole-scroll-technology fit. Held-out metric uses PCU-generated ladders, not human labels."
+      },
+      {
+        "id": "B0",
+        "script": "kaggle/pcu-0826/pcu_0826.py",
+        "inputs": [
+          "A0 inputs",
+          "PCU gold v1 relative winding constraints"
+        ],
+        "human_input": false,
+        "pcu_relative_constraints": true,
+        "reported_heldout_pcu_ladder_disagreement_percent": 45.1,
+        "interpretation": "Default-weight automatic winding-constraint ablation."
+      },
+      {
+        "id": "B1w10",
+        "script": "kaggle/pcu-0826b/pcu_0826b.py",
+        "inputs": [
+          "A0 inputs",
+          "PCU gold v2 relative winding constraints"
+        ],
+        "sample_count_unattached_pcls_per_step": 840,
+        "loss_weight_unattached_pcl_radius": 10,
+        "loss_weight_unattached_pcl_dt": 10,
+        "reported_heldout_pcu_ladder_disagreement_percent": 38.7,
+        "reported_unassigned_ladder_points": 1304
+      },
+      {
+        "id": "B1w20",
+        "script": "kaggle/pcu-0826b/pcu_0826b.py",
+        "inputs": [
+          "A0 inputs",
+          "PCU gold v2 relative winding constraints"
+        ],
+        "sample_count_unattached_pcls_per_step": 840,
+        "loss_weight_unattached_pcl_radius": 20,
+        "loss_weight_unattached_pcl_dt": 10,
+        "reported_heldout_pcu_ladder_disagreement_percent": 36.3,
+        "reported_95ci_percent": [
+          34.8,
+          37.9
+        ],
+        "reported_unassigned_ladder_points": 1237,
+        "reported_strips_satisfied_percent": 47,
+        "interpretation": "Strongest reported PHerc0826 winding-constraint variant. The 36.3% metric is agreement with PCU-generated held-out ladders, not human ground truth."
+      },
+      {
+        "id": "C0",
+        "script": "kaggle/pcu-0826c/pcu_0826c.py",
+        "inputs": [
+          "A0 inputs",
+          "PCU-generated outer shell"
+        ],
+        "reported_heldout_pcu_ladder_disagreement_percent": 49.5,
+        "interpretation": "Outer shell alone showed no material gain versus A0; deprioritize unless another failure specifically implicates boundary geometry."
+      },
+      {
+        "id": "C1",
+        "script": "kaggle/pcu-0826c/pcu_0826c.py",
+        "inputs": [
+          "B1w20-style constraints",
+          "PCU-generated outer shell"
+        ],
+        "reported_heldout_pcu_ladder_disagreement_percent": 36.4,
+        "interpretation": "Outer shell adds no material gain to the strong constraint variant."
+      }
+    ],
+    "heldout_reference": {
+      "file": "data/gold/gold0826_heldout8.json",
+      "slices": [
+        4225,
+        4490,
+        5197,
+        5857,
+        6000,
+        6750,
+        7530,
+        7847
+      ],
+      "source": "PCU-generated gold ladders",
+      "human_ground_truth": false,
+      "warning": "Useful for reproduction/relative comparison only; do not promote a Grand Prize method on this metric alone."
+    }
+  },
+  "first_postfit_intervention": {
+    "id": "B1w20_plus_refine",
+    "implementation": "pcu/refine.py",
+    "method": "Densify fitted grid 4x; sample m7 sheetness along surface normals; choose local peak offsets; robustly median/Gaussian smooth the offset field; move vertices in three shrinking-radius passes.",
+    "default_parameters": {
+      "factor": 4,
+      "radii_voxels": [
+        7,
+        4,
+        2
+      ],
+      "profile_step_voxels": 0.5,
+      "median_filter_size": 7,
+      "gaussian_sigma": 2
+    },
+    "intended_failure": "Correct winding topology but fitted surface displaced several voxels from the papyrus sheet.",
+    "topology_guard": "Upstream states search radius stays below half sheet spacing to preserve winding assignment.",
+    "stochastic": false,
+    "promotion_rule": "Do not promote on PHerc0826 PCU-ladder agreement alone. Freeze the variant then transfer to PHerc0800 held-out geometry and measure completeness/residuals/wrong-wrap failures."
+  },
+  "current_villa_port": {
+    "target_villa_commit": "5a4388f08cc547e6a1a037f949173e731a3e7aa2",
+    "order": "Reproduce historical 6bbe6e2 A0/B1w20 first, then port identical inputs/config to current villa. Treat differences as upstream-drift evidence, not an algorithmic gain."
+  },
+  "transfer_gate": {
+    "scroll": "PHerc0800",
+    "prize_volume_id": "20250521135224",
+    "frozen_split": "artifacts/2026-09-30-grand-prize-qualifier/pherc0800_geometry_split.json",
+    "held_out_windows": [
+      7472,
+      10464,
+      15872
+    ],
+    "fitter_may_consume_heldout_geometry": false,
+    "ink_may_select_variant": false,
+    "required_outputs": [
+      "attempted targets",
+      "recovered targets",
+      "missing targets",
+      "geometry residuals",
+      "completeness",
+      "wrong-wrap/sheet-switch failures"
+    ]
+  },
+  "deprioritized": [
+    "new generic certification layer",
+    "outer-shell work absent a measured boundary failure",
+    "new flattening method before geometry is frozen",
+    "ink-driven geometry selection"
+  ]
+}
