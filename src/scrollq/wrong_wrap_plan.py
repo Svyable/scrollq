@@ -194,15 +194,19 @@ def _exact_source_urls(
     scroll = parts[-3]
     ct_name = parts[-1]
     volume_id = ct_name.split("-", 1)[0]
-    if not volume_id or volume_id not in prediction_url:
-        raise WrongWrapError("prediction_url does not name the exact reference volume id")
+    if not volume_id:
+        raise WrongWrapError("exact reference volume id is empty")
     if f"/{scroll}/representations/predictions/surfaces/" not in prediction_url:
         raise WrongWrapError("prediction_url does not name the reference scroll")
-    if not model_id or model_id not in prediction_url:
-        raise WrongWrapError("prediction_url does not name the declared model id")
-    if not prediction_url.endswith("-surface-m7-L0-th0.2.zarr"):
+    if not isinstance(model_id, str) or not model_id:
+        raise WrongWrapError("model_id must be a non-empty string")
+    expected_name = (
+        f"{volume_id}-surface-{model_id}-surface-m7-L0-th0.2.zarr"
+    )
+    if prediction_url.rsplit("/", 1)[-1] != expected_name:
         raise WrongWrapError(
-            "prediction_url must name the frozen m7 level-0 threshold-0.2 artifact"
+            "prediction_url does not exactly name the frozen reference-volume "
+            "m7 level-0 threshold-0.2 artifact"
         )
     return prediction_url, ct_url
 
@@ -493,6 +497,11 @@ def _load_spec(path: str | Path) -> tuple[dict[str, Any], str]:
     source = spec.get("source_attestation")
     if not isinstance(source, dict) or source.get("axes") != ["z", "y", "x"]:
         raise WrongWrapError("wrong-wrap spec source attestation is invalid")
+    if source.get("algorithm") != "zpa-metadata-semantics-v1":
+        raise WrongWrapError("wrong-wrap spec source-attestation algorithm mismatch")
+    if source.get("state") != "PRESENT":
+        raise WrongWrapError("wrong-wrap spec source-attestation state must be PRESENT")
+    _int_triplet(source.get("level0_shape_zyx"), "wrong-wrap spec level0 shape")
     _lower_hex_sha(
         source.get("metadata_semantics_sha256"),
         "wrong-wrap spec metadata_semantics_sha256",
@@ -547,6 +556,8 @@ def run_spec(
     ref = spec.get("reference_plan")
     if not isinstance(ref, dict) or ref.get("sha256") != plan_sha:
         raise WrongWrapError("reference plan sha256 does not match frozen wrong-wrap spec")
+    if ref.get("group_count") != len(plan["groups"]):
+        raise WrongWrapError("reference plan group count does not match frozen wrong-wrap spec")
     if spec.get("volume_root") != plan.get("volume_root"):
         raise WrongWrapError("reference plan volume_root changed after wrong-wrap freeze")
 
