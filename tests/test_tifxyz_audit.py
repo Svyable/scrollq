@@ -219,18 +219,48 @@ def test_planar_tifxyz_passes_structure_spacing_and_distortion_checks(tmp_path):
     assert result["spacing"]["columns"]["measured_to_nominal_ratio"] == 1.0
     assert result["spacing"]["rows"]["measured_to_nominal_ratio"] == 1.0
     assert result["quads"]["symmetric_area_distortion"]["median"] == 1.0
+    assert result["quads"]["isometry"]["normalization"]["source"] == (
+        "observed-directional-median"
+    )
     assert result["quads"]["isometry"]["symmetric_stretch_distortion"]["median"] == 1.0
     assert result["quads"]["isometry"]["anisotropy"]["median"] == 1.0
     assert result["quads"]["normal_reversal_pairs"] == 0
 
 
-def test_area_preserving_anisotropy_is_detected_as_non_isometric(tmp_path):
+def test_observed_spacing_is_default_isometry_reference(tmp_path):
     result = audit_tifxyz(
         _write_tifxyz(tmp_path, area_preserving_anisotropy=True),
         spacing_tolerance_ratio=3.0,
     )
 
     assert np.isclose(result["quads"]["symmetric_area_distortion"]["median"], 1.0)
+    assert result["quads"]["isometry"]["normalization"]["source"] == (
+        "observed-directional-median"
+    )
+    assert np.allclose(
+        result["quads"]["isometry"]["normalization"]["reference_spacing_voxels"],
+        [5.0, 0.8],
+    )
+    assert np.isclose(
+        result["quads"]["isometry"]["symmetric_stretch_distortion"]["p95"],
+        1.0,
+    )
+    assert not any(
+        item["kind"] == "isometry-distortion" for item in result["findings"]
+    )
+
+
+def test_explicit_expected_spacing_detects_area_preserving_anisotropy(tmp_path):
+    result = audit_tifxyz(
+        _write_tifxyz(tmp_path, area_preserving_anisotropy=True),
+        spacing_tolerance_ratio=3.0,
+        expected_spacing_x=2.0,
+        expected_spacing_y=2.0,
+    )
+
+    assert result["quads"]["isometry"]["normalization"]["source"] == (
+        "explicit-expected-spacing"
+    )
     assert np.isclose(
         result["quads"]["isometry"]["symmetric_stretch_distortion"]["p95"],
         2.5,
@@ -238,6 +268,12 @@ def test_area_preserving_anisotropy_is_detected_as_non_isometric(tmp_path):
     assert np.isclose(result["quads"]["isometry"]["anisotropy"]["median"], 6.25)
     assert result["status"] == "partial"
     assert any(item["kind"] == "isometry-distortion" for item in result["findings"])
+
+
+def test_expected_spacing_requires_both_directions(tmp_path):
+    surface = _write_tifxyz(tmp_path)
+    with np.testing.assert_raises_regex(ValueError, "must be supplied together"):
+        audit_tifxyz(surface, expected_spacing_x=2.0)
 
 
 def test_clean_official_surface_preflight_binds_ct_support(tmp_path):
