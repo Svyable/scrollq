@@ -330,6 +330,8 @@ def _build_reviewer_contract(
     docker_image = code.get("docker_image")
     if not isinstance(docker_image, str) or "@sha256:" not in docker_image:
         raise PackageError("manifest must pin code.docker_image by sha256 digest")
+    if docker_run_command is None:
+        docker_run_command = f"docker run --rm {docker_image}"
     if not isinstance(docker_run_command, str) or not docker_run_command.strip():
         raise PackageError("docker run command must be non-empty")
     if docker_image not in docker_run_command:
@@ -370,12 +372,12 @@ def build_package(
     manifest_path: str | Path,
     root_dir: str | Path,
     out_path: str | Path,
-    methodology_path: str,
-    system_requirements_path: str,
-    human_input_log_path: str,
-    vc3d_workflow_path: str,
-    false_positive_mitigation_path: str,
-    docker_run_command: str,
+    methodology_path: str = "METHODOLOGY.md",
+    system_requirements_path: str = "SYSTEM_REQUIREMENTS.md",
+    human_input_log_path: str = "human-input.json",
+    vc3d_workflow_path: str = "VC3D_WORKFLOW.md",
+    false_positive_mitigation_path: str = "FALSE_POSITIVES.md",
+    docker_run_command: str | None = None,
 ) -> dict[str, Any]:
     """Validate provenance and build one deterministic reviewer package."""
     manifest_path = Path(manifest_path)
