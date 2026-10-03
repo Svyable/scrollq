@@ -61,6 +61,7 @@ def _spec(control_sha: str):
         "control_manifest_sha256": control_sha,
         "source_revision": "a" * 40,
         "source_split": "leave-one-papyrus-out",
+        "expected_sample_count": 6,
         "descriptors": [
             "local-gradient-rank",
             "curvature-rank",
