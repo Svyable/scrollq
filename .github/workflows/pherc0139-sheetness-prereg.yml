@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          mesh="input/w035.tifxyz"
+          mesh="input/20260317000000-on-20250728140407-9.362um.tifxyz"
           base="https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260317000000-w035_2026031718/mesh/20260317000000-on-20250728140407-9.362um.tifxyz"
           mkdir -p "$mesh"
           for f in x.tif y.tif z.tif meta.json; do
@@ -133,7 +133,7 @@ jobs:
           mkdir -p "$outdir"
           {
             echo "=== planner ==="
-            scroliq-sheetness-plan               --tifxyz input/w035.tifxyz               --zpa-report zpa.json               --volume-root PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr               --surface-volume-token 20250728140407               --binding-url https://scrollprize.org/tutorial5               --samples 32               --offsets=-8,-4,4,8               --halo 8               --out "$outdir/reference-plan.json"
+            scroliq-sheetness-plan               --tifxyz input/20260317000000-on-20250728140407-9.362um.tifxyz               --zpa-report zpa.json               --volume-root PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr               --surface-volume-token 20250728140407               --binding-url https://scrollprize.org/tutorial5               --samples 32               --offsets=-8,-4,4,8               --halo 8               --out "$outdir/reference-plan.json"
             echo "=== freeze checks ==="
             python - <<'PY'
           import json
