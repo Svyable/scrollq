@@ -176,6 +176,34 @@ carry enough source-collection identity to edit safely.
 
 A corrected file is still only a reviewed hypothesis. The next evidence step is
 to construct a rerun dataset with the corrected relative file, leave every other
-input byte-identical, run the pre-registered winding-attachment diagnostic again,
-and compare its decision, residual distribution and positive-control performance
-against the frozen baseline.
+input byte-identical, and run the pre-registered winding-attachment diagnostic
+again.
+
+## Compare the controlled rerun
+
+`scroliq-winding-review-compare` turns that rerun into a fail-closed before/after
+artifact:
+
+```bash
+scroliq-winding-review-compare \
+  --before-result artifacts/2026-10-03-paris4-winding-attachment/result.json \
+  --before-attachments artifacts/2026-10-03-paris4-winding-attachment/attachments.json \
+  --after-result /tmp/rerun/result.json \
+  --after-attachments /tmp/rerun/attachments.json \
+  --application /tmp/relative_windings.application.json \
+  --out /tmp/winding-review-comparison.json
+```
+
+The comparison refuses to run unless the baseline result is the exact diagnostic
+bound by the review application; the before/after relative-winding hashes match
+the application's source and corrected hashes; every other declared input hash
+is unchanged; the diagnostic input accounting and preregistered constants are
+unchanged; and the full parsed `attachments.json` list is identical before and
+after.
+
+That last requirement closes an important provenance gap: a network rerun cannot
+quietly change patch geometry and still be presented as the effect of the winding
+edit. The comparison reports residual and review-queue deltas, resolved,
+persisted and introduced physical review points, each corrected point's
+post-rerun disposition, and before/after positive-control performance. It does
+not label a correction physically correct merely because a residual disappeared.
