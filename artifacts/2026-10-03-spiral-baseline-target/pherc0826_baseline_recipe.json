@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "preflight_blocked_pending_outward_sense_confirmation_and_data_download",
+  "status": "ready_for_data_download_and_bounded_reproduction",
   "as_of": "2026-10-03",
   "scroll": "PHerc0826",
   "prize_volume_id": "20250821151701",
@@ -13,13 +13,13 @@
     "name": "PHerc0826",
     "voxel_size_um": 9.362,
     "spiral_outward_sense_candidate": "CW",
-    "spiral_outward_sense_status": "candidate_from_published_PHerc0826_assembler_example; independently confirm in VC3D/catalog before execution",
+    "spiral_outward_sense_status": "CW is the published PHerc0826 assembler example; independently cross-check in VC3D/catalog before promotion beyond reproduction",
     "normal_zarr_group": "2",
     "lasagna_scale": 4
   },
   "dataset_assembly": {
     "command_template": "python make_eligible_spiral_dataset.py --scroll PHerc0826 --outward-sense CW --out ds0826 --fetch",
-    "precondition": "Do not run until outward sense is independently confirmed.",
+    "precondition": "CW may be used to reproduce the published PHerc0826 example; independently cross-check winding sense before treating the resulting geometry as promotion evidence.",
     "notes": [
       "Assembler writes spiral-scroll.json, published umbilicus and track provenance and repairs the published crossings-cache DBM mtime signature.",
       "Assembler does not download/assemble lasagna_inputs; do that separately."
@@ -32,7 +32,10 @@
     "resident_pool_command_template": "python pack_resident_pools.py ds0826/lasagna_inputs --what normals,grad_mag --normal-group 2"
   },
   "bounded_reproduction": {
-    "z_range_half_open": [11000, 12000],
+    "z_range_half_open": [
+      11000,
+      12000
+    ],
     "optimizer_num_training_steps": 30000,
     "optimizer_random_seed": 1,
     "config_overrides": {
@@ -47,7 +50,7 @@
       "dense_spacing_mode": "grad_mag",
       "loss_weight_dense_spacing": 0
     },
-    "shell_template": "FIT_SPIRAL_CONFIG_OVERRIDES='{"z_begin":11000,"z_end":12000,"optimizer_num_training_steps":30000,"optimizer_random_seed":1,"input_use_tracks":true,"input_disable_patches":true,"loss_weight_shell_outer":0,"loss_weight_shell_patch_radius":0,"dense_spacing_mode":"grad_mag","loss_weight_dense_spacing":0}' python fit_spiral.py --dataset ds0826",
+    "shell_template": "FIT_SPIRAL_CONFIG_OVERRIDES='{\"z_begin\":11000,\"z_end\":12000,\"optimizer_num_training_steps\":30000,\"optimizer_random_seed\":1,\"input_use_tracks\":true,\"input_disable_patches\":true,\"loss_weight_shell_outer\":0,\"loss_weight_shell_patch_radius\":0,\"dense_spacing_mode\":\"grad_mag\",\"loss_weight_dense_spacing\":0}' python fit_spiral.py --dataset ds0826",
     "expected_reference_context": {
       "documented_gpu": "RTX 3090",
       "documented_tracks_loaded_with_input_use_tracks_true": 480117,
