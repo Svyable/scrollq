@@ -214,7 +214,9 @@ report, and adds the local checks selfcross does not make: components, enclosed 
 folds and Jacobian isometry</td></tr>
 <tr><td>CT support of a surface</td><td>Villa <code>vesuvius.surface_preflight</code></td>
 <td>Binds the report to the exact volume root and surface, and refuses a report made on a different
-scan of the same scroll</td></tr>
+scan of the same scroll. Adds the local geometry checks preflight does not make: on the same 21 published
+Grand Prize meshes, structure-only preflight passes all 21, including the broken PHerc1447 segment
+(<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-preflight-comparison">head-to-head</a>)</td></tr>
 <tr><td>Finding broken segments</td><td>Opening segments one at a time in a viewer</td>
 <td>One command over every published mesh, in TIFXYZ and OBJ, with a dated, reproducible flag list
 (903 + 200 meshes, 77 segments flagged on every registration)</td></tr>
@@ -231,6 +233,12 @@ stability failure with rank bands, and a weight-free Grand Prize frontier</td></
 for review, 1 broken</td>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-real-mesh-audit"><code>artifacts/2026-10-01-real-mesh-audit/</code></a> —
 <code>run.sh</code>, per-segment reports with SHA-256s, <code>summary.json</code></td></tr>
+<tr><td><b>Upstream preflight head-to-head:</b> Villa <code>vesuvius.surface_preflight</code> (commit
+<code>078e9eb</code>, unmodified, structure-only) passes all 21 published Grand Prize meshes on 8/8 gates, including
+the PHerc1447 segment <code>scroliq-mesh</code> flags with 5 findings; same bytes, hash-checked. CT-support gates and
+<code>vc_tifxyz_selfcross</code> not run</td>
+<td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-preflight-comparison"><code>artifacts/2026-10-01-preflight-comparison/</code></a> —
+<code>run.sh</code> (pinned, hash-checked upstream module), <code>preflight/</code>, <code>comparison.json</code></td></tr>
 <tr><td><b>Corpus-wide mesh audit:</b> 843/903 TIFXYZ + 200/200 OBJ; 77/307 segments flagged; controls flagged; formats
 agree on 175/185. Review candidates, not confirmed defects</td>
 <td><a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-corpus-mesh-audit"><code>artifacts/2026-10-01-corpus-mesh-audit/</code></a> —

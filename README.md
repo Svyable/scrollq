@@ -380,7 +380,7 @@ ScrolIQ reads the community's tool outputs and checks them against the exact dat
 | Job | Existing tool or practice | What ScrolIQ adds |
 |---|---|---|
 | Non-local self-intersection of a TIFXYZ surface | VC3D `vc_tifxyz_selfcross` | Validates the report against the exact surface and grid; adds local checks (components, holes, edge jumps, folds, Jacobian isometry) |
-| CT support of a surface | Villa `vesuvius.surface_preflight` | Binds the report to the exact volume root and surface; a report from another scan of the same scroll fails |
+| CT support of a surface | Villa `vesuvius.surface_preflight` | Binds the report to the exact volume root and surface; a report from another scan of the same scroll fails. Adds local geometry checks: structure-only preflight passes all 21 published Grand Prize meshes, including the broken PHerc1447 segment ([head-to-head](artifacts/2026-10-01-preflight-comparison/README.md)) |
 | Finding broken segments | Opening segments one at a time in a viewer | One command over every published mesh in TIFXYZ and OBJ, with a dated flag list ([corpus audit](artifacts/2026-10-01-corpus-mesh-audit/README.md): 77 of 307 segments flagged) |
 | Zarr store integrity | Noticing errors downstream | `scrollq-health` runs zarr-pyramid-audit before any quality verdict |
 | Choosing the next volume to label or train on | We found no published per-volume scan comparison | Scan-health survey of all 64 volcomp volumes with sampling provenance and a weight-free Grand Prize frontier |
