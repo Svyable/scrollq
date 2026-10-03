@@ -59,10 +59,15 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
 RUN useradd --uid 10001 --create-home --home-dir /home/scroliq --shell /usr/sbin/nologin scroliq
 
 COPY --from=builder /wheels /wheels
+# Install the complete wheelhouse as explicit local artifacts. --no-deps is
+# intentional: resolving the ScrolIQ wheel's PEP 508 direct-URL ZPA pin would
+# otherwise invoke Git in the runtime stage, defeating the Git-free image.
+# The builder already resolved that immutable commit into a wheel; pip check
+# then verifies that the installed distributions satisfy the declared graph.
 RUN python -m pip install \
       --no-index \
-      --find-links=/wheels \
-      scrollq==0.1.0 \
+      --no-deps \
+      /wheels/*.whl \
     && python -m pip check \
     && rm -rf /wheels
 
