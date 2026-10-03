@@ -38,6 +38,12 @@ def _documents(tmp_path: Path, *, omit_x: int | None = None):
         "schema_version": 1,
         "coordinate_system": "score_map_xy",
         "protocol_id": "synthetic-heldout-v1",
+        "volume_root": "public/test-volume.zarr",
+        "source_attestation": {
+            "algorithm": "zpa-metadata-semantics-v1",
+            "state": "PRESENT",
+            "metadata_semantics_sha256": "a" * 64,
+        },
         "shape_yx": [20, 11],
         "score_sha256": score_sha,
         "truth_sha256": horizon_validation._sha256(truth),
@@ -175,3 +181,13 @@ def test_canonical_spec_hash_is_stable(tmp_path: Path):
     spec, _, _, _ = _documents(tmp_path)
     shuffled = dict(reversed(list(spec.items())))
     assert horizon_validation.digest(spec) == horizon_validation.digest(shuffled)
+
+
+def test_source_attestation_must_be_present(tmp_path: Path):
+    spec, prediction, truth, pred_csv = _documents(tmp_path)
+    spec["source_attestation"]["state"] = "UNKNOWN"
+
+    with pytest.raises(ValueError, match="state must be PRESENT"):
+        horizon_validation.evaluate(
+            spec, prediction, truth_path=truth, prediction_csv=pred_csv
+        )
