@@ -274,6 +274,15 @@ tbody tr.vol:focus-visible{{outline:2px solid var(--ember);outline-offset:-2px}}
     published segments on those two targets are accounted for. The other 11 targets are
     <b>evidence gaps</b>, not failures.
     <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-02-grand-prize-mesh-crosscut">Offline exact-volume cross-cut →</a></p></div>
+  <div class="card"><h3>Independent same-byte cross-check</h3>
+    <p>Mesh IQ was run on the exact <b>1,818,055 SHA-256-verified bytes</b> in TIFXYZ Doctor's
+    pinned 10-case real-data benchmark: <b>10 / 10</b> agreement on enclosed-hole presence,
+    <b>10 / 10</b> on single-component presence, and <b>7 / 7</b> hole-presence agreement
+    on the PHerc0800 + PHerc1447 Grand Prize overlap. The first run also exposed our own
+    isometry normalization error; after fixing it, all <b>10 / 10</b> Doctor-below-threshold
+    cases have no Mesh IQ isometry finding, with nearly identical p95 stretch on the Villa controls.
+    Rival benchmark roles are provenance labels, not geometry ground truth.
+    <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-02-doctor-same-byte">Frozen same-byte evidence →</a></p></div>
   <div class="card"><h3>Winding check with measured sensitivity</h3>
     <p>On public PHercParis4 annotations, the ray-order audit found <b>2 inversions / 13,700 comparable pairs</b>.
     In a seeded injection control, deliberate &plusmn;3 winding errors were detected in <b>179 / 200</b>
