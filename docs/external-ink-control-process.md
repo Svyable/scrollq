@@ -155,6 +155,16 @@ The external repository's physics tests are incorporated conservatively:
 
 No control is allowed to be tuned by looking for attractive letters.
 
+### Independent morphology control
+
+The [morphology-based ink control](morphology-ink-control.md) is an independent
+physical falsification path, not another prediction ensemble. Its current
+profilometry source may be benchmarked only with scale-normalized descriptors;
+the public source has an unresolved lateral-sampling discrepancy, so it cannot
+yet be used as a Grand Prize CT promotion signal. When that blocker clears,
+bind any target-control result to the same frozen evaluation regions used here
+rather than selecting a new region from attractive morphology or ink output.
+
 ## Gate D — promotion rule
 
 The candidate can strengthen the **ink false-positive/falsification gate** only
