@@ -588,6 +588,22 @@ The gate fails closed on wrong-volume lineage, missing/tampered/invalid ZPA evid
 See [the provenance-manifest specification](docs/grand-prize-provenance.md) and [example manifest](examples/grand-prize-provenance.example.json).
 For unpacked VC3D surfaces, `scroliq-hash column_01.tifxyz` computes the canonical tree SHA-256 used by the provenance gate, so the complete directory-format mesh is cryptographically bound without repacking it.
 
+### Grand Prize pre-submission readiness
+
+`scroliq-gp-ready` composes schema-v5 provenance with an independent-evidence ledger instead of turning every diagnostic into another score. That means source CT identity, ZPA source attestation, model voxel/axis/window/preprocessing contracts, recto coverage, training leakage and held-out ink provenance are checked first; independent geometry evidence is then evaluated against the exact submitted mesh bytes where its native format supports content identity.
+
+```bash
+scroliq-gp-ready \
+  --manifest submission/provenance.json \
+  --evidence submission/evidence.json \
+  --root-dir submission \
+  --out submission/readiness.json
+```
+
+The verdict is **READY**, **BLOCKED**, or **UNKNOWN**. Policy v1 is deliberately conservative: Windcheck's content-bound `windcheck_check/v1` certificate can authorize the self-intersection claim, while Flatcheck, Handcheck and held-out spiral evidence remain unresolved until their package-level binding/acceptance semantics are strong enough. Unapproved or stale evidence can neither clear nor convict the submission.
+
+This is a ScrolIQ pre-submission policy, not an official Scroll Prize ruling and not a character-legibility judgment. See [the readiness evidence policy](docs/grand-prize-readiness.md).
+
 ## First Letters target qualification
 
 The same qualifier covers the 22 First Letters scans with `--prize
