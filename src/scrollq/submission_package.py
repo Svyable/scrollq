@@ -407,7 +407,7 @@ def _build_reviewer_contract(
         )
 
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "tool": PACKAGE_TOOL,
         "materials": materials,
         "reproduction": {
@@ -736,10 +736,21 @@ def verify_package(archive_path: str | Path) -> dict[str, Any]:
                     errors.append(f"{name}: sha256 mismatch")
                 verified_hashes[name] = payload_sha
 
+            embedded_manifest: dict[str, Any] | None = None
             manifest_rel = index.get("manifest_path")
             if isinstance(manifest_rel, str) and manifest_rel in actual_names:
+                manifest_raw = zf.read(manifest_rel)
                 if verified_hashes.get(manifest_rel) != index.get("manifest_sha256"):
                     errors.append("manifest_sha256 does not match manifest bytes")
+                try:
+                    candidate_manifest = json.loads(manifest_raw)
+                except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                    errors.append(f"cannot parse embedded provenance manifest: {exc}")
+                else:
+                    if isinstance(candidate_manifest, dict):
+                        embedded_manifest = candidate_manifest
+                    else:
+                        errors.append("embedded provenance manifest is not an object")
             else:
                 errors.append("manifest_path is missing from archive")
 
@@ -775,7 +786,7 @@ def verify_package(archive_path: str | Path) -> dict[str, Any]:
                     errors.append(f"cannot parse reviewer contract: {exc}")
                 else:
                     if (
-                        reviewer.get("schema_version") != 1
+                        reviewer.get("schema_version") != 2
                         or reviewer.get("tool") != PACKAGE_TOOL
                     ):
                         errors.append("unsupported reviewer contract")
@@ -854,8 +865,10 @@ def verify_package(archive_path: str | Path) -> dict[str, Any]:
             else:
                 errors.append("reviewer_contract_path is missing from archive")
 
+            ledger_document: dict[str, Any] | None = None
             ledger_rel = index.get("legibility_ledger_path")
             if isinstance(ledger_rel, str) and ledger_rel in actual_names:
+                ledger_raw = zf.read(ledger_rel)
                 if (
                     verified_hashes.get(ledger_rel)
                     != index.get("legibility_ledger_sha256")
@@ -863,6 +876,15 @@ def verify_package(archive_path: str | Path) -> dict[str, Any]:
                     errors.append(
                         "legibility_ledger_sha256 does not match ledger bytes"
                     )
+                try:
+                    candidate_ledger = json.loads(ledger_raw)
+                except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                    errors.append(f"cannot parse legibility ledger: {exc}")
+                else:
+                    if isinstance(candidate_ledger, dict):
+                        ledger_document = candidate_ledger
+                    else:
+                        errors.append("legibility ledger is not an object")
             else:
                 errors.append("legibility_ledger_path is missing from archive")
 
@@ -903,6 +925,21 @@ def verify_package(archive_path: str | Path) -> dict[str, Any]:
                         errors.append(
                             "legibility validation ledger hash differs from package"
                         )
+                    if (
+                        embedded_manifest is not None
+                        and ledger_document is not None
+                    ):
+                        recomputed = audit_legibility(
+                            embedded_manifest,
+                            ledger_document,
+                            manifest_sha256=index.get("manifest_sha256"),
+                            ledger_sha256=index.get("legibility_ledger_sha256"),
+                        )
+                        if _json_bytes(recomputed) != legibility_raw:
+                            errors.append(
+                                "embedded legibility validation does not match "
+                                "a fresh audit of the embedded manifest and ledger"
+                            )
             else:
                 errors.append(
                     "legibility_validation_path is missing from archive"
