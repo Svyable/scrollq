@@ -129,6 +129,18 @@ def test_tampered_summary_is_rejected():
         evaluate_tournament([entry("a", a, "c"), entry("b", b, "d")])
 
 
+def test_tampered_target_error_and_bool_schema_rejected():
+    a = report(prediction="a")
+    b = report(prediction="b", checkpoint="2")
+    b["targets"][0]["error_voxels"] = 4.0
+    with pytest.raises(GeometryTournamentError, match="does not match coordinates"):
+        evaluate_tournament([entry("a", a, "c"), entry("b", b, "d")])
+    b = report(prediction="b", checkpoint="2")
+    b["schema_version"] = True
+    with pytest.raises(GeometryTournamentError, match="schema_version"):
+        evaluate_tournament([entry("a", a, "c"), entry("b", b, "d")])
+
+
 def test_requires_two_unique_candidates():
     a = report(prediction="a")
     with pytest.raises(GeometryTournamentError, match="at least two"):
