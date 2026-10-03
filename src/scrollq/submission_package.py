@@ -52,7 +52,7 @@ def _sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _normalise_rel(raw: str) -> str:
+def _normalise_rel(raw: str, *, allow_reserved: bool = False) -> str:
     if not isinstance(raw, str) or not raw:
         raise PackageError("package path must be a non-empty string")
     if "\\" in raw:
@@ -61,7 +61,11 @@ def _normalise_rel(raw: str) -> str:
     if path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts):
         raise PackageError(f"unsafe package-relative path: {raw!r}")
     normal = path.as_posix()
-    if normal == INDEX_PATH or normal == VALIDATION_PATH or normal.startswith("_scroliq/"):
+    if (not allow_reserved) and (
+        normal == INDEX_PATH
+        or normal == VALIDATION_PATH
+        or normal.startswith("_scroliq/")
+    ):
         raise PackageError(f"manifest artifact collides with reserved path: {normal}")
     return normal
 
@@ -176,6 +180,8 @@ def build_package(
     if out.suffix.lower() != ".zip":
         raise PackageError("--out must end in .zip")
 
+    if manifest_path.is_symlink():
+        raise PackageError("provenance manifest may not be a symlink")
     manifest_raw = manifest_path.read_bytes()
     try:
         manifest = json.loads(manifest_raw)
@@ -307,6 +313,11 @@ def verify_package(archive_path: str | Path) -> dict[str, Any]:
                     "archive_sha256": archive_sha,
                     "errors": errors,
                 }
+            index_info = zf.getinfo(INDEX_PATH)
+            if index_info.compress_type != zipfile.ZIP_STORED:
+                errors.append(f"{INDEX_PATH}: member is not ZIP_STORED")
+            if index_info.date_time != FIXED_ZIP_TIME:
+                errors.append(f"{INDEX_PATH}: timestamp is not deterministic")
             try:
                 index = json.loads(zf.read(INDEX_PATH))
             except (UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -344,7 +355,7 @@ def verify_package(archive_path: str | Path) -> dict[str, Any]:
                     continue
                 path = row.get("path")
                 try:
-                    normal = _normalise_rel(path)
+                    normal = _normalise_rel(path, allow_reserved=True)
                 except PackageError as exc:
                     errors.append(str(exc))
                     continue
