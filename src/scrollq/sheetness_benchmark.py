@@ -143,9 +143,10 @@ def _validate_rule(rule: Any) -> dict[str, float]:
     if not isinstance(rule, dict):
         raise ValueError("decision_rule is required")
     names = {
-        "min_score_completeness": (0.0, 1.0),
-        "min_surface_win_fraction": (0.0, 1.0),
-        "min_median_margin": (None, None),
+        "min_localization_completeness": (0.0, 1.0),
+        "min_surface_beats_offset_fraction": (0.0, 1.0),
+        "min_median_surface_offset_margin": (None, None),
+        "min_wrong_wrap_completeness": (0.0, 1.0),
         "min_normal_completeness": (0.0, 1.0),
         "min_median_abs_cosine": (0.0, 1.0),
     }
@@ -323,10 +324,12 @@ def evaluate(
     ids: set[str] = set()
     rows: list[dict[str, Any]] = []
     margins: list[float] = []
+    wrong_wrap_scores_all: list[float] = []
     cosines: list[float] = []
-    score_complete_count = 0
+    localization_complete_count = 0
+    wrong_wrap_complete_count = 0
     normal_complete_count = 0
-    surface_win_count = 0
+    surface_beats_offset_count = 0
 
     for index, group in enumerate(groups):
         path = f"groups[{index}]"
@@ -354,8 +357,10 @@ def evaluate(
         seen_roles: set[str] = set()
         seen_control_ids: set[str] = set()
         control_rows: list[dict[str, Any]] = []
-        control_scores: list[float] = []
-        control_complete = True
+        normal_offset_scores: list[float] = []
+        wrong_wrap_scores: list[float] = []
+        normal_offset_complete = True
+        wrong_wrap_complete = True
         for c_index, control in enumerate(controls):
             cpath = f"{path}.controls[{c_index}]"
             if not isinstance(control, dict):
@@ -374,10 +379,17 @@ def evaluate(
             seen_roles.add(str(role))
             coord = _probe_coord(control.get("zyx"), f"{cpath}.zyx")
             score, reason = _value_at(response, coord)
-            if score is None:
-                control_complete = False
+            if role == "normal-offset":
+                if score is None:
+                    normal_offset_complete = False
+                else:
+                    normal_offset_scores.append(score)
             else:
-                control_scores.append(score)
+                if score is None:
+                    wrong_wrap_complete = False
+                else:
+                    wrong_wrap_scores.append(score)
+                    wrong_wrap_scores_all.append(score)
             control_rows.append(
                 {
                     "id": cid,
@@ -395,16 +407,18 @@ def evaluate(
             raise ValueError(f"{path} missing required control roles: {missing_roles}")
 
         surface_score, surface_failure = _value_at(response, surface_coord)
-        score_complete = surface_score is not None and control_complete
+        localization_complete = surface_score is not None and normal_offset_complete
         margin = None
-        surface_beats_all = False
-        if score_complete:
-            score_complete_count += 1
-            margin = float(surface_score - max(control_scores))
+        surface_beats_offsets = False
+        if localization_complete:
+            localization_complete_count += 1
+            margin = float(surface_score - max(normal_offset_scores))
             margins.append(margin)
-            surface_beats_all = bool(surface_score > max(control_scores))
-            if surface_beats_all:
-                surface_win_count += 1
+            surface_beats_offsets = bool(surface_score > max(normal_offset_scores))
+            if surface_beats_offsets:
+                surface_beats_offset_count += 1
+        if wrong_wrap_complete:
+            wrong_wrap_complete_count += 1
 
         cosine, normal_failure = _normal_at(normals, surface_coord, reference)
         if cosine is not None:
@@ -426,36 +440,51 @@ def evaluate(
                     "normal_failure": normal_failure,
                 },
                 "controls": control_rows,
-                "score_complete": score_complete,
-                "surface_beats_all_controls": surface_beats_all,
-                "surface_minus_best_control": margin,
+                "localization_complete": localization_complete,
+                "surface_beats_all_normal_offsets": surface_beats_offsets,
+                "surface_minus_best_normal_offset": margin,
+                "wrong_wrap_complete": wrong_wrap_complete,
             }
         )
 
     total = len(rows)
-    score_completeness = score_complete_count / total
+    localization_completeness = localization_complete_count / total
+    wrong_wrap_completeness = wrong_wrap_complete_count / total
     normal_completeness = normal_complete_count / total
-    surface_win_fraction = surface_win_count / total
+    surface_beats_offset_fraction = surface_beats_offset_count / total
     median_margin = _median(margins)
+    median_wrong_wrap_sheetness = _median(wrong_wrap_scores_all)
     median_abs_cosine = _median(cosines)
 
     metrics = {
         "group_count": total,
-        "score_complete_count": score_complete_count,
-        "score_completeness": score_completeness,
-        "surface_win_count": surface_win_count,
-        "surface_win_fraction": surface_win_fraction,
-        "median_surface_minus_best_control": median_margin,
+        "localization_complete_count": localization_complete_count,
+        "localization_completeness": localization_completeness,
+        "surface_beats_offset_count": surface_beats_offset_count,
+        "surface_beats_offset_fraction": surface_beats_offset_fraction,
+        "median_surface_minus_best_normal_offset": median_margin,
+        "wrong_wrap_complete_count": wrong_wrap_complete_count,
+        "wrong_wrap_completeness": wrong_wrap_completeness,
+        "median_wrong_wrap_sheetness": median_wrong_wrap_sheetness,
         "normal_complete_count": normal_complete_count,
         "normal_completeness": normal_completeness,
         "median_abs_cosine": median_abs_cosine,
     }
 
     checks = {
-        "score_completeness": score_completeness >= rule["min_score_completeness"],
-        "surface_win_fraction": surface_win_fraction >= rule["min_surface_win_fraction"],
-        "median_margin": (
-            median_margin is not None and median_margin >= rule["min_median_margin"]
+        "localization_completeness": (
+            localization_completeness >= rule["min_localization_completeness"]
+        ),
+        "surface_beats_offset_fraction": (
+            surface_beats_offset_fraction
+            >= rule["min_surface_beats_offset_fraction"]
+        ),
+        "median_surface_offset_margin": (
+            median_margin is not None
+            and median_margin >= rule["min_median_surface_offset_margin"]
+        ),
+        "wrong_wrap_completeness": (
+            wrong_wrap_completeness >= rule["min_wrong_wrap_completeness"]
         ),
         "normal_completeness": normal_completeness >= rule["min_normal_completeness"],
         "median_abs_cosine": (
@@ -499,8 +528,10 @@ def evaluate(
         "decision_checks": checks,
         "groups": rows,
         "claim_boundary": (
-            "This result compares a frozen sheetness field against frozen surface, "
-            "normal-offset, and wrong-wrap probes on a declared exact CT volume. "
+            "This result tests local sheet localization against frozen normal-offset "
+            "controls and separately records sheetness on frozen wrong-wrap probes. "
+            "Wrong-wrap sheetness is not treated as a negative because another papyrus "
+            "winding should itself be locally sheet-like. "
             "The cutout is hash- and coordinate-bound to an exact audited level-0 "
             "volume through scroliq-ct-cutout, and probe values are sampled "
             "trilinearly at continuous TIFXYZ-compatible coordinates. This still "
