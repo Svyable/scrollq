@@ -10,11 +10,15 @@
     "author",
     "task",
     "checkpoint_sha256",
+    "checkpoint_url",
     "training_data",
+    "training_data_sources",
     "training_regions",
     "training_inventory_complete",
     "training_data_license",
     "held_out_excluded",
+    "pseudo_labeling_used",
+    "pseudo_label_stages",
     "inference_script",
     "inference_sha256",
     "license",
@@ -22,15 +26,36 @@
     "experiment_run_url"
   ],
   "properties": {
-    "schema_version": {"const": 1},
-    "name": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._-]*$"},
-    "author": {"type": "string", "minLength": 1},
-    "task": {"enum": ["ink_detection", "geometry", "segmentation"]},
-    "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "schema_version": {
+      "const": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task": {
+      "enum": [
+        "ink_detection",
+        "geometry",
+        "segmentation"
+      ]
+    },
+    "checkpoint_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
     "training_data": {
       "type": "array",
       "uniqueItems": true,
-      "items": {"type": "string", "minLength": 1}
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
     },
     "training_regions": {
       "type": "array",
@@ -40,16 +65,90 @@
         "pattern": "^[^:\\s]+:[^:\\s]+$"
       }
     },
-    "training_inventory_complete": {"type": "boolean"},
-    "training_data_license": {"const": "CC-BY-NC-4.0"},
-    "held_out_excluded": {"type": "boolean"},
-    "inference_script": {"type": "string", "minLength": 1},
-    "inference_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "license": {"type": "string", "minLength": 1},
-    "random_seed": {"type": "integer", "minimum": 0},
+    "training_inventory_complete": {
+      "type": "boolean"
+    },
+    "training_data_license": {
+      "const": "CC-BY-NC-4.0"
+    },
+    "held_out_excluded": {
+      "type": "boolean"
+    },
+    "inference_script": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inference_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1
+    },
+    "random_seed": {
+      "type": "integer",
+      "minimum": 0
+    },
     "experiment_run_url": {
       "type": "string",
       "pattern": "^https?://"
+    },
+    "checkpoint_url": {
+      "type": "string",
+      "pattern": "^https?://"
+    },
+    "training_data_sources": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^https?://"
+      }
+    },
+    "pseudo_labeling_used": {
+      "type": "boolean"
+    },
+    "pseudo_label_stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "dataset_url",
+          "dataset_sha256",
+          "checkpoint_url",
+          "checkpoint_sha256",
+          "experiment_run_url"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dataset_url": {
+            "type": "string",
+            "pattern": "^https?://"
+          },
+          "dataset_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "checkpoint_url": {
+            "type": "string",
+            "pattern": "^https?://"
+          },
+          "checkpoint_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "experiment_run_url": {
+            "type": "string",
+            "pattern": "^https?://"
+          }
+        }
+      }
     }
   }
 }
