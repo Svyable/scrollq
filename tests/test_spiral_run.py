@@ -96,6 +96,9 @@ def _dataset(tmp_path, villa_commit):
             "z_range_half_open": [11000, 12000],
             "optimizer_num_training_steps": 30000,
             "optimizer_random_seed": 1,
+            "expected_reference_context": {
+                "documented_tracks_loaded_with_input_use_tracks_true": 480117,
+            },
             "config_overrides": {
                 "z_begin": 11000,
                 "z_end": 12000,
