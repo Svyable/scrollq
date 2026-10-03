@@ -18,6 +18,12 @@ import re
 from pathlib import Path
 from typing import Any
 
+from .evidence_adapters import (
+    APPROVED_PASS_ADAPTERS,
+    ASSESSORS,
+    verify_normalized_entry,
+)
+
 SCHEMA_VERSION = 1
 DIAGNOSTIC = "grand-prize-evidence-ledger"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -29,11 +35,12 @@ MESH_CLAIMS = (
     "render-handedness",
 )
 VOLUME_CLAIMS = ("spiral-held-out",)
-ADVISORY_CLAIMS = (
-    "surface-sheet-identity",
+MESH_ADVISORY_CLAIMS = ("surface-sheet-identity",)
+VOLUME_ADVISORY_CLAIMS = (
     "surface-ct-support",
     "cross-scan-registration",
 )
+ADVISORY_CLAIMS = MESH_ADVISORY_CLAIMS + VOLUME_ADVISORY_CLAIMS
 KNOWN_CLAIMS = frozenset(MESH_CLAIMS + VOLUME_CLAIMS + ADVISORY_CLAIMS)
 STATUSES = frozenset({"pass", "partial", "fail", "unknown"})
 
@@ -52,12 +59,27 @@ def _verify_local_artifact(
     path: str,
     root_dir: Path | None,
     errors: list[dict[str, str]],
-) -> None:
-    if root_dir is None or not entry.get("path"):
-        return
+    required: bool,
+) -> Path | None:
     rel = entry.get("path")
+    if root_dir is None:
+        if required:
+            _error(
+                errors,
+                "EVIDENCE_PACKAGE_ROOT_REQUIRED",
+                path,
+                "Grand Prize readiness requires a package root so native evidence can be re-verified",
+            )
+        return None
     if not isinstance(rel, str) or not rel:
-        return
+        if required:
+            _error(
+                errors,
+                "EVIDENCE_LOCAL_ARTIFACT_REQUIRED",
+                f"{path}.path",
+                "required evidence must include a package-relative native report path",
+            )
+        return None
 
     root = root_dir.resolve()
     target = (root / rel).resolve()
@@ -65,10 +87,10 @@ def _verify_local_artifact(
         target.relative_to(root)
     except ValueError:
         _error(errors, "EVIDENCE_PATH_ESCAPE", f"{path}.path", "path escapes package root")
-        return
+        return None
     if not target.is_file():
         _error(errors, "EVIDENCE_FILE_MISSING", f"{path}.path", f"file not found: {rel}")
-        return
+        return None
 
     digest = entry.get("sha256")
     if isinstance(digest, str) and SHA256_RE.fullmatch(digest):
@@ -80,6 +102,8 @@ def _verify_local_artifact(
                 f"{path}.sha256",
                 f"declared {digest}, actual {actual}",
             )
+            return None
+    return target
 
 
 def _claim_summary(
@@ -150,6 +174,7 @@ def validate_evidence_ledger(
     expected_mesh_ids: list[str] | set[str] | tuple[str, ...] | None = None,
     root_dir: Path | None = None,
     ledger_sha256: str | None = None,
+    require_local_artifacts: bool = False,
 ) -> dict[str, Any]:
     """Validate a normalized independent-evidence ledger.
 
@@ -281,9 +306,11 @@ def validate_evidence_ledger(
             )
 
         scope = raw.get("scope")
-        if not isinstance(scope, dict):
+        if scope is None:
             scope = {}
-            _error(errors, "EVIDENCE_SCOPE", f"{path}.scope", "scope object is required")
+        elif not isinstance(scope, dict):
+            scope = {}
+            _error(errors, "EVIDENCE_SCOPE", f"{path}.scope", "scope must be an object")
         mesh_ids = scope.get("mesh_ids", [])
         if not isinstance(mesh_ids, list) or not all(
             isinstance(v, str) and v for v in mesh_ids
@@ -318,13 +345,62 @@ def validate_evidence_ledger(
                 f"evidence names mesh ids not present in submission: {unknown_meshes}",
             )
 
-        _verify_local_artifact(raw, path=path, root_dir=root_dir, errors=errors)
+        required_claim = claim in MESH_CLAIMS or claim in VOLUME_CLAIMS
+        target = _verify_local_artifact(
+            raw,
+            path=path,
+            root_dir=root_dir,
+            errors=errors,
+            required=require_local_artifacts and required_claim,
+        )
+
+        normalization = raw.get("normalization")
+        adapter = (
+            normalization.get("adapter")
+            if isinstance(normalization, dict)
+            else None
+        )
+        effective_status = status
+        approved = APPROVED_PASS_ADAPTERS.get(str(claim), frozenset())
+        if status == "pass" and required_claim and adapter not in approved:
+            warnings.append(
+                {
+                    "code": "EVIDENCE_PASS_NOT_AUTHORIZED",
+                    "path": f"{path}.normalization.adapter",
+                    "message": (
+                        f"{claim!r} has no approved adapter-backed PASS in this "
+                        "policy version; treating the claim as unknown"
+                    ),
+                }
+            )
+            effective_status = "unknown"
+
+        if target is not None and isinstance(adapter, str) and adapter in ASSESSORS:
+            try:
+                native_report = json.loads(target.read_text(encoding="utf-8"))
+            except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+                _error(
+                    errors,
+                    "EVIDENCE_NATIVE_REPORT_UNREADABLE",
+                    f"{path}.path",
+                    f"cannot read adapter source report: {exc}",
+                )
+            else:
+                mismatches = verify_normalized_entry(raw, native_report)
+                for mismatch in mismatches:
+                    _error(
+                        errors,
+                        "EVIDENCE_NORMALIZATION_MISMATCH",
+                        path,
+                        mismatch,
+                    )
 
         normalized.append(
             {
                 "id": entry_id,
                 "claim": claim,
-                "status": status,
+                "declared_status": status,
+                "status": effective_status,
                 "tool": tool,
                 "artifact_url": raw.get("artifact_url"),
                 "sha256": digest,
@@ -335,6 +411,7 @@ def validate_evidence_ledger(
                     "commit": producer.get("commit"),
                     "command": producer.get("command"),
                 },
+                "normalization": normalization,
                 "summary": raw.get("summary"),
             }
         )
@@ -361,7 +438,7 @@ def validate_evidence_ledger(
         _claim_summary(
             claim,
             normalized,
-            mesh_scoped=False,
+            mesh_scoped=claim in MESH_ADVISORY_CLAIMS,
             expected_mesh_ids=expected_mesh_set,
         )
         for claim in ADVISORY_CLAIMS
@@ -441,6 +518,7 @@ def main() -> None:
         expected_mesh_ids=args.mesh_id,
         root_dir=Path(args.root_dir) if args.root_dir else None,
         ledger_sha256=hashlib.sha256(raw).hexdigest(),
+        require_local_artifacts=bool(args.root_dir),
     )
 
     if args.out:
