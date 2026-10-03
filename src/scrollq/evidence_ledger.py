@@ -172,6 +172,7 @@ def validate_evidence_ledger(
     *,
     expected_volume_id: str | None = None,
     expected_mesh_ids: list[str] | set[str] | tuple[str, ...] | None = None,
+    expected_mesh_sha256: dict[str, str] | None = None,
     root_dir: Path | None = None,
     ledger_sha256: str | None = None,
     require_local_artifacts: bool = False,
@@ -223,6 +224,7 @@ def validate_evidence_ledger(
 
     seen_ids: set[str] = set()
     expected_mesh_set = set(expected_mesh_ids or ())
+    expected_mesh_digests = dict(expected_mesh_sha256 or {})
 
     for i, raw in enumerate(raw_entries):
         path = f"entries[{i}]"
@@ -336,6 +338,37 @@ def validate_evidence_ledger(
                 f"{path}.scope.mesh_ids",
                 f"{claim!r} evidence must identify at least one submitted mesh",
             )
+
+        mesh_sha256 = scope.get("mesh_sha256", {})
+        if mesh_sha256 is None:
+            mesh_sha256 = {}
+        if not isinstance(mesh_sha256, dict):
+            _error(
+                errors,
+                "EVIDENCE_SCOPE_MESH_SHA256",
+                f"{path}.scope.mesh_sha256",
+                "mesh_sha256 must map mesh ids to lowercase 64-hex digests",
+            )
+            mesh_sha256 = {}
+        if claim in MESH_CLAIMS:
+            for mesh_id in mesh_ids:
+                value = mesh_sha256.get(mesh_id)
+                if not isinstance(value, str) or not SHA256_RE.fullmatch(value):
+                    _error(
+                        errors,
+                        "EVIDENCE_SCOPE_MESH_SHA256",
+                        f"{path}.scope.mesh_sha256",
+                        f"exact submitted mesh digest is required for {mesh_id!r}",
+                    )
+                expected = expected_mesh_digests.get(mesh_id)
+                if expected is not None and value != expected:
+                    _error(
+                        errors,
+                        "EVIDENCE_SCOPE_MESH_HASH_MISMATCH",
+                        f"{path}.scope.mesh_sha256.{mesh_id}",
+                        "evidence is bound to a different mesh digest than the provenance manifest",
+                    )
+
         unknown_meshes = sorted(set(mesh_ids) - expected_mesh_set) if expected_mesh_set else []
         if unknown_meshes:
             _error(
@@ -405,7 +438,10 @@ def validate_evidence_ledger(
                 "artifact_url": raw.get("artifact_url"),
                 "sha256": digest,
                 "path": raw.get("path"),
-                "scope": {"mesh_ids": list(mesh_ids)},
+                "scope": {
+                    "mesh_ids": list(mesh_ids),
+                    "mesh_sha256": dict(mesh_sha256),
+                },
                 "producer": {
                     "repository": producer.get("repository"),
                     "commit": producer.get("commit"),
