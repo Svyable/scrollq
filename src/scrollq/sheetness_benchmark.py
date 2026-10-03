@@ -10,7 +10,7 @@ from typing import Any
 
 import numpy as np
 
-SCHEMA = "scroliq-sheetness-benchmark/1"
+SCHEMA = "scroliq-sheetness-benchmark/2"
 REQUIRED_CONTROL_ROLES = ("normal-offset", "wrong-wrap")
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
@@ -116,6 +116,77 @@ def _validate_rule(rule: Any) -> dict[str, float]:
     return out
 
 
+def _validate_cutout_manifest(
+    spec: dict[str, Any],
+    manifest: dict[str, Any],
+    *,
+    volume_root: str,
+    source: dict[str, Any],
+    expected_input_sha: str,
+    manifest_file_sha256: str,
+) -> dict[str, Any]:
+    expected_manifest_sha = _require_sha(
+        spec.get("cutout_manifest_sha256"), "spec.cutout_manifest_sha256"
+    )
+    if expected_manifest_sha != manifest_file_sha256:
+        raise ValueError("cutout manifest sha256 does not match frozen spec")
+    if manifest.get("schema") != "scroliq-ct-cutout/1":
+        raise ValueError("cutout manifest must be scroliq-ct-cutout/1")
+    if manifest.get("status") != "measured":
+        raise ValueError("cutout manifest status must be measured")
+    if manifest.get("volume_root") != volume_root:
+        raise ValueError("cutout manifest volume_root does not match frozen spec")
+    if manifest.get("level") != 0 or manifest.get("coordinate_space") != "level0-voxel-index":
+        raise ValueError("cutout manifest must describe level-0 voxel-index coordinates")
+
+    attestation = manifest.get("source_attestation")
+    if not isinstance(attestation, dict):
+        raise ValueError("cutout manifest source_attestation is required")
+    for key in ("algorithm", "state", "metadata_semantics_sha256"):
+        if attestation.get(key) != source.get(key):
+            raise ValueError(
+                f"cutout manifest source_attestation.{key} does not match frozen spec"
+            )
+
+    cutout = manifest.get("cutout")
+    if not isinstance(cutout, dict):
+        raise ValueError("cutout manifest cutout block is required")
+    if cutout.get("sha256") != expected_input_sha:
+        raise ValueError("cutout manifest sha256 does not match frozen input_sha256")
+    shape = _coord(cutout.get("shape_zyx"), "cutout manifest cutout.shape_zyx")
+    if cutout.get("dtype") != "uint8":
+        raise ValueError("cutout manifest dtype must be uint8")
+
+    bbox = manifest.get("bbox_zyx_half_open")
+    if not isinstance(bbox, dict):
+        raise ValueError("cutout manifest bbox_zyx_half_open is required")
+    start = _coord(bbox.get("start"), "cutout manifest bbox start")
+    stop = _coord(bbox.get("stop"), "cutout manifest bbox stop")
+    if any(a >= b for a, b in zip(start, stop)):
+        raise ValueError("cutout manifest bbox must use increasing half-open bounds")
+    if tuple(stop[d] - start[d] for d in range(3)) != shape:
+        raise ValueError("cutout manifest bbox extent does not match cutout shape")
+
+    transform = manifest.get("local_to_global")
+    if (
+        not isinstance(transform, dict)
+        or transform.get("kind") != "integer-translation"
+        or transform.get("start_zyx") != list(start)
+    ):
+        raise ValueError("cutout manifest local_to_global transform is inconsistent")
+
+    chunks = manifest.get("source_chunks")
+    if not isinstance(chunks, dict) or chunks.get("missing_count") != 0:
+        raise ValueError("cutout manifest must prove zero missing source chunks")
+
+    return {
+        "file_sha256": manifest_file_sha256,
+        "bbox_zyx_half_open": {"start": list(start), "stop": list(stop)},
+        "start_zyx": start,
+        "shape_zyx": list(shape),
+    }
+
+
 def evaluate(
     spec: dict[str, Any],
     report: dict[str, Any],
@@ -126,9 +197,11 @@ def evaluate(
     report_file_sha256: str,
     response_file_sha256: str,
     normal_file_sha256: str,
+    cutout_manifest: dict[str, Any],
+    cutout_manifest_file_sha256: str,
 ) -> dict[str, Any]:
-    if spec.get("schema_version") != 1:
-        raise ValueError("spec.schema_version must be 1")
+    if spec.get("schema_version") != 2:
+        raise ValueError("spec.schema_version must be 2")
     volume_root = spec.get("volume_root")
     if not isinstance(volume_root, str) or not volume_root.strip():
         raise ValueError("spec.volume_root is required")
@@ -152,6 +225,14 @@ def evaluate(
         raise ValueError("sheetness report sha256 does not match frozen spec")
 
     expected_input_sha = _require_sha(spec.get("input_sha256"), "spec.input_sha256")
+    cutout_binding = _validate_cutout_manifest(
+        spec,
+        cutout_manifest,
+        volume_root=volume_root,
+        source=source,
+        expected_input_sha=expected_input_sha,
+        manifest_file_sha256=cutout_manifest_file_sha256,
+    )
     if report.get("kind") != "sheetness" or report.get("schema_version") != 1:
         raise ValueError("report must be a scroliq-sheetness schema v1 report")
     report_input = report.get("input")
@@ -180,6 +261,9 @@ def evaluate(
         raise ValueError("normal array must have response.shape + (3,)")
     if report_input.get("shape_zyx") != [int(v) for v in response.shape]:
         raise ValueError("response shape does not match sheetness report input shape")
+    if cutout_binding["shape_zyx"] != [int(v) for v in response.shape]:
+        raise ValueError("response shape does not match provenance-bound cutout shape")
+    global_start = cutout_binding["start_zyx"]
 
     groups = spec.get("groups")
     if not isinstance(groups, list) or not groups:
@@ -249,6 +333,9 @@ def evaluate(
                     "id": cid,
                     "role": role,
                     "zyx": list(coord),
+                    "global_zyx": [
+                        int(coord[d] + global_start[d]) for d in range(3)
+                    ],
                     "score": score,
                     "failure": reason,
                 }
@@ -279,6 +366,9 @@ def evaluate(
                 "id": gid,
                 "surface": {
                     "zyx": list(surface_coord),
+                    "global_zyx": [
+                        int(surface_coord[d] + global_start[d]) for d in range(3)
+                    ],
                     "score": surface_score,
                     "score_failure": surface_failure,
                     "reference_normal_zyx": [float(v) for v in reference],
@@ -349,6 +439,8 @@ def evaluate(
         },
         "inputs": {
             "cutout_sha256": expected_input_sha,
+            "cutout_manifest_sha256": cutout_binding["file_sha256"],
+            "global_bbox_zyx_half_open": cutout_binding["bbox_zyx_half_open"],
             "response_sha256": response_file_sha256,
             "normal_sha256": normal_file_sha256,
             "shape_zyx": [int(v) for v in response.shape],
@@ -359,25 +451,28 @@ def evaluate(
         "claim_boundary": (
             "This result compares a frozen sheetness field against frozen surface, "
             "normal-offset, and wrong-wrap probes on a declared exact CT volume. "
-            "It does not independently prove that the cutout bytes came from that "
-            "volume, establish sheet identity/topology, or demonstrate readable ink. "
-            "Use scroliq-provenance to bind this benchmark into the submission graph."
+            "The cutout is hash- and coordinate-bound to an exact audited level-0 "
+            "volume through scroliq-ct-cutout. This still does not establish physical "
+            "sheet identity/topology or demonstrate readable ink."
         ),
     }
 
 
 def run(
     spec_path: str | Path,
+    cutout_manifest_path: str | Path,
     report_path: str | Path,
     response_path: str | Path,
     normal_path: str | Path,
 ) -> dict[str, Any]:
     spec_path = Path(spec_path)
+    cutout_manifest_path = Path(cutout_manifest_path)
     report_path = Path(report_path)
     response_path = Path(response_path)
     normal_path = Path(normal_path)
 
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    cutout_manifest = json.loads(cutout_manifest_path.read_text(encoding="utf-8"))
     report = json.loads(report_path.read_text(encoding="utf-8"))
     response = np.load(response_path, allow_pickle=False)
     normals = np.load(normal_path, allow_pickle=False)
@@ -391,6 +486,8 @@ def run(
         report_file_sha256=sha256_file(report_path),
         response_file_sha256=sha256_file(response_path),
         normal_file_sha256=sha256_file(normal_path),
+        cutout_manifest=cutout_manifest,
+        cutout_manifest_file_sha256=sha256_file(cutout_manifest_path),
     )
 
 
@@ -402,6 +499,7 @@ def build_parser() -> argparse.ArgumentParser:
         )
     )
     parser.add_argument("--spec", required=True)
+    parser.add_argument("--cutout-manifest", required=True)
     parser.add_argument("--report", required=True)
     parser.add_argument("--response", required=True)
     parser.add_argument("--normal", required=True)
@@ -417,7 +515,13 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        result = run(args.spec, args.report, args.response, args.normal)
+        result = run(
+            args.spec,
+            args.cutout_manifest,
+            args.report,
+            args.response,
+            args.normal,
+        )
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(json.dumps({"schema": SCHEMA, "status": "invalid", "error": str(exc)}))
         return 2
