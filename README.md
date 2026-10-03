@@ -717,6 +717,22 @@ and [example ledger](examples/grand-prize-legibility.example.json).
 
 `scroliq-submission-image` turns final VC3D renders into the exact reviewer-facing image forms required by the prize. The `column` command derives the 1 cm scale-bar length from the eligible CT voxel size plus the same pyramid level and `--scale` parameters used by `vc_render_tifxyz`, appends the bar in a footer without touching papyrus pixels, and writes a SHA-pinned scale proof. The `banner` command assembles the frozen column images in numeric order and overlays every column number, rejecting gaps or duplicates. See [the submission-image contract](docs/grand-prize-images.md).
 
+### Reproducible Grand Prize reviewer container
+
+The repository now builds and publishes a non-root reviewer/evidence image from
+a digest-pinned Python base and an exact-version runtime constraint set. Normal
+CI builds and smoke-tests the image; the publish workflow tags by Git commit,
+pushes to GHCR, resolves the immutable registry digest, pulls that exact digest
+back, and smoke-tests it again. Use the resulting
+`ghcr.io/svyable/scrollq@sha256:<digest>` value in
+`code.docker_image`—never a moving tag. See the
+[container reproduction contract](docs/grand-prize-container.md).
+
+The image contains ScrolIQ plus the pinned ZPA companion and covers the
+machine-checkable evidence/reviewer layer. It intentionally does not claim to
+bundle the VC3D GUI; the final package still requires a concrete
+`VC3D_WORKFLOW.md` describing the host-side Volume Cartographer workflow.
+
 ### Deterministic Grand Prize reviewer package
 
 `scroliq-package` is the final fail-closed boundary. It will not build the
