@@ -25,7 +25,7 @@ MODEL_SCHEMA_VERSION = 1
 DATASET_SCHEMA_VERSION = 1
 TASKS = {"ink_detection", "geometry", "segmentation"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
-REGION_KEY_RE = re.compile(r"^[^:\\s]+:[^:\\s]+$")
+REGION_KEY_RE = re.compile(r"^[^:\s]+:[^:\s]+$")
 
 
 def canonical_digest(document: dict[str, Any]) -> str:
@@ -116,8 +116,10 @@ def validate_dataset_manifest(dataset: dict[str, Any]) -> list[str]:
         errors.append(f"task must be one of {sorted(TASKS)}")
     if dataset.get("held_out") is not True:
         errors.append("held_out must be true")
-    if not _public_url(dataset.get("source_url")):
-        errors.append("source_url must be public http(s)")
+    if dataset.get("source_url") is not None and not _public_url(dataset.get("source_url")):
+        errors.append("source_url must be public http(s) when provided")
+    if not SHA256_RE.fullmatch(str(dataset.get("truth_commitment_sha256", ""))):
+        errors.append("truth_commitment_sha256 must be lowercase 64-hex")
     regions = dataset.get("regions")
     if not isinstance(regions, list) or not regions:
         errors.append("regions must be a non-empty list")
@@ -324,6 +326,7 @@ def build_preflight_report(
             if isinstance(dataset.get("regions"), list)
             else 0,
             "source_url": dataset.get("source_url"),
+            "truth_commitment_sha256": dataset.get("truth_commitment_sha256"),
         },
         "checks": {
             "model_card_errors": model_errors,
