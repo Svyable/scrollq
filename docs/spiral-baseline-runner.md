@@ -35,7 +35,22 @@ fitter hash, Python identity, safe environment, GPU identity, UTC timing,
 log hashes, final checkpoint hash, and an inventory of official fit outputs.
 
 Exit code zero alone is insufficient: the receipt is failed if
-`checkpoint_fitted.ckpt` is missing. Failed runs still retain logs/receipts.
+`checkpoint_fitted.ckpt` is missing **or if Villa's own stdout does not prove
+that the frozen supervision actually reached the optimizer**. For the current
+PHerc0826 recipe that means:
+
+- exactly the frozen `[11000, 12000)` ROI is reported for track loading;
+- the post-ROI track count is positive and matches the frozen reproduction
+  reference of **480,117** tracks;
+- `fitting 0 patches` is reported, because
+  `input_disable_patches=true` is intentional for this baseline.
+
+The 480,117 count is a reproduction/supervision identity check, not a geometry
+quality metric. A future recipe that intentionally changes the input stack must
+freeze its own expected supervision evidence instead of inheriting this number.
+Missing, contradictory, zero-track, or unexpected-patch observations fail the
+run receipt even when Villa exits 0 and writes a checkpoint. Failed runs still
+retain logs/receipts.
 
 After a successful bounded reproduction, use the pinned villa
 `flatten_spiral_checkpoint.py` path for checkpoint-to-TIFXYZ export; do not
