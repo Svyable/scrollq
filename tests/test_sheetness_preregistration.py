@@ -250,7 +250,7 @@ def test_finalize_adds_only_measured_bindings_and_local_coordinates():
         sheetness_report=_sheetness_report(),
         sheetness_report_file_sha256="2" * 64,
     )
-    assert spec["schema_version"] == int(pre.BENCHMARK_SCHEMA.rsplit("/", 1)[1])
+    assert spec["schema_version"] == pre.BENCHMARK_SPEC_VERSION
     assert spec["preregistration"]["file_sha256"] == "f" * 64
     assert spec["input_sha256"] == "c" * 64
     assert spec["cutout_manifest_sha256"] == "1" * 64
@@ -361,8 +361,8 @@ def test_cli_validate_and_finalize_are_create_only(tmp_path, capsys):
 
     assert pre.main(["validate", "--prereg", str(prereg), "--out", str(receipt)]) == 0
     assert json.loads(receipt.read_text())["status"] == "valid"
-    with pytest.raises(FileExistsError):
-        pre.main(["validate", "--prereg", str(prereg), "--out", str(receipt)])
+    assert pre.main(["validate", "--prereg", str(prereg), "--out", str(receipt)]) == 2
+    assert json.loads(capsys.readouterr().out)["status"] == "invalid"
 
     cutout = tmp_path / "cutout.json"
     report = tmp_path / "sheetness.json"
