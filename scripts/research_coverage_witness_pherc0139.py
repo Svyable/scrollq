@@ -650,7 +650,7 @@ def main() -> int:
     print(
         json.dumps(
             {
-                "schema": SCHEMA,
+                "schema": result["schema"],
                 "status": result["status"],
                 "decision": result["decision"]["status"],
                 "min_witness_count": result["descriptive_witness_support"]["min_count"],
