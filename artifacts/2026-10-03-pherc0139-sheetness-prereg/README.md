@@ -12,7 +12,7 @@ Hessian sheetness response is inspected.
 - TIFXYZ: `mesh/20260317000000-on-20250728140407-9.362um.tifxyz/`
 - exact native CT: `PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr`
 - external binding: https://scrollprize.org/tutorial5
-- voxel size fence: 9.362 µm
+- documented voxel size: 9.362 µm (from the exact source identity and official tutorial binding)
 
 The Challenge tutorial explicitly downloads this TIFXYZ and renders it against
 that exact native 9.362 µm CT volume.
@@ -39,7 +39,7 @@ and 74.9 µm. That conversion is descriptive only; no threshold is derived from 
 
 1. fetch the four required TIFXYZ files (plus `mask.tif` if present) from the
    public Challenge bucket;
-2. run `zpa-gate` on the exact CT root with the 9.362 µm physical-size fence;
+2. run the pinned `zpa-gate` on the exact CT root and require PASS, PRESENT metadata semantics, exact root equality and unambiguous ZYX axes;
 3. extract the embedded full ZPA report to `zpa.json`;
 4. run `scroliq-sheetness-plan` with the frozen constants above;
 5. verify that all wrong-wrap controls remain
@@ -47,7 +47,7 @@ and 74.9 µm. That conversion is descriptive only; no threshold is derived from 
 6. record source hashes, environment information and the run log;
 7. commit the create-only outputs to the campaign branch.
 
-The workflow refuses to overwrite `reference-plan.json`. A rerun after the
+The pinned ZPA attestation does not expose unit-bearing spatial axes for this source, so the workflow does not pretend to independently re-derive 9.362 µm from relative-scale metadata. The resolution identity comes from the exact `…9.362um…` source root and the official tutorial's explicit TIFXYZ↔CT pairing.\n\nThe workflow refuses to overwrite `reference-plan.json`. A rerun after the
 plan exists is therefore verification-only unless a new dated campaign is made.
 
 ## Expected outputs
