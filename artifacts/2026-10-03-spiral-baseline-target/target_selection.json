@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-10-03",
+  "purpose": "Freeze the first Spiral reconstruction campaign target split before new fit output or ink screening.",
+  "software": {
+    "villa_repository": "https://github.com/ScrollPrize/villa",
+    "villa_commit": "5a4388f08cc547e6a1a037f949173e731a3e7aa2",
+    "dataset_assembler_repository": "https://github.com/ttendoscopie-creator/eligible-spiral-dataset"
+  },
+  "bringup_target": {
+    "scroll": "PHerc0826",
+    "prize_volume_id": "20250821151701",
+    "role": "official Spiral execution bring-up",
+    "current_public_inputs": {
+      "tracks": true,
+      "crossings": true,
+      "umbilicus": true,
+      "lasagna_normals": true,
+      "surface_prediction": true
+    },
+    "known_execution_evidence": {
+      "published_crossings_z_range_half_open": [4500, 16919],
+      "documented_fit_z_range_half_open": [11000, 12000],
+      "documented_fit_iterations": 30000,
+      "documented_gpu": "RTX 3090"
+    },
+    "selection_reason": "Complete published Spiral input stack plus a documented real fit path reduce baseline bring-up uncertainty."
+  },
+  "transfer_target": {
+    "scroll": "PHerc0800",
+    "prize_volume_id": "20250521135224",
+    "role": "independent sealed transfer / geometry evaluation",
+    "current_public_inputs": {
+      "tracks": true,
+      "crossings": true,
+      "umbilicus": false,
+      "lasagna_normals": true,
+      "surface_prediction": true
+    },
+    "frozen_split": "artifacts/2026-09-30-grand-prize-qualifier/pherc0800_geometry_split.json",
+    "held_out_windows": [7472, 10464, 15872],
+    "selection_reason": "Existing ink-blind frozen held-out geometry split provides independent transfer evidence after PHerc0826 bring-up."
+  },
+  "sources": [
+    {
+      "url": "https://scrollprize.org/prizes",
+      "claim": "Both exact volumes are listed as 2027 Grand Prize eligible as of the artifact date."
+    },
+    {
+      "url": "https://github.com/ttendoscopie-creator/eligible-spiral-dataset",
+      "claim": "Published-input survey and PHerc0826 assembly/execution evidence."
+    }
+  ],
+  "policy": {
+    "ink_used_for_target_selection": false,
+    "pherc0800_held_out_geometry_allowed_as_fit_input": false,
+    "invent_missing_umbilicus": false,
+    "single_composite_quality_score": false
+  }
+}
