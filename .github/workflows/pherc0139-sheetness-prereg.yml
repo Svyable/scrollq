@@ -1,0 +1,144 @@
+name: PHerc0139 w035 sheetness preregistration
+
+# Issue #105, Phase A. This workflow freezes geometry-only probes before any
+# sheetness response is read. It is intentionally create-only.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/pherc0139-sheetness-prereg.yml"
+      - "artifacts/2026-10-03-pherc0139-sheetness-prereg/**"
+      - "src/scrollq/sheetness_plan.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  preregister:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Guard frozen output
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json"
+          if [ -e "$out" ]; then
+            echo "reference plan already exists; frozen"
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install pinned campaign environment
+        if: steps.guard.outputs.skip != '1'
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+          python -m pip install -e .
+
+      - name: Fetch official w035 TIFXYZ bytes
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mesh="input/w035.tifxyz"
+          base="https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260317000000-w035_2026031718/mesh/20260317000000-on-20250728140407-9.362um.tifxyz"
+          mkdir -p "$mesh"
+          for f in x.tif y.tif z.tif meta.json; do
+            curl -fsSL --retry 4 --retry-delay 2 -o "$mesh/$f" "$base/$f"
+          done
+          if curl -fsSL --retry 2 --retry-delay 2 -o "$mesh/mask.tif" "$base/mask.tif"; then
+            echo "mask.tif present"
+          else
+            rm -f "$mesh/mask.tif"
+            echo "mask.tif absent; planner will use coordinate validity only"
+          fi
+          sha256sum "$mesh"/* | sort > source-sha256.txt
+          cat source-sha256.txt
+
+      - name: Audit exact native CT
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export AWS_ENDPOINT_URL_S3="https://s3.us-east-1.amazonaws.com"
+          root="PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr"
+          zpa-gate             --base s3://vesuvius-challenge-open-data             --root "$root"             --expected-voxel-size-um 9.362             --out gate.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          gate = json.loads(Path("gate.json").read_text())
+          if gate.get("n_pass") != 1 or gate.get("n_fail") != 0:
+              raise SystemExit("exact CT gate did not pass")
+          rows = gate.get("results")
+          if not isinstance(rows, list) or len(rows) != 1 or "report" not in rows[0]:
+              raise SystemExit("gate output missing embedded full audit report")
+          Path("zpa.json").write_text(json.dumps(rows[0]["report"], indent=2) + "\n")
+          PY
+
+      - name: Freeze geometry-only reference plan
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-pherc0139-sheetness-prereg"
+          mkdir -p "$outdir"
+          {
+            echo "=== planner ==="
+            scroliq-sheetness-plan               --tifxyz input/w035.tifxyz               --zpa-report zpa.json               --volume-root PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr               --surface-volume-token 20250728140407               --binding-url https://scrollprize.org/tutorial5               --samples 32               --offsets=-8,-4,4,8               --halo 8               --out "$outdir/reference-plan.json"
+            echo "=== freeze checks ==="
+            python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json")
+          plan = json.loads(p.read_text())
+          groups = plan.get("groups") or []
+          assert plan.get("schema") == "scroliq-sheetness-plan/1"
+          assert plan.get("status") == "planned"
+          assert len(groups) == 32
+          assert plan["protocol"]["offsets_voxels"] == [-8.0, -4.0, 4.0, 8.0]
+          assert plan["protocol"]["halo_voxels"] == 8
+          assert plan["protocol"]["sample_selection"]["uses_ct_intensity"] is False
+          assert plan["protocol"]["sample_selection"]["uses_sheetness_response"] is False
+          assert all(
+              g.get("wrong_wrap", {}).get("status") == "pending-independent-geometry"
+              and g.get("wrong_wrap", {}).get("global_zyx") is None
+              for g in groups
+          )
+          assert plan["freeze_requirements"]["wrong_wraps_complete"] is False
+          print("freeze checks PASS: 32 groups; wrong-wrap controls remain unbound")
+          PY
+          } | tee "$outdir/run.log"
+          cp zpa.json "$outdir/zpa.json"
+          cp source-sha256.txt "$outdir/source-sha256.txt"
+          {
+            python --version
+            python -m pip freeze
+          } > "$outdir/environment.txt"
+
+      - name: Commit frozen plan to campaign branch
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/2026-10-03-pherc0139-sheetness-prereg
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Freeze PHerc0139 w035 sheetness probe plan"
+          branch="${{ github.head_ref || github.ref_name }}"
+          if [ "$branch" = main ]; then
+            branch=campaign/pherc0139-sheetness-prereg
+          fi
+          git push origin "HEAD:$branch"
