@@ -402,6 +402,13 @@ def validate_preregistration(value: Any) -> dict[str, Any]:
                     raise PreregistrationError(
                         f"{cpath}.source must name a different surface"
                     )
+                if (
+                    wrong_source["coordinate_sha256"]
+                    == surface_source["coordinate_sha256"]
+                ):
+                    raise PreregistrationError(
+                        f"{cpath}.source must bind different coordinate bytes"
+                    )
                 normalized_control["source"] = wrong_source
 
             normalized_controls.append(normalized_control)
