@@ -11,15 +11,18 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import re
 from pathlib import Path
 from typing import Any
+
+from zpa.report import validate_report as validate_zpa_report
 
 from .grand_prize import DEFAULT_MANIFEST
 from .package_hash import sha256_path
 from .recto_coverage import audit_recto_coverage
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 RULES_URL = "https://scrollprize.org/prizes"
 CC_BY_NC_4 = {"CC-BY-NC-4.0", "CC BY-NC 4.0"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
