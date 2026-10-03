@@ -9,7 +9,7 @@ import scrollq.submission_package as pkg
 
 def _package_manifest():
     return {
-        "schema_version": 5,
+        "schema_version": 6,
         "ct_volume": {
             "zarr_audit": {
                 "path": "evidence/zpa-report.json",
@@ -17,9 +17,9 @@ def _package_manifest():
         },
         "surfaces": [],
         "meshes": [{"path": "column_01.tifxyz"}],
-        "renders": [{"path": "column_01.tif"}],
+        "renders": [{"path": "column_01.tif", "scale_proof": {"path": "evidence/column_01.scale.json"}}],
         "held_out_validations": [{"path": "validation/heldout.json"}],
-        "banner": {"path": "banner.tif"},
+        "banner": {"path": "banner.tif", "proof": {"path": "evidence/banner.json"}},
     }
 
 
@@ -31,6 +31,8 @@ def _write_tree(root):
     mesh.mkdir(parents=True)
 
     (root / "evidence" / "zpa-report.json").write_bytes(b"zpa")
+    (root / "evidence" / "column_01.scale.json").write_bytes(b"scale-proof")
+    (root / "evidence" / "banner.json").write_bytes(b"banner-proof")
     (root / "validation" / "heldout.json").write_bytes(b"heldout")
     (root / "column_01.tif").write_bytes(b"render")
     (root / "banner.tif").write_bytes(b"banner")
@@ -51,7 +53,7 @@ def _write_tree(root):
 def _passing_validation(manifest, *, root_dir=None, manifest_sha256=None):
     return {
         "validator": "scrollq.provenance",
-        "validator_schema_version": 5,
+        "validator_schema_version": 6,
         "manifest_sha256": manifest_sha256,
         "graph_sha256": "a" * 64,
         "eligible": True,
@@ -95,6 +97,8 @@ def test_package_is_deterministic_and_only_contains_declared_artifacts(
         assert "unrelated.txt" not in names
         assert "provenance.json" in names
         assert "evidence/zpa-report.json" in names
+        assert "evidence/column_01.scale.json" in names
+        assert "evidence/banner.json" in names
         assert "column_01.tifxyz/meta.json" in names
         assert "column_01.tifxyz/x.tif" in names
         assert "column_01.tifxyz/y.tif" in names
