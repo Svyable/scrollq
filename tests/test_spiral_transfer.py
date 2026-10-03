@@ -6,7 +6,10 @@ import pytest
 
 from scrollq.spiral_transfer import (
     TriangleSurface,
-    _git_blob_sha1,\n    _midpoint_ranks,\n    _choose_offset,\n    _held_metrics,
+    _git_blob_sha1,
+    _midpoint_ranks,
+    _choose_offset,
+    _held_metrics,
     _load_predictions,
     _point_triangle_distance,
     _triangles,
@@ -82,9 +85,11 @@ def test_npz_key_must_be_winding(tmp_path):
 
 
 def test_git_blob_hash_matches_git_object_definition():
-    data = b"hello\n"
+    data = b"hello
+"
     import hashlib
-    expected = hashlib.sha1(b"blob 6\0hello\n").hexdigest()
+    expected = hashlib.sha1(b"blob 6\0hello
+").hexdigest()
     assert _git_blob_sha1(data) == expected
 
 
@@ -121,8 +126,10 @@ def test_offset_choice_has_no_held_out_input_surface():
 
 def test_repeat_report_serialization_can_be_byte_identical():
     report = {"b": [2, 1], "a": {"value": 3.5}}
-    one = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n"
-    two = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    one = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "
+"
+    two = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "
+"
     assert one.encode() == two.encode()
     assert "timestamp" not in one
 
