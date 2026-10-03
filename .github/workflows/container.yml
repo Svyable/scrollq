@@ -82,6 +82,17 @@ jobs:
           docker run --rm "$PINNED" scroliq-provenance --help >/dev/null
           docker run --rm "$PINNED" scroliq-package --help >/dev/null
 
+      - name: Verify anonymous reviewer access
+        run: |
+          set -euo pipefail
+          PINNED="${{ steps.image.outputs.pinned }}"
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
+          docker logout ghcr.io
+          docker image rm -f "$PINNED" "${IMAGE}:sha-${GITHUB_SHA}" "${IMAGE}:main" || true
+          docker pull "$PINNED"
+          test "$(docker run --rm "$PINNED" id -u)" = "10001"
+          docker run --rm "$PINNED" scroliq-package --help >/dev/null
+
       - uses: actions/upload-artifact@v4
         with:
           name: grand-prize-container-digest
