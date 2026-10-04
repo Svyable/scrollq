@@ -1,0 +1,166 @@
+name: Projected component correspondence
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/projected-component-relaxation.yml"
+      - "src/scrollq/prediction_recovery.py"
+      - "scripts/research_projected_component_relaxation.py"
+      - "tests/test_prediction_recovery.py"
+      - "artifacts/2026-10-03-projected-relaxation-prereg/**"
+      - "artifacts/2026-10-03-projected-relaxation-run/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  relax:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Guard measured output
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="artifacts/2026-10-03-projected-relaxation-run/result.json"
+          if [ -e "$out" ]; then
+            echo "projected-relaxation result already exists; frozen"
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Prove preregistration is merged and unchanged
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git fetch origin main --depth=1
+          path="artifacts/2026-10-03-projected-relaxation-prereg/spec.json"
+          git cat-file -e "origin/main:$path"
+          git diff --exit-code origin/main -- "$path"
+
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install repository environment
+        if: steps.guard.outputs.skip != '1'
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+          python -m pip install -e .
+
+      - name: Run projected-relaxation tests
+        if: steps.guard.outputs.skip != '1'
+        run: |
+          set -euxo pipefail
+          python -m pytest -q tests/test_prediction_recovery.py
+
+      - name: Fetch exact frozen w035 TIFXYZ
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mesh="input/20260317000000-on-20250728140407-9.362um.tifxyz"
+          base="https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260317000000-w035_2026031718/mesh/20260317000000-on-20250728140407-9.362um.tifxyz"
+          mkdir -p "$mesh"
+          for f in x.tif y.tif z.tif meta.json; do
+            curl -fsSL --retry 4 --retry-delay 2 -o "$mesh/$f" "$base/$f"
+          done
+
+      - name: Record frozen inputs
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-projected-relaxation-run"
+          mkdir -p "$outdir"
+          {
+            sha256sum artifacts/2026-10-03-projected-relaxation-prereg/spec.json
+            sha256sum artifacts/2026-10-03-prediction-connectivity-recovery-prereg/spec.json
+            sha256sum artifacts/2026-10-03-prediction-connectivity-recovery-run/result.json
+            sha256sum artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json
+            sha256sum input/20260317000000-on-20250728140407-9.362um.tifxyz/{meta.json,x.tif,y.tif,z.tif}
+          } > "$outdir/inputs.sha256"
+          cat "$outdir/inputs.sha256"
+
+      - name: Run frozen projected correspondence experiment
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          outdir="artifacts/2026-10-03-projected-relaxation-run"
+          python scripts/research_projected_component_relaxation.py \
+            --spec artifacts/2026-10-03-projected-relaxation-prereg/spec.json \
+            --v1-spec artifacts/2026-10-03-prediction-connectivity-recovery-prereg/spec.json \
+            --v1-result artifacts/2026-10-03-prediction-connectivity-recovery-run/result.json \
+            --tifxyz input/20260317000000-on-20250728140407-9.362um.tifxyz \
+            --reference-plan artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json \
+            --out "$outdir/result.json" \
+            | tee "$outdir/run.log"
+
+      - name: Verify observation contract
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(
+              Path("artifacts/2026-10-03-projected-relaxation-run/result.json").read_text()
+          )
+          assert result["schema"] == "scrollq-research-projected-component-relaxation-result/1"
+          assert result["status"] == "measured"
+          assert result["decision"]["status"] in {"pass", "fail"}
+          assert result["firewall"]["relaxation_hidden_reference_arguments"] == []
+          assert len(result["firewall"]["v2_candidate_hashes_frozen_before_scoring"]) == 4
+          assert len(set(result["firewall"]["v2_candidate_hashes_frozen_before_scoring"])) == 4
+          for row in result["centers"]:
+              assert row["v1_identity"]["hash_exact"] is True
+              assert row["v1_identity"]["label_exact"] is True
+              assert row["v2_candidate"]["candidate_sha256"] == row["score"]["candidate_sha256"]
+          print("projected correspondence observation contract PASS")
+          print("scientific decision:", result["decision"]["status"])
+          print("median within 8:", result["decision"]["median_fraction_within_8_voxels"])
+          print("median p95:", result["decision"]["median_p95_error_voxels"])
+          print("max regression:", result["decision"]["maximum_within_8_regression"])
+          print("wrong-wrap rejected:", result["decision"]["wrong_wrap_rejected_count"])
+          PY
+
+      - name: Record environment
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-projected-relaxation-run"
+          {
+            python --version
+            python -m pip freeze
+          } > "$outdir/environment.txt"
+
+      - name: Commit measured result to campaign branch
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/2026-10-03-projected-relaxation-run
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Measure projected component correspondence"
+          branch="${{ github.head_ref || github.ref_name }}"
+          if [ "$branch" = main ]; then
+            branch=campaign/projected-component-relaxation
+          fi
+          git push origin "HEAD:$branch"
