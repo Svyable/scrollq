@@ -1,9 +1,15 @@
 import os
 import subprocess
 
+import numpy as np
 import pytest
 
-from scrollq.subgrid_run import SubgridRunError, run_candidate, verify_checkout
+from scrollq.subgrid_run import (
+    SubgridRunError,
+    run_candidate,
+    validate_explicit_npz,
+    verify_checkout,
+)
 
 
 MIT = """MIT License
@@ -90,8 +96,57 @@ exit 7
 
 def _input(tmp_path):
     path = tmp_path / "hits.npz"
-    path.write_bytes(b"fixture explicit edge intersections")
+    np.savez(
+        path,
+        vertices=np.asarray(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+            dtype=np.float64,
+        ),
+        tets=np.asarray([[0, 1, 2, 3]], dtype=np.int32),
+        edges=np.asarray([[0, 1], [0, 2]], dtype=np.int32),
+        isect_offsets=np.asarray([0, 1, 2], dtype=np.int32),
+        isect_ts=np.asarray([0.25, 0.75], dtype=np.float64),
+    )
     return path
+
+
+def test_explicit_npz_contract_is_validated_before_launch(tmp_path):
+    path = _input(tmp_path)
+    evidence = validate_explicit_npz(path)
+    assert evidence["vertices"] == 4
+    assert evidence["tets"] == 1
+    assert evidence["edges_with_intersections"] == 2
+    assert evidence["intersections"] == 2
+    assert evidence["normals_present"] is False
+
+    bad = tmp_path / "bad.npz"
+    np.savez(
+        bad,
+        vertices=np.zeros((4, 3), dtype=np.float64),
+        tets=np.asarray([[0, 1, 2, 3]], dtype=np.int32),
+        edges=np.asarray([[1, 0]], dtype=np.int32),
+        isect_offsets=np.asarray([0, 1], dtype=np.int32),
+        isect_ts=np.asarray([0.5], dtype=np.float64),
+    )
+    with pytest.raises(SubgridRunError, match="i < j"):
+        validate_explicit_npz(bad)
+
+
+def test_explicit_npz_rejects_unsorted_intersections(tmp_path):
+    path = tmp_path / "unsorted.npz"
+    np.savez(
+        path,
+        vertices=np.asarray(
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+            dtype=np.float64,
+        ),
+        tets=np.asarray([[0, 1, 2, 3]], dtype=np.int32),
+        edges=np.asarray([[0, 1]], dtype=np.int32),
+        isect_offsets=np.asarray([0, 2], dtype=np.int32),
+        isect_ts=np.asarray([0.8, 0.2], dtype=np.float64),
+    )
+    with pytest.raises(SubgridRunError, match="not sorted"):
+        validate_explicit_npz(path)
 
 
 def test_verify_checkout_binds_clean_commit_binary_and_license(tmp_path):
