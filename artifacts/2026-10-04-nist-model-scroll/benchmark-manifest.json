@@ -1,0 +1,48 @@
+{
+  "schema": "scroliq-blind-benchmark/1",
+  "benchmark_id": "nist-synthetic-carbonized-scroll",
+  "as_of": "2026-10-04",
+  "training_eligible": false,
+  "volume": {
+    "id": "nist-synthetic-carbonized-scroll",
+    "kind": "physical-synthetic-scroll",
+    "claimed": {
+      "slice_count": 620,
+      "bits_per_voxel": 32,
+      "voxel_size_um": 130,
+      "isotropic": true,
+      "container": "tiff-stack"
+    },
+    "claimed_source": "maintainer briefing 2026-10-04 (Seiler et al., paper dated 2026-09-16); not yet checked against the NIST catalog or the acquired bytes"
+  },
+  "acquisition": {
+    "doi": null,
+    "landing_url": null,
+    "license": {
+      "statement": "NIST open-data license per the catalog entry, and CC0 for the paper, as relayed in the 2026-10-04 maintainer briefing; neither has been read from the source",
+      "evidence_url": null,
+      "verified": false
+    },
+    "inventory": null
+  },
+  "truth": [
+    {
+      "id": "known-text-transcription",
+      "role": "sealed_truth",
+      "training_eligible": false,
+      "description": "The text that was written on the specimen before it was rolled, carbonized and scanned."
+    },
+    {
+      "id": "leaded-letter-locations",
+      "role": "sealed_truth",
+      "training_eligible": false,
+      "description": "Where the lead-spiked letters sit on the papyrus, in a frame that can be mapped to the CT volume."
+    }
+  ],
+  "sealed_truth_commitment_sha256": null,
+  "claim_limits": [
+    "Evaluation-only: no training, tuning, threshold selection or early stopping may use this volume or its truth.",
+    "Success is not validation of carbon-ink detection on ancient papyrus. The specimen differs in acquisition, resolution and ink chemistry, and lead supplies genuine absorption contrast.",
+    "Success is not evidence that any Herculaneum model works; it shows only that the pipeline and proof machinery can recover a real hidden signal without manufacturing it."
+  ]
+}

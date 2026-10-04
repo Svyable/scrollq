@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -550,6 +551,129 @@ def _ink_stage(
     return result
 
 
+_BLIND_VERDICTS = (
+    "sealed-order-anchored",
+    "sealed-order-self-asserted",
+    "awaiting-reveal",
+    "not-blind",
+)
+_BLIND_ANCHORED_EVIDENCE = {"anchor-declared", "anchor-content-verified"}
+
+
+def _aware_time(value: Any) -> datetime | None:
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None else None
+
+
+def _blind_order_inconsistency(report: dict[str, Any], verdict: str) -> str | None:
+    """Re-derive the ordering from recorded timestamps instead of trusting the verdict."""
+    timing = report.get("timing") if isinstance(report.get("timing"), dict) else {}
+    committed = _aware_time(timing.get("prediction_committed_at"))
+    if committed is None:
+        return "timing.prediction_committed_at is missing or has no UTC offset"
+    visible_raw = timing.get("truth_first_visible_at")
+    if verdict == "awaiting-reveal":
+        if visible_raw is not None or timing.get("order") != "truth-not-yet-visible":
+            return "verdict is awaiting-reveal but truth visibility is recorded"
+        return None
+    visible = _aware_time(visible_raw)
+    if visible is None:
+        return "timing.truth_first_visible_at is missing or has no UTC offset"
+    if not committed < visible or timing.get("order") != "prediction-before-truth":
+        return "recorded timestamps do not show the prediction committed before truth was visible"
+    if verdict == "sealed-order-anchored" and (
+        timing.get("ordering_evidence") not in _BLIND_ANCHORED_EVIDENCE
+        or timing.get("custody_attested") is not True
+    ):
+        return "verdict is anchored but the anchor or custody attestation is not recorded"
+    return None
+
+
+def _blind_control_stage(
+    volume_root: str,
+    report: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if report is None:
+        return {
+            "status": "unknown",
+            "open_problem": "ink-reliability",
+            "reason": (
+                "no blind-control report was supplied; when sealed truth became "
+                "visible relative to the prediction commitment is not recorded"
+            ),
+        }
+    if report.get("diagnostic") != "blind-control-report":
+        return {
+            "status": "excluded",
+            "open_problem": "ink-reliability",
+            "reason": "artifact is not a ScrolIQ blind-control-report",
+        }
+    volume = report.get("volume") if isinstance(report.get("volume"), dict) else {}
+    report_root = volume.get("id")
+    if not isinstance(report_root, str) or not report_root:
+        return {
+            "status": "excluded",
+            "open_problem": "ink-reliability",
+            "reason": "blind-control report has no exact volume.id binding",
+        }
+    if report_root != volume_root:
+        return {
+            "status": "excluded",
+            "open_problem": "ink-reliability",
+            "reason": "blind-control report names a different volume",
+        }
+    verdict = report.get("verdict")
+    if verdict not in _BLIND_VERDICTS:
+        return {
+            "status": "excluded",
+            "open_problem": "ink-reliability",
+            "reason": f"unsupported blind-control verdict: {verdict!r}",
+        }
+
+    acquisition = dict(report.get("acquisition") or {})
+    result: dict[str, Any] = {
+        "open_problem": "ink-reliability",
+        "verdict": verdict,
+        "benchmark": dict(report.get("benchmark") or {}),
+        "volume": {
+            key: volume.get(key) for key in ("id", "kind", "claimed", "claimed_source")
+        },
+        "acquisition": {
+            "doi": acquisition.get("doi"),
+            "license": dict(acquisition.get("license") or {}),
+            "inventory": acquisition.get("inventory"),
+            "pin_status": acquisition.get("pin_status"),
+        },
+        "truth_roles": dict(report.get("truth_roles") or {}),
+        "timing": dict(report.get("timing") or {}),
+        "violations": list(report.get("violations") or []),
+        "weaknesses": list(report.get("weaknesses") or []),
+        "claim_limits": list(report.get("claim_limits") or []),
+        "limitation": (
+            "Establishes the order of the prediction commitment and truth "
+            "visibility, and truth custody, only. It carries no detection or "
+            "surface score and does not show that a prediction is correct or "
+            "that the control transfers to carbon ink on ancient papyrus."
+        ),
+    }
+    if verdict == "not-blind":
+        result["status"] = "blocked"
+        result["reason"] = "blind-control chain records a blindness violation"
+        return result
+    inconsistency = _blind_order_inconsistency(report, verdict)
+    if inconsistency:
+        result["status"] = "blocked"
+        result["reason"] = f"blind-control report is internally inconsistent: {inconsistency}"
+        return result
+    result["status"] = "measured" if verdict == "sealed-order-anchored" else "partial"
+    return result
+
+
 def _unknown_stage(open_problem: str, reason: str) -> dict[str, str]:
     return {"status": "unknown", "open_problem": open_problem, "reason": reason}
 
@@ -563,6 +687,7 @@ def build_passport(
     external_mesh_evidence: dict[str, Any] | None = None,
     fiber_audit: dict[str, Any] | None = None,
     ink_audit: dict[str, Any] | None = None,
+    blind_control: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build one evidence-preserving diagnostic passport from current artifacts."""
     root = str(volume.get("root", ""))
@@ -581,6 +706,7 @@ def build_passport(
         ),
         "labels": _label_stage(coverage),
         "ink": _ink_stage(root, ink_audit),
+        "blind_control": _blind_control_stage(root, blind_control),
     }
 
     actions: list[dict[str, str]] = []
@@ -836,6 +962,39 @@ def build_passport(
             }
         )
 
+    blind = stages["blind_control"]
+    if blind["status"] == "blocked":
+        actions.append(
+            {
+                "priority": "high",
+                "action": (
+                    "resolve the blind-control violation or inconsistency; do not "
+                    "cite this control as blind until the chain verifies"
+                ),
+                "open_problem": "ink-reliability",
+            }
+        )
+    elif blind["status"] == "excluded":
+        actions.append(
+            {
+                "priority": "next-evidence",
+                "action": "rebuild the blind-control report bound to this exact volume id",
+                "open_problem": "ink-reliability",
+            }
+        )
+    elif blind["status"] == "partial":
+        actions.append(
+            {
+                "priority": "next-evidence",
+                "action": (
+                    "complete the sealed-truth chain: reveal after the prediction "
+                    "commitment, anchor the commitment to a third-party-observable "
+                    "record, and attest truth custody"
+                ),
+                "open_problem": "ink-reliability",
+            }
+        )
+
     actions.append(
         {
             "priority": "next-evidence",
@@ -854,7 +1013,7 @@ def build_passport(
         "next_actions": actions,
         "interpretation": (
             "The existing quality score describes sampled CT health only. Unknown "
-            "surface, mesh, winding geometry, spiral, label-localization, fiber, or ink state remains unknown."
+            "surface, mesh, winding geometry, spiral, label-localization, fiber, ink, or blind-control state remains unknown."
         ),
     }
 
@@ -892,6 +1051,11 @@ def main() -> None:
     )
     ap.add_argument("--fiber-audit", default=None, help="optional volume-bound scroliq-fiber JSON artifact")
     ap.add_argument("--ink-audit", default=None, help="optional volume-bound scroliq-ink-audit JSON artifact")
+    ap.add_argument(
+        "--blind-control",
+        default=None,
+        help="optional volume-bound scroliq-blind-control report JSON artifact",
+    )
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -933,6 +1097,11 @@ def main() -> None:
         if args.ink_audit
         else None
     )
+    blind_control = (
+        json.loads(Path(args.blind_control).read_text(encoding="utf-8"))
+        if args.blind_control
+        else None
+    )
     passport = build_passport(
         volume,
         coverage=coverage,
@@ -942,6 +1111,7 @@ def main() -> None:
         external_mesh_evidence=external_mesh_evidence,
         fiber_audit=fiber_audit,
         ink_audit=ink_audit,
+        blind_control=blind_control,
     )
 
     out = Path(args.out)
