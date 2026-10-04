@@ -1,6 +1,7 @@
 """Export ScrolIQ diagnostic review queues as native VC3D PointCollections.
 
-The first supported source is the preregistered winding-attachment result.
+Supported sources: the preregistered winding-attachment result and the
+winding ray-order audit (``scroliq-winding`` ``ray_order.review_queue``).
 The exporter is deterministic, carries the source SHA-256, and preserves
 review context in PointCollection tags so the file can be loaded directly
 through VC3D or ``vc3d_load_points_json``.
@@ -20,6 +21,8 @@ TOOL = "scroliq-vc3d-review"
 SCHEMA_VERSION = 1
 POINTCOLLECTIONS_VERSION = "1"
 KIND = "winding-attachment"
+RAY_ORDER_KIND = "winding-ray-order"
+KINDS = (KIND, RAY_ORDER_KIND)
 
 LIMITATION = (
     "These markers are review cues, not confirmed annotation or patch errors. "
@@ -200,12 +203,119 @@ def build_winding_attachment_bundle(
     }
 
 
+def build_ray_order_bundle(
+    document: Any,
+    *,
+    source_name: str,
+    source_sha256: str,
+    scroll: str,
+) -> dict[str, Any]:
+    """Convert a winding ray-order audit's review queue into PointCollections v1."""
+    if not isinstance(document, dict):
+        raise ReviewExportError("source must be a JSON object")
+    if (
+        not isinstance(source_sha256, str)
+        or len(source_sha256) != 64
+        or any(ch not in "0123456789abcdef" for ch in source_sha256)
+    ):
+        raise ReviewExportError("source_sha256 must be lowercase 64-hex")
+    if not isinstance(scroll, str) or not scroll.strip():
+        raise ReviewExportError("scroll must be non-empty")
+    ray = document.get("ray_order")
+    if not isinstance(ray, dict):
+        raise ReviewExportError("source has no ray_order section")
+    if ray.get("review_queue_truncated"):
+        raise ReviewExportError("ray_order review_queue is truncated; rerun untruncated")
+    queue = ray.get("review_queue")
+    if not isinstance(queue, list) or not queue:
+        raise ReviewExportError("ray_order.review_queue must be a non-empty list")
+
+    rows: dict[tuple[str, str], dict[str, Any]] = {}
+    for index, row in enumerate(queue):
+        if not isinstance(row, dict):
+            raise ReviewExportError(f"review_queue[{index}] must be an object")
+        frame = row.get("frame")
+        point_id = str(row.get("point_id") or "")
+        xyz = row.get("xyz")
+        wind_a = row.get("wind_a")
+        if not isinstance(frame, str) or not frame or not point_id:
+            raise ReviewExportError(f"review_queue[{index}] needs frame and point_id")
+        if (
+            not isinstance(xyz, list)
+            or len(xyz) != 3
+            or not all(_finite_number(v) for v in xyz)
+        ):
+            raise ReviewExportError(
+                f"review_queue[{index}].xyz must be three finite numbers"
+            )
+        if not _finite_number(wind_a) or not float(wind_a).is_integer():
+            raise ReviewExportError(
+                f"review_queue[{index}].wind_a must be a finite integer"
+            )
+        key = (frame, point_id)
+        if key in rows:
+            raise ReviewExportError(f"duplicate review point {frame}/{point_id}")
+        rows[key] = {
+            "xyz": [float(v) for v in xyz],
+            "wind_a": int(wind_a),
+            "inversion_pairs": int(row.get("inversion_pairs") or 0),
+            "comparable_pairs": int(row.get("comparable_pairs") or 0),
+        }
+
+    collections: dict[str, Any] = {}
+    for collection_index, key in enumerate(sorted(rows), start=1):
+        frame, point_id = key
+        item = rows[key]
+        collections[str(collection_index)] = {
+            "name": f"ScrolIQ ray order · {frame}/{point_id}",
+            "points": {
+                str(collection_index): {
+                    "p": item["xyz"],
+                    "creation_time": 0,
+                    "wind_a": item["wind_a"],
+                }
+            },
+            "metadata": {"winding_is_absolute": frame == "absolute"},
+            "color": [0.4, 0.66, 0.88],
+            "tags": {
+                "scroliq_kind": RAY_ORDER_KIND,
+                "source_sha256": source_sha256,
+                "frame": frame,
+                "source_point_id": point_id,
+                "source_winding": str(item["wind_a"]),
+                "inversion_pairs": str(item["inversion_pairs"]),
+                "comparable_pairs": str(item["comparable_pairs"]),
+            },
+        }
+
+    return {
+        "scroliq_review_bundle": {
+            "schema_version": SCHEMA_VERSION,
+            "tool": TOOL,
+            "kind": RAY_ORDER_KIND,
+            "scroll": scroll,
+            "coordinate_space": "level0-voxel-xyz",
+            "source": source_name,
+            "source_sha256": source_sha256,
+            "source_verdict": ray.get("status"),
+            "review_points": len(collections),
+            "source_findings": len(queue),
+            "limitation": LIMITATION,
+        },
+        "vc_pointcollections_json_version": POINTCOLLECTIONS_VERSION,
+        "collections": collections,
+    }
+
+
 def export_file(
     source: str | Path,
     output: str | Path,
     *,
     scroll: str,
+    kind: str = KIND,
 ) -> dict[str, Any]:
+    if kind not in KINDS:
+        raise ReviewExportError(f"unknown kind {kind!r}; expected one of {KINDS}")
     src = Path(source)
     out = Path(output)
     if out.exists():
@@ -216,7 +326,11 @@ def export_file(
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ReviewExportError(f"cannot read source: {exc}") from exc
 
-    bundle = build_winding_attachment_bundle(
+    builder = (
+        build_ray_order_bundle if kind == RAY_ORDER_KIND
+        else build_winding_attachment_bundle
+    )
+    bundle = builder(
         document,
         source_name=src.name,
         source_sha256=_sha256(raw),
@@ -231,17 +345,27 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog=TOOL,
         description=(
-            "Export a ScrolIQ winding-attachment review queue as a native "
+            "Export a ScrolIQ winding review queue (attachment or ray order) "
+            "as a native "
             "VC3D PointCollections v1 JSON file."
         ),
     )
-    parser.add_argument("--input", required=True, help="winding-attachment result.json")
+    parser.add_argument(
+        "--input", required=True,
+        help="winding-attachment result.json or winding-audit JSON",
+    )
+    parser.add_argument(
+        "--kind", choices=KINDS, default=KIND,
+        help="review queue type (default: %(default)s)",
+    )
     parser.add_argument("--scroll", required=True, help="scroll id, e.g. PHercParis4")
     parser.add_argument("--out", required=True, help="new PointCollections JSON path")
     args = parser.parse_args(argv)
 
     try:
-        bundle = export_file(args.input, args.out, scroll=args.scroll)
+        bundle = export_file(
+            args.input, args.out, scroll=args.scroll, kind=args.kind
+        )
     except ReviewExportError as exc:
         print(f"{TOOL}: FAIL: {exc}", file=sys.stderr)
         return 2
