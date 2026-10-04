@@ -89,3 +89,21 @@ def test_download_failures_mark_campaign_incomplete_and_audit_fail_is_a_finding(
                              listed=9, control_missing=[])
     assert incomplete["verdict"] == "incomplete"
     assert incomplete["status_counts"]["download-fail"] == 1
+
+
+def test_frozen_census_is_internally_consistent_and_contains_the_pinned_controls():
+    import hashlib
+    import json
+
+    m = _module()
+    report = json.loads((ROOT / "artifacts/2026-10-04-fiber-corpus-census/summary.json").read_text())
+    rows = report["rows"]
+    assert report["verdict"] == "complete" and report["positive_control"]["passed"]
+    assert report["listed"] == report["audited"] == len(rows) == 136
+    assert {r["file"]: r["sha256"] for r in rows if r["file"] in m.PINNED_SHA256} == m.PINNED_SHA256
+    assert sum(r["gaps"] for r in rows) == report["totals"]["gaps"] == 388
+    assert sum(r["sharp_turns"] for r in rows) == report["totals"]["sharp_turns"] == 519
+    assert sum(r["fallback_segments"] for r in rows) == 502
+    assert sum(r["gaps"] for r in rows if not r["fallback_segments"]) == 0
+    manifest = "".join(f"{r['file']}\t{r['sha256']}\n" for r in sorted(rows, key=lambda r: r["file"]))
+    assert hashlib.sha256(manifest.encode()).hexdigest() == report["manifest_sha256"]
