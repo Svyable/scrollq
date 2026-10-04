@@ -129,6 +129,7 @@ def _artifact_errors(
     *,
     candidate_volume_id: str,
     index: int,
+    repo_root: Path,
 ) -> list[str]:
     prefix = f"artifact[{index}]"
     if not isinstance(artifact, dict):
@@ -144,6 +145,32 @@ def _artifact_errors(
     digest = artifact.get("sha256")
     if not isinstance(digest, str) or _HEX64.fullmatch(digest) is None:
         errors.append(f"{prefix}.sha256 must be lowercase 64-hex")
+
+    location = _safe_artifact_location(artifact.get("uri"))
+    if (
+        location is not None
+        and not location.startswith(("https://", "http://"))
+        and isinstance(digest, str)
+        and _HEX64.fullmatch(digest) is not None
+    ):
+        root = repo_root.resolve()
+        evidence_path = (root / location).resolve()
+        try:
+            evidence_path.relative_to(root)
+        except ValueError:
+            errors.append(f"{prefix}.uri resolves outside repository root")
+        else:
+            try:
+                actual_digest = hashlib.sha256(evidence_path.read_bytes()).hexdigest()
+            except OSError as exc:
+                errors.append(f"{prefix}.uri repository artifact is unreadable: {exc}")
+            else:
+                if actual_digest != digest:
+                    errors.append(
+                        f"{prefix}.sha256 does not match repository artifact bytes "
+                        f"(actual {actual_digest})"
+                    )
+
     if artifact.get("volume_id") != candidate_volume_id:
         errors.append(
             f"{prefix}.volume_id must equal candidate volume_id "
@@ -159,6 +186,7 @@ def _stage_check(
     raw: Any,
     *,
     candidate_volume_id: str,
+    repo_root: Path,
 ) -> dict[str, Any]:
     if raw is None:
         return {
@@ -199,6 +227,7 @@ def _stage_check(
                 artifact,
                 candidate_volume_id=candidate_volume_id,
                 index=index,
+                repo_root=repo_root,
             )
         )
     reasons.extend(artifact_reasons)
@@ -231,6 +260,7 @@ def evaluate_target_gate(
     document: dict[str, Any],
     *,
     manifest: dict[str, Any] = DEFAULT_MANIFEST,
+    repo_root: Path | str = Path("."),
 ) -> dict[str, Any]:
     """Evaluate one target without ranking it against other candidates."""
     if not isinstance(document, dict):
@@ -250,11 +280,13 @@ def evaluate_target_gate(
     if not isinstance(prerequisites, dict):
         raise TargetGateError("prerequisites must be an object")
 
+    repository_root = Path(repo_root)
     stage_checks = [
         _stage_check(
             stage_id,
             prerequisites.get(stage_id),
             candidate_volume_id=candidate_volume_id,
+            repo_root=repository_root,
         )
         for stage_id in REQUIRED_STAGES
     ]
@@ -294,9 +326,11 @@ def evaluate_target_gate(
         "ranking": None,
         "claim_boundary": (
             "This gate verifies exact-volume identity and the declared provenance "
-            "contract needed to freeze a proof target. It does not rank scrolls, "
-            "validate scientific correctness inside third-party artifacts, prove "
-            "readability, or predict Grand Prize success."
+            "contract needed to freeze a proof target. Repository-relative evidence "
+            "is byte-verified against its declared SHA-256; remote http(s) evidence "
+            "remains declaration-bound and is not fetched by this offline gate. It "
+            "does not rank scrolls, validate scientific correctness inside third-party "
+            "artifacts, prove readability, or predict Grand Prize success."
         ),
     }
 
@@ -305,6 +339,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--in", dest="input_path", required=True)
     parser.add_argument("--out", required=True)
+    parser.add_argument(
+        "--repo-root",
+        default=".",
+        help="repository root used to verify repository-relative evidence bytes",
+    )
     return parser
 
 
@@ -326,7 +365,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         raw = Path(args.input_path).read_text(encoding="utf-8")
         document = json.loads(raw)
-        report = evaluate_target_gate(document)
+        report = evaluate_target_gate(document, repo_root=args.repo_root)
         out.parent.mkdir(parents=True, exist_ok=True)
         with out.open("x", encoding="utf-8") as handle:
             json.dump(report, handle, indent=2, sort_keys=True)

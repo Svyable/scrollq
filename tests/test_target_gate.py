@@ -1,3 +1,4 @@
+import hashlib
 import json
 
 from scrollq import target_gate
@@ -6,7 +7,7 @@ from scrollq import target_gate
 def _artifact(volume_id: str, name: str = "evidence") -> dict:
     return {
         "kind": name,
-        "uri": f"artifacts/2026-10-03-target/{name}.json",
+        "uri": f"https://example.invalid/evidence/{name}.json",
         "sha256": "a" * 64,
         "volume_id": volume_id,
         "claim": f"{name} evidence for exact eligible volume",
@@ -144,3 +145,75 @@ def test_manifest_binding_changes_when_manifest_changes():
 
     assert baseline["manifest_sha256"] != rebound["manifest_sha256"]
     assert baseline["manifest_target_sha256"] == rebound["manifest_target_sha256"]
+
+
+def test_repository_artifact_hash_is_verified(tmp_path):
+    evidence = tmp_path / "artifacts" / "evidence.json"
+    evidence.parent.mkdir()
+    evidence.write_bytes(b"frozen evidence\n")
+
+    document = _document()
+    artifact = document["prerequisites"]["heldout_geometry"]["artifacts"][0]
+    artifact["uri"] = "artifacts/evidence.json"
+    artifact["sha256"] = hashlib.sha256(evidence.read_bytes()).hexdigest()
+
+    report = target_gate.evaluate_target_gate(document, repo_root=tmp_path)
+
+    assert report["status"] == "ready-to-freeze"
+
+
+def test_repository_artifact_hash_mismatch_fails_closed(tmp_path):
+    evidence = tmp_path / "artifacts" / "evidence.json"
+    evidence.parent.mkdir()
+    evidence.write_bytes(b"actual evidence\n")
+
+    document = _document()
+    artifact = document["prerequisites"]["heldout_geometry"]["artifacts"][0]
+    artifact["uri"] = "artifacts/evidence.json"
+    artifact["sha256"] = "0" * 64
+
+    report = target_gate.evaluate_target_gate(document, repo_root=tmp_path)
+
+    assert report["status"] == "blocked"
+    assert "heldout_geometry" in report["blocking_checks"]
+    check = next(row for row in report["checks"] if row["id"] == "heldout_geometry")
+    assert any(
+        "does not match repository artifact bytes" in reason
+        for reason in check["reasons"]
+    )
+
+
+def test_missing_repository_artifact_fails_closed(tmp_path):
+    document = _document()
+    artifact = document["prerequisites"]["vc3d_handoff"]["artifacts"][0]
+    artifact["uri"] = "artifacts/missing.json"
+
+    report = target_gate.evaluate_target_gate(document, repo_root=tmp_path)
+
+    assert report["status"] == "blocked"
+    assert "vc3d_handoff" in report["blocking_checks"]
+    check = next(row for row in report["checks"] if row["id"] == "vc3d_handoff")
+    assert any("repository artifact is unreadable" in reason for reason in check["reasons"])
+
+
+def test_repository_artifact_symlink_escape_fails_closed(tmp_path):
+    outside = tmp_path.parent / "outside-evidence.json"
+    outside.write_bytes(b"outside\n")
+    artifacts = tmp_path / "artifacts"
+    artifacts.mkdir()
+    link = artifacts / "evidence.json"
+    try:
+        link.symlink_to(outside)
+    except (OSError, NotImplementedError):
+        return
+
+    document = _document()
+    artifact = document["prerequisites"]["input_integrity"]["artifacts"][0]
+    artifact["uri"] = "artifacts/evidence.json"
+    artifact["sha256"] = hashlib.sha256(outside.read_bytes()).hexdigest()
+
+    report = target_gate.evaluate_target_gate(document, repo_root=tmp_path)
+
+    assert report["status"] == "blocked"
+    check = next(row for row in report["checks"] if row["id"] == "input_integrity")
+    assert any("resolves outside repository root" in reason for reason in check["reasons"])
