@@ -53,6 +53,7 @@ weight-free Pareto frontier (triage, not a readability claim).
     `scroliq-fiber`; `fiber_frame.py` → `scroliq-fiber-frame` for the
     experimental ink-blind cross-ply CT continuity diagnostic
   - `vc3d_run_guard.py` → `scroliq-vc3d-run-guard`: create-only external-command receipt that rejects exit-zero runs unless a newly produced TIFXYZ surface satisfies semantic vertex/quad/area postconditions; optional exact-volume CT preflight binding
+  - `subgrid_run.py` → `scroliq-subgrid-run`: pinned MIT Subgrid Marching Tetrahedra candidate adapter; consumes frozen explicit `.npz` edge intersections, verifies exact clean upstream bytes, audits the new OBJ, and marks the receipt ink-blind/candidate-only
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
@@ -105,6 +106,7 @@ scroliq-manifest --help                                # derive prize manifests
 scroliq-chunk-audit --index <metadata.min.json[.gz]> --out out/audit.json
 scroliq-segmentation-uq --help                      # structural boundary/component UQ gate
 scroliq-vc3d-run-guard --help                       # exit code + semantic TIFXYZ postconditions
+scroliq-subgrid-run --help                             # frozen edge-intersection mesher candidate
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests
