@@ -1,0 +1,332 @@
+name: Execute frozen PHerc0139 sheetness Phase A
+
+# Issue #105. This workflow executes the already-frozen 32-group campaign.
+# It may publish a positive or negative scientific result, but it must never
+# retune the frozen probes, bboxes, engine parameters, normalization, or rule.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/pherc0139-sheetness-run.yml"
+      - "artifacts/2026-10-03-pherc0139-sheetness-run/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pherc0139-sheetness-phase-a-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Guard create-only result
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="artifacts/2026-10-03-pherc0139-sheetness-run/sheetness-result.json"
+          if [ -e "$out" ]; then
+            echo "Phase-A sheetness result already exists; frozen"
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != '1'
+        with:
+          python-version: "3.12.14"
+          cache: pip
+
+      - name: Reconstruct frozen numerical environment
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          envfile="artifacts/2026-10-03-pherc0139-sheetness-campaign/environment.txt"
+          grep -E '^[A-Za-z0-9_.-]+==[^[:space:]]+$' "$envfile" > /tmp/pherc0139-frozen-constraints.txt
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt -c /tmp/pherc0139-frozen-constraints.txt
+          python -m pip install -e . -c /tmp/pherc0139-frozen-constraints.txt
+
+      - name: Verify frozen engine bytes and package versions
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import importlib.metadata
+          import json
+          import platform
+          import re
+          from pathlib import Path
+
+          plan_path = Path("artifacts/2026-10-03-pherc0139-sheetness-campaign/campaign-plan.json")
+          plan = json.loads(plan_path.read_text())
+          if plan.get("schema") != "scroliq-sheetness-campaign/1":
+              raise SystemExit("unexpected campaign schema")
+          if plan.get("status") != "frozen-before-sheetness":
+              raise SystemExit("campaign is not frozen-before-sheetness")
+          if plan.get("summary", {}).get("group_count") != 32:
+              raise SystemExit("campaign group count changed")
+          if plan.get("summary", {}).get("ready_group_count") != 32:
+              raise SystemExit("not all campaign groups are ready")
+
+          engine = plan["engine"]
+          expected = {
+              "src/scrollq/sheetness.py": engine["sheetness_py_sha256"],
+              "src/scrollq/sheetness_benchmark.py": engine["sheetness_benchmark_py_sha256"],
+              "src/scrollq/sheetness_campaign.py": engine["sheetness_campaign_py_sha256"],
+          }
+          for path, want in expected.items():
+              got = hashlib.sha256(Path(path).read_bytes()).hexdigest()
+              if got != want:
+                  raise SystemExit(f"frozen engine byte mismatch: {path}: {got} != {want}")
+
+          if platform.python_version() != "3.12.14":
+              raise SystemExit(f"Python drift: {platform.python_version()} != 3.12.14")
+
+          frozen = {}
+          for raw in Path(
+              "artifacts/2026-10-03-pherc0139-sheetness-campaign/environment.txt"
+          ).read_text().splitlines():
+              m = re.fullmatch(r"([A-Za-z0-9_.-]+)==([^\s]+)", raw.strip())
+              if m:
+                  frozen[m.group(1).lower().replace("_", "-")] = m.group(2)
+
+          for name, want in frozen.items():
+              try:
+                  got = importlib.metadata.version(name)
+              except importlib.metadata.PackageNotFoundError as exc:
+                  raise SystemExit(f"frozen package missing: {name}=={want}") from exc
+              if got != want:
+                  raise SystemExit(f"package drift: {name} {got} != {want}")
+
+          print("frozen execution fence PASS")
+          print("engine revision:", engine["code_revision"])
+          print("groups:", plan["summary"]["group_count"])
+          print("planned voxels:", plan["summary"]["total_cutout_voxels"])
+          PY
+
+      - name: Execute all 32 frozen groups
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import subprocess
+          from pathlib import Path
+
+          plan_path = Path("artifacts/2026-10-03-pherc0139-sheetness-campaign/campaign-plan.json")
+          zpa_path = Path("artifacts/2026-10-03-pherc0139-sheetness-prereg/zpa.json")
+          plan = json.loads(plan_path.read_text())
+          outdir = Path("artifacts/2026-10-03-pherc0139-sheetness-run")
+          groups_dir = outdir / "groups"
+          specs_dir = outdir / "specs"
+          results_dir = outdir / "results"
+          for path in (groups_dir, specs_dir, results_dir):
+              path.mkdir(parents=True, exist_ok=True)
+
+          volume_root = plan["volume_root"]
+          ct_url = (
+              "https://vesuvius-challenge-open-data.s3.amazonaws.com/"
+              + volume_root
+          )
+          engine = plan["engine"]
+          log_path = outdir / "run.log"
+
+          def run(cmd):
+              with log_path.open("a", encoding="utf-8") as log:
+                  log.write("$ " + " ".join(str(x) for x in cmd) + "\n")
+                  proc = subprocess.run(
+                      [str(x) for x in cmd],
+                      text=True,
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.STDOUT,
+                      check=False,
+                  )
+                  log.write(proc.stdout)
+                  if not proc.stdout.endswith("\n"):
+                      log.write("\n")
+                  log.flush()
+              if proc.returncode != 0:
+                  raise SystemExit(
+                      f"command failed ({proc.returncode}): {' '.join(str(x) for x in cmd)}"
+                  )
+
+          for index, group in enumerate(plan["groups"], start=1):
+              if group.get("status") != "ready":
+                  raise SystemExit(f"group {group.get('id')} is no longer ready")
+              gid = group["id"]
+              bbox = group["bbox_zyx_half_open"]
+              start = ",".join(str(v) for v in bbox["start"])
+              stop = ",".join(str(v) for v in bbox["stop"])
+              gdir = groups_dir / gid
+              gdir.mkdir(parents=True, exist_ok=True)
+              cutout = gdir / "cutout.npy"
+              manifest = gdir / "cutout.json"
+              prefix = gdir / "sheetness"
+
+              print(f"[{index:02d}/32] {gid}: extract")
+              run([
+                  "scroliq-ct-cutout",
+                  "--ct-url", ct_url,
+                  "--volume-root", volume_root,
+                  "--zpa-report", zpa_path,
+                  "--start", start,
+                  "--stop", stop,
+                  "--out", cutout,
+                  "--manifest", manifest,
+              ])
+
+              print(f"[{index:02d}/32] {gid}: sheetness")
+              params = engine["parameters"]
+              normalization = engine["normalization"]
+              cmd = [
+                  "scroliq-sheetness",
+                  cutout,
+                  "--out-prefix", prefix,
+                  "--sigmas", ",".join(str(v) for v in params["sigmas"]),
+                  "--beta", str(params["beta"]),
+                  "--gamma", str(params["gamma"]),
+                  "--bright-object" if params["bright_object"] else "--dark-object",
+                  "--normalize-low", str(normalization["lower_percentile"]),
+                  "--normalize-high", str(normalization["upper_percentile"]),
+                  "--write-normal",
+                  "--max-voxels", str(engine["max_voxels"]),
+              ]
+              if params["scale_objectness"]:
+                  cmd.append("--scale-objectness")
+              if not normalization["enabled"]:
+                  cmd.append("--no-normalize")
+              run(cmd)
+
+              report = Path(str(prefix) + ".sheetness.json")
+              response = Path(str(prefix) + ".sheetness.npy")
+              normal = Path(str(prefix) + ".normal-zyx.npy")
+              spec = specs_dir / f"{gid}.json"
+              result = results_dir / f"{gid}.json"
+
+              print(f"[{index:02d}/32] {gid}: seal + evaluate")
+              run([
+                  "scroliq-sheetness-campaign", "seal-group",
+                  "--plan", plan_path,
+                  "--group-id", gid,
+                  "--cutout-manifest", manifest,
+                  "--sheetness-report", report,
+                  "--out", spec,
+              ])
+              run([
+                  "scroliq-sheetness-eval",
+                  "--spec", spec,
+                  "--cutout-manifest", manifest,
+                  "--report", report,
+                  "--response", response,
+                  "--normal", normal,
+                  "--out", result,
+              ])
+
+          aggregate = outdir / "sheetness-result.json"
+          run([
+              "scroliq-sheetness-campaign", "aggregate",
+              "--plan", plan_path,
+              "--specs-dir", specs_dir,
+              "--results-dir", results_dir,
+              "--out", aggregate,
+          ])
+
+          result = json.loads(aggregate.read_text())
+          if result.get("schema") != "scroliq-sheetness-campaign-result/1":
+              raise SystemExit("aggregate schema mismatch")
+          if result.get("metrics", {}).get("group_count") != 32:
+              raise SystemExit("aggregate lost frozen groups")
+          if result.get("metrics", {}).get("failed_group_count") != 0:
+              raise SystemExit(
+                  "execution produced invalid/missing groups; this is not a scientific negative"
+              )
+          if result.get("status") not in {"pass", "fail"}:
+              raise SystemExit("aggregate status is neither pass nor fail")
+
+          print("Phase-A scientific result:", result["status"].upper())
+          print(json.dumps(result["metrics"], indent=2, sort_keys=True))
+          PY
+
+      - name: Freeze execution evidence
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-pherc0139-sheetness-run"
+          {
+            git rev-parse HEAD
+            python --version
+            python -m pip freeze
+          } > "$outdir/environment.txt"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("artifacts/2026-10-03-pherc0139-sheetness-run")
+          result = json.loads((root / "sheetness-result.json").read_text())
+          metrics = result["metrics"]
+          status = result["status"].upper()
+          text = f"""# PHerc0139 Phase-A sheetness result — 2026-10-03
+
+**Frozen scientific result: {status}.**
+
+This directory is the create-only execution of the preregistered campaign in
+`artifacts/2026-10-03-pherc0139-sheetness-campaign/campaign-plan.json`.
+No probe, bbox, engine parameter, normalization setting, or decision threshold
+was changed after the campaign freeze.
+
+Measured groups: **{metrics['group_count']} / 32**.
+Normal-offset wins: **{metrics['normal_offset_win_count']} / 32**
+({metrics['normal_offset_win_fraction']:.3f}).
+Median surface-minus-best-offset margin:
+**{metrics['median_surface_minus_best_normal_offset']}**.
+Normal completeness: **{metrics['normal_completeness']:.3f}**.
+Median absolute normal cosine: **{metrics['median_abs_cosine']}**.
+Wrong-wrap wins (descriptive only): **{metrics['wrong_wrap_win_count_descriptive']} / 32**.
+
+A FAIL here is a valid negative scientific result and must not be retuned into
+PASS under this campaign identity. Invalid or missing groups are treated
+separately as execution failure and are not published as a scientific negative.
+
+The result tests local physical sheet localization only. Even PASS would not
+establish winding identity, topology, recto coverage, ink, readable text, or
+Grand Prize readiness.
+"""
+          (root / "README.md").write_text(text, encoding="utf-8")
+          PY
+          (
+            cd "$outdir"
+            find . -type f ! -name hashes.sha256 -print0 \
+              | sort -z \
+              | xargs -0 sha256sum
+          ) > "$outdir/hashes.sha256"
+
+      - name: Commit create-only measured result
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/2026-10-03-pherc0139-sheetness-run
+          if git diff --cached --quiet; then
+            echo "no measured outputs to commit"
+            exit 0
+          fi
+          git commit -m "Run frozen PHerc0139 Phase-A sheetness campaign"
+          branch="${{ github.head_ref || github.ref_name }}"
+          if [ "$branch" = main ]; then
+            branch=campaign/pherc0139-sheetness-phase-a
+          fi
+          git push origin "HEAD:$branch"
