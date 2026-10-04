@@ -68,7 +68,7 @@ def test_pin_resolves_revision_and_lfs_sha256():
     }
     assert report["files"][1]["content_sha256"] == "d" * 64
     assert "/api/models/YoussefMoNader/ink-8um-v8in/revision/main" in get.url
-    assert get.kwargs["params"] == {"files_metadata": "true"}
+    assert get.kwargs["params"] == {"blobs": "true"}
 
 
 def test_dataset_url_and_revision_are_encoded():
