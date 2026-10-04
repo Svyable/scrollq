@@ -81,10 +81,10 @@ correspondence under a translation-plus-depth-lag model". Non-rigid deformation
 over the tile can also cause it. The real-CT benchmark must measure that
 false-contradiction rate; it is not assumed small.
 
-`refinement.usable` is true only for `AUTHENTICATED` with z >= 25. On the
-development seeds, authenticated runs with z >= 25 had displacement error at most
-0.18 px (n = 49) while z in [9, 12) reached 1.3 px, so `AUTHENTICATED` alone must
-never be read as "safe to shift the seam".
+`refinement.usable` is true only for `AUTHENTICATED` with z >= 25. In the
+held-out synthetic suite, authenticated runs with weak peaks carried displacement
+errors up to 0.93 px while strong ones stayed under 0.4 px (numbers below), so
+`AUTHENTICATED` alone must never be read as "safe to shift the seam".
 
 ### Frozen constants
 
@@ -136,7 +136,118 @@ verified here.
 
 ## Synthetic software controls
 
-<!-- RESULTS -->
+These are **software controls on synthetic sheets** (crossed fiber plies with
+cross-ply depth structure, plus voids; slab standard deviation about 1.1). They
+show the implementation honors its stated rules, including the falsification and
+low-information controls. They say nothing about real carbonized papyrus.
+
+Held-out run: `controls-heldout.json`, seed base 700000 (never looked at before
+the constants were final), 40 seeds per control, `scroliq-seam-fingerprint controls --seed-base 700000 --n 40 --sweep-n 12`.
+Gate: **PASS**. Peak z is the robust z of the best cell in the search disk.
+
+| control | kind | AUTH / CONTRA / UNKNOWN | peak z (min / median / max) | shift error px, authenticated runs (median / max) |
+|---|---|---|---|---|
+| `genuine_small_offset` | genuine | 40 / 0 / 0 | 101.2 / 186.4 / 497.0 | 0.14 / 0.25 |
+| `genuine_independent_noise` | genuine | 40 / 0 / 0 | 26.4 / 30.7 / 33.8 | 0.09 / 0.19 |
+| `genuine_rerendered` | genuine | 40 / 0 / 0 | 38.1 / 44.0 / 52.5 | 0.08 / 0.15 |
+| `genuine_depth_offset` | genuine | 40 / 0 / 0 | 85.4 / 168.1 / 456.5 | 0.14 / 0.28 |
+| `genuine_fused_sheet` | genuine | 40 / 0 / 0 | 21.2 / 30.7 / 40.7 | 0.13 / 0.37 |
+| `genuine_shared_crack` | genuine | 40 / 0 / 0 | 94.7 / 148.4 / 540.3 | 0.18 / 0.36 |
+| `genuine_degraded` | genuine | 20 / 0 / 20 | 7.9 / 10.2 / 12.3 | 0.64 / 0.93 |
+| `genuine_depth_misregistered` | genuine | 0 / 0 / 40 | 28.0 / 51.4 / 62.2 | - |
+| `genuine_registration_offset` | misregistered | 0 / 40 / 0 | 30.2 / 44.4 / 63.7 | - |
+| `wrong_sheet_independent` | impostor | 0 / 40 / 0 | 3.1 / 3.8 / 5.8 | - |
+| `adjacent_shared_coarse` | impostor | 0 / 39 / 1 | 2.8 / 4.0 / 6.0 | - |
+| `shared_crack_impostor` | impostor | 0 / 37 / 3 | 3.6 / 4.8 / 7.5 | - |
+| `shared_fold_impostor` | impostor | 0 / 39 / 1 | 3.1 / 4.1 / 6.1 | - |
+| `offset_beyond_search` | misregistered | 0 / 39 / 1 | 2.8 / 3.9 / 7.5 | - |
+| `flipped_normal` | misregistered | 0 / 40 / 0 | 39.5 / 52.0 / 67.7 | - |
+| `phase_randomized` | falsification | 0 / 40 / 0 | 3.0 / 4.0 / 4.7 | - |
+| `block_shuffled` | falsification | 0 / 40 / 0 | 2.9 / 3.8 / 5.5 | - |
+| `blank_smooth` | unknown-required | 0 / 0 / 40 | 3.4 / 4.0 / 5.6 | - |
+| `blank_shared_voxel_noise` | unknown-required | 0 / 0 / 40 | 254.9 / 337.9 / 1883 | - |
+| `pure_noise` | unknown-required | 0 / 0 / 40 | 3.1 / 4.0 / 5.7 | - |
+| `identical_pixels` | unknown-required | 0 / 0 / 40 | 11842 / 20634 / 56246 | - |
+
+What the table says, with the caveats attached:
+
+- **No false authentications**: 0 of 160 impostor runs (wrong sheet, shared coarse
+  structure, shared crack, shared fold), 0 of 120 misregistered runs (flipped
+  normal, 8 px and 20 px offsets), 0 of 80 destroyed-identity runs, and 0 of 160
+  low-information runs.
+- **Falsification pair collapses**: the median peak z of the phase-randomized and
+  block-shuffled controls is 2.1 % and 2.0 % of the matched genuine control's, and
+  neither is ever authenticated. This is the test that separates correspondence
+  from generic papyrus appearance.
+- **The margin is thin.** The largest impostor-or-destroyed peak was z 7.49 against
+  `z_authenticate` 9.0 (1.2×); the development-seed run gave 7.45. The gap to
+  well-posed genuine pairs (smallest z 21.2) is wide, but the gap to the threshold
+  is not, and real-CT calibration has to widen it or accept the false-authentication
+  rate it measures.
+- **Displacement**: the largest error among authenticated runs in the well-posed
+  genuine controls was 0.37 px (median 0.08–0.18); depth lag was recovered in all
+  runs of `genuine_small_offset` and `genuine_depth_offset`. The degraded control
+  authenticates 20 of 40 runs (the rest abstain, none are contradicted), but the
+  authenticated ones carry error up to 0.93 px (median 0.64) at peak z 7.9–12.3.
+  That is why `AUTHENTICATED` does not imply `refinement.usable`: every run with
+  error above 0.5 px has z below 12.4, and `z_refine = 25` was set from a
+  development scatter of error against z (not committed) and not tuned on this run.
+- **Shared voxel noise is a real hazard.** `blank_shared_voxel_noise` peaks at
+  z 255–1883, far above any threshold; only the information gate keeps it
+  `UNKNOWN`.
+- A flipped normal is `CONTRADICTED` with reason `normal-orientation-flipped`, and
+  a sampling-depth error beyond the lag search is `UNKNOWN`
+  (`depth-lag-at-search-boundary`), not a wrong lag asserted with confidence. The
+  flip is only detectable because the synthetic sheet has cross-ply depth
+  structure; on a depth-invariant sheet it would not be.
+
+Detectability envelope (informational, not gated; 12 seeds per level,
+independent noise in each patch as in an independent-scan arm):
+
+| noise σ per patch | AUTH / CONTRA / UNKNOWN (n=12) | median peak z |
+|---|---|---|
+| 0.5 | 12 / 0 / 0 | 44.2 |
+| 1 | 12 / 0 / 0 | 30.1 |
+| 2 | 12 / 0 / 0 | 17.5 |
+| 3 | 12 / 0 / 0 | 11.9 |
+| 4 | 0 / 0 / 12 | 8.9 |
+| 6 | 0 / 0 / 12 | 5.5 |
+| 8 | 0 / 0 / 12 | 4.7 |
+
+Authentication holds up to per-patch noise about 2.7× the sheet's own standard
+deviation and abstains from about 3.6×. That is a property of this synthetic
+texture and this band, not a forecast for real CT.
+
+| in-plane rotation of B (deg) | AUTH / CONTRA / UNKNOWN (n=12) | median peak z |
+|---|---|---|
+| 0 | 12 / 0 / 0 | 44.2 |
+| 0.5 | 12 / 0 / 0 | 42.9 |
+| 1 | 12 / 0 / 0 | 40.2 |
+| 2 | 12 / 0 / 0 | 32.9 |
+| 4 | 12 / 0 / 0 | 20.0 |
+
+A translation-only model survives 4° of in-plane rotation of B on a 64 px tile
+with the peak z roughly halved; the tool does not estimate rotation.
+
+### Ablations: why each gate exists
+
+Same seeds, one gate disabled, committed so the hazards stay visible (both are
+expected to FAIL and do):
+
+- `controls-ablation-feature-gate.json` (`--ablate feature-gate`):
+  `shared_crack_impostor` is **`AUTHENTICATED` in 33 of 40 runs** (peak z up to
+  14.7). A crack that crosses two different windings is exactly what a naive
+  correlation recognizes.
+- `controls-ablation-information-gate.json` (`--ablate information-gate`):
+  `blank_shared_voxel_noise` is **`AUTHENTICATED` in 40 of 40 runs**, and the
+  independent-noise `blank_smooth` and `pure_noise` controls flip from `UNKNOWN`
+  to `CONTRADICTED` in every run: without the gate, noise is read as evidence of a
+  wrong sheet instead of as no evidence.
+
+Other artifacts: `controls-development.json` (seed base 100000; gate PASS; used
+while developing, so not held-out), `controls-heldout-run1-superseded.json` (first
+held-out run, 19 cases, earlier source), and `descriptor-comparison.json`
+(`scripts/seam_descriptor_comparison.py`).
 
 ## Real-CT benchmark (pre-registration; not run)
 

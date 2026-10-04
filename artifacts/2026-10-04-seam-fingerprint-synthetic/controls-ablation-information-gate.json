@@ -1,0 +1,805 @@
+{
+  "ablation": "information-gate-disabled",
+  "cases": [
+    {
+      "allowed_verdicts": [
+        "AUTHENTICATED"
+      ],
+      "depth_lag_recovered_fraction": 1.0,
+      "description": "same sheet, independent exact sub-pixel offset up to 2 px, no noise",
+      "kind": "genuine",
+      "n": 40,
+      "name": "genuine_small_offset",
+      "pass": true,
+      "peak_z": {
+        "max": 497.01675728168095,
+        "median": 186.36222894670442,
+        "min": 101.22097724633603
+      },
+      "reason_counts": {},
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": {
+        "max": 0.25458694664306214,
+        "median": 0.13620580612009472,
+        "min": 0.03196826017952835
+      },
+      "verdict_counts": {
+        "AUTHENTICATED": 40,
+        "CONTRADICTED": 0,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "AUTHENTICATED"
+      ],
+      "depth_lag_recovered_fraction": 1.0,
+      "description": "same sheet, independent additive noise per patch (rescan analogue)",
+      "kind": "genuine",
+      "n": 40,
+      "name": "genuine_independent_noise",
+      "pass": true,
+      "peak_z": {
+        "max": 33.78305769507485,
+        "median": 30.667779248172714,
+        "min": 26.43700388862165
+      },
+      "reason_counts": {},
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": {
+        "max": 0.19497445722078852,
+        "median": 0.09043883067618103,
+        "min": 0.011396002307900253
+      },
+      "verdict_counts": {
+        "AUTHENTICATED": 40,
+        "CONTRADICTED": 0,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "AUTHENTICATED"
+      ],
+      "depth_lag_recovered_fraction": 1.0,
+      "description": "patch B independently resampled with bilinear interpolation",
+      "kind": "genuine",
+      "n": 40,
+      "name": "genuine_rerendered",
+      "pass": true,
+      "peak_z": {
+        "max": 52.53202592426933,
+        "median": 44.04029427962144,
+        "min": 38.06878856401228
+      },
+      "reason_counts": {},
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": {
+        "max": 0.1470526932111595,
+        "median": 0.08277795541591595,
+        "min": 0.027602573744989745
+      },
+      "verdict_counts": {
+        "AUTHENTICATED": 40,
+        "CONTRADICTED": 0,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "AUTHENTICATED"
+      ],
+      "depth_lag_recovered_fraction": 1.0,
+      "description": "patch B sampled one slice deeper along the normal",
+      "kind": "genuine",
+      "n": 40,
+      "name": "genuine_depth_offset",
+      "pass": true,
+      "peak_z": {
+        "max": 456.53673671029463,
+        "median": 168.05998555410343,
+        "min": 85.40670780394342
+      },
+      "reason_counts": {},
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": {
+        "max": 0.28060079252561887,
+        "median": 0.14254697446957793,
+        "min": 0.027898335822982706
+      },
+      "verdict_counts": {
+        "AUTHENTICATED": 40,
+        "CONTRADICTED": 0,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "AUTHENTICATED",
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": 1.0,
+      "description": "same sheet plus a different adjacent sheet leaking into each slab",
+      "kind": "genuine",
+      "n": 40,
+      "name": "genuine_fused_sheet",
+      "pass": true,
+      "peak_z": {
+        "max": 40.67412602298505,
+        "median": 30.673987245257194,
+        "min": 21.168911758883397
+      },
+      "reason_counts": {},
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": {
+        "max": 0.3672370166425738,
+        "median": 0.1331317230225126,
+        "min": 0.010611515263267606
+      },
+      "verdict_counts": {
+        "AUTHENTICATED": 40,
+        "CONTRADICTED": 0,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "AUTHENTICATED",
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": 1.0,
+      "description": "same sheet carrying a through-going crack",
+      "kind": "genuine",
+      "n": 40,
+      "name": "genuine_shared_crack",
+      "pass": true,
+      "peak_z": {
+        "max": 540.3109826216404,
+        "median": 148.37151564702225,
+        "min": 94.65454039757488
+      },
+      "reason_counts": {},
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": {
+        "max": 0.3594013222539875,
+        "median": 0.17815134686212292,
+        "min": 0.0190735479637047
+      },
+      "verdict_counts": {
+        "AUTHENTICATED": 40,
+        "CONTRADICTED": 0,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "AUTHENTICATED",
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": 1.0,
+      "description": "same sheet with severe in-plane blur and heavy noise (compressed/low-resolution)",
+      "kind": "genuine",
+      "n": 40,
+      "name": "genuine_degraded",
+      "pass": true,
+      "peak_z": {
+        "max": 12.259107370240416,
+        "median": 10.174422938468513,
+        "min": 7.865240668820745
+      },
+      "reason_counts": {
+        "ambiguous-peak": 13,
+        "peak-below-authentication-floor": 7
+      },
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": {
+        "max": 0.9256932246295552,
+        "median": 0.6389768139867475,
+        "min": 0.09996439909972661
+      },
+      "verdict_counts": {
+        "AUTHENTICATED": 20,
+        "CONTRADICTED": 0,
+        "UNKNOWN": 20
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "same sheet sampled three slices deeper: the lag is beyond the search and must not be asserted",
+      "kind": "genuine",
+      "n": 40,
+      "name": "genuine_depth_misregistered",
+      "pass": true,
+      "peak_z": {
+        "max": 62.21245381128819,
+        "median": 51.446547702520505,
+        "min": 27.971404167706954
+      },
+      "reason_counts": {
+        "depth-lag-at-search-boundary": 40
+      },
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 0,
+        "CONTRADICTED": 0,
+        "UNKNOWN": 40
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "CONTRADICTED"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "same sheet but claimed registration is 8 px off (outside tolerance, inside search)",
+      "kind": "misregistered",
+      "n": 40,
+      "name": "genuine_registration_offset",
+      "pass": true,
+      "peak_z": {
+        "max": 63.67768696341315,
+        "median": 44.36926464032926,
+        "min": 30.196579989447994
+      },
+      "reason_counts": {
+        "registration-offset-exceeds-tolerance": 40
+      },
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 0,
+        "CONTRADICTED": 40,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "CONTRADICTED",
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "distant papyrus: independent sheet with identical statistics",
+      "kind": "impostor",
+      "n": 40,
+      "name": "wrong_sheet_independent",
+      "pass": true,
+      "peak_z": {
+        "max": 5.813721318617024,
+        "median": 3.8334072224368816,
+        "min": 3.0523064102869224
+      },
+      "reason_counts": {
+        "no-correspondence-within-search": 40
+      },
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 0,
+        "CONTRADICTED": 40,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "CONTRADICTED",
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "adjacent winding: same coarse structure/orientation, independent microtexture",
+      "kind": "impostor",
+      "n": 40,
+      "name": "adjacent_shared_coarse",
+      "pass": true,
+      "peak_z": {
+        "max": 6.003685493434128,
+        "median": 3.954317143551919,
+        "min": 2.816070563557548
+      },
+      "reason_counts": {
+        "no-correspondence-within-search": 39,
+        "peak-below-authentication-floor": 1
+      },
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 0,
+        "CONTRADICTED": 39,
+        "UNKNOWN": 1
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "CONTRADICTED",
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "adjacent winding cut by the same through-going crack, independent microtexture",
+      "kind": "impostor",
+      "n": 40,
+      "name": "shared_crack_impostor",
+      "pass": true,
+      "peak_z": {
+        "max": 7.493229795536026,
+        "median": 4.764599995426584,
+        "min": 3.6131843830371
+      },
+      "reason_counts": {
+        "no-correspondence-within-search": 37,
+        "peak-below-authentication-floor": 3
+      },
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 0,
+        "CONTRADICTED": 37,
+        "UNKNOWN": 3
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "CONTRADICTED",
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "adjacent winding sharing the same fold step, independent microtexture",
+      "kind": "impostor",
+      "n": 40,
+      "name": "shared_fold_impostor",
+      "pass": true,
+      "peak_z": {
+        "max": 6.072898478234367,
+        "median": 4.130970465645129,
+        "min": 3.1216159202659446
+      },
+      "reason_counts": {
+        "no-correspondence-within-search": 39,
+        "peak-below-authentication-floor": 1
+      },
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 0,
+        "CONTRADICTED": 39,
+        "UNKNOWN": 1
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "CONTRADICTED",
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "same sheet displaced 20 px, beyond the 12 px search radius",
+      "kind": "misregistered",
+      "n": 40,
+      "name": "offset_beyond_search",
+      "pass": true,
+      "peak_z": {
+        "max": 7.483490173617736,
+        "median": 3.8538068515708925,
+        "min": 2.829911063792949
+      },
+      "reason_counts": {
+        "no-correspondence-within-search": 39,
+        "peak-below-authentication-floor": 1
+      },
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 0,
+        "CONTRADICTED": 39,
+        "UNKNOWN": 1
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "CONTRADICTED"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "same sheet with the normal (depth) axis reversed",
+      "kind": "misregistered",
+      "n": 40,
+      "name": "flipped_normal",
+      "pass": true,
+      "peak_z": {
+        "max": 67.66301538457064,
+        "median": 52.023613413003176,
+        "min": 39.4621161896052
+      },
+      "reason_counts": {
+        "normal-orientation-flipped": 40
+      },
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 0,
+        "CONTRADICTED": 40,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "CONTRADICTED",
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "genuine pair with patch B phase-randomized: statistics kept, identity destroyed",
+      "kind": "falsification",
+      "n": 40,
+      "name": "phase_randomized",
+      "pass": true,
+      "peak_z": {
+        "max": 4.702191633960406,
+        "median": 3.989276162757365,
+        "min": 3.0211804003019256
+      },
+      "reason_counts": {
+        "no-correspondence-within-search": 40
+      },
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 0,
+        "CONTRADICTED": 40,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "CONTRADICTED",
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "genuine pair with patch B block-shuffled (8 px): local texture kept, layout destroyed",
+      "kind": "falsification",
+      "n": 40,
+      "name": "block_shuffled",
+      "pass": true,
+      "peak_z": {
+        "max": 5.523796417592355,
+        "median": 3.7622864665658033,
+        "min": 2.9055000279588565
+      },
+      "reason_counts": {
+        "no-correspondence-within-search": 40
+      },
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 0,
+        "CONTRADICTED": 40,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "smooth papyrus plus shared voxel noise",
+      "kind": "unknown-required",
+      "n": 40,
+      "name": "blank_smooth",
+      "pass": false,
+      "peak_z": {
+        "max": 5.565376981569691,
+        "median": 4.021469950137197,
+        "min": 3.353840678026675
+      },
+      "reason_counts": {
+        "no-correspondence-within-search": 40
+      },
+      "runs_outside_allowed": 40,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 0,
+        "CONTRADICTED": 40,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "smooth papyrus whose two patches read the same voxel-noise realization",
+      "kind": "unknown-required",
+      "n": 40,
+      "name": "blank_shared_voxel_noise",
+      "pass": false,
+      "peak_z": {
+        "max": 1883.0788682422383,
+        "median": 337.8899423764368,
+        "min": 254.8852099854303
+      },
+      "reason_counts": {},
+      "runs_outside_allowed": 40,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 40,
+        "CONTRADICTED": 0,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "independent noise only",
+      "kind": "unknown-required",
+      "n": 40,
+      "name": "pure_noise",
+      "pass": false,
+      "peak_z": {
+        "max": 5.724059163565379,
+        "median": 3.9560310193303265,
+        "min": 3.127278400877803
+      },
+      "reason_counts": {
+        "no-correspondence-within-search": 40
+      },
+      "runs_outside_allowed": 40,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 0,
+        "CONTRADICTED": 40,
+        "UNKNOWN": 0
+      }
+    },
+    {
+      "allowed_verdicts": [
+        "UNKNOWN"
+      ],
+      "depth_lag_recovered_fraction": null,
+      "description": "the same pixel array supplied twice (shared preprocessing hazard)",
+      "kind": "unknown-required",
+      "n": 40,
+      "name": "identical_pixels",
+      "pass": true,
+      "peak_z": {
+        "max": 56245.63265593204,
+        "median": 20634.378480504343,
+        "min": 11842.217185325708
+      },
+      "reason_counts": {
+        "identical-pixel-arrays": 40
+      },
+      "runs_outside_allowed": 0,
+      "shift_error_px_authenticated_runs": null,
+      "verdict_counts": {
+        "AUTHENTICATED": 0,
+        "CONTRADICTED": 0,
+        "UNKNOWN": 40
+      }
+    }
+  ],
+  "classification": "EXPERIMENT FURTHER",
+  "config": {
+    "depth_search": 2,
+    "exclusion_radius_px": 3.0,
+    "feature_clip_sigma": 4.0,
+    "feature_dilate_px": 2,
+    "flip_margin": 1.5,
+    "geometry_tolerance_px": 3.0,
+    "max_masked_fraction": 0.35,
+    "min_band_snr": 0.0,
+    "min_unique_ratio": 1.5,
+    "min_valid_fraction": 0.7,
+    "search_radius_px": 12.0,
+    "sigma_high_px": 4.0,
+    "sigma_low_px": 1.0,
+    "surrogate_margin": 1.25,
+    "surrogates": 16,
+    "window_alpha": 0.5,
+    "z_authenticate": 9.0,
+    "z_contradict": 6.0,
+    "z_refine": 25.0
+  },
+  "config_sha256": "431c2a504563220734928fcc96d9f331a2fe638b94faa88c1316e227e1964271",
+  "falsification_z_collapse_ratio": {
+    "block_shuffled": 0.020188031060959975,
+    "phase_randomized": 0.021406033751067723
+  },
+  "gate": {
+    "depth_lag_recovered": true,
+    "falsification_collapses": true,
+    "genuine_controls_behave": true,
+    "impostors_never_authenticated": true,
+    "low_information_is_unknown": false,
+    "max_impostor_or_destroyed_peak_z": 7.493229795536026,
+    "max_shift_error_px": 0.28060079252561887,
+    "misregistered_never_authenticated": true,
+    "shift_error_within_half_pixel": true,
+    "status": "fail",
+    "z_authenticate": 9.0
+  },
+  "interpretation": "A pass shows the implementation honors its stated verdict rules on synthetic sheets, including the falsification and low-information controls. It says nothing about whether carbonized papyrus at scan resolution carries a recoverable fingerprint; that requires the real-CT adjacent-winding benchmark.",
+  "method": "tangent-microtexture-phasecorr-v1",
+  "n_per_case": 40,
+  "numpy_version": "2.4.6",
+  "purpose": "software controls for the seam fingerprint authenticator; synthetic data only",
+  "schema_version": 1,
+  "seed_base": 700000,
+  "source_sha256": "f1091d0c3405a70a7e65a67fd4418fce3d5b36db55359a82062e2a940e6c7903",
+  "sweep_n": 12,
+  "sweeps": {
+    "inplane_rotation_degrees": [
+      {
+        "n": 12,
+        "peak_z": {
+          "max": 49.423142432953746,
+          "median": 44.15155939501328,
+          "min": 41.936911576029786
+        },
+        "rotation_degrees": 0.0,
+        "verdict_counts": {
+          "AUTHENTICATED": 12,
+          "CONTRADICTED": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "n": 12,
+        "peak_z": {
+          "max": 48.677084417040206,
+          "median": 42.85849790726722,
+          "min": 40.42239330855314
+        },
+        "rotation_degrees": 0.5,
+        "verdict_counts": {
+          "AUTHENTICATED": 12,
+          "CONTRADICTED": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "n": 12,
+        "peak_z": {
+          "max": 45.99589496717286,
+          "median": 40.169209495401134,
+          "min": 38.56552213172841
+        },
+        "rotation_degrees": 1.0,
+        "verdict_counts": {
+          "AUTHENTICATED": 12,
+          "CONTRADICTED": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "n": 12,
+        "peak_z": {
+          "max": 36.88491181403835,
+          "median": 32.86647967118833,
+          "min": 30.765747667212906
+        },
+        "rotation_degrees": 2.0,
+        "verdict_counts": {
+          "AUTHENTICATED": 12,
+          "CONTRADICTED": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "n": 12,
+        "peak_z": {
+          "max": 22.825610320269906,
+          "median": 19.95542656483584,
+          "min": 17.53151956571603
+        },
+        "rotation_degrees": 4.0,
+        "verdict_counts": {
+          "AUTHENTICATED": 12,
+          "CONTRADICTED": 0,
+          "UNKNOWN": 0
+        }
+      }
+    ],
+    "noise_sigma_independent_per_patch": [
+      {
+        "n": 12,
+        "noise_sigma": 0.5,
+        "peak_z": {
+          "max": 49.423142432953746,
+          "median": 44.15155939501328,
+          "min": 41.936911576029786
+        },
+        "verdict_counts": {
+          "AUTHENTICATED": 12,
+          "CONTRADICTED": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "n": 12,
+        "noise_sigma": 1.0,
+        "peak_z": {
+          "max": 33.580779184486246,
+          "median": 30.082780497264515,
+          "min": 28.773368211396836
+        },
+        "verdict_counts": {
+          "AUTHENTICATED": 12,
+          "CONTRADICTED": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "n": 12,
+        "noise_sigma": 2.0,
+        "peak_z": {
+          "max": 19.88118495929482,
+          "median": 17.501919849511573,
+          "min": 16.381479984024768
+        },
+        "verdict_counts": {
+          "AUTHENTICATED": 12,
+          "CONTRADICTED": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "n": 12,
+        "noise_sigma": 3.0,
+        "peak_z": {
+          "max": 13.94387703694922,
+          "median": 11.875555086419059,
+          "min": 10.391991002734684
+        },
+        "verdict_counts": {
+          "AUTHENTICATED": 12,
+          "CONTRADICTED": 0,
+          "UNKNOWN": 0
+        }
+      },
+      {
+        "n": 12,
+        "noise_sigma": 4.0,
+        "peak_z": {
+          "max": 9.883968918676448,
+          "median": 8.904975456390908,
+          "min": 6.875056103500899
+        },
+        "verdict_counts": {
+          "AUTHENTICATED": 5,
+          "CONTRADICTED": 0,
+          "UNKNOWN": 7
+        }
+      },
+      {
+        "n": 12,
+        "noise_sigma": 6.0,
+        "peak_z": {
+          "max": 6.381125333775073,
+          "median": 5.505463651722598,
+          "min": 4.472022533809304
+        },
+        "verdict_counts": {
+          "AUTHENTICATED": 0,
+          "CONTRADICTED": 7,
+          "UNKNOWN": 5
+        }
+      },
+      {
+        "n": 12,
+        "noise_sigma": 8.0,
+        "peak_z": {
+          "max": 5.46029836088359,
+          "median": 4.675380588679691,
+          "min": 3.4923310368443845
+        },
+        "verdict_counts": {
+          "AUTHENTICATED": 0,
+          "CONTRADICTED": 12,
+          "UNKNOWN": 0
+        }
+      }
+    ]
+  },
+  "synthetic": true,
+  "tool": "scroliq-seam-fingerprint"
+}
