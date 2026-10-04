@@ -79,7 +79,7 @@ def pin_repo(
     require_files: Sequence[str] = (),
     require_sha256: Sequence[str] = (),
     timeout: float = 20.0,
-    request_get: Callable[..., Any] = requests.get,
+    request_get: Callable[..., Any] | None = None,
 ) -> dict[str, Any]:
     """Resolve one Hub revision and return a deterministic immutable snapshot."""
     repo_id = _nonempty(repo_id, "repo_id")
@@ -98,8 +98,9 @@ def pin_repo(
         f"https://huggingface.co/api/{kind_path}/{encoded_repo}"
         f"/revision/{encoded_revision}"
     )
+    get = requests.get if request_get is None else request_get
     try:
-        response = request_get(
+        response = get(
             endpoint,
             params={"files_metadata": "true"},
             timeout=timeout,
