@@ -1,7 +1,8 @@
 # Structure-aware conformal uncertainty sets for surface predictions
 
-**Status:** EXPERIMENT FURTHER. Queued 2026-10-04. **Not preregistered; nothing
-is frozen and no CT or prediction data has been read for this experiment.**
+**Status:** EXPERIMENT FURTHER, **downscoped 2026-10-04**. Queued 2026-10-04.
+**Not preregistered; nothing is frozen.** The only data read is a value-census of
+the published prediction arrays (below); no CT, TIFXYZ or ROI has been read.
 
 This note queues one post-hoc audit experiment. It does not change a surface
 model, a mesh, or the production campaign.
@@ -86,19 +87,42 @@ Freeze everything first; the prediction model is never altered.
 connectivity experiments. ScrollQ owns **no surface model or checkpoint**, only
 this published prediction volume.
 
-**Must verify before preregistration.** The stored array is uint8 and the repo
-thresholds it at `>127`. Sample chunks and report the value histogram. If it is
-effectively binary, the probability-thresholding arm is degenerate and
-confidence-guided geodesic expansion has nothing to follow; the experiment then
-needs a graded source or is closed.
+**Measured 2026-10-04: the published surface arrays are binary.** A read-only
+sample census
+([`artifacts/2026-10-04-surface-prediction-value-census/`](../../artifacts/2026-10-04-surface-prediction-value-census/README.md),
+`scripts/surface_prediction_value_census.py`) found a single nonzero value, 255,
+in every sampled chunk of the `surface-m7-L0-th0.2` array (16 chunks,
+21,389,105 nonzero voxels) and of every level of the sibling `surface-recto-090`
+array (8 chunks per level, six levels). The `th0.2` in the filename is
+consistent with an export that was thresholded. The sample is not exhaustive,
+but a graded voxel inside any inspected chunk would have been reported as
+`graded`, and the unit tests include that positive control. No confidence
+survives in the sampled chunks of either array.
 
-**Three constructions**, each calibrated only on the calibration ROIs:
+Consequences for the design:
 
-1. probability thresholding;
-2. ordinary isotropic dilation;
-3. instance-level + confidence-guided geodesic expansion (the paper's
-   construction, implemented independently unless reuse is explicitly approved
-   below).
+- **Probability thresholding is dropped.** Every threshold in (0, 255) yields the
+  identical set, so it is not a distinct construction on this source.
+- **Confidence-guided geodesic expansion has no confidence to follow.** The
+  paper's geodesic arm cannot be run as published. A CT-derived cost map would
+  be a ScrollQ adaptation, must not touch the reference surface, and must be
+  labelled as not the paper's method. A graded surface prediction would restore
+  the original arm; none is published among the `PHerc0139` surface arrays, and
+  the `lasagna/` product family was **not** checked. ScrollQ owns no model that
+  could produce one.
+- **Still testable on a binary mask:** isotropic dilation and instance-level
+  structural-miss accounting. That reproduces the paper's central claim
+  (dilation saturates on missed components, an instance-level split does not)
+  but not the benefit of the unified method.
+
+**Constructions now in scope**, each calibrated only on the calibration ROIs:
+
+1. ordinary isotropic dilation (baseline);
+2. instance-level boundary / structural-miss split on the binary mask
+   (independent implementation unless reuse is explicitly approved below);
+3. *conditional:* confidence-guided geodesic expansion, only if a graded source
+   is identified or a CT-derived cost is explicitly preregistered as an
+   adaptation.
 
 **ROI split.** Calibration ROIs and proof ROIs are disjoint in space (certified
 with `scrollq-geometry-probe`, not by ID alone). **The six PHerc0139 centers used
@@ -150,7 +174,8 @@ and state the loosest `alpha` it will accept in advance.
 - exact prediction and CT identities (URL, shape, hash) and reference TIFXYZ;
 - ROI centers/sizes for calibration and proof, with the disjointness check;
 - `alpha`, strata definitions, tolerance, and maximum non-vacuous radius;
-- the stored-value histogram result above;
+- which of the three constructions are in scope, given the measured binary
+  source above;
 - injection recipes and seeds for the control classes;
 - the decision rule (below), computed by code, not by judgement.
 
@@ -160,9 +185,9 @@ Promote to a production audit layer only if, on untouched natural ROIs and in
 every stratum that was kept:
 
 1. the winning set-level construction achieves its nominal held-out coverage
-   and is **not vacuous** where the dilation/threshold constructions are;
-2. it beats both baselines on structural-miss accounting (does not hide missed
-   mass inside a large radius);
+   and is **not vacuous** where the dilation baseline is;
+2. it beats the dilation baseline on structural-miss accounting (does not hide
+   missed mass inside a large radius);
 3. the injected missed-fragment and hole controls are detected rather than
    absorbed;
 4. neighboring-winding switches are either excluded from the validated envelope
@@ -182,7 +207,8 @@ histogram and sample-size checks.
 - prize impact: **high as an audit layer**, medium on segmentation quality
 - plausibility: **medium-high**
 - evidence burden: **medium-high**
-- implementation cost: **medium-low** once a graded prediction exists
+- implementation cost: **medium-low** for the binary-mask arms; the geodesic arm
+  is blocked until a graded source exists
 - reproducibility burden: **low** (post-hoc, deterministic)
 - invalid-evaluation risk: **medium** — exchangeability, and injected controls
   mistaken for coverage evidence
