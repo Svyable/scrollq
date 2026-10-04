@@ -33,7 +33,7 @@ https://scrollprize.org/prizes
 | Blind held-out TIFXYZ surface recovery has a salted private-truth commitment, exact-volume binding, bidirectional coverage and fail-closed region accounting | [segmentation-validation.md](segmentation-validation.md) |
 | Held-out geometry evaluation has an explicit fit-input exclusion contract and keeps missing predictions in the denominator | [heldout-geometry-evaluation.md](heldout-geometry-evaluation.md) |
 | CT integrity evidence is delegated to zarr-pyramid-audit and consumed fail-closed rather than re-invented here | [zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit) and README “Diagnostic passport” |
-| Submission packaging, image traceability, provenance and legibility evidence have explicit interfaces | [grand-prize-package.md](grand-prize-package.md), [grand-prize-images.md](grand-prize-images.md), [grand-prize-provenance.md](grand-prize-provenance.md), [grand-prize-legibility.md](grand-prize-legibility.md) |
+| Submission packaging, image traceability, provenance and legibility evidence have explicit interfaces | [grand-prize-package.md](grand-prize-package.md), [submission-dry-run.md](submission-dry-run.md), [grand-prize-images.md](grand-prize-images.md), [grand-prize-provenance.md](grand-prize-provenance.md), [grand-prize-legibility.md](grand-prize-legibility.md) |
 
 ## Why this is different from another quality score
 
