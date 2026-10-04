@@ -13,6 +13,7 @@ scroliq-hf-pin \
   --repo YoussefMoNader/ink-8um-v8in \
   --repo-type model \
   --revision main \
+  --require-public \
   --require-file README.md \
   --out evidence/v8in.hf-pin.json
 ```
@@ -23,6 +24,9 @@ sizes and Git blob ids when exposed, and Git-LFS content SHA-256 values when the
 Hub explicitly provides them.
 
 ## Fail-closed file requirements
+
+Use `--require-public` for prize-release inputs; the command then fails when
+the Hub reports the repository as private.
 
 Use `--require-file PATH` when a campaign depends on a particular checkpoint,
 script, config or manifest. The command fails if that path is absent.
