@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   ct-support:
@@ -28,6 +28,18 @@ jobs:
         run: |
           echo "=== CT_SUPPORT_RESULT ==="
           python -c "import json; print(json.dumps(json.load(open('out/ct-support/result.json')),separators=(',',':')))"
+      - name: Commit result (create-only)
+        run: |
+          set -euxo pipefail
+          dest=artifacts/2026-10-04-paris4-fiber-ct-support-run
+          test ! -e "$dest/result.json"
+          mkdir -p "$dest"
+          cp out/ct-support/result.json "$dest/result.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$dest/result.json"
+          git commit -m "Add PHercParis4 fiber CT support result (deterministic re-run)"
+          git push origin "HEAD:${{ github.ref_name }}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
