@@ -193,7 +193,11 @@
     "minimum_wrong_left_target_right_detection_fraction": 0.7,
     "minimum_pooled_seam_comparison_coverage_fraction_each_variant": 0.75,
     "no_parameter_tuning_after_observation": true,
-    "holdout_action": "Only if every development gate passes may this exact sampling/analyzer/substitution/gate contract be frozen for the untouched ten-region holdout. Failure dismisses cross-ply-seam-v1 without reading holdout."
+    "holdout_action": "Only if every development gate passes may this exact sampling/analyzer/substitution/gate contract be frozen for the untouched ten-region holdout. Failure dismisses cross-ply-seam-v1 without reading holdout.",
+    "detection_denominator": "All 10 frozen development groups. A group that is unusable or lacks the required seam comparisons counts as not detected in each substitution arm.",
+    "intact_false_positive_denominator": "All 10 frozen development groups. Only a usable intact variant meeting the frozen group_detection_rule counts as a false positive; unusable groups are separately penalized by required_usable_groups and pooled coverage.",
+    "pooled_coverage_denominator": "For each variant separately: valid seam comparisons divided by 40 (10 frozen groups x 4 frozen seam pairs), so missing frames cannot disappear from the coverage denominator.",
+    "decision_rule": "PASS only if every listed numeric gate passes simultaneously; otherwise FAIL. No borderline/manual override."
   },
   "reproducibility": {
     "randomness": null,
