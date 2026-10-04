@@ -53,6 +53,7 @@ weight-free Pareto frontier (triage, not a readability claim).
     `geometry_probe.py` → `scrollq-geometry-probe`; `fiber_audit.py` →
     `scroliq-fiber`; `fiber_frame.py` → `scroliq-fiber-frame` for the
     experimental ink-blind cross-ply CT continuity diagnostic
+  - `vc3d_run_guard.py` → `scroliq-vc3d-run-guard`: create-only external-command receipt that rejects exit-zero runs unless a newly produced TIFXYZ surface satisfies semantic vertex/quad/area postconditions; optional exact-volume CT preflight binding
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
@@ -65,6 +66,12 @@ weight-free Pareto frontier (triage, not a readability claim).
     manifests derived from pinned official eligibility + bucket index; checks
     the built-in manifests for drift
   - `chunk_audit.py` — `scroliq-chunk-audit`: declared-vs-stored chunk sizes
+- `scripts/` fiber campaigns (run in Actions; data hosts may be unreachable
+  locally): `fiber_corpus_campaign.py` / `fiber_scroll_census.py` (fail-closed
+  censuses with positive controls), `fiber_span_test.py`, `fiber_gap_rule_eval.py`,
+  `paris4_fiber_binding.py`, `paris4_fiber_ct_support.py`, `paris4_fiber_ct_direction.py`.
+  Pre-registered runners execute only specs listed in their `FROZEN_SPECS`
+  hash table; CI results are committed create-only by `scripts/ci_commit_result.sh`
 - `tests/` — pytest suite; keep it green. `test_surface_independence.py` guards the
   import graph: the October surfaces (bucket helpers, OME-Zarr reader +
   registration, chunk audit, prize manifests, protocol pairs) must stay
@@ -98,6 +105,7 @@ scroliq-pairs --list --out out/discovery.json          # registered rescan pairs
 scroliq-manifest --help                                # derive prize manifests
 scroliq-chunk-audit --index <metadata.min.json[.gz]> --out out/audit.json
 scroliq-segmentation-uq --help                      # structural boundary/component UQ gate
+scroliq-vc3d-run-guard --help                       # exit code + semantic TIFXYZ postconditions
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests

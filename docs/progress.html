@@ -270,6 +270,11 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
   <div class="change-grid">
     <article class="change">
       <div class="date">OCT 04</div>
+      <h3>Public fibers follow real papyrus on two scrolls</h3>
+      <p>Pre-registered and replicated: PHercParis4 and PHerc0139 fibers sit on dense CT material and run within the sheet plane (median about 3.4° out of plane vs 30° random). Wrong-frame controls passed.</p>
+    </article>
+    <article class="change">
+      <div class="date">OCT 04</div>
       <h3>PHerc0813 is off the Grand Prize frontier under v2 sampling</h3>
       <p>Re-derived from the pre-registered v2 scores, PHerc1447 is the only robust Grand Prize frontier member and PHerc0800 the only robust First Letters member. The segment-free slot is a band within noise.</p>
     </article>
@@ -287,11 +292,6 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
       <div class="date">OCT 03</div>
       <h3>Blind model evaluation now reaches held-out surface recovery</h3>
       <p><code>scroliq-eval</code> provides the fail-closed envelope; <code>scroliq-segmentation-validate</code> adds bidirectional TIFXYZ coverage, exact-distance diagnostics, topology gates, and a salted commitment that freezes private truth before scoring.</p>
-    </article>
-    <article class="change">
-      <div class="date">OCT 03</div>
-      <h3>Winding consistency moved from intuition to measurable constraints</h3>
-      <p>2,111 / 2,232 points attached to verified patches; 6 / 16,074 constraints flagged; the +2 injection control detected 194 / 200 corruptions.</p>
     </article>
   </div>
 </section>
@@ -423,6 +423,12 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
         <div class="title">Ambitions raised: October gains O7–O10, November raised to N1–N9</div>
         <div class="detail">The fiber span test came back SUPPORTED, so the gap rule mostly measures fallback rendering. Under the v2 frontier PHerc0813 is out and PHerc1447 is the only robust member. The public fibers sit on material in PHercParis4 20260411134726 (AUC 0.775; wrong-frame control passed). Every queue now loads in VC3D. <a href="./october-2026.html#o7">Details →</a></div>
       </div>
+
+      <div class="event">
+        <div class="date">2026-10-04</div>
+        <div class="title">Fiber IQ replicated on PHerc0139; span-aware gap rule rejected</div>
+        <div class="detail">411 PHerc0139 fibers audited. CT support (AUC 0.760) and in-plane direction (D 0.414) both replicate PHercParis4 under unchanged frozen designs. The span-aware gap rule did not halve fallback flags on independent data (ratio 0.67), so the current rule stays. <a href="./october-2026.html#o11">Details →</a></div>
+      </div>
     </div>
   </div>
 </section>
@@ -460,7 +466,7 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
 
   <div class="backlog-wrap">
     <div class="backlog">
-      <h3>ScrolIQ · O1–O10 (O7–O10 stretch, raised Oct 4)</h3>
+      <h3>ScrolIQ · O1–O11 (O7–O11 stretch, raised Oct 4)</h3>
 
       <div class="goal">
         <div class="ghead"><span class="gid">O1</span><span class="gtitle">Mesh IQ: how often are flags real defects?</span><span class="state partial">Partial</span></div>
@@ -510,6 +516,11 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
       <div class="goal">
         <div class="ghead"><span class="gid">O10</span><span class="gtitle">Every review queue loads in VC3D</span><span class="state measured">Done</span></div>
         <div class="gdetail">Winding attachment, ray order and 388 fiber gap cues as PointCollections, plus the Mesh IQ packet.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">O11</span><span class="gtitle">Fiber IQ goes physical, on two scrolls</span><span class="state measured">Measured</span></div>
+        <div class="gdetail">411 PHerc0139 fibers audited. On both scrolls, fibers sit on CT material (AUC 0.775 / 0.760) and run within the sheet plane (median 3.3° / 3.5° out of plane). Span-aware gap rule not adopted.</div>
       </div>
     </div>
 
@@ -579,8 +590,8 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
         <div class="gdetail">Raised from one model to three, covering surface and ink, published as a comparison with CIs. Needs model owners' agreement.</div>
       </div>
       <div class="goal">
-        <div class="ghead"><span class="gid">N4</span><span class="gtitle">Fiber IQ: span-aware rule, PHerc0139, CT direction</span><span class="state unknown">Not started</span></div>
-        <div class="gdetail">The span test and CT support moved into October (O7, O9). Next: fix the gap rule, census a second scroll, and test CT orientation.</div>
+        <div class="ghead"><span class="gid">N4</span><span class="gtitle">Fiber IQ: which sheet, and a CT-based gap model</span><span class="state unknown">Not started</span></div>
+        <div class="gdetail">The old N4 was done in October (O11). Next: same-sheet tracking with a planted sheet-switch control, and gap detection from CT continuity.</div>
       </div>
     </div>
     <div class="backlog">

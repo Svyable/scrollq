@@ -92,7 +92,7 @@ Working deadline: end of November, following the monthly progress-prize cadence.
 <div class="stats">
 <div class="stat"><div class="n">9</div><div class="l">November goals<br>raised 2026-10-04</div></div>
 <div class="stat"><div class="n warn">0</div><div class="l">exact prize volumes with blind-scored surface<br>the bottleneck (N2)</div></div>
-<div class="stat"><div class="n">2 / 388</div><div class="l">fiber gap cues in native spans<br>next: span-aware rule (N4)</div></div>
+<div class="stat"><div class="n">2 scrolls</div><div class="l">fibers on CT material and in-plane<br>next: which sheet (N4)</div></div>
 <div class="stat"><div class="n warn">0</div><div class="l">published blind community-model evaluations<br>harness exists (N3)</div></div>
 </div>
 </div></header>
@@ -136,14 +136,14 @@ surface arms, for example a learned surface predictor and a physical descriptor 
 <p><b>Deliverable.</b> At least three public models covering surface and ink. They are evaluated on one declared held-out split with model cards, checkpoint hashes and overlap checks, and published as a comparison table with CIs and failed regions.</p>
 <p><b>Done when.</b> At least two evaluations are committed, with the third either committed or explicitly declined by its owner. Ask each model owner before publishing.</p></div>
 
-<div class="goal" id="n4"><h3><span class="id">N4</span>Fiber IQ: a span-aware gap rule, a second scroll, and CT direction</h3>
-<div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: fiber connectivity</span><span class="chip state">raised 2026-10-04</span></div>
-<p><b>Why.</b> October showed that the whole-fiber gap rule mostly measures fallback rendering density (<a href="./october-2026.html#o7">O7</a>), and the CT support question moved into October (<a href="./october-2026.html#o9">O9</a>).</p>
+<div class="goal" id="n4"><h3><span class="id">N4</span>Fiber IQ: which sheet, and a gap model that works</h3>
+<div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: fiber connectivity</span><span class="chip state">raised again 2026-10-04</span></div>
+<p><b>Why.</b> The old N4 was done in October (<a href="./october-2026.html#o11">O11</a>). Fibers on two scrolls sit on CT material and run within the sheet plane. The simple span-aware gap rule failed on independent data.</p>
 <p><b>Deliverable.</b>
-(a) A span-aware gap rule, evaluated pre-registered against the current rule on the O7 data with a planted-break positive control.
-(b) A census of the public PHerc0139 fibers, with the same fail-closed listing and controls.
-(c) CT fiber <i>direction</i> agreement in the O9 volume (structure-tensor orientation vs fiber tangent), with a rotated-fiber control.</p>
-<p><b>Done when.</b> All three have committed verdicts. If the O9 support test did not pass, (c) stays <code>unknown</code> with that reason.</p></div>
+(a) <b>Sheet identity:</b> test whether consecutive points of a fiber stay on the <i>same</i> CT sheet. Use a pre-registered sheet-tracking check with a planted sheet-switch control.
+(b) <b>A gap model that works:</b> a pre-registered gap detector that uses CT (for example, material continuity along the step) rather than step length alone, evaluated on both scrolls.
+(c) Fiber-to-patch consistency against the verified PHercParis4 patches, once their frame is shown to match.</p>
+<p><b>Done when.</b> (a) and (b) have committed verdicts on both scrolls. (c) is done or explicitly <code>unknown</code> with the frame evidence.</p></div>
 
 <div class="goal" id="n5"><h3><span class="id">N5</span>Close O3: score a spiral fit on constraints it never saw</h3>
 <div class="chips"><span class="chip crit">open problem: spiral fitting</span><span class="chip state">carryover · evaluator ready</span><span class="chip gate">needs a GPU fit run</span></div>
@@ -183,15 +183,15 @@ surface arms, for example a learned surface predictor and a physical descriptor 
 <div class="weeks">
 <div class="week"><h3>Week 1 · Nov 1–7</h3><ul>
 <li>N2: choose the exact volume; pre-register the transfer and commit truth</li>
-<li>N4a: pre-register the span-aware gap rule</li>
+<li>N4a: pre-register the sheet-identity check</li>
 <li>N7: maintainer review of the three drafts</li></ul></div>
 <div class="week"><h3>Week 2 · Nov 8–14</h3><ul>
 <li>N2: produce predictions; run the blind scorer</li>
-<li>N4a: run it; N4b: PHerc0139 fiber census</li>
+<li>N4a: run it; N4b: CT-based gap model</li>
 <li>N6: surface-support survey of the 13 targets</li></ul></div>
 <div class="week"><h3>Week 3 · Nov 15–21</h3><ul>
 <li>N3: community-model evaluations</li>
-<li>N4c: CT fiber direction with rotated control</li>
+<li>N4c: fiber–patch consistency</li>
 <li>N1: review cutoff (Nov 21)</li></ul></div>
 <div class="week"><h3>Week 4 · Nov 22–30</h3><ul>
 <li>N5: held-out spiral score (when a GPU fit exists)</li>

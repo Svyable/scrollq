@@ -1,0 +1,29 @@
+name: Fiber gap rule evaluation (pre-registered)
+
+# Ran 2026-10-04; manual only now (the commit step is create-only).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install .
+      - name: Run
+        continue-on-error: true
+        run: python scripts/fiber_gap_rule_eval.py --out-dir out/r
+      - name: Print result
+        if: always()
+        run: |
+          python -c "import json; d=json.load(open('out/r/result.json')); print(json.dumps({k: v for k, v in d.items() if k not in ('rows', 'per_fiber', 'per_fiber_mean_abs_dot')}, indent=1))"
+      - name: Commit result (create-only)
+        run: scripts/ci_commit_result.sh artifacts/2026-10-04-fiber-gap-rule-run "Add Fiber gap rule evaluation (pre-registered) result" out/r/result.json
