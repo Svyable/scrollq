@@ -264,10 +264,6 @@ jobs:
         run: |
           set -euxo pipefail
           outdir="artifacts/2026-10-03-pherc0139-sheetness-run"
-          (
-            cd "$outdir"
-            find . -type f ! -name hashes.sha256 -print0               | sort -z               | xargs -0 sha256sum
-          ) > "$outdir/hashes.sha256"
           {
             git rev-parse HEAD
             python --version
@@ -309,6 +305,12 @@ Grand Prize readiness.
 """
           (root / "README.md").write_text(text, encoding="utf-8")
           PY
+          (
+            cd "$outdir"
+            find . -type f ! -name hashes.sha256 -print0 \
+              | sort -z \
+              | xargs -0 sha256sum
+          ) > "$outdir/hashes.sha256"
 
       - name: Commit create-only measured result
         if: steps.guard.outputs.skip != '1'
