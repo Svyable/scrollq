@@ -30,7 +30,114 @@ jobs:
         run: |
           mkdir -p out/pherc1447-v8in-pins
           bash bin/pin_pherc1447_v8in.sh out/pherc1447-v8in-pins
-          sha256sum out/pherc1447-v8in-pins/*.json | tee out/pherc1447-v8in-pins/SHA256SUMS
+
+      - name: Capture and verify small release metadata
+        shell: python
+        run: |
+          import hashlib
+          import json
+          from pathlib import Path
+          from urllib.parse import quote
+
+          import requests
+
+          root = Path("out/pherc1447-v8in-pins")
+          wanted = {
+              "v8in-base.hf-pin.json": [
+                  "README.md",
+                  "config.json",
+                  "predict.py",
+                  "ink8um/inference.py",
+                  "training/configs/v8in.json",
+              ],
+              "v8in-pherc1447-loo-w062.hf-pin.json": [
+                  "README.md",
+                  "config.json",
+                  "predict.py",
+                  "ink8um/inference.py",
+                  "training/configs/loo_w062.json",
+              ],
+              "pherc1447-surfaces.hf-pin.json": [
+                  "README.md",
+                  "SHA256SUMS",
+                  "w058/tifxyz/meta.json",
+                  "w060/tifxyz/meta.json",
+                  "w062/tifxyz/meta.json",
+              ],
+              "v8-patchpack.hf-pin.json": [
+                  "README.md",
+                  "SHA256SUMS",
+              ],
+          }
+
+          captured = []
+          for pin_name, paths in wanted.items():
+              pin = json.loads((root / pin_name).read_text(encoding="utf-8"))
+              inventory = {row["path"]: row for row in pin["files"]}
+              prefix = "datasets/" if pin["repo_type"] == "dataset" else ""
+              repo_id = pin["repo_id"]
+              revision = pin["resolved_revision"]
+              slug = pin_name.removesuffix(".hf-pin.json")
+
+              for relative in paths:
+                  if relative not in inventory:
+                      raise SystemExit(f"{pin_name}: missing expected metadata file {relative}")
+                  expected_blob = inventory[relative].get("git_blob_id")
+                  if not expected_blob:
+                      raise SystemExit(f"{pin_name}: {relative} has no Git blob id")
+
+                  url = (
+                      f"https://huggingface.co/{prefix}{repo_id}/resolve/"
+                      f"{revision}/{quote(relative, safe='/')}"
+                  )
+                  response = requests.get(
+                      url,
+                      timeout=30,
+                      headers={"User-Agent": "ScrolIQ PHerc1447 evidence capture"},
+                  )
+                  response.raise_for_status()
+                  data = response.content
+
+                  header = f"blob {len(data)}\\0".encode("ascii")
+                  observed_blob = hashlib.sha1(header + data).hexdigest()
+                  if observed_blob != expected_blob:
+                      raise SystemExit(
+                          f"{pin_name}: Git blob mismatch for {relative}: "
+                          f"{observed_blob} != {expected_blob}"
+                      )
+
+                  destination = root / "metadata" / slug / relative
+                  destination.parent.mkdir(parents=True, exist_ok=True)
+                  destination.write_bytes(data)
+                  captured.append(
+                      {
+                          "pin": pin_name,
+                          "repo_id": repo_id,
+                          "revision": revision,
+                          "path": relative,
+                          "git_blob_id": expected_blob,
+                          "sha256": hashlib.sha256(data).hexdigest(),
+                          "size": len(data),
+                      }
+                  )
+
+          manifest = {
+              "schema_version": 1,
+              "purpose": "small immutable PHerc1447 v8-in release metadata capture",
+              "files": captured,
+          }
+          (root / "metadata.json").write_text(
+              json.dumps(manifest, indent=2, sort_keys=True) + "\\n",
+              encoding="utf-8",
+          )
+
+      - name: Hash captured evidence
+        run: |
+          cd out/pherc1447-v8in-pins
+          find . -type f ! -name SHA256SUMS -print0 \
+            | sort -z \
+            | xargs -0 sha256sum > SHA256SUMS
+          cat SHA256SUMS
 
       - name: Upload pin evidence
         uses: actions/upload-artifact@v4
