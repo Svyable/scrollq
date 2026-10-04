@@ -45,6 +45,28 @@ def _load_2d(path: str | Path) -> np.ndarray:
     elif suffix == ".png":
         with Image.open(p) as image:
             arr = np.array(image)
+        if arr.ndim == 3:
+            if arr.shape[2] not in (3, 4):
+                raise ValueError(
+                    f"{p} PNG must be grayscale or replicated RGB/RGBA, got shape {arr.shape}"
+                )
+            rgb = arr[..., :3]
+            if not (
+                np.array_equal(rgb[..., 0], rgb[..., 1])
+                and np.array_equal(rgb[..., 0], rgb[..., 2])
+            ):
+                raise ValueError(
+                    f"{p} PNG color channels differ; refusing implicit grayscale conversion"
+                )
+            if arr.shape[2] == 4:
+                if not np.issubdtype(arr.dtype, np.integer):
+                    raise ValueError(f"{p} RGBA PNG must use an integer dtype")
+                opaque = np.iinfo(arr.dtype).max
+                if not np.all(arr[..., 3] == opaque):
+                    raise ValueError(
+                        f"{p} RGBA PNG has non-opaque alpha; refusing to discard it"
+                    )
+            arr = rgb[..., 0]
     else:
         raise ValueError(
             f"unsupported array format for {p}; expected .npy, .png, .tif, or .tiff"
@@ -53,6 +75,42 @@ def _load_2d(path: str | Path) -> np.ndarray:
     if arr.ndim != 2:
         raise ValueError(f"{p} must be 2D, got shape {arr.shape}")
     return arr
+
+
+def _binarize_labels(
+    arr: np.ndarray,
+    *,
+    scale: str = "binary",
+    threshold: float = 0.5,
+) -> np.ndarray:
+    """Return binary 0/1 labels under an explicit source encoding."""
+    x = np.asarray(arr)
+    if not np.all(np.isfinite(x)):
+        raise ValueError("labels contain NaN or infinite values")
+    if not (0.0 <= threshold <= 1.0):
+        raise ValueError("label threshold must be in [0,1]")
+
+    if scale == "binary":
+        if not np.all(np.isin(x, (0, 1, 255))):
+            raise ValueError(
+                "binary labels must contain only 0/1 or 0/255; "
+                "use --label-scale for soft/anti-aliased labels"
+            )
+        return (x > 0).astype(np.uint8)
+
+    if scale == "unit":
+        denom = 1.0
+    elif scale == "uint8":
+        denom = 255.0
+    elif scale == "uint16":
+        denom = 65535.0
+    else:
+        raise ValueError(f"unknown label scale {scale!r}")
+
+    unit = x.astype(np.float32, copy=False) / denom
+    if float(unit.min(initial=0.0)) < 0.0 or float(unit.max(initial=0.0)) > 1.0:
+        raise ValueError("normalized labels are outside [0,1]")
+    return (unit > threshold).astype(np.uint8)
 
 
 def _normalize_prediction(arr: np.ndarray, scale: str = "auto") -> np.ndarray:
@@ -418,6 +476,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         choices=("auto", "unit", "uint8", "uint16"),
         default="auto",
     )
+    ap.add_argument(
+        "--label-scale",
+        choices=("binary", "unit", "uint8", "uint16"),
+        default="binary",
+        help=(
+            "label encoding; non-binary encodings are normalized then "
+            "binarized explicitly with --label-threshold"
+        ),
+    )
+    ap.add_argument(
+        "--label-threshold",
+        type=float,
+        default=0.5,
+        help="strict > threshold used after non-binary label normalization",
+    )
     ap.add_argument("--threshold", type=float, default=0.5)
     ap.add_argument("--split-id", required=True)
     ap.add_argument("--held-out", action="store_true")
@@ -464,7 +537,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     prediction = _normalize_prediction(
         _load_2d(prediction_path), args.prediction_scale
     )
-    labels = _load_2d(labels_path)
+    labels_raw = _load_2d(labels_path)
+    labels = _binarize_labels(
+        labels_raw,
+        scale=args.label_scale,
+        threshold=args.label_threshold,
+    )
     mask = _load_2d(mask_path)
 
     control_arrays: dict[str, np.ndarray] = {}
@@ -502,6 +580,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             "labels": {
                 "path": str(labels_path),
                 "sha256": _sha256_file(labels_path),
+                "source_scale": args.label_scale,
+                "binarization_threshold": (
+                    args.label_threshold if args.label_scale != "binary" else None
+                ),
+                "binarization_comparison": (
+                    ">" if args.label_scale != "binary" else None
+                ),
             },
             "validation_mask": {
                 "path": str(mask_path),
