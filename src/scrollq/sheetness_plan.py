@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import math
+import re
 from pathlib import Path
 from typing import Any, Callable
 
@@ -27,6 +28,75 @@ def _sha256(path: Path) -> str:
         for block in iter(lambda: handle.read(1 << 20), b""):
             h.update(block)
     return h.hexdigest()
+
+
+def _git_blob_sha1(path: Path) -> str:
+    data = path.read_bytes()
+    h = hashlib.sha1()
+    h.update(b"blob " + str(len(data)).encode("ascii") + b"\\0")
+    h.update(data)
+    return h.hexdigest()
+
+
+def _external_surface_binding(
+    path: str | Path,
+    *,
+    surface_root: Path,
+    volume_root: str,
+) -> dict[str, Any]:
+    binding_path = Path(path)
+    try:
+        doc = json.loads(binding_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise PlanError(f"cannot read surface binding: {exc}") from exc
+    if not isinstance(doc, dict) or doc.get("schema") != "scroliq-tifxyz-volume-binding/1":
+        raise PlanError("surface binding schema must be scroliq-tifxyz-volume-binding/1")
+    if doc.get("volume_root", "").strip("/") != volume_root.strip("/"):
+        raise PlanError("surface binding volume_root does not exactly match requested volume_root")
+    source = doc.get("source")
+    if not isinstance(source, dict):
+        raise PlanError("surface binding source is required")
+    repository = source.get("repository")
+    commit = source.get("commit")
+    source_path = source.get("path")
+    evidence_url = doc.get("evidence_url")
+    if not all(isinstance(v, str) and v for v in (repository, commit, source_path)):
+        raise PlanError("surface binding source repository/commit/path are required")
+    if not isinstance(evidence_url, str) or not evidence_url.startswith(("https://", "http://")):
+        raise PlanError("surface binding evidence_url must be public http(s)")
+    if not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise PlanError("surface binding source commit must be lowercase 40-hex")
+
+    files = doc.get("files")
+    required = {"meta.json", "x.tif", "y.tif", "z.tif"}
+    if not isinstance(files, dict) or set(files) != required:
+        raise PlanError("surface binding files must exactly cover meta.json/x.tif/y.tif/z.tif")
+    verified: dict[str, str] = {}
+    for name in sorted(required):
+        row = files.get(name)
+        expected = row.get("git_blob_sha1") if isinstance(row, dict) else None
+        if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{40}", expected):
+            raise PlanError(f"surface binding {name} git_blob_sha1 must be lowercase 40-hex")
+        actual = _git_blob_sha1(surface_root / name)
+        if actual != expected:
+            raise PlanError(
+                f"surface binding {name} blob mismatch: actual {actual}, expected {expected}"
+            )
+        verified[name] = actual
+
+    return {
+        "path": str(binding_path),
+        "sha256": _sha256(binding_path),
+        "schema": doc["schema"],
+        "volume_root": volume_root.strip("/"),
+        "source": {
+            "repository": repository,
+            "commit": commit,
+            "path": source_path,
+        },
+        "evidence_url": evidence_url,
+        "verified_git_blob_sha1": verified,
+    }
 
 
 def _read_tiff(path: Path) -> np.ndarray:
@@ -307,6 +377,7 @@ def build_plan(
     volume_root: str,
     surface_volume_token: str,
     binding_url: str,
+    surface_binding_path: str | Path | None = None,
     samples: int,
     offsets: tuple[float, ...],
     halo: int,
@@ -333,9 +404,19 @@ def build_plan(
     xyz, valid, surface_info = _load_surface(root)
     meta_text = json.dumps(surface_info["meta"], sort_keys=True)
     meta_match = surface_volume_token in meta_text
-    if not (surface_name_match or meta_match):
+    external_binding = (
+        _external_surface_binding(
+            surface_binding_path,
+            surface_root=root,
+            volume_root=volume_root,
+        )
+        if surface_binding_path is not None
+        else None
+    )
+    if not (surface_name_match or meta_match or external_binding is not None):
         raise PlanError(
-            "surface volume token is not present in TIFXYZ directory name or meta.json"
+            "surface volume token is not present in TIFXYZ directory name or meta.json "
+            "and no verified external surface binding was supplied"
         )
 
     zpa_path = Path(zpa_report_path)
@@ -452,6 +533,8 @@ def build_plan(
         binding_methods.append("tifxyz-directory-name")
     if meta_match:
         binding_methods.append("meta-json-token")
+    if external_binding is not None:
+        binding_methods.append("hash-bound-external-binding")
 
     return {
         "schema": SCHEMA,
@@ -469,6 +552,7 @@ def build_plan(
             "volume_token": surface_volume_token,
             "binding_url": binding_url,
             "binding_methods": binding_methods,
+            "external_binding": external_binding,
             "shape_yx": surface_info["shape_yx"],
             "valid_vertex_count": surface_info["valid_vertex_count"],
             "mask": surface_info["mask"],
@@ -521,6 +605,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--volume-root", required=True)
     parser.add_argument("--surface-volume-token", required=True)
     parser.add_argument("--binding-url", required=True)
+    parser.add_argument(
+        "--surface-binding",
+        default=None,
+        help=(
+            "optional hash-bound external TIFXYZ-to-volume binding for sources whose "
+            "directory/meta do not embed the exact volume id"
+        ),
+    )
     parser.add_argument("--samples", type=int, required=True)
     parser.add_argument(
         "--offsets",
@@ -546,6 +638,7 @@ def main(argv: list[str] | None = None) -> int:
             volume_root=args.volume_root,
             surface_volume_token=args.surface_volume_token,
             binding_url=args.binding_url,
+            surface_binding_path=args.surface_binding,
             samples=args.samples,
             offsets=args.offsets,
             halo=args.halo,
