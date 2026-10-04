@@ -85,6 +85,18 @@ def test_dataset_url_and_revision_are_encoded():
     assert "/datasets/YoussefMoNader/" in report["immutable_repo_url"]
 
 
+def test_private_repo_fails_when_public_access_is_required():
+    payload = _payload()
+    payload["private"] = True
+    with pytest.raises(HubPinError, match="private"):
+        pin_repo(
+            repo_id="owner/repo",
+            repo_type="model",
+            require_public=True,
+            request_get=_get(payload),
+        )
+
+
 def test_required_file_missing_fails_closed():
     with pytest.raises(HubPinError, match="required Hub files are missing"):
         pin_repo(
