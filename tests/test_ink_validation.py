@@ -3,6 +3,7 @@ from PIL import Image
 import pytest
 
 from scrollq.ink_validation import (
+    _binarize_labels,
     _load_2d,
     _normalize_prediction,
     build_report,
@@ -163,12 +164,42 @@ def test_loads_grayscale_png_without_conversion(tmp_path):
     assert loaded16.dtype == np.uint16
 
 
-def test_rgb_png_is_rejected_as_non_2d(tmp_path):
+def test_replicated_rgb_png_collapses_without_color_conversion(tmp_path):
     path = tmp_path / "rgb.png"
-    Image.fromarray(np.zeros((2, 2, 3), dtype=np.uint8)).save(path)
+    gray = np.array([[0, 255], [128, 64]], dtype=np.uint8)
+    rgb = np.repeat(gray[..., None], 3, axis=2)
+    Image.fromarray(rgb).save(path)
 
-    with pytest.raises(ValueError, match="must be 2D"):
+    loaded = _load_2d(path)
+
+    assert np.array_equal(loaded, gray)
+    assert loaded.dtype == np.uint8
+
+
+def test_true_color_png_is_rejected(tmp_path):
+    path = tmp_path / "rgb.png"
+    rgb = np.zeros((2, 2, 3), dtype=np.uint8)
+    rgb[0, 0, 1] = 1
+    Image.fromarray(rgb).save(path)
+
+    with pytest.raises(ValueError, match="color channels differ"):
         _load_2d(path)
+
+
+def test_uint8_soft_labels_use_explicit_strict_threshold():
+    labels = np.array([[0, 127, 128, 255]], dtype=np.uint8)
+
+    binary = _binarize_labels(labels, scale="uint8", threshold=0.5)
+
+    assert binary.tolist() == [[0, 0, 1, 1]]
+
+
+def test_binary_label_mode_stays_strict():
+    with pytest.raises(ValueError, match="use --label-scale"):
+        _binarize_labels(
+            np.array([[0, 127, 255]], dtype=np.uint8),
+            scale="binary",
+        )
 
 
 def test_uint8_prediction_normalization():
