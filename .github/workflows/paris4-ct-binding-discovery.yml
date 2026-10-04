@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - ".github/workflows/paris4-ct-binding-discovery.yml"
+      - "scripts/paris4_fiber_binding.py"
   workflow_dispatch:
 
 permissions:
@@ -15,6 +16,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install .
+      - name: Fiber extent vs every public PHercParis4 volume
+        run: |
+          python scripts/paris4_fiber_binding.py --out out/binding.json || true
+          echo "=== BINDING_RESULT ==="
+          python -c "import json; print(json.dumps(json.load(open('out/binding.json')),separators=(',',':')))"
       - name: dl.ash2txt.org spiral dataset index
         run: |
           set -u
