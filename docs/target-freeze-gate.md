@@ -30,9 +30,13 @@ Five additional prerequisites must then be declared:
 
 Every declared `pass` must carry at least one evidence artifact. Each artifact
 must have a SHA-256, the exact candidate `volume_id`, a type, a location, and a
-plain-language claim. A cross-volume artifact or a `pass` with no artifact
-becomes a failure. A missing prerequisite stays `unknown`; it is never inferred
-from scan quality or another stage.
+plain-language claim. Repository-relative evidence is read and hash-verified
+by the gate. Remote HTTP(S) evidence must additionally carry a
+`retrieved_sha256` recorded from an actual retrieval of those bytes, and that
+digest must equal the declared `sha256`; a URL plus a declared hash is not enough
+to pass. A cross-volume artifact or a `pass` with no artifact becomes a failure.
+A missing prerequisite stays `unknown`; it is never inferred from scan quality
+or another stage.
 
 ## Input
 
@@ -69,6 +73,23 @@ from scan quality or another stage.
 ```
 
 Prerequisites omitted from the document are treated as `unknown`.
+
+For a remote artifact, bind the retrieval observation explicitly:
+
+```json
+{
+  "kind": "public-checkpoint-metadata",
+  "uri": "https://example.org/checkpoints/model-card.json",
+  "sha256": "<64 lowercase hex>",
+  "retrieved_sha256": "<same 64 lowercase hex observed after retrieval>",
+  "volume_id": "20250521135224",
+  "claim": "Public checkpoint metadata consumed by the frozen proof campaign."
+}
+```
+
+The gate remains offline: it does not fetch remote bytes itself. Requiring the
+retrieval digest makes an unobserved URL/hash declaration fail closed while
+keeping large public datasets and checkpoints usable as external evidence.
 
 Run:
 

@@ -147,9 +147,31 @@ def _artifact_errors(
         errors.append(f"{prefix}.sha256 must be lowercase 64-hex")
 
     location = _safe_artifact_location(artifact.get("uri"))
+    is_remote = (
+        location is not None
+        and location.startswith(("https://", "http://"))
+    )
+    if is_remote:
+        retrieved_digest = artifact.get("retrieved_sha256")
+        if (
+            not isinstance(retrieved_digest, str)
+            or _HEX64.fullmatch(retrieved_digest) is None
+        ):
+            errors.append(
+                f"{prefix}.retrieved_sha256 must be lowercase 64-hex for remote evidence"
+            )
+        elif (
+            isinstance(digest, str)
+            and _HEX64.fullmatch(digest) is not None
+            and retrieved_digest != digest
+        ):
+            errors.append(
+                f"{prefix}.retrieved_sha256 does not match declared sha256"
+            )
+
     if (
         location is not None
-        and not location.startswith(("https://", "http://"))
+        and not is_remote
         and isinstance(digest, str)
         and _HEX64.fullmatch(digest) is not None
     ):
@@ -328,7 +350,8 @@ def evaluate_target_gate(
             "This gate verifies exact-volume identity and the declared provenance "
             "contract needed to freeze a proof target. Repository-relative evidence "
             "is byte-verified against its declared SHA-256; remote http(s) evidence "
-            "remains declaration-bound and is not fetched by this offline gate. It "
+            "is not fetched by this offline gate and must carry a retrieved_sha256 "
+            "observation matching its declared SHA-256. It "
             "does not rank scrolls, validate scientific correctness inside third-party "
             "artifacts, prove readability, or predict Grand Prize success."
         ),
