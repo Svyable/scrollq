@@ -1,0 +1,122 @@
+{
+  "campaign_decision_rule": {
+    "min_median_abs_cosine": 0.7,
+    "min_median_normal_offset_margin": 0.0,
+    "min_normal_completeness": 1.0,
+    "min_normal_offset_win_fraction": 0.75,
+    "min_score_completeness": 1.0
+  },
+  "campaign_group_id": "surface-0028",
+  "campaign_plan_canonical_sha256": "f2f9817b2f5b71878ff8b82b481d8f17db601cd864c595a563633fcc9aea1439",
+  "campaign_plan_sha256": "76c58373d2acd5513c505824832b3628b2edaf695072cfb48560fb8646a45a2e",
+  "campaign_schema": "scroliq-sheetness-campaign/1",
+  "claim_boundary": "This v3 spec materializes one already-frozen campaign group against the exact deterministic sheetness report/cutout bytes. Its local decision rule checks measurement completeness only; the scientific pass/fail rule is applied across all frozen groups by scroliq-sheetness-campaign aggregate.",
+  "cutout_manifest_sha256": "70e9fa55678791dce5ff5c90bffb5461c6b2a7166a08f79ab6e4875dbeef1050",
+  "decision_rule": {
+    "min_median_abs_cosine": 0.0,
+    "min_median_normal_offset_margin": -1.0,
+    "min_normal_completeness": 1.0,
+    "min_normal_offset_win_fraction": 0.0,
+    "min_score_completeness": 1.0
+  },
+  "frozen_engine": {
+    "code_revision": "65bb493b87795011e1bed1ed0b2e0272e0f5a733",
+    "max_voxels": 2500000,
+    "method": "itk-hessian-objectness-m2-n3-compatible",
+    "normalization": {
+      "enabled": true,
+      "lower_percentile": 1.0,
+      "upper_percentile": 99.0
+    },
+    "parameters": {
+      "beta": 0.5,
+      "bright_object": true,
+      "gamma": 0.1,
+      "scale_objectness": false,
+      "sigmas": [
+        0.8,
+        1.2,
+        1.8
+      ]
+    },
+    "seed": null,
+    "sheetness_benchmark_py_sha256": "0c0b3b5c4eeedfc8a5002b356439c874849301588c5a1c2ee53e9cf43eb88e79",
+    "sheetness_campaign_py_sha256": "6ba6a78cb5ab45c8ddb462df59f99034ce0697617d3e3502e61b5f57b411a243",
+    "sheetness_py_sha256": "d04c84aaadad5d3b42f372b9702c3980ae4dad8cc895fa0b02c9264d44473a51",
+    "stochastic": false,
+    "write_normal": true
+  },
+  "groups": [
+    {
+      "controls": [
+        {
+          "id": "surface-0028-offset-01",
+          "role": "normal-offset",
+          "zyx": [
+            9.024264942758236,
+            29.248085719425944,
+            9.221379044272453
+          ]
+        },
+        {
+          "id": "surface-0028-offset-02",
+          "role": "normal-offset",
+          "zyx": [
+            8.931810205754118,
+            33.23830067221297,
+            8.9574912799485
+          ]
+        },
+        {
+          "id": "surface-0028-offset-03",
+          "role": "normal-offset",
+          "zyx": [
+            8.746900731745882,
+            41.21873057778703,
+            8.4297157513015
+          ]
+        },
+        {
+          "id": "surface-0028-offset-04",
+          "role": "normal-offset",
+          "zyx": [
+            8.654445994741764,
+            45.208945530574056,
+            8.165827986977547
+          ]
+        },
+        {
+          "id": "surface-0028-wrong-wrap",
+          "role": "wrong-wrap",
+          "zyx": [
+            9.509652312030994,
+            8.29945721729382,
+            10.606789806971392
+          ]
+        }
+      ],
+      "id": "surface-0028",
+      "surface": {
+        "reference_normal_zyx": [
+          -0.023113684251070788,
+          0.9975537381967748,
+          -0.06597194108090391
+        ],
+        "zyx": [
+          8.83935546875,
+          37.228515625,
+          8.693603515625
+        ]
+      }
+    }
+  ],
+  "input_sha256": "109417d72a0b27e226130660e1b7351701a0cf78419b7db6d91d939275934996",
+  "schema_version": 3,
+  "sheetness_report_sha256": "e3502e3b6e0e18a23d86f203fb5281134f4ef09757851acdeca9d51083965881",
+  "source_attestation": {
+    "algorithm": "zpa-metadata-semantics-v1",
+    "metadata_semantics_sha256": "58a956b0623bce7ba4f6fc38ec159cc4e500b2859b6619152574d5c9020c9bed",
+    "state": "PRESENT"
+  },
+  "volume_root": "PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr"
+}

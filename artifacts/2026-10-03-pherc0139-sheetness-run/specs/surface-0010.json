@@ -1,0 +1,122 @@
+{
+  "campaign_decision_rule": {
+    "min_median_abs_cosine": 0.7,
+    "min_median_normal_offset_margin": 0.0,
+    "min_normal_completeness": 1.0,
+    "min_normal_offset_win_fraction": 0.75,
+    "min_score_completeness": 1.0
+  },
+  "campaign_group_id": "surface-0010",
+  "campaign_plan_canonical_sha256": "f2f9817b2f5b71878ff8b82b481d8f17db601cd864c595a563633fcc9aea1439",
+  "campaign_plan_sha256": "76c58373d2acd5513c505824832b3628b2edaf695072cfb48560fb8646a45a2e",
+  "campaign_schema": "scroliq-sheetness-campaign/1",
+  "claim_boundary": "This v3 spec materializes one already-frozen campaign group against the exact deterministic sheetness report/cutout bytes. Its local decision rule checks measurement completeness only; the scientific pass/fail rule is applied across all frozen groups by scroliq-sheetness-campaign aggregate.",
+  "cutout_manifest_sha256": "452159e9452aaa46b62e4a708b73e97f561a084694c66415234f8bb9ad8d7c82",
+  "decision_rule": {
+    "min_median_abs_cosine": 0.0,
+    "min_median_normal_offset_margin": -1.0,
+    "min_normal_completeness": 1.0,
+    "min_normal_offset_win_fraction": 0.0,
+    "min_score_completeness": 1.0
+  },
+  "frozen_engine": {
+    "code_revision": "65bb493b87795011e1bed1ed0b2e0272e0f5a733",
+    "max_voxels": 2500000,
+    "method": "itk-hessian-objectness-m2-n3-compatible",
+    "normalization": {
+      "enabled": true,
+      "lower_percentile": 1.0,
+      "upper_percentile": 99.0
+    },
+    "parameters": {
+      "beta": 0.5,
+      "bright_object": true,
+      "gamma": 0.1,
+      "scale_objectness": false,
+      "sigmas": [
+        0.8,
+        1.2,
+        1.8
+      ]
+    },
+    "seed": null,
+    "sheetness_benchmark_py_sha256": "0c0b3b5c4eeedfc8a5002b356439c874849301588c5a1c2ee53e9cf43eb88e79",
+    "sheetness_campaign_py_sha256": "6ba6a78cb5ab45c8ddb462df59f99034ce0697617d3e3502e61b5f57b411a243",
+    "sheetness_py_sha256": "d04c84aaadad5d3b42f372b9702c3980ae4dad8cc895fa0b02c9264d44473a51",
+    "stochastic": false,
+    "write_normal": true
+  },
+  "groups": [
+    {
+      "controls": [
+        {
+          "id": "surface-0010-offset-01",
+          "role": "normal-offset",
+          "zyx": [
+            9.944291172836529,
+            29.15604070362133,
+            10.810341594802594
+          ]
+        },
+        {
+          "id": "surface-0010-offset-02",
+          "role": "normal-offset",
+          "zyx": [
+            10.135719805168264,
+            33.133440273685665,
+            11.189350484901297
+          ]
+        },
+        {
+          "id": "surface-0010-offset-03",
+          "role": "normal-offset",
+          "zyx": [
+            10.518577069831736,
+            41.088239413814335,
+            11.947368265098703
+          ]
+        },
+        {
+          "id": "surface-0010-offset-04",
+          "role": "normal-offset",
+          "zyx": [
+            10.710005702163471,
+            45.06563898387867,
+            12.326377155197406
+          ]
+        },
+        {
+          "id": "surface-0010-wrong-wrap",
+          "role": "wrong-wrap",
+          "zyx": [
+            8.939290853094462,
+            8.274692960781977,
+            8.820544921783949
+          ]
+        }
+      ],
+      "id": "surface-0010",
+      "surface": {
+        "reference_normal_zyx": [
+          0.04785715808294682,
+          0.9943498925161381,
+          0.09475222252469066
+        ],
+        "zyx": [
+          10.3271484375,
+          37.11083984375,
+          11.568359375
+        ]
+      }
+    }
+  ],
+  "input_sha256": "753da0236bed520beadade860756d753fe4dad8710e69bde05c470ee8e111ac2",
+  "schema_version": 3,
+  "sheetness_report_sha256": "12157d1aba97943205267dedfadad3890a0ddf6eca1f8bff2a60ade154f22c73",
+  "source_attestation": {
+    "algorithm": "zpa-metadata-semantics-v1",
+    "metadata_semantics_sha256": "58a956b0623bce7ba4f6fc38ec159cc4e500b2859b6619152574d5c9020c9bed",
+    "state": "PRESENT"
+  },
+  "volume_root": "PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr"
+}

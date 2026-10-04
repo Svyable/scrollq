@@ -1,0 +1,84 @@
+{
+  "input": {
+    "dtype": "uint8",
+    "path": "/home/runner/work/scrollq/scrollq/artifacts/2026-10-03-pherc0139-sheetness-run/groups/surface-0006/cutout.npy",
+    "sha256": "e7d238cef37988f32d6f9ef56bbe26691c97363a4aa306e1ece7ac8d040652c5",
+    "shape_zyx": [
+      22,
+      38,
+      23
+    ],
+    "voxels": 19228
+  },
+  "kind": "sheetness",
+  "method": "itk-hessian-objectness-m2-n3-compatible",
+  "normal": {
+    "basis": "ZYX voxel axes",
+    "interpretation": "unit eigenvector of the largest-absolute Hessian eigenvalue at the winning scale; sign is arbitrary",
+    "output_path": "/home/runner/work/scrollq/scrollq/artifacts/2026-10-03-pherc0139-sheetness-run/groups/surface-0006/sheetness.normal-zyx.npy",
+    "output_sha256": "1528238be8b4535b859ae4360c8822f3e2bf8d9bf89876b00ff0d04fa4268e93"
+  },
+  "normalization": {
+    "enabled": true,
+    "lower_percentile": 1.0,
+    "lower_value": 8.0,
+    "upper_percentile": 99.0,
+    "upper_value": 185.0
+  },
+  "parameters": {
+    "beta": 0.5,
+    "bright_object": true,
+    "gamma": 0.1,
+    "scale_objectness": false,
+    "sigmas": [
+      0.8,
+      1.2,
+      1.8
+    ]
+  },
+  "per_scale": [
+    {
+      "response_max": 0.7130337357521057,
+      "response_mean": 0.08046306669712067,
+      "response_p99": 0.5813164710998535,
+      "sigma": 0.8
+    },
+    {
+      "response_max": 0.9580436944961548,
+      "response_mean": 0.1389869600534439,
+      "response_p99": 0.8581655621528625,
+      "sigma": 1.2
+    },
+    {
+      "response_max": 0.9853166937828064,
+      "response_mean": 0.17891544103622437,
+      "response_p99": 0.9397740364074707,
+      "sigma": 1.8
+    }
+  ],
+  "response": {
+    "nonzero_fraction": 0.5924693155814438,
+    "output_path": "/home/runner/work/scrollq/scrollq/artifacts/2026-10-03-pherc0139-sheetness-run/groups/surface-0006/sheetness.sheetness.npy",
+    "output_sha256": "50888f123a6d494aac330591b323b683930be256dbcf06a722be4b66c0223956",
+    "summary": {
+      "max": 0.9853166937828064,
+      "mean": 0.19716569781303406,
+      "min": 0.0,
+      "p50": 0.06281788647174835,
+      "p90": 0.6165319085121155,
+      "p99": 0.9397740364074707
+    }
+  },
+  "schema_version": 1,
+  "scope": "local 3-D cutout diagnostic; not by itself evidence of correct papyrus identity, winding identity, recto/verso, or readable ink",
+  "status": "measured",
+  "winning_scale": {
+    "counts": {
+      "0.800000011920929": 9322,
+      "1.2000000476837158": 2929,
+      "1.7999999523162842": 6977
+    },
+    "output_path": "/home/runner/work/scrollq/scrollq/artifacts/2026-10-03-pherc0139-sheetness-run/groups/surface-0006/sheetness.scale.npy",
+    "output_sha256": "20048700b91a1963cadc2f3a5aaf174ea22b7bad770c38db0754b3daccd5324f"
+  }
+}

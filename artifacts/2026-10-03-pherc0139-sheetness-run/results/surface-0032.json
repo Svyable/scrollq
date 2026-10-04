@@ -1,0 +1,205 @@
+{
+  "claim_boundary": "This result tests whether a frozen sheetness field localizes a candidate surface relative to deliberate normal offsets on an exact audited CT volume. Wrong-wrap/competing-sheet probes are retained as mandatory descriptive controls, not a pass/fail target, because another papyrus sheet is itself sheet-like. This does not establish physical sheet identity/topology or demonstrate readable ink.",
+  "decision_checks": {
+    "median_abs_cosine": true,
+    "median_normal_offset_margin": true,
+    "normal_completeness": true,
+    "normal_offset_win_fraction": true,
+    "score_completeness": true
+  },
+  "engine": {
+    "method": "itk-hessian-objectness-m2-n3-compatible",
+    "normalization": {
+      "enabled": true,
+      "lower_percentile": 1.0,
+      "lower_value": 8.0,
+      "upper_percentile": 99.0,
+      "upper_value": 207.0
+    },
+    "parameters": {
+      "beta": 0.5,
+      "bright_object": true,
+      "gamma": 0.1,
+      "scale_objectness": false,
+      "sigmas": [
+        0.8,
+        1.2,
+        1.8
+      ]
+    },
+    "report_sha256": "cf7bf7f979296610ff5c5eec5f57c3eb12d4582f02cc5f8308bf579b8c802f60",
+    "seed": null,
+    "stochastic": false
+  },
+  "groups": [
+    {
+      "controls": [
+        {
+          "failure": null,
+          "global_zyx": [
+            7737.61823166809,
+            2771.9393166964255,
+            3885.6312106210125
+          ],
+          "id": "surface-0032-offset-01",
+          "role": "normal-offset",
+          "score": 0.9424510114265408,
+          "zyx": [
+            15.61823166808972,
+            15.939316696425522,
+            21.631210621012542
+          ]
+        },
+        {
+          "failure": null,
+          "global_zyx": [
+            7735.943393177795,
+            2770.0663380357128,
+            3888.7435838261313
+          ],
+          "id": "surface-0032-offset-02",
+          "role": "normal-offset",
+          "score": 0.03881319728670955,
+          "zyx": [
+            13.94339317779486,
+            14.06633803571276,
+            24.74358382613127
+          ]
+        },
+        {
+          "failure": null,
+          "global_zyx": [
+            7732.593716197205,
+            2766.3203807142872,
+            3894.9683302363687
+          ],
+          "id": "surface-0032-offset-03",
+          "role": "normal-offset",
+          "score": 0.5638451453067964,
+          "zyx": [
+            10.59371619720514,
+            10.32038071428724,
+            30.96833023636873
+          ]
+        },
+        {
+          "failure": null,
+          "global_zyx": [
+            7730.91887770691,
+            2764.4474020535745,
+            3898.0807034414875
+          ],
+          "id": "surface-0032-offset-04",
+          "role": "normal-offset",
+          "score": 0.0,
+          "zyx": [
+            8.91887770691028,
+            8.447402053574478,
+            34.08070344148746
+          ]
+        },
+        {
+          "failure": null,
+          "global_zyx": [
+            7744.526940440557,
+            2779.6653536718654,
+            3872.7926711498976
+          ],
+          "id": "surface-0032-wrong-wrap",
+          "role": "wrong-wrap",
+          "score": 0.07140724931318762,
+          "zyx": [
+            22.526940440557155,
+            23.665353671865432,
+            8.792671149897615
+          ]
+        }
+      ],
+      "id": "surface-0032",
+      "score_complete": true,
+      "surface": {
+        "global_zyx": [
+          7734.2685546875,
+          2768.193359375,
+          3891.85595703125
+        ],
+        "normal_failure": null,
+        "predicted_normal_abs_cosine": 0.7408432347050665,
+        "reference_normal_zyx": [
+          -0.41870962257375327,
+          -0.4682446651781738,
+          0.7780933012796891
+        ],
+        "score": 0.09085536056147192,
+        "score_failure": null,
+        "zyx": [
+          12.2685546875,
+          12.193359375,
+          27.85595703125
+        ]
+      },
+      "surface_beats_all_normal_offsets": false,
+      "surface_beats_all_wrong_wraps": true,
+      "surface_minus_best_normal_offset": -0.8515956508650688,
+      "surface_minus_best_wrong_wrap": 0.0194481112482843
+    }
+  ],
+  "inputs": {
+    "cutout_manifest_sha256": "c0253e1c7d701ea0edb222b070f3de1f9711f97168976ea15e53b0fb91ee058c",
+    "cutout_sha256": "71ef32014e11a9de77aa9d202db4ecad8f8e61571d3d74d3e14ead6bfe302302",
+    "global_bbox_zyx_half_open": {
+      "start": [
+        7722,
+        2756,
+        3864
+      ],
+      "stop": [
+        7754,
+        2789,
+        3908
+      ]
+    },
+    "normal_sha256": "b2b1c48ebb9ff7a133ebcf77bdc739f9eae05097daf449055ab4e2f071c78f89",
+    "response_sha256": "d9c32b2ae1f7b45e9269dfe4aedd6d6cadb7e01c1bba86780f69d2cc4bfad765",
+    "shape_zyx": [
+      32,
+      33,
+      44
+    ],
+    "zpa_report_sha256": "9a659bd974478032e1c4115c4e349ea4cd2711e090852500b7396bf480d92bdc"
+  },
+  "metrics": {
+    "group_count": 1,
+    "median_abs_cosine": 0.7408432347050665,
+    "median_surface_minus_best_normal_offset": -0.8515956508650688,
+    "median_surface_minus_best_wrong_wrap_descriptive": 0.0194481112482843,
+    "normal_complete_count": 1,
+    "normal_completeness": 1.0,
+    "normal_offset_win_count": 0,
+    "normal_offset_win_fraction": 0.0,
+    "score_complete_count": 1,
+    "score_completeness": 1.0,
+    "wrong_wrap_win_count_descriptive": 1,
+    "wrong_wrap_win_fraction_descriptive": 1.0
+  },
+  "schema": "scroliq-sheetness-benchmark/3",
+  "source_attestation": {
+    "algorithm": "zpa-metadata-semantics-v1",
+    "metadata_semantics_sha256": "58a956b0623bce7ba4f6fc38ec159cc4e500b2859b6619152574d5c9020c9bed",
+    "state": "PRESENT"
+  },
+  "spec": {
+    "canonical_sha256": "15452e0fda270c02ff71fc77a4f01ba76fcc9f1ff2605e3f760cd8cea08a93f3",
+    "decision_rule": {
+      "min_median_abs_cosine": 0.0,
+      "min_median_normal_offset_margin": -1.0,
+      "min_normal_completeness": 1.0,
+      "min_normal_offset_win_fraction": 0.0,
+      "min_score_completeness": 1.0
+    },
+    "file_sha256": "e71dbae5c8c506cdef5c1c479b1baba8dec2f57d0d6a00d26b105efe0328c87a"
+  },
+  "status": "pass",
+  "volume_root": "PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+  "wrong_wrap_interpretation": "descriptive-only: a genuine competing papyrus sheet is also expected to be sheet-like, so wrong-wrap response measures the method's sheet-identity limitation and is not a pass/fail criterion"
+}
