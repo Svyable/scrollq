@@ -1,0 +1,499 @@
+{
+  "schema": "scrollq-research-fiber-fingerprint-dev/1",
+  "status": "frozen-before-ct-texture-read",
+  "purpose": "Development-stage test of a CT-local papyrus texture/fiber spectrum as a physical sheet-identity signal after Stage B and C ruled out smooth geometry continuation. Derive a same-sheet distance threshold only from development regions; the ten holdout regions remain unread by this experiment.",
+  "classification_before_observation": "EXPERIMENT FURTHER",
+  "claim_boundary": "A development pass establishes only that this fixed tangent-frame CT descriptor separates same-sheet material neighbors from frozen adjacent-winding controls well enough to justify freezing the derived threshold for an untouched holdout. It does not prove fiber identity, winding identity in arbitrary regions, recto completeness, or Grand Prize eligibility.",
+  "provenance": {
+    "reference_plan_path": "artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json",
+    "wrong_wrap_result_path": "artifacts/2026-10-03-pherc0139-wrong-wrap-run/wrong-wrap-result.json",
+    "stage_b_result_path": "artifacts/2026-10-03-coverage-witness-stage-b-run/result.json",
+    "stage_c_result_path": "artifacts/2026-10-03-coverage-witness-stage-c-run/result.json",
+    "excluded_prior_decision_ids": [
+      "surface-0003",
+      "surface-0004",
+      "surface-0008",
+      "surface-0009",
+      "surface-0012",
+      "surface-0014",
+      "surface-0016",
+      "surface-0019",
+      "surface-0023",
+      "surface-0024",
+      "surface-0028",
+      "surface-0030"
+    ]
+  },
+  "source": {
+    "scroll": "PHerc0139",
+    "segment": "20260317000000-w035_2026031718",
+    "exact_ct_root": "PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "ct_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "tifxyz": "mesh/20260317000000-on-20250728140407-9.362um.tifxyz",
+    "tifxyz_sha256": {
+      "meta.json": "11752e63185cc6bc8842cf6f4d7aef84a7e3ec7b0b4eb5c10bf99842e7cd8dda",
+      "x.tif": "d827a5d2e51035c91da74b5fba4fea55c9df9d8f58c6ec7f534d6012ee2f7b69",
+      "y.tif": "41f1df324572b68450f4da92dcd4598844f602982f1965e5bea67e6de080d664",
+      "z.tif": "b61f8bbcd9cb538f43cd72678fd4d38a25cc1643daa4bcfdd7f2e9954f9a1e81"
+    },
+    "uses_ink": false,
+    "uses_surface_prediction_values": false,
+    "note": "Wrong-wrap coordinates were frozen previously from the independent surface prediction, but this experiment reads only the exact CT and TIFXYZ geometry."
+  },
+  "split": {
+    "source_pool_rule": "Original 32 frozen geometry-only probes minus all 12 centers used for Stage B or Stage C scientific decisions, preserving original reference-plan order.",
+    "remaining_ids": [
+      "surface-0001",
+      "surface-0002",
+      "surface-0005",
+      "surface-0006",
+      "surface-0007",
+      "surface-0010",
+      "surface-0011",
+      "surface-0013",
+      "surface-0015",
+      "surface-0017",
+      "surface-0018",
+      "surface-0020",
+      "surface-0021",
+      "surface-0022",
+      "surface-0025",
+      "surface-0026",
+      "surface-0027",
+      "surface-0029",
+      "surface-0031",
+      "surface-0032"
+    ],
+    "split_rule": "Alternating in the remaining ordered list: zero-based even positions are development; odd positions are holdout.",
+    "development_ids": [
+      "surface-0001",
+      "surface-0005",
+      "surface-0007",
+      "surface-0011",
+      "surface-0015",
+      "surface-0018",
+      "surface-0021",
+      "surface-0025",
+      "surface-0027",
+      "surface-0031"
+    ],
+    "holdout_ids": [
+      "surface-0002",
+      "surface-0006",
+      "surface-0010",
+      "surface-0013",
+      "surface-0017",
+      "surface-0020",
+      "surface-0022",
+      "surface-0026",
+      "surface-0029",
+      "surface-0032"
+    ],
+    "holdout_firewall": "The development workflow must fail if it attempts to sample CT descriptors for any holdout ID. Holdout CT texture may be read only after a derived threshold artifact is separately frozen.",
+    "development_centers": [
+      {
+        "id": "surface-0001",
+        "grid_yx": [
+          16,
+          32
+        ],
+        "wrong_wrap_zyx": [
+          3123.9634192011777,
+          2331.4659766225113,
+          3237.06497990474
+        ],
+        "wrong_wrap_signed_distance_voxels": 17.5
+      },
+      {
+        "id": "surface-0005",
+        "grid_yx": [
+          49,
+          237
+        ],
+        "wrong_wrap_zyx": [
+          3802.3451672356878,
+          3910.4137341058854,
+          1947.7751504051964
+        ],
+        "wrong_wrap_signed_distance_voxels": -13.5
+      },
+      {
+        "id": "surface-0007",
+        "grid_yx": [
+          66,
+          77
+        ],
+        "wrong_wrap_zyx": [
+          4052.539612781352,
+          2741.314502955201,
+          4110.330842091861
+        ],
+        "wrong_wrap_signed_distance_voxels": 27.5
+      },
+      {
+        "id": "surface-0011",
+        "grid_yx": [
+          98,
+          217
+        ],
+        "wrong_wrap_zyx": [
+          4709.963014371134,
+          4117.800574277805,
+          2430.2810213118596
+        ],
+        "wrong_wrap_signed_distance_voxels": -19.5
+      },
+      {
+        "id": "surface-0015",
+        "grid_yx": [
+          131,
+          79
+        ],
+        "wrong_wrap_zyx": [
+          5320.311851089248,
+          2977.2913211927885,
+          4158.742134066229
+        ],
+        "wrong_wrap_signed_distance_voxels": 15
+      },
+      {
+        "id": "surface-0018",
+        "grid_yx": [
+          155,
+          194
+        ],
+        "wrong_wrap_zyx": [
+          5739.681098073046,
+          4387.788390228193,
+          2994.452775696819
+        ],
+        "wrong_wrap_signed_distance_voxels": 22.5
+      },
+      {
+        "id": "surface-0021",
+        "grid_yx": [
+          180,
+          25
+        ],
+        "wrong_wrap_zyx": [
+          6238.998448970615,
+          2760.514339986218,
+          3119.8750744066833
+        ],
+        "wrong_wrap_signed_distance_voxels": -17
+      },
+      {
+        "id": "surface-0025",
+        "grid_yx": [
+          212,
+          20
+        ],
+        "wrong_wrap_zyx": [
+          6845.704793349941,
+          2842.8285527906646,
+          2976.699871422681
+        ],
+        "wrong_wrap_signed_distance_voxels": 17
+      },
+      {
+        "id": "surface-0027",
+        "grid_yx": [
+          227,
+          214
+        ],
+        "wrong_wrap_zyx": [
+          7173.192226371475,
+          4461.478172534633,
+          2717.6032087062263
+        ],
+        "wrong_wrap_signed_distance_voxels": -16.5
+      },
+      {
+        "id": "surface-0031",
+        "grid_yx": [
+          259,
+          133
+        ],
+        "wrong_wrap_zyx": [
+          7728.162123795326,
+          4068.9790340432783,
+          4118.64688872554
+        ],
+        "wrong_wrap_signed_distance_voxels": -28
+      }
+    ],
+    "holdout_centers": [
+      {
+        "id": "surface-0002",
+        "grid_yx": [
+          25,
+          139
+        ],
+        "wrong_wrap_zyx": [
+          3262.0800237395124,
+          3698.9771586961447,
+          3703.8991156204256
+        ],
+        "wrong_wrap_signed_distance_voxels": 20.5
+      },
+      {
+        "id": "surface-0006",
+        "grid_yx": [
+          58,
+          28
+        ],
+        "wrong_wrap_zyx": [
+          3953.2580724059385,
+          2470.1159926814653,
+          3171.8666770887903
+        ],
+        "wrong_wrap_signed_distance_voxels": 13
+      },
+      {
+        "id": "surface-0010",
+        "grid_yx": [
+          90,
+          189
+        ],
+        "wrong_wrap_zyx": [
+          4490.9392908530945,
+          4084.274692960782,
+          2966.820544921784
+        ],
+        "wrong_wrap_signed_distance_voxels": -29
+      },
+      {
+        "id": "surface-0013",
+        "grid_yx": [
+          115,
+          13
+        ],
+        "wrong_wrap_zyx": [
+          5032.299891149181,
+          2767.4693454506214,
+          2900.6029948399214
+        ],
+        "wrong_wrap_signed_distance_voxels": -13.5
+      },
+      {
+        "id": "surface-0017",
+        "grid_yx": [
+          147,
+          159
+        ],
+        "wrong_wrap_zyx": [
+          5531.474595186093,
+          4242.827429697618,
+          3665.9997274982243
+        ],
+        "wrong_wrap_signed_distance_voxels": -18
+      },
+      {
+        "id": "surface-0020",
+        "grid_yx": [
+          171,
+          243
+        ],
+        "wrong_wrap_zyx": [
+          6159.142885595447,
+          4091.6868464649046,
+          2115.3880718458636
+        ],
+        "wrong_wrap_signed_distance_voxels": -17
+      },
+      {
+        "id": "surface-0022",
+        "grid_yx": [
+          188,
+          47
+        ],
+        "wrong_wrap_zyx": [
+          6385.045808929883,
+          2929.2586266663025,
+          3488.983086740305
+        ],
+        "wrong_wrap_signed_distance_voxels": 24
+      },
+      {
+        "id": "surface-0026",
+        "grid_yx": [
+          219,
+          245
+        ],
+        "wrong_wrap_zyx": [
+          7094.917153106496,
+          4137.319580331274,
+          2176.714908482229
+        ],
+        "wrong_wrap_signed_distance_voxels": -21.5
+      },
+      {
+        "id": "surface-0029",
+        "grid_yx": [
+          243,
+          169
+        ],
+        "wrong_wrap_zyx": [
+          7427.903640847724,
+          4492.340282618468,
+          3609.1725925610986
+        ],
+        "wrong_wrap_signed_distance_voxels": -13.5
+      },
+      {
+        "id": "surface-0032",
+        "grid_yx": [
+          270,
+          63
+        ],
+        "wrong_wrap_zyx": [
+          7744.526940440557,
+          2779.6653536718654,
+          3872.7926711498976
+        ],
+        "wrong_wrap_signed_distance_voxels": -24.5
+      }
+    ]
+  },
+  "same_sheet_controls": {
+    "material_grid_offsets_yx": [
+      [
+        -3,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        0,
+        -3
+      ],
+      [
+        0,
+        3
+      ]
+    ],
+    "meaning": "For each development center, compare its descriptor to up to four same-w035 descriptors exactly three TIFXYZ grid cells away in cardinal material directions.",
+    "nonoverlap_rationale": "The frozen tangent patch radius is 12 voxels while typical w035 material-grid spacing is about 20 voxels; a three-cell material offset is intended to avoid direct voxel overlap.",
+    "validity_rule": "A same-sheet neighbor is usable only if the neighbor and its centered +/-1 row/column TIFXYZ cells are valid and finite. No replacement offset is allowed.",
+    "minimum_usable_neighbors_per_group": 2
+  },
+  "tangent_frame": {
+    "source": "TIFXYZ geometry only",
+    "x_axis": "unit centered column tangent: xyz[y,x+1]-xyz[y,x-1]",
+    "provisional_y": "centered row tangent: xyz[y+1,x]-xyz[y-1,x]",
+    "normal": "unit cross(x_axis, provisional_y)",
+    "y_axis": "unit cross(normal, x_axis), giving a right-handed orthonormal frame",
+    "wrong_wrap_basis": "Use the frozen center reference frame at the wrong-wrap coordinate. Do not estimate a response-dependent wrong-wrap orientation."
+  },
+  "sampling": {
+    "interpolation": "nearest voxel using floor(coord+0.5), consistent with existing frozen geometry samplers",
+    "in_plane_offsets_voxels": [
+      -12,
+      -11,
+      -10,
+      -9,
+      -8,
+      -7,
+      -6,
+      -5,
+      -4,
+      -3,
+      -2,
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "normal_offsets_voxels": [
+      -4,
+      -2,
+      0,
+      2,
+      4
+    ],
+    "sample_grid": "For each depth d and in-plane v,u, sample center_xyz + u*x_axis + v*y_axis + d*normal.",
+    "patch_shape_depth_v_u": [
+      5,
+      25,
+      25
+    ],
+    "bounds_rule": "All samples must be inside exact level-0 CT bounds.",
+    "minimum_nonzero_fraction": 0.95,
+    "invalid_policy": "Descriptor is invalid if bounds fail, nonzero fraction is below 0.95, or robust normalization/feature construction is degenerate."
+  },
+  "descriptor": {
+    "name": "tangent-fiber-spectrum-v1",
+    "per_depth_normalization": "For each 25x25 slice, subtract its median and divide by Q75-Q25. Require IQR>=1 CT stored-value unit; clip normalized values to [-5,5].",
+    "gradient_features": {
+      "method": "numpy.gradient over v,u axes",
+      "unsigned_orientation_bins": 12,
+      "orientation_range_radians": [
+        0,
+        3.141592653589793
+      ],
+      "histogram_weight": "gradient magnitude",
+      "normalization": "L1 per depth slice",
+      "magnitude_quantiles": [
+        0.5,
+        0.75,
+        0.9,
+        0.95
+      ]
+    },
+    "spectral_features": {
+      "window": "separable numpy.hanning(25) outer product",
+      "transform": "fftshift(fft2(normalized_slice * window)); use squared magnitude",
+      "unsigned_angular_bins": 12,
+      "radial_bands_frequency_index": [
+        [
+          1.5,
+          4
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          8,
+          12.5
+        ]
+      ],
+      "band_normalization": "Within each radial band, normalize the 12 angular powers to sum 1. Empty/zero-power band invalidates descriptor."
+    },
+    "concatenation": "Per depth: 12 gradient-orientation values + 4 gradient-magnitude quantiles + 36 spectral angular-band values = 52 values. Concatenate five depths to 260 values and L2-normalize the full vector.",
+    "distance": "cosine distance for unit descriptors: 1 - dot(a,b)"
+  },
+  "development_scoring": {
+    "positive_distances": "Cosine distance from the center descriptor to each usable same-sheet neighbor descriptor.",
+    "wrong_wrap_score": "Minimum cosine distance from the wrong-wrap descriptor to the reference set consisting of the center descriptor plus every usable same-sheet neighbor descriptor. Taking the minimum gives the wrong-wrap control its most favorable same-sheet match.",
+    "threshold_rule": "Derived threshold T = numpy.quantile of pooled development positive distances at q=0.95 using method='linear'. Classify a descriptor as same-sheet when distance <= T.",
+    "group_usable_rule": "Center descriptor valid, wrong-wrap descriptor valid, and at least two same-sheet neighbor descriptors valid.",
+    "no_manual_threshold_tuning": true
+  },
+  "development_gate": {
+    "required_usable_groups": 8,
+    "required_pooled_positive_pairs": 24,
+    "minimum_wrong_wrap_rejection_fraction": 0.7,
+    "minimum_median_wrong_to_positive_distance_ratio": 1.25,
+    "require_median_wrong_distance_above_threshold": true,
+    "holdout_action": "Only if every development gate passes may the exact derived threshold and descriptor spec/hash be frozen in a separate holdout preregistration before any holdout CT texture is read."
+  },
+  "reproducibility": {
+    "randomness": null,
+    "create_only_result": true,
+    "no_target_scroll_use": true,
+    "holdout_unread_until_separate_prereg": true
+  }
+}
