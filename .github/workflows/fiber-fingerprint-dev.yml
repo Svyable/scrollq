@@ -1,0 +1,155 @@
+name: Fiber fingerprint development
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/fiber-fingerprint-dev.yml"
+      - "src/scrollq/fiber_fingerprint.py"
+      - "scripts/research_fiber_fingerprint_dev.py"
+      - "tests/test_fiber_fingerprint.py"
+      - "artifacts/2026-10-03-fiber-fingerprint-dev-prereg/**"
+      - "artifacts/2026-10-03-fiber-fingerprint-dev-run/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Guard measured output
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="artifacts/2026-10-03-fiber-fingerprint-dev-run/result.json"
+          if [ -e "$out" ]; then
+            echo "fiber-fingerprint development result already exists; frozen"
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Prove preregistration is unchanged on this branch
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git fetch origin main --depth=1
+          path="artifacts/2026-10-03-fiber-fingerprint-dev-prereg/spec.json"
+          git diff --exit-code origin/main -- "$path"
+
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install repository environment
+        if: steps.guard.outputs.skip != '1'
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+          python -m pip install -e .
+
+      - name: Run descriptor and gate tests
+        if: steps.guard.outputs.skip != '1'
+        run: |
+          set -euxo pipefail
+          python -m pytest -q tests/test_fiber_fingerprint.py
+
+      - name: Fetch exact frozen w035 TIFXYZ
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mesh="input/20260317000000-on-20250728140407-9.362um.tifxyz"
+          base="https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260317000000-w035_2026031718/mesh/20260317000000-on-20250728140407-9.362um.tifxyz"
+          mkdir -p "$mesh"
+          for f in x.tif y.tif z.tif meta.json; do
+            curl -fsSL --retry 4 --retry-delay 2 -o "$mesh/$f" "$base/$f"
+          done
+
+      - name: Record frozen input hashes
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-fiber-fingerprint-dev-run"
+          {
+            sha256sum artifacts/2026-10-03-fiber-fingerprint-dev-prereg/spec.json
+            sha256sum artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json
+            sha256sum artifacts/2026-10-03-pherc0139-wrong-wrap-run/wrong-wrap-result.json
+            sha256sum input/20260317000000-on-20250728140407-9.362um.tifxyz/{meta.json,x.tif,y.tif,z.tif}
+          } > "$outdir/inputs.sha256"
+          cat "$outdir/inputs.sha256"
+
+      - name: Run frozen development experiment
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          outdir="artifacts/2026-10-03-fiber-fingerprint-dev-run"
+          python scripts/research_fiber_fingerprint_dev.py             --spec artifacts/2026-10-03-fiber-fingerprint-dev-prereg/spec.json             --tifxyz input/20260317000000-on-20250728140407-9.362um.tifxyz             --reference-plan artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json             --wrong-wrap-result artifacts/2026-10-03-pherc0139-wrong-wrap-run/wrong-wrap-result.json             --out "$outdir/result.json"             | tee "$outdir/run.log"
+
+      - name: Verify observation contract
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(
+              Path("artifacts/2026-10-03-fiber-fingerprint-dev-run/result.json").read_text()
+          )
+          assert result["schema"] == "scrollq-research-fiber-fingerprint-dev-result/1"
+          assert result["status"] == "measured"
+          assert result["decision"]["status"] in {"pass", "fail"}
+          assert result["firewall"]["holdout_descriptor_reads"] == 0
+          assert result["firewall"]["sampled_development_ids"] == [
+              "surface-0001", "surface-0005", "surface-0007", "surface-0011",
+              "surface-0015", "surface-0018", "surface-0021", "surface-0025",
+              "surface-0027", "surface-0031"
+          ]
+          assert result["inputs"]["missing_ct_chunks"] == []
+          print("fiber-fingerprint observation contract PASS")
+          print("scientific decision:", result["decision"]["status"])
+          print("derived threshold:", result["decision"]["threshold"])
+          print("wrong-wrap rejection:", result["decision"]["wrong_wrap_rejection_fraction"])
+          print("distance ratio:", result["decision"]["median_wrong_to_positive_distance_ratio"])
+          PY
+
+      - name: Record environment
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-fiber-fingerprint-dev-run"
+          {
+            python --version
+            python -m pip freeze
+          } > "$outdir/environment.txt"
+
+      - name: Commit measured result to campaign branch
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/2026-10-03-fiber-fingerprint-dev-run
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Measure CT fiber-fingerprint development gate"
+          branch="${{ github.head_ref || github.ref_name }}"
+          if [ "$branch" = main ]; then
+            branch=campaign/fiber-fingerprint-dev
+          fi
+          git push origin "HEAD:$branch"
