@@ -656,6 +656,7 @@ def _decision(spec: dict[str, Any], variants: list[dict[str, Any]]) -> dict[str,
             for v in rows
         ]
 
+        median_visible_p95 = _median(visible_p95)
         size_ok = (
             len(rows) == len(centers)
             and all(
@@ -700,7 +701,8 @@ def _decision(spec: dict[str, Any], variants: list[dict[str, Any]]) -> dict[str,
                 <= float(rule["visible_validation_every_variant_p95_max_voxels"])
                 for value in visible_p95
             )
-            and (_median(visible_p95) or float("inf"))
+            and median_visible_p95 is not None
+            and median_visible_p95
             <= float(rule["visible_validation_median_p95_each_size_max_voxels"])
         )
         all_size_ok = all_size_ok and size_ok
@@ -718,7 +720,7 @@ def _decision(spec: dict[str, Any], variants: list[dict[str, Any]]) -> dict[str,
             "min_omission_recall": min(omissions) if omissions else None,
             "median_omission_recall": _median(omissions),
             "max_visible_validation_p95": max(visible_p95) if visible_p95 else None,
-            "median_visible_validation_p95": _median(visible_p95),
+            "median_visible_validation_p95": median_visible_p95,
             "pass": bool(size_ok),
         }
 
