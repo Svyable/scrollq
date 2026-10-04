@@ -1,7 +1,9 @@
 import numpy as np
+from PIL import Image
 import pytest
 
 from scrollq.ink_validation import (
+    _load_2d,
     _normalize_prediction,
     build_report,
     evaluate_prediction,
@@ -142,6 +144,31 @@ def test_training_overlap_prevents_prize_readiness():
 
     assert report["prize_evidence_ready"] is False
     assert any("overlap" in reason for reason in report["readiness_reasons"])
+
+
+def test_loads_grayscale_png_without_conversion(tmp_path):
+    uint8_path = tmp_path / "prediction.png"
+    uint16_path = tmp_path / "prediction16.png"
+    uint8 = np.array([[0, 255], [128, 64]], dtype=np.uint8)
+    uint16 = np.array([[0, 65535], [32768, 1024]], dtype=np.uint16)
+    Image.fromarray(uint8).save(uint8_path)
+    Image.fromarray(uint16).save(uint16_path)
+
+    loaded8 = _load_2d(uint8_path)
+    loaded16 = _load_2d(uint16_path)
+
+    assert np.array_equal(loaded8, uint8)
+    assert loaded8.dtype == np.uint8
+    assert np.array_equal(loaded16, uint16)
+    assert loaded16.dtype == np.uint16
+
+
+def test_rgb_png_is_rejected_as_non_2d(tmp_path):
+    path = tmp_path / "rgb.png"
+    Image.fromarray(np.zeros((2, 2, 3), dtype=np.uint8)).save(path)
+
+    with pytest.raises(ValueError, match="must be 2D"):
+        _load_2d(path)
 
 
 def test_uint8_prediction_normalization():
