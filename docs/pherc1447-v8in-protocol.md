@@ -129,3 +129,13 @@ A completed dated campaign contains:
 
 Only after those artifacts exist may reproduced numbers be promoted into the
 Grand Prize readiness page or submission methodology.
+
+## Execution log
+
+This log records progress only; it does not alter the frozen protocol above.
+
+- **2026-10-04, step 1 (pins and byte inventory) done.** The four Hub repositories are
+  resolved to immutable commits and the scoring-input bytes are hashed in
+  [`artifacts/2026-10-04-pherc1447-v8in-pins/`](../artifacts/2026-10-04-pherc1447-v8in-pins/README.md).
+  Model cards, the `scroliq-model-release` report, zero-shot inference, the falsification
+  controls and the per-winding validator reports remain open.
