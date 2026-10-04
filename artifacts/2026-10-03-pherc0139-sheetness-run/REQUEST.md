@@ -11,5 +11,3 @@ Frozen campaign:
 `artifacts/2026-10-03-pherc0139-sheetness-campaign/campaign-plan.json`
 
 Execution trigger revision 2: rerun after Actions-wrapper repair only; scientific contract unchanged.
-
-Evidence finalization: measured bundle persisted; this marker changes no frozen scientific input or result.
