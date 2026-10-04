@@ -80,3 +80,23 @@ def test_fiber_points_are_evenly_spaced_and_unique():
     line = np.arange(30, dtype=float).reshape(10, 3)
     assert len(m.fiber_points(line, 16)) == 10
     assert m.fiber_points(np.arange(300, dtype=float).reshape(100, 3), 16).shape == (16, 3)
+
+
+def test_frozen_ct_support_result_matches_run_one_log():
+    run = ROOT / "artifacts/2026-10-04-paris4-fiber-ct-support-run/result.json"
+    r = json.loads(run.read_text())
+    m = _m()
+    assert r["spec_sha256"] == m.SPEC_SHA256
+    assert r["verdict"] == "SUPPORTED" and r["control_wrong_frame_supported"] is False
+    # Values logged by run 1 (37169930475); run 2 must reproduce them exactly.
+    assert r["auc_F_vs_R"] == 0.7752110042374026
+    assert r["auc_S_vs_R"] == 0.5545193365288441
+    assert r["auc_X_vs_R"] == 0.42915697988754326
+    assert r["auc_F_vs_R_ci95"] == [0.7601893124695881, 0.7894949573134056]
+    assert r["specificity_F_minus_S_ci95"] == [0.20675294473509476, 0.23329532187702753]
+    assert r["reads"] == {"voxels": 10880, "missing_chunk_reads": 470, "out_of_bounds": 0}
+    assert r["per_fiber"]["flag_rate_fibers"] == 0.0
+    assert round(r["per_fiber"]["flag_rate_shifted"] * 136) == 38
+    census = json.loads((ROOT / "artifacts/2026-10-04-fiber-corpus-census/summary.json").read_text())
+    assert r["fibers"] == [row["file"] for row in census["rows"]]
+    assert len(r["per_fiber_auc_F_vs_R"]) == 136

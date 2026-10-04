@@ -140,3 +140,14 @@ object/geometry parity and target-domain downstream evidence before an
 accelerated backend is accepted for the same use. The current Brook
 GPL-3.0-only license is also kept distinct from Grand Prize
 submission-eligibility.
+
+## Reading gap counts on VC3D fibers (2026-10-04)
+
+A pre-registered span-level test
+([`fiber-span-test-run/`](../artifacts/2026-10-04-fiber-span-test-run/)) found
+that 386 of the 388 gap candidates in the public PHercParis4 census fall in
+fallback-interpolated spans (`lasagna`, `cspline`). Those spans are rendered at a
+median 3.26× the fiber's typical step, so the whole-fiber 4× gap rule mostly
+measures rendering density there. Until a span-aware rule is evaluated
+(November N4), read `gaps` together with `fallback_segments`. Treat gaps inside
+native `trace` spans as the strong cues.
