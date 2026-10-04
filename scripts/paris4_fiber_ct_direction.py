@@ -34,6 +34,7 @@ SPEC_SHA256 = "3690f5ccfeb72ea56b3fb14ffd55c450269f7c8347a515864fc8f6b916a159da"
 # Every frozen spec this runner may execute, by repo-relative path.
 FROZEN_SPECS = {
     "artifacts/2026-10-04-paris4-fiber-ct-direction-prereg/spec.json": SPEC_SHA256,
+    "artifacts/2026-10-04-pherc0139-fiber-ct-direction-prereg/spec.json": "548c91096093fafb0a2c189661445f5e6ea75ca136094339c9eccef45d29c8c5",
 }
 CENSUS = ROOT / "artifacts/2026-10-04-fiber-corpus-census/summary.json"
 UA = {"User-Agent": "scrollq-paris4-fiber-ct-direction/1"}

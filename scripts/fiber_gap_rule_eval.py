@@ -30,6 +30,7 @@ SPEC_SHA256 = "09ea046e97c5d274d8587dd7aa2b2bade14c418c2b39659cb77a9c450164da56"
 # Every frozen spec this runner may execute, by repo-relative path.
 FROZEN_SPECS = {
     "artifacts/2026-10-04-fiber-gap-rule-prereg/spec.json": SPEC_SHA256,
+    "artifacts/2026-10-04-fiber-gap-rule-v2-pherc0139-prereg/spec.json": "e70e851d3189e7c8aab6ff5e0eee73a111be4ec31665f44272aa4ea0fd9e42de",
 }
 CENSUS = ROOT / "artifacts/2026-10-04-fiber-corpus-census/summary.json"
 UA = {"User-Agent": "scrollq-fiber-gap-rule-eval/1"}
