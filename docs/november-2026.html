@@ -90,9 +90,9 @@ Working deadline: end of November, following the monthly progress-prize cadence.
 <a href="https://scrollprize.org/prizes#progress-prizes">prize page</a> states.</div>
 
 <div class="stats">
-<div class="stat"><div class="n">7</div><div class="l">November goals<br>each with an exit criterion</div></div>
+<div class="stat"><div class="n">9</div><div class="l">November goals<br>raised 2026-10-04</div></div>
 <div class="stat"><div class="n warn">0</div><div class="l">exact prize volumes with blind-scored surface<br>the bottleneck (N2)</div></div>
-<div class="stat"><div class="n">136</div><div class="l">public fibers audited<br>next: CT support (N4)</div></div>
+<div class="stat"><div class="n">2 / 388</div><div class="l">fiber gap cues in native spans<br>next: span-aware rule (N4)</div></div>
 <div class="stat"><div class="n warn">0</div><div class="l">published blind community-model evaluations<br>harness exists (N3)</div></div>
 </div>
 </div></header>
@@ -101,7 +101,9 @@ Working deadline: end of November, following the monthly progress-prize cadence.
 <div class="panel"><h2>Where October leaves us</h2>
 <p>As of 2026-10-04: O2 (winding attachment) and O5 (stability gate → rank bands) are done. O4 part 1 (full fiber census) is done.
 O6 has guides and three unfiled upstream drafts ready. O1 is waiting on a human VC3D review, and O3 is waiting on a GPU fit.
-Both carry over below unless they close in October. See the <a href="./october-2026.html">October plan</a> for per-goal evidence.</p>
+Both carry over below unless they close in October. On the same day, October's ambition was raised by four stretch goals:
+O7 (fiber span test: SUPPORTED), O8 (v2 frontier: PHerc0813 out, PHerc1447 the only robust member), O9 (fiber CT volume and support)
+and O10 (every queue in VC3D). See the <a href="./october-2026.html#o7">October plan</a> for per-goal evidence.</p>
 <p>The <a href="./progress.html#bottleneck">current bottleneck</a> is unchanged: no exact 2027 Grand Prize volume has recovered recto surface
 validated against held-out truth. November therefore puts one exact-volume surface result first, and keeps every other goal small.</p>
 </div>
@@ -116,27 +118,32 @@ validated against held-out truth. November therefore puts one exact-volume surfa
 <p><b>Deliverable.</b> Returned reviewer labels, scored by <code>bin/mesh_review_score.py</code> as written in the protocol.</p>
 <p><b>Done when.</b> Flag precision and the clean-segment defect rate are committed with 95% intervals. If no review comes back by Nov 21, publish that as the status and keep the rate <code>unknown</code>.</p></div>
 
-<div class="goal" id="n2"><h3><span class="id">N2</span>One exact-volume surface result, scored blind</h3>
-<div class="chips"><span class="chip crit">Grand Prize bottleneck</span><span class="chip crit">held-out validation</span><span class="chip state">tools ready · campaign not started</span></div>
-<p><b>Why.</b> This is the only goal that moves the bottleneck sentence. Everything else improves trust in the evidence around it.</p>
-<p><b>Starting point.</b> The frozen PHerc0139 sheetness reference campaign (<a href="./sheetness-campaign.md">sheetness-campaign.md</a>), the blind TIFXYZ scorer
-<code>scroliq-segmentation-validate</code> (<a href="./segmentation-validation.md">segmentation-validation.md</a>) and the target-freeze gate (<a href="./target-freeze-gate.md">target-freeze-gate.md</a>).</p>
-<p><b>Deliverable.</b> Pre-register a transfer to one exact prize-eligible volume: volume ID, probe boxes, engine bytes, truth source and decision rule. Commit the salted truth commitment before predictions exist, produce TIFXYZ predictions, and score them.</p>
-<p><b>Done when.</b> One scored run is committed with its verdict, whether that verdict is pass or fail, with bidirectional coverage, topology gates and per-region failures. A failed transfer is a result, not a reason to change the rule.</p></div>
+<div class="goal" id="n2"><h3><span class="id">N2</span>Two surface arms on one exact volume, scored blind on the same frozen truth</h3>
+<div class="chips"><span class="chip crit">Grand Prize bottleneck</span><span class="chip crit">held-out validation</span><span class="chip state">raised 2026-10-04</span></div>
+<p><b>Why.</b> This is the only goal that moves the bottleneck sentence. The frozen PHerc0139 Phase-A sheetness arm returned <b>FAIL</b> (10 / 32 groups),
+so one more run of the same idea is not enough. Two independent arms against one truth commitment tell us which direction works.</p>
+<p><b>Starting point.</b> Phase-A FAIL (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-03-pherc0139-sheetness-run">sheetness-run</a>), the blind TIFXYZ scorer
+<code>scroliq-segmentation-validate</code>, the target-freeze gate, and the CT fiber-fingerprint development protocol.</p>
+<p><b>Deliverable.</b> One exact prize-eligible volume. One salted truth commitment frozen before any prediction exists. At least two pre-registered
+surface arms, for example a learned surface predictor and a physical descriptor arm, each scored blind per region with bidirectional coverage and topology gates.
+<b>Stretch:</b> recto-coverage accounting (<code>scroliq-recto-coverage</code>) over one contiguous multi-column region of the winning arm.</p>
+<p><b>Done when.</b> Both arms have committed verdicts against the same truth, pass or fail, with failed regions listed. A failure does not license retuning under the same identity.</p></div>
 
-<div class="goal" id="n3"><h3><span class="id">N3</span>First blind evaluation of a community model</h3>
-<div class="chips"><span class="chip crit">gets used</span><span class="chip crit">held-out validation</span><span class="chip state">harness ready</span><span class="chip gate">needs a model owner</span></div>
-<p><b>Why.</b> <code>scroliq-eval</code> is infrastructure until it has evaluated a real model somebody else built.</p>
-<p><b>Starting point.</b> Contracts, overlap blocking, bootstrap CIs and the two-trust-domain design (<a href="./model-evaluation.md">model-evaluation.md</a>). Zero published evaluations.</p>
-<p><b>Deliverable.</b> One public surface or ink model evaluated on a declared held-out region, with model card, checkpoint hash and the overlap check, all committed.</p>
-<p><b>Done when.</b> The result envelope with CIs and failed regions is committed and linked from the progress board. Ask the model owner before publishing anything about their model.</p></div>
+<div class="goal" id="n3"><h3><span class="id">N3</span>Blind evaluations of three community models on one held-out split</h3>
+<div class="chips"><span class="chip crit">gets used</span><span class="chip crit">held-out validation</span><span class="chip state">raised 2026-10-04</span><span class="chip gate">needs model owners</span></div>
+<p><b>Why.</b> One evaluation is a demo. Three evaluations on the same split are a comparison people can act on.</p>
+<p><b>Starting point.</b> <code>scroliq-eval</code> contracts, overlap blocking, bootstrap CIs and the two-trust-domain design (<a href="./model-evaluation.md">model-evaluation.md</a>). Zero published evaluations.</p>
+<p><b>Deliverable.</b> At least three public models covering surface and ink. They are evaluated on one declared held-out split with model cards, checkpoint hashes and overlap checks, and published as a comparison table with CIs and failed regions.</p>
+<p><b>Done when.</b> At least two evaluations are committed, with the third either committed or explicitly declined by its owner. Ask each model owner before publishing.</p></div>
 
-<div class="goal" id="n4"><h3><span class="id">N4</span>Fiber IQ part 2: CT support, and test the fallback–gap pattern</h3>
-<div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: fiber connectivity</span><span class="chip state">census done</span></div>
-<p><b>Why.</b> The 136-fiber census found every one of the 388 gap candidates inside fibers with fallback-interpolated spans. That co-occurrence becomes actionable for annotators only if it is tested, and fiber geometry means little until it is checked against CT.</p>
-<p><b>Starting point.</b> <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-fiber-corpus-census">fiber-corpus-census</a>: 136 fibers, 502 / 5,503 fallback spans, 388 gaps, 519 sharp turns.</p>
-<p><b>Deliverable.</b> (a) A pre-registered span-level test: are gap candidates over-represented in fallback spans compared with native spans of the same fibers? (b) A CT-support check on an exact, declared PHercParis4 volume root, with a positive control: a fiber shifted off the sheet must be flagged.</p>
-<p><b>Done when.</b> (a) is decided by its frozen rule, and (b) catches its positive control without flagging the unshifted calibration fibers. If no exact CT binding can be established, (b) stays <code>unknown</code> with the reason.</p></div>
+<div class="goal" id="n4"><h3><span class="id">N4</span>Fiber IQ: a span-aware gap rule, a second scroll, and CT direction</h3>
+<div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: fiber connectivity</span><span class="chip state">raised 2026-10-04</span></div>
+<p><b>Why.</b> October showed that the whole-fiber gap rule mostly measures fallback rendering density (<a href="./october-2026.html#o7">O7</a>), and the CT support question moved into October (<a href="./october-2026.html#o9">O9</a>).</p>
+<p><b>Deliverable.</b>
+(a) A span-aware gap rule, evaluated pre-registered against the current rule on the O7 data with a planted-break positive control.
+(b) A census of the public PHerc0139 fibers, with the same fail-closed listing and controls.
+(c) CT fiber <i>direction</i> agreement in the O9 volume (structure-tensor orientation vs fiber tangent), with a rotated-fiber control.</p>
+<p><b>Done when.</b> All three have committed verdicts. If the O9 support test did not pass, (c) stays <code>unknown</code> with that reason.</p></div>
 
 <div class="goal" id="n5"><h3><span class="id">N5</span>Close O3: score a spiral fit on constraints it never saw</h3>
 <div class="chips"><span class="chip crit">open problem: spiral fitting</span><span class="chip state">carryover · evaluator ready</span><span class="chip gate">needs a GPU fit run</span></div>
@@ -144,12 +151,12 @@ validated against held-out truth. November therefore puts one exact-volume surfa
 <p><b>Starting point.</b> The held-out geometry evaluator (<a href="./heldout-geometry-evaluation.md">heldout-geometry-evaluation.md</a>) and the consumer-GPU gate (<a href="./spiral-consumer-gpu-gate.md">spiral-consumer-gpu-gate.md</a>).</p>
 <p><b>Deliverable / done when.</b> One real fit run with declared withheld collections, its config and checkpoint hashes, and the held-out score committed.</p></div>
 
-<div class="goal" id="n6"><h3><span class="id">N6</span>Re-run the Grand Prize frontier under the v2 sampling design</h3>
-<div class="chips"><span class="chip crit">frozen data</span><span class="chip state">under re-evaluation since Oct 2</span></div>
-<p><b>Why.</b> September scores differ from the v2 pooled scores by 6.9 points on average, so the frontier (PHerc0813 + PHerc1447) needs a fresh check.</p>
-<p><b>Starting point.</b> <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-stability-v2">stability-v2</a> and the 2026-09-30 frontier artifacts.</p>
-<p><b>Deliverable.</b> A new dated campaign (new <code>as_of</code>, new artifact directory) that scores the 13 Grand Prize volumes and the First Letters targets with the balanced design and recomputes both frontiers. September artifacts stay untouched.</p>
-<p><b>Done when.</b> The new frontier is committed, and README and docs numbers are updated together, whether the frontier changes or not.</p></div>
+<div class="goal" id="n6"><h3><span class="id">N6</span>Exact-volume surface-support survey of all 13 Grand Prize volumes</h3>
+<div class="chips"><span class="chip crit">frozen data</span><span class="chip crit">insightful, actionable</span><span class="chip state">replaces the old N6 (done in October as O8)</span></div>
+<p><b>Why.</b> The v2 frontier (<a href="./october-2026.html#o8">O8</a>) leaves the segment-free slot as a band within noise. A third, independent axis is the honest way to break the tie, and a blended score is not.</p>
+<p><b>Starting point.</b> <code>scroliq-support</code> (exact-scan prediction CT support with bootstrap CIs) and the First Letters support campaign; the October frontier has only two axes.</p>
+<p><b>Deliverable.</b> A new dated campaign that measures surface-prediction CT support on each exact eligible volume where a released prediction exists, and reports the three-axis frontier as a sensitivity analysis. A volume without a released prediction stays <code>unknown</code>.</p>
+<p><b>Done when.</b> Every one of the 13 targets is measured or listed with its reason, and README and docs are updated together.</p></div>
 
 <div class="goal" id="n7"><h3><span class="id">N7</span>Upstream: from drafts to filed reports, and the dl regression</h3>
 <div class="chips"><span class="chip crit">fixes bugs in tools people use</span><span class="chip state">3 drafts ready</span><span class="chip gate">needs maintainer approval</span></div>
@@ -158,25 +165,37 @@ validated against held-out truth. November therefore puts one exact-volume surfa
 <p><b>Deliverable.</b> After the maintainer reproduces each defect and approves it, file the report. Run the dl regression.</p>
 <p><b>Done when.</b> Each draft is either filed and linked here or explicitly withdrawn with a reason, and the dl regression is committed.</p></div>
 
+<div class="goal" id="n8"><h3><span class="id">N8</span>End-to-end submission dry run on one volume</h3>
+<div class="chips"><span class="chip crit">reproducible</span><span class="chip state">new 2026-10-04</span></div>
+<p><b>Why.</b> A qualifying result would arrive with no time left to discover packaging failures.</p>
+<p><b>Deliverable.</b> Take the best non-qualifying N2 output through the whole submission path: the container build, mesh and image package, provenance manifest, scale bars and the package validator. Record every failure.</p>
+<p><b>Done when.</b> The package validates, or each blocking defect is filed as an issue in this repo with the failing check named.</p></div>
+
+<div class="goal" id="n9"><h3><span class="id">N9</span>Outside evidence of use</h3>
+<div class="chips"><span class="chip crit">gets used</span><span class="chip state">new 2026-10-04</span><span class="chip gate">needs other people</span></div>
+<p><b>Why.</b> The progress prize rewards tools that are used. So far every reviewer of ScrolIQ output has been us.</p>
+<p><b>Deliverable.</b> At least two external reviewers return labels on a ScrolIQ queue (N1 or the fiber/winding VC3D files), and at least one approved upstream report is filed.</p>
+<p><b>Done when.</b> Each item is linked from the progress board, or is listed as not achieved.</p></div>
+
 </div></div>
 
 <div class="panel"><h2>Sequence</h2>
 <div class="weeks">
 <div class="week"><h3>Week 1 · Nov 1–7</h3><ul>
 <li>N2: choose the exact volume; pre-register the transfer and commit truth</li>
-<li>N4a: pre-register the span-level fallback test</li>
+<li>N4a: pre-register the span-aware gap rule</li>
 <li>N7: maintainer review of the three drafts</li></ul></div>
 <div class="week"><h3>Week 2 · Nov 8–14</h3><ul>
 <li>N2: produce predictions; run the blind scorer</li>
-<li>N4a: run the test; N4b: settle the CT binding</li>
-<li>N6: v2-design frontier campaign</li></ul></div>
+<li>N4a: run it; N4b: PHerc0139 fiber census</li>
+<li>N6: surface-support survey of the 13 targets</li></ul></div>
 <div class="week"><h3>Week 3 · Nov 15–21</h3><ul>
-<li>N3: first community-model evaluation</li>
-<li>N4b: CT support with positive control</li>
+<li>N3: community-model evaluations</li>
+<li>N4c: CT fiber direction with rotated control</li>
 <li>N1: review cutoff (Nov 21)</li></ul></div>
 <div class="week"><h3>Week 4 · Nov 22–30</h3><ul>
 <li>N5: held-out spiral score (when a GPU fit exists)</li>
-<li>N7: dl regression</li>
+<li>N7: dl regression · N8: submission dry run</li>
 <li>November results page and submission</li></ul></div>
 </div>
 <p class="meta" style="margin-top:.9rem">N2 goes first because it is the bottleneck. Goals that wait on other people (N1 reviewers, N3 model owner,
