@@ -182,23 +182,24 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
   <div class="navlinks">
     <a href="#grand-prize">Grand Prize</a><a href="#differentiation">Difference</a><a href="#evidence">Evidence</a>
     <a href="#leaderboard">Survey</a><a href="#method">Method</a>
-    <a href="./progress.html">Grand Prize evidence</a><a href="./september-2026.html">Writeup</a><a href="./october-2026-update.html">October update</a><a href="./october-2026.html">October goals</a><a href="https://github.com/Svyable/scrollq">GitHub</a>
+    <a href="./progress.html">Grand Prize evidence</a><a href="https://github.com/Svyable/scrollq/blob/main/docs/SUBMISSION.md">Reviewer map</a><a href="./november-2026.html">November goals</a><a href="https://github.com/Svyable/scrollq">GitHub</a>
   </div>
   <span class="navstatus">● reproducible evidence</span>
 </div></nav>
 
 <header class="hero"><div class="wrap">
-  <div class="eyebrow">VESUVIUS CHALLENGE · EVIDENCE THROUGH OCTOBER 3, 2026</div>
+  <div class="eyebrow">VESUVIUS CHALLENGE · EVIDENCE THROUGH OCTOBER 4, 2026</div>
   <h1>Scrol<span class="q">IQ</span></h1>
   <p class="tagline">Diagnostics for reading Herculaneum scrolls. <em>Find the bottleneck.</em></p>
   <p class="lede">ScrolIQ does not try to replace the community's geometry, winding, scan-quality or ink tools. It makes their evidence composable: results are bound to the exact CT, mesh, model and evaluation region they measure; stale or cross-volume evidence is excluded; leakage and missing evidence fail closed; and failed controls stay visible. The next objective is deliberately narrow: produce one measurably better held-out surface / fit / ink result on one exact 2027 Grand Prize volume, then carry that proof into a complete unrolling. <strong><a href="./progress.html">Open the live Grand Prize evidence board →</a></strong></p>
   <div class="stats">
     <div class="stat"><div class="n">16,074</div><div class="l">cross-collection winding constraints checked</div></div>
     <div class="stat"><div class="n">194/200</div><div class="l">injected +2 winding corruptions detected</div></div>
-    <div class="stat"><div class="n">2,111/2,232</div><div class="l">annotated points attached to verified patches</div></div>
+    <div class="stat"><div class="n">136/136</div><div class="l">public PHercParis4 fibers audited<br>full listed corpus</div></div>
     <div class="stat"><div class="n">&rho; 0.750</div><div class="l">pre-registered scan-rank stability<br>below gate → precise ranks retired</div></div>
   </div>
   <div class="scope" style="margin-top:1rem"><b>Current Grand Prize bottleneck:</b> No exact 2027 Grand Prize volume has 100% of its recto surface segmented and unrolled into column-scale meshes with full-column legible ink renders. <a href="./progress.html">Inspect measured, partial, and blocked evidence →</a></div>
+  <p class="alignment-links"><b>Evaluator path:</b> <a href="https://github.com/Svyable/scrollq/blob/main/docs/SUBMISSION.md">five-minute reviewer map</a> · <a href="https://github.com/Svyable/scrollq/blob/main/docs/grand-prize-container.md">reproduce in the pinned container</a> · <a href="https://github.com/Svyable/scrollq/blob/main/docs/review-queues.md">open native VC3D review queues</a> · <a href="./november-2026.html#n2">next bottleneck experiment</a></p>
 </div></header>
 
 <main id="main" class="wrap">
@@ -217,9 +218,9 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
   <div class="problem"><div><h3>Scan diagnostics</h3><span class="state live">LIVE</span></div><p>Real-voxel health and coordinate-preserving spatial scan maps. Next: validated layer-separability and decohesion diagnostics.</p></div>
   <div class="problem"><div><h3>Surface topology</h3><span class="state next">NEXT</span></div><p>CT support, competing sheets, topology risk, and surface-placement uncertainty.</p></div>
   <div class="problem"><div><h3>Mesh connectivity</h3><span class="state live">LIVE</span></div><p><code>scroliq-mesh</code> audits native TIFXYZ and can bind official Villa CT-support and VC3D self-intersection reports to the exact surface; <code>scroliq-obj</code> covers triangular meshes. Both expose advisory findings or explicit <code>--fail-on-findings</code> CI gates. Sheet identity remains unproven.</p></div>
-  <div class="problem"><div><h3>Fiber connectivity</h3><span class="state live">LIVE</span></div><p><code>scroliq-fiber</code> reads VC3D <code>vc3d_fiber</code> JSON v1/v3/v4 or CSV, hashes the exact input, validates persisted span/tracer metadata, and checks rendered continuity plus control-point/render consistency. A SHA-256-pinned public PHercParis4 run covers <b>8 fibers / 53,828 points</b>: 11 gap and 26 sharp-turn review candidates, with 0 control-line offsets/order inversions. With <code>--volume-root</code>, passports accept only exact-volume Fiber IQ; the public directory is not asserted to identify one exact CT volume, so that campaign is not passport evidence. <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-public-fiber-audit">Frozen evidence →</a></p></div>
-  <div class="problem"><div><h3>Winding annotations</h3><span class="state live">LIVE</span></div><p><code>scroliq-winding</code> validates PointCollections structure, exact-file provenance, volume binding, winding semantics, and axial coverage, and checks winding numbers against the umbilicus before any fit. On the published PHercParis4 annotations: <b>2 of 13,700</b> comparable pairs out of radial order, both under 0.1 voxel; an injection control catches 89.5% of ±3 and 85.5% of ±5 single-point mis-numberings, and ±2 errors are undetectable by design. Next: patch attachment, graph consistency, and holonomy.</p></div>
-  <div class="problem"><div><h3>Spiral fitting</h3><span class="state plan">PLANNED</span></div><p>Held-out constraint residuals, sensitivity, and under-constrained regions.</p></div>
+  <div class="problem"><div><h3>Fiber connectivity</h3><span class="state live">LIVE</span></div><p><code>scroliq-fiber</code> reads VC3D <code>vc3d_fiber</code> JSON v1/v3/v4 or CSV, hashes exact inputs, validates persisted span/tracer metadata, and checks rendered continuity plus control-point/render consistency. The 2026-10-04 census audited <b>136 / 136</b> publicly listed PHercParis4 fibers: 671,984 line points, 5,503 spans, 388 gap and 519 sharp-turn candidates, with <b>0</b> control-line offsets or order inversions. All 388 gaps occur in fibers containing fallback-interpolated spans; the 57 fully native fibers have none. That is a descriptive co-occurrence, not yet a causal claim. The public directory is not asserted to identify one exact CT volume, so the census is deliberately not passport evidence; a passport-bound Fiber IQ report must be rerun with the exact <code>--volume-root</code>. <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-fiber-corpus-census">Frozen census →</a></p></div>
+  <div class="problem"><div><h3>Winding annotations</h3><span class="state live">LIVE</span></div><p><code>scroliq-winding</code> validates PointCollections structure, exact-file provenance, volume binding, winding semantics, and axial coverage, and checks winding numbers against the umbilicus before any fit. The PHercParis4 ray-order audit found <b>2 / 13,700</b> comparable-pair inversions, both under 0.1 voxel. Cross-collection attachment then tied <b>2,111 / 2,232</b> points to verified patches, flagged <b>6 / 16,074</b> constraints, and caught <b>194 / 200</b> injected +2 errors. The queue now exports as native VC3D PointCollections for inspection. <a href="https://github.com/Svyable/scrollq/blob/main/docs/review-queues.md">Review workflow →</a></p></div>
+  <div class="problem"><div><h3>Spiral fitting</h3><span class="state next">NEXT</span></div><p>The held-out geometry evaluator and reproduction contract are ready; the missing evidence is one real GPU fit scored on constraints it never saw. <a href="./november-2026.html#n5">November N5 →</a></p></div>
   <div class="problem"><div><h3>Label quality</h3><span class="state live">LIVE</span></div><p>Label–volume coverage join: all 70 published ink-detection labels sit on PHercParis4 while 14 top-quartile volumes have zero published ink labels and are flagged as <b>label-coverage candidates</b> for review. This is a coverage gap, not evidence of ink or surface readiness. Next: physical label offset, snapping candidates, review queues.</p></div>
   <div class="problem"><div><h3>Ink reliability</h3><span class="state live">LIVE</span></div><p><code>scroliq-ink-audit</code> fails closed on declared train/evaluation overlap and audits checkpoint, seed, held-out-run, and falsification-control provenance. It is an evidence audit, not an ink verdict. Next: attach measured perturbation and cross-scroll results.</p></div>
   <div class="problem"><div><h3>Data scale</h3><span class="state live">LIVE</span></div><p>Cloud-native partial reads, decode provenance, exact coordinate bindings, file hashes, and machine-readable artifacts keep evidence inspectable across stages.</p></div>
@@ -301,13 +302,15 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
     testable trials and &plusmn;5 errors in <b>171 / 200</b>; &plusmn;2 is undetectable by construction.
     That measured blind spot is part of the result.
     <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-paris4-winding-ray-order">Audit + injection control →</a></p></div>
-  <div class="card"><h3>Hash-pinned native VC3D fibers</h3>
-    <p>Eight public PHercParis4 VC3D fiber files were SHA-256 pinned and parsed as native v3:
-    <b>53,828 rendered points</b>, 377 control points and 369 spans. The audit surfaced
-    <b>11 gap</b> and <b>26 sharp-turn</b> review candidates, with <b>0 control-line offsets</b> and
-    <b>0 control-order inversions</b>. This campaign is deliberately not attached to a volume passport
-    because exact CT-volume binding is not proven.
-    <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-public-fiber-audit">Pinned fiber campaign →</a></p></div>
+  <div class="card"><h3>Full public VC3D fiber census</h3>
+    <p>The 2026-10-04 campaign audited <b>136 / 136</b> publicly listed PHercParis4 v3 fibers:
+    <b>671,984 rendered points</b>, 5,639 control points and 5,503 spans. It surfaced
+    <b>388 gap</b> and <b>519 sharp-turn</b> review candidates, with <b>0 control-line offsets</b> and
+    <b>0 control-order inversions</b>. The exact positive control remains the <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-public-fiber-audit">2026-10-01-public-fiber-audit</a>: <b>53,828 points</b> with <b>11 gap and 26 sharp-turn</b> candidates, reproduced unchanged inside the census.
+    Every gap occurs in a fiber containing fallback spans, while the 57 fully native fibers have none; this remains
+    a hypothesis for span-level testing, not a causal finding. Exact CT-volume binding is still unproven, so the census is
+    deliberately not passport evidence.
+    <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-fiber-corpus-census">Frozen full-corpus evidence →</a></p></div>
 </div>
 
 <div class="panel"><h2>Scan-quality distribution<span class="sub">64 volumes · 5-point bins</span></h2>
@@ -460,13 +463,15 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
 </main>
 
 <footer><div class="wrap">
-  Generated by <a href="https://github.com/Svyable/scrollq">ScrolIQ</a> from public dl.ash2txt.org volumes,
-  2026-10-01 07:37 UTC. Scores are heuristic and published with their components — audit the
+  Scan-survey table generated by <a href="https://github.com/Svyable/scrollq">ScrolIQ</a> from public dl.ash2txt.org volumes,
+  2026-10-01 07:37 UTC; Grand Prize evidence above is updated independently. Scores are heuristic and published with their components — audit the
   weights, don't worship the ranking. Companion:
   <a href="https://github.com/Svyable/zarr-pyramid-audit">zarr-pyramid-audit</a>.
   · <a href="./september-2026.html">September 2026 writeup →</a>
   · <a href="./october-2026-update.html">October 2026 update →</a>
   · <a href="./october-2026.html">October 2026 goals →</a>
+  · <a href="./november-2026.html">November 2026 goals →</a>
+  · <a href="https://github.com/Svyable/scrollq/blob/main/docs/SUBMISSION.md">reviewer map →</a>
   <br>Community: <a href="https://discord.com/invite/V4fJhvtaQn">Vesuvius Discord</a>
   · <a href="https://scrollprize.org">Vesuvius Challenge</a>
   · <a href="https://github.com/ScrollPrize/villa">villa monorepo</a>
@@ -592,8 +597,7 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
       ];
       lines.push(values.map(csvCell).join(","));
     });
-    const blob = new Blob([lines.join("
-")], {type:"text/csv;charset=utf-8"});
+    const blob = new Blob([lines.join("\n")], {type:"text/csv;charset=utf-8"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url; a.download = "scrollq-filtered.csv";

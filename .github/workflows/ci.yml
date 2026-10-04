@@ -9,6 +9,14 @@ permissions:
   contents: read
 
 jobs:
+  public-site:
+    name: public site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate public Pages surface
+        run: python scripts/check_public_site.py
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -46,7 +54,7 @@ jobs:
 
   container:
     name: reviewer container
-    needs: test
+    needs: [public-site, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

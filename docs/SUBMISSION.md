@@ -1,4 +1,4 @@
-# October 2026 Progress Prize — reviewer map
+# ScrolIQ — reviewer map
 
 This page is the shortest path through ScrolIQ for a Vesuvius Challenge reviewer.
 
@@ -9,11 +9,11 @@ https://scrollprize.org/prizes
 
 ## Five-minute review path
 
-1. **Start with the live overview:** https://svyable.github.io/scrollq/
-2. **See the Grand Prize contract:** https://svyable.github.io/scrollq/grand-prize-readiness.html
-3. **Read the October evidence update:** https://svyable.github.io/scrollq/october-2026-update.html
-4. **Inspect the real PHercParis4 winding controls:** [README — Winding annotation audit](../README.md#winding-annotation-audit)
-5. **Inspect the current real-data frontier:** [issue #105](https://github.com/Svyable/scrollq/issues/105), the frozen PHerc0139 sheetness campaign before transfer to an exact prize-eligible volume.
+1. **Start with the live Grand Prize evidence board:** https://svyable.github.io/scrollq/progress.html
+2. **Read the exact current bottleneck and next experiment:** [November N2 — one exact-volume surface result, scored blind](november-2026.html#n2).
+3. **Verify the strongest current real-data controls:** [full 136-fiber census](../artifacts/2026-10-04-fiber-corpus-census/), [PHercParis4 winding attachment](../artifacts/2026-10-03-paris4-winding-attachment/), and [same-byte TIFXYZ cross-check](../artifacts/2026-10-02-doctor-same-byte/).
+4. **Check the blind evaluation contract:** [held-out segmentation validation](segmentation-validation.md) and the [model-evaluation protocol](model-evaluation.md).
+5. **Reproduce and inspect:** [pinned reviewer container](grand-prize-container.md) · [VC3D-native review queues](review-queues.md) · [source](https://github.com/Svyable/scrollq).
 
 ## What is already demonstrated on real Challenge data
 
@@ -24,6 +24,9 @@ https://scrollprize.org/prizes
 | The same detector catches deliberately corrupted labels on the real geometry: 179 / 200 testable ±3 shifts and 171 / 200 ±5 shifts | [ray_order_control.py](../bin/ray_order_control.py) and README control table |
 | Cross-collection winding consistency can be tested through verified patches | [2026-10-03 Paris4 winding attachment artifacts](../artifacts/2026-10-03-paris4-winding-attachment/) |
 | On that run, 2,111 / 2,232 points attached; 6 / 16,074 constraints were flagged; the +2 injection control detected 194 / 200 injected errors | README, “Cross-collection consistency through verified patches” |
+| Every publicly listed PHercParis4 VC3D fiber can be audited reproducibly with an eight-file hash-pinned positive control | [2026-10-04 full fiber census](../artifacts/2026-10-04-fiber-corpus-census/) — 136 / 136 fibers, 388 gaps, 519 sharp turns, 0 control-line offsets/order inversions |
+| Findings can be handed back to reviewers in native VC3D coordinates instead of as dashboard-only counts | [review-queues.md](review-queues.md) and [2026-10-04 review queue artifacts](../artifacts/2026-10-04-review-queues/) |
+| Blind held-out TIFXYZ surface recovery has a salted private-truth commitment, exact-volume binding, bidirectional coverage and fail-closed region accounting | [segmentation-validation.md](segmentation-validation.md) |
 | Held-out geometry evaluation has an explicit fit-input exclusion contract and keeps missing predictions in the denominator | [heldout-geometry-evaluation.md](heldout-geometry-evaluation.md) |
 | CT integrity evidence is delegated to zarr-pyramid-audit and consumed fail-closed rather than re-invented here | [zarr-pyramid-audit](https://github.com/Svyable/zarr-pyramid-audit) and README “Diagnostic passport” |
 | Submission packaging, image traceability, provenance and legibility evidence have explicit interfaces | [grand-prize-package.md](grand-prize-package.md), [grand-prize-images.md](grand-prize-images.md), [grand-prize-provenance.md](grand-prize-provenance.md), [grand-prize-legibility.md](grand-prize-legibility.md) |
@@ -43,14 +46,14 @@ The project’s stronger contribution is the **evidence contract across stages**
 
 That makes the output useful even when a diagnostic produces a negative result: it tells the next stage what is known, what is not known, and what must not be trusted.
 
-## Current October frontier
+## Current Grand Prize frontier
 
-The highest-priority scientific step is **issue #105**:
-[Freeze first physical sheetness campaign on PHerc0139 w035 before Grand Prize transfer](https://github.com/Svyable/scrollq/issues/105).
+The highest-priority experiment is **November N2: one exact-volume surface result, scored blind**:
+[November 2026 goals — N2](november-2026.html#n2).
 
-The experiment is intentionally frozen before reading the result. PHerc0139 w035 is used as a geometry/source reference; the exact sheetness configuration and evaluation procedure are then transferred unchanged to an exact Grand Prize-eligible CT volume. A negative result is a valid result.
+The measurement infrastructure is ready; the campaign result is not. N2 freezes one exact prize-eligible volume, public metric spec, probe regions, engine identity and a salted commitment over private TIFXYZ truth **before** predictions exist. It then scores every preregistered region with bidirectional surface coverage, topology gates and explicit failures. A negative result counts as evidence and does not authorize changing the rule after the fact.
 
-A separate flattening experiment, [issue #114](https://github.com/Svyable/scrollq/issues/114), is explicitly marked R&D-only and must not displace that main dependency frontier.
+[Issue #105](https://github.com/Svyable/scrollq/issues/105) remains the frozen PHerc0139 physical-sheetness reference/transfer experiment that informs the surface campaign; it is no longer a good summary of the whole project frontier by itself. Other active but subordinate dependencies are the blinded Mesh IQ review (N1), first external community-model evaluation (N3), CT-conditioned Fiber IQ (N4), held-out spiral score (N5), and the v2 Grand Prize frontier rerun (N6).
 
 ## Reproducibility / integration surfaces
 
@@ -83,9 +86,9 @@ ScrolIQ does **not** currently claim to:
 
 Native spiral-fit export and the first frozen physical sheetness transfer remain active work. Those gaps are stated because the evidence contract is only useful if “unknown” stays unknown.
 
-## What to verify in an October submission
+## What to verify before promoting any claim
 
-For any claim copied into the October Progress Prize submission, require all four:
+For any prize-facing claim copied into a submission or public evidence page, require all four:
 
 1. a dated committed artifact;
 2. the exact command or protocol that produced it;
