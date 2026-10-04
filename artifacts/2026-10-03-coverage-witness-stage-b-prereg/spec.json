@@ -1,0 +1,272 @@
+{
+  "schema": "scrollq-research-coverage-witness-stage-b/1",
+  "status": "frozen-before-stage-b-witness-read",
+  "purpose": "Identity-aware real-papyrus coverage-witness calibration for issue #151. Use only intact collar geometry to continue an expected sheet corridor across a deliberately hidden w035 patch, then interrogate the independently published surface-m7 prediction along continuation normals while explicitly separating near-corridor target runs from 12-32 voxel competing-sheet runs.",
+  "classification_before_observation": "EXPERIMENT FURTHER",
+  "claim_boundary": "A pass establishes that collar-only geometry continuation plus an independent surface prediction can recover enough correctly localized missing-sheet witnesses on these frozen PHerc0139 controls while rejecting known adjacent-winding locations. It does not establish whole-scroll recto completeness, universal sheet identity, Grand Prize eligibility, or target-scroll validity.",
+  "predecessor": {
+    "stage_a_v2_spec_path": "artifacts/2026-10-03-coverage-witness-pherc0139-prereg-v2/spec.json",
+    "stage_a_v2_result_path": "artifacts/2026-10-03-coverage-witness-pherc0139-run-v2/result.json",
+    "stage_a_v2_embedded_spec_sha256": "e9dccbcbd7bb9dcf1091b934fed5154b5732c532701ee8a63828401cbb00b542",
+    "stage_a_v2_decision": "pass",
+    "wrong_wrap_result_path": "artifacts/2026-10-03-pherc0139-wrong-wrap-run/wrong-wrap-result.json",
+    "reason_for_stage_b": "Stage A showed broad independent support but the same independent source also produced separated surface candidates at 32/32 wrong-wrap probes. Stage B must distinguish intended sheet continuation from adjacent-winding surface existence."
+  },
+  "reference_surface": {
+    "scroll": "PHerc0139",
+    "segment": "20260317000000-w035_2026031718",
+    "tifxyz": "mesh/20260317000000-on-20250728140407-9.362um.tifxyz",
+    "exact_ct_root": "PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "binding_url": "https://scrollprize.org/tutorial5",
+    "tifxyz_sha256": {
+      "meta.json": "11752e63185cc6bc8842cf6f4d7aef84a7e3ec7b0b4eb5c10bf99842e7cd8dda",
+      "x.tif": "d827a5d2e51035c91da74b5fba4fea55c9df9d8f58c6ec7f534d6012ee2f7b69",
+      "y.tif": "41f1df324572b68450f4da92dcd4598844f602982f1965e5bea67e6de080d664",
+      "z.tif": "b61f8bbcd9cb538f43cd72678fd4d38a25cc1643daa4bcfdd7f2e9954f9a1e81"
+    }
+  },
+  "independent_witness_source": {
+    "kind": "published-surface-prediction",
+    "model_id": "20260413222639",
+    "prediction_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/representations/predictions/surfaces/20250728140407-surface-20260413222639-surface-m7-L0-th0.2.zarr",
+    "stored_value_threshold": 127,
+    "published_threshold": 0.2,
+    "ct_support_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "ct_support_rule": "masked CT voxel value > 0",
+    "uses_ink": false,
+    "uses_sheetness_response": false
+  },
+  "frozen_regions": {
+    "material_grid_coordinate_system": "TIFXYZ y,x indices",
+    "evaluation_window_size_vertices": 51,
+    "deletion_sizes_vertices": [
+      21,
+      31,
+      41
+    ],
+    "centers": [
+      {
+        "id": "surface-0004",
+        "grid_yx": [
+          41,
+          210
+        ],
+        "wrong_wrap_zyx": [
+          3610.5373616463853,
+          4064.0871413991345,
+          2448.588450514539
+        ],
+        "wrong_wrap_signed_distance_voxels": 25
+      },
+      {
+        "id": "surface-0008",
+        "grid_yx": [
+          74,
+          121
+        ],
+        "wrong_wrap_zyx": [
+          4129.329884005405,
+          3534.0840855751335,
+          4050.311872668538
+        ],
+        "wrong_wrap_signed_distance_voxels": -25
+      },
+      {
+        "id": "surface-0012",
+        "grid_yx": [
+          106,
+          231
+        ],
+        "wrong_wrap_zyx": [
+          4885.091502499959,
+          4145.20752013793,
+          2162.707202805177
+        ],
+        "wrong_wrap_signed_distance_voxels": 13
+      },
+      {
+        "id": "surface-0016",
+        "grid_yx": [
+          139,
+          124
+        ],
+        "wrong_wrap_zyx": [
+          5370.450036746958,
+          3791.5572970444764,
+          4180.008520563305
+        ],
+        "wrong_wrap_signed_distance_voxels": -18
+      },
+      {
+        "id": "surface-0023",
+        "grid_yx": [
+          196,
+          45
+        ],
+        "wrong_wrap_zyx": [
+          6545.726512326095,
+          2949.8402477339314,
+          3440.7897029850606
+        ],
+        "wrong_wrap_signed_distance_voxels": -19
+      },
+      {
+        "id": "surface-0028",
+        "grid_yx": [
+          235,
+          188
+        ],
+        "wrong_wrap_zyx": [
+          7287.509652312031,
+          4517.299457217294,
+          3232.6067898069714
+        ],
+        "wrong_wrap_signed_distance_voxels": -29
+      }
+    ],
+    "selection_note": "The six centers and wrong-wrap controls were frozen by earlier geometry-only campaigns. Stage B may not replace a center or wrong-wrap coordinate based on continuation or prediction response."
+  },
+  "hidden_interior_firewall": {
+    "rule": "Before continuation or witness extraction, every TIFXYZ XYZ value and validity bit inside the active deletion rectangle is removed from the algorithm input. Hidden reference values may be reintroduced only after all candidate target/competitor runs have been emitted, solely for scoring.",
+    "implementation_test": "A deterministic leakage/metamorphic test must prove that changing hidden reference coordinates while keeping the same visible collar leaves continuation and candidate outputs unchanged.",
+    "rectangle_rule": "For odd deletion size S centered at frozen [y,x], hide every grid cell with |dy|<=floor(S/2) and |dx|<=floor(S/2), regardless of whether the original reference cell is valid."
+  },
+  "collar_continuation": {
+    "method": "discrete-harmonic-material-grid-v1",
+    "coordinate_channels": [
+      "x",
+      "y",
+      "z"
+    ],
+    "neighborhood": "4-neighbor material grid",
+    "solve_rule": "Solve each coordinate independently over all hidden rectangle cells. Unknown-to-unknown 4-neighbor edges contribute the graph Laplacian. An outside neighbor contributes a Dirichlet value only when its visible TIFXYZ cell is valid. Invalid outside neighbors are omitted (Neumann boundary). Every unknown connected component must touch at least one visible valid Dirichlet neighbor or the variant is invalid.",
+    "solver": "scipy.sparse.linalg.spsolve",
+    "evaluation_window_constraint": "All hidden cells and their one-cell boundary must fit inside the frozen 51x51 evaluation window.",
+    "normal_method": "After inpainting, compute unit normals from centered material-grid tangents using the same cross-product orientation convention as scroliq-sheetness-plan. Candidate generation does not orient the sign semantically."
+  },
+  "normal_ray_decomposition": {
+    "signed_offsets_voxels": [
+      -32,
+      -31,
+      -30,
+      -29,
+      -28,
+      -27,
+      -26,
+      -25,
+      -24,
+      -23,
+      -22,
+      -21,
+      -20,
+      -19,
+      -18,
+      -17,
+      -16,
+      -15,
+      -14,
+      -13,
+      -12,
+      -11,
+      -10,
+      -9,
+      -8,
+      -7,
+      -6,
+      -5,
+      -4,
+      -3,
+      -2,
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32
+    ],
+    "ray_step_voxels": 1,
+    "support_rule": "prediction > 127 AND aligned masked CT > 0",
+    "min_run_voxels": 2,
+    "run_definition": "A run is a maximal contiguous sequence of supported integer offsets with length at least 2. No response-dependent gap bridging or smoothing.",
+    "target_band_abs_midpoint_voxels_max": 8,
+    "competing_band_abs_midpoint_voxels_min": 12,
+    "competing_band_abs_midpoint_voxels_max": 32,
+    "guard_band": "Runs with 8 < absolute midpoint < 12 are recorded as guard-band ambiguity and are never selected as the target.",
+    "target_selection": "Among runs with absolute midpoint <=8, choose smallest absolute midpoint; negative midpoint wins exact ties.",
+    "target_witness_coordinate": "continued_surface_zyx + target_midpoint * continued_unit_normal_zyx",
+    "competitor_coordinates": "continued_surface_zyx + competitor_midpoint * continued_unit_normal_zyx for every qualifying 12-32 voxel run",
+    "hidden_reference_used_for_selection": false
+  },
+  "scoring": {
+    "eligible_hidden_reference_point": "Original hidden TIFXYZ cell is valid AND the collar continuation emitted a finite centered normal at that material index. Eligibility is scoring-only and cannot affect candidate generation.",
+    "correct_target_tolerance_voxels": 8,
+    "correct_target_definition": "Euclidean distance from the selected target witness to the original hidden TIFXYZ point at the same material index <=8 voxels.",
+    "omission_tolerance_voxels": 8,
+    "omission_definition": "A correct target witness is an omission hit when its nearest point in the counterfactual submitted surface with the active deletion removed is >8 voxels away.",
+    "wrong_wrap_rejection_definition": "For each center/size variant, the frozen wrong-wrap point must be >8 voxels from every selected target witness in that variant.",
+    "competitor_recovery_definition": "For the 41x41 variant at each center, the frozen wrong-wrap point is recovered when at least one emitted 12-32 voxel competitor coordinate lies within 8 voxels of it.",
+    "report_fields": [
+      "eligible_hidden_count",
+      "target_witness_count",
+      "correct_target_count",
+      "target_witness_fraction",
+      "correct_target_recall",
+      "target_precision",
+      "omission_recall_among_correct_targets",
+      "wrong_wrap_min_target_distance_voxels",
+      "wrong_wrap_rejected",
+      "competitor_run_count",
+      "guard_band_run_count",
+      "center_competitor_recovered",
+      "continuation_error_quantiles_scoring_only"
+    ]
+  },
+  "decision_rule": {
+    "minimum_target_witnesses_each_variant": 25,
+    "every_variant_min_correct_target_recall": 0.1,
+    "median_correct_target_recall_each_size": 0.25,
+    "every_variant_min_target_precision": 0.85,
+    "median_target_precision_each_size": 0.95,
+    "every_variant_min_omission_recall_among_correct_targets": 0.75,
+    "median_omission_recall_among_correct_targets_each_size": 0.9,
+    "require_all_wrong_wraps_rejected_as_targets": true,
+    "size_41_min_centers_with_wrong_wrap_competitor_recovered": 4,
+    "missing_or_invalid_variant_policy": "A missing, unsolved, or under-supported variant remains in the denominator and fails the campaign. Do not substitute another region or relax a threshold.",
+    "pass_interpretation": "A pass promotes this method only to a reusable experimental diagnostic and justifies a second independent witness-family replication before any Grand Prize completeness claim. It does not make the independent surface predictor ground truth."
+  },
+  "reproducibility": {
+    "randomness": null,
+    "create_only_result": true,
+    "no_target_scroll_use": true,
+    "parameters_frozen_before_response": true,
+    "exact_source_hashes_required": true
+  }
+}
