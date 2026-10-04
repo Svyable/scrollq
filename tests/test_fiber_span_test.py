@@ -124,3 +124,20 @@ def test_vc3d_bundle_shape():
     assert b["vc_pointcollections_json_version"] == "1"
     assert b["collections"]["1"]["points"]["1"]["p"] == [1.0, 2.0, 3.0]
     assert b["collections"]["1"]["tags"]["span_mode"] == "cspline"
+
+
+def test_frozen_run_matches_spec_and_census_and_is_internally_consistent():
+    run = ROOT / "artifacts/2026-10-04-fiber-span-test-run"
+    r = json.loads((run / "result.json").read_text())
+    pts = json.loads((run / "fiber-gaps.points.json").read_text())
+    census = json.loads((ROOT / "artifacts/2026-10-04-fiber-corpus-census/summary.json").read_text())
+    assert r["spec_sha256"] == _m().SPEC_SHA256
+    assert r["census_manifest_sha256"] == census["manifest_sha256"]
+    assert r["verdict"] == "SUPPORTED" and r["controls"]["passed"] is True
+    p = r["primary"]
+    assert (p["fallback_spans"], p["fallback_gap_spans"], p["native_spans"], p["native_gap_spans"]) == (502, 101, 5001, 2)
+    assert p["fallback_spans"] == sum(f["counts"]["fallback"] for f in r["per_fiber"])
+    assert p["native_gap_spans"] == sum(f["counts"]["native_gap"] for f in r["per_fiber"])
+    assert sum(f["gap_steps_total"] for f in r["per_fiber"]) == len(pts["collections"]) == 388 == census["totals"]["gaps"]
+    modes = [c["tags"]["span_mode"] for c in pts["collections"].values()]
+    assert modes.count("trace") == 2
