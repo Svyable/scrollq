@@ -52,6 +52,7 @@ weight-free Pareto frontier (triage, not a readability claim).
     `geometry_probe.py` → `scrollq-geometry-probe`; `fiber_audit.py` →
     `scroliq-fiber`; `fiber_frame.py` → `scroliq-fiber-frame` for the
     experimental ink-blind cross-ply CT continuity diagnostic
+  - `vc3d_run_guard.py` → `scroliq-vc3d-run-guard`: create-only external-command receipt that rejects exit-zero runs unless a newly produced TIFXYZ surface satisfies semantic vertex/quad/area postconditions; optional exact-volume CT preflight binding
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
@@ -103,6 +104,7 @@ scroliq-pairs --list --out out/discovery.json          # registered rescan pairs
 scroliq-manifest --help                                # derive prize manifests
 scroliq-chunk-audit --index <metadata.min.json[.gz]> --out out/audit.json
 scroliq-segmentation-uq --help                      # structural boundary/component UQ gate
+scroliq-vc3d-run-guard --help                       # exit code + semantic TIFXYZ postconditions
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests
