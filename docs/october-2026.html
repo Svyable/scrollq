@@ -149,11 +149,17 @@ This is a foundation, not a completed spiral evaluation: native fitter export, s
 <p><b>Deliverable.</b> Withhold a declared set of winding collections from a fit, then measure the fit against them with the upstream satisfaction tolerances. The provenance gate checks that withheld collections never entered the fit.</p>
 <p><b>Done when.</b> One real held-out evaluation, with the withheld set, fit config and checkpoint hashes committed.</p></div>
 <div class="goal" id="o4"><h3><span class="id">O4</span>Fiber IQ: whole public corpus, then CT support</h3>
-<div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: fiber connectivity</span><span class="chip state">planned</span></div>
+<div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: fiber connectivity</span><span class="chip state">corpus done · CT support open</span></div>
 <p><b>Why.</b> Eight fibers showed that the checks work on real files. To be useful, every published fiber needs auditing, and then a check that a fiber follows real papyrus in the CT.</p>
 <p><b>Starting point.</b> 8 SHA-256-pinned PHercParis4 fibers: 11 gap and 26 sharp-turn candidates, 0 control-line offsets or inversions (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-01-public-fiber-audit">public-fiber-audit</a>).</p>
 <p><b>Deliverable.</b> A hash-pinned audit of every public PHercParis4 fiber, then a CT-conditioned orientation and support check with a positive control: a fiber deliberately shifted off the sheet must be flagged.</p>
-<p><b>Done when.</b> The full-corpus artifact is committed, and the CT check catches its positive control without flagging the unshifted fibers it was calibrated on.</p></div>
+<p><b>Done when.</b> The full-corpus artifact is committed, and the CT check catches its positive control without flagging the unshifted fibers it was calibrated on.</p>
+<p><b>Progress, 2026-10-04.</b> Part 1 done: all <b>136</b> public PHercParis4 fibers listed and audited, with the 8 pinned
+fibers as a positive control (identical to their 2026-10-01 results). 388 gap and 519 sharp-turn candidates in 107 fibers;
+0 control-line offsets or inversions. All 388 gaps are in the 79 fibers that contain fallback-interpolated spans, and the
+57 fully native fibers have none. That is a co-occurrence, not a cause
+(<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-fiber-corpus-census">fiber-corpus-census</a>).
+Part 2, CT support with a shifted-fiber positive control, needs an exact CT binding and moves to <a href="./november-2026.html#n4">November N4</a>.</p></div>
 <div class="goal" id="o5"><h3><span class="id">O5</span>Scan-health score: pass the stability gate, or retire the ranking</h3>
 <div class="chips"><span class="chip crit">insightful, actionable</span><span class="chip crit">honest negative results</span><span class="chip state">done · FAIL → rank bands</span></div>
 <p><b>Why.</b> The published ranking failed our own stability gate. A ranking that reorders on resampling should not be read as an order.</p>
@@ -167,11 +173,18 @@ and Pearson r is 0.911, so scores are reliable but close volumes still swap rank
 v2 pooled score by 6.9 points on average, so the Grand Prize and First Letters frontiers need a new dated campaign
 (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-stability-v2"><code>2026-10-stability-v2/</code></a>).</p></div>
 <div class="goal" id="o6"><h3><span class="id">O6</span>Get the review queues into reviewers' hands</h3>
-<div class="chips"><span class="chip crit">gets used</span><span class="chip crit">released early</span><span class="chip crit">standard formats</span><span class="chip state">planned</span><span class="chip gate">needs maintainer approval</span></div>
+<div class="chips"><span class="chip crit">gets used</span><span class="chip crit">released early</span><span class="chip crit">standard formats</span><span class="chip state">guides + drafts ready</span><span class="chip gate">needs maintainer approval</span></div>
 <p><b>Why.</b> The prize favours tools that get used. Every ScrolIQ queue (mesh flags, ray-order candidates, fiber gaps) already carries VC3D coordinates but lives in JSON.</p>
 <p><b>Starting point.</b> Review queues exist as JSON reports with segment IDs and XYZ coordinates.</p>
 <p><b>Deliverable.</b> A short how-to for each queue, VC3D-ready lists, and upstream bug reports drafted for the confirmed defects: the defective PHerc0814 pyramid, the broken PHerc1447 segment <code>20251105093211-z_dbg_gen_00320</code>, and the PHerc0343P chunk-size mismatch. Nothing is filed upstream without the maintainer's explicit approval.</p>
-<p><b>Done when.</b> The guides are published and the drafts are reviewed. Any external feedback, such as an issue, comment or bug report, is linked from this page.</p></div>
+<p><b>Done when.</b> The guides are published and the drafts are reviewed. Any external feedback, such as an issue, comment or bug report, is linked from this page.</p>
+<p><b>Progress, 2026-10-04.</b> The how-to for all four queues is <a href="./review-queues.md">review-queues.md</a>.
+The ray-order queue now exports to VC3D PointCollections (<code>scroliq-vc3d-review --kind winding-ray-order</code>),
+alongside the existing winding-attachment bundle. All three upstream reports are drafted and <b>unfiled</b>. PHerc0814
+(six level headers, zero chunks) and the PHerc1447 debug mesh (same bytes, same 153 components, 1,335 edge jumps and 386
+reversals) were both rechecked live today
+(<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-review-queues">review-queues</a>).
+Remaining: maintainer review and approval to file, then any external feedback.</p></div>
 </div>
 </div>
 

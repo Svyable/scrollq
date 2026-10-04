@@ -1,0 +1,45 @@
+name: Fiber Corpus Census
+
+on:
+  push:
+    paths:
+      - "scripts/fiber_corpus_campaign.py"
+      - ".github/workflows/fiber-corpus.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install .
+      - name: Audit every public PHercParis4 fiber
+        id: census
+        continue-on-error: true
+        run: |
+          python scripts/fiber_corpus_campaign.py \
+            --out out/fiber-corpus/summary.json
+      - name: Print full evidence
+        if: always()
+        run: |
+          echo "=== FIBER_CORPUS_SUMMARY_BEGIN ==="
+          python -c "import json,sys; print(json.dumps(json.load(open('out/fiber-corpus/summary.json')),separators=(',',':')))"
+          echo "=== FIBER_CORPUS_SUMMARY_END ==="
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fiber-corpus
+          path: out/fiber-corpus/summary.json
+          if-no-files-found: error
+      - name: Enforce campaign result
+        if: steps.census.outcome != 'success'
+        run: exit 1

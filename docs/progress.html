@@ -172,12 +172,13 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
   <a href="#changes">This week</a>
   <a href="#numbers">Measurements</a>
   <a href="#bottleneck">Bottleneck</a>
-  <a href="#backlog">Backlog</a>
+  <a href="#backlog">October</a>
+  <a href="#november">November</a>
   <a href="#reproduce">Reproduce</a>
 </nav>
 
 <header class="hero">
-  <div class="eyebrow">Live Grand Prize evidence board · updated 2026-10-03</div>
+  <div class="eyebrow">Live Grand Prize evidence board · updated 2026-10-04</div>
   <h1>Road to the 2027 Grand Prize</h1>
   <p class="lede">
     ScrolIQ is not counting commits toward a prize. It is tracking the evidence required to turn an exact
@@ -268,6 +269,11 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
 
   <div class="change-grid">
     <article class="change">
+      <div class="date">OCT 04</div>
+      <h3>Every public PHercParis4 fiber audited, with a positive control</h3>
+      <p>136 / 136 fibers, 388 gaps and 519 sharp turns. All 388 gaps fall in fibers that contain fallback-interpolated spans; the 57 fully native fibers have none. Not yet a causal claim.</p>
+    </article>
+    <article class="change">
       <div class="date">OCT 03</div>
       <h3>Blind model evaluation now reaches held-out surface recovery</h3>
       <p><code>scroliq-eval</code> provides the fail-closed envelope; <code>scroliq-segmentation-validate</code> adds bidirectional TIFXYZ coverage, exact-distance diagnostics, topology gates, and a salted commitment that freezes private truth before scoring.</p>
@@ -276,11 +282,6 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
       <div class="date">OCT 03</div>
       <h3>Winding consistency moved from intuition to measurable constraints</h3>
       <p>2,111 / 2,232 points attached to verified patches; 6 / 16,074 constraints flagged; the +2 injection control detected 194 / 200 corruptions.</p>
-    </article>
-    <article class="change">
-      <div class="date">OCT 02</div>
-      <h3>Precise scan ranking failed its own preregistered stability gate</h3>
-      <p>Stability v2 produced Spearman ρ = 0.750, below the 0.85 gate. The site now uses rank bands instead of pretending close ranks are exact.</p>
     </article>
     <article class="change">
       <div class="date">OCT 03</div>
@@ -316,9 +317,9 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
       <div class="why">positive control for the attachment audit</div>
     </article>
     <article class="stat">
-      <div class="n">2,166/2,232</div>
-      <div class="l">annotated points with comparable winding neighbours</div>
-      <div class="why">97% ray-order coverage on PHercParis4</div>
+      <div class="n">136/136</div>
+      <div class="l">public PHercParis4 fibers audited</div>
+      <div class="why">388 gaps, all in fibers with fallback spans</div>
     </article>
     <article class="stat">
       <div class="n">ρ 0.750</div>
@@ -404,6 +405,18 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
         <div class="title">Model evaluation foundation merged</div>
         <div class="detail"><code>scroliq-eval</code> is now an installed evaluation harness, not scaffolding: versioned model/data/results contracts, checkpoint and code hashing, overlap blocking, deterministic bootstrap CIs, explicit failed regions, and a two-trust-domain blind-evaluation design.</div>
       </div>
+
+      <div class="event">
+        <div class="date">2026-10-04</div>
+        <div class="title">Fiber census: 136 / 136 public fibers audited</div>
+        <div class="detail">The 8 pinned fibers served as the positive control, and their results were identical to 2026-10-01. 388 gap and 519 sharp-turn candidates; 0 control-line offsets or inversions. <a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-fiber-corpus-census">Evidence →</a></div>
+      </div>
+
+      <div class="event">
+        <div class="date">2026-10-04</div>
+        <div class="title">Review queues documented; three upstream drafts ready (unfiled)</div>
+        <div class="detail">One how-to covers all four queues, and the ray-order queue now exports to VC3D. Live rechecks confirm the PHerc0814 headers-without-chunks and the PHerc1447 debug mesh are still published, with the same bytes and the same findings. <a href="./review-queues.md">Guide →</a></div>
+      </div>
     </div>
   </div>
 </section>
@@ -460,7 +473,7 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
 
       <div class="goal">
         <div class="ghead"><span class="gid">O4</span><span class="gtitle">Fiber IQ: whole public corpus, then CT support</span><span class="state partial">Partial</span></div>
-        <div class="gdetail">Eight-fiber public pilot is frozen. Full-corpus coverage and exact-volume CT support with a positive control remain open.</div>
+        <div class="gdetail">Full public corpus measured: 136 / 136 fibers, positive control passed. Exact-volume CT support with a shifted-fiber control remains open → N4.</div>
       </div>
 
       <div class="goal">
@@ -470,7 +483,7 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
 
       <div class="goal">
         <div class="ghead"><span class="gid">O6</span><span class="gtitle">Put review queues in reviewers' hands</span><span class="state partial">Partial</span></div>
-        <div class="gdetail">Native-coordinate review queues and reviewer map exist. Human review throughput and feedback loops remain incomplete.</div>
+        <div class="gdetail">How-to for all four queues published; ray-order queue exports to VC3D; PHerc0814, PHerc1447 and PHerc0343P drafts ready but unfiled pending maintainer approval → N7.</div>
       </div>
     </div>
 
@@ -510,6 +523,53 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
       <div class="goal">
         <div class="ghead"><span class="gid">G7</span><span class="gtitle">Dashboard & docs refresh</span><span class="state measured">Measured</span></div>
         <div class="gdetail">Current evidence and campaign state are published here; scientific claims still trace to committed artifacts rather than the dashboard itself.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="november">
+  <div class="section-head">
+    <div>
+      <div class="section-kicker">06b · Next month</div>
+      <h2>November campaigns</h2>
+    </div>
+    <div class="section-note">Drafted 2026-10-04, ahead of the month. Full goals and exit criteria: <a href="./november-2026.html">November plan</a>.</div>
+  </div>
+
+  <div class="backlog-wrap">
+    <div class="backlog">
+      <h3>Science · N1–N4</h3>
+      <div class="goal">
+        <div class="ghead"><span class="gid">N1</span><span class="gtitle">Close O1: publish Mesh IQ flag precision</span><span class="state blocked">Needs reviewers</span></div>
+        <div class="gdetail">Frozen 54-segment blinded sample; labels must come from human VC3D review. Cutoff Nov 21.</div>
+      </div>
+      <div class="goal">
+        <div class="ghead"><span class="gid">N2</span><span class="gtitle">One exact-volume surface result, scored blind</span><span class="state unknown">Not started</span></div>
+        <div class="gdetail">The bottleneck goal. Sheetness campaign, blind TIFXYZ scorer and target-freeze gate exist; volume choice and pre-registration come first.</div>
+      </div>
+      <div class="goal">
+        <div class="ghead"><span class="gid">N3</span><span class="gtitle">First blind evaluation of a community model</span><span class="state ready">Ready to test</span></div>
+        <div class="gdetail"><code>scroliq-eval</code> is ready, but no published evaluation exists yet. Needs a model owner's agreement.</div>
+      </div>
+      <div class="goal">
+        <div class="ghead"><span class="gid">N4</span><span class="gtitle">Fiber IQ: CT support + fallback–gap test</span><span class="state partial">Partial</span></div>
+        <div class="gdetail">Census done (136 fibers). Span-level pre-registration and the exact CT binding come next.</div>
+      </div>
+    </div>
+    <div class="backlog">
+      <h3>Carryover & delivery · N5–N7</h3>
+      <div class="goal">
+        <div class="ghead"><span class="gid">N5</span><span class="gtitle">Close O3: held-out spiral score</span><span class="state blocked">Needs GPU fit</span></div>
+        <div class="gdetail">The evaluator is ready. The missing input is one real fit with declared withheld collections.</div>
+      </div>
+      <div class="goal">
+        <div class="ghead"><span class="gid">N6</span><span class="gtitle">Grand Prize frontier under the v2 design</span><span class="state unknown">Not started</span></div>
+        <div class="gdetail">Requires a new dated <code>as_of</code> campaign. September artifacts stay frozen.</div>
+      </div>
+      <div class="goal">
+        <div class="ghead"><span class="gid">N7</span><span class="gtitle">Upstream: file approved reports; dl regression</span><span class="state blocked">Needs approval</span></div>
+        <div class="gdetail">Three drafts are ready. Each will be filed only after the maintainer reproduces it and approves.</div>
       </div>
     </div>
   </div>
@@ -593,12 +653,14 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
 </section>
 
 <footer>
-  Built from committed ScrolIQ and zarr-pyramid-audit evidence. Updated 2026-10-03.
+  Built from committed ScrolIQ and zarr-pyramid-audit evidence. Updated 2026-10-04.
   This page is a navigation layer, not a source of truth.
   <div class="links">
     <a href="./">ScrolIQ overview</a>
     <a href="./grand-prize-readiness.html">Grand Prize readiness</a>
     <a href="./october-2026-update.html">October evidence update</a>
+    <a href="./november-2026.html">November plan</a>
+    <a href="./review-queues.md">Review queues</a>
     <a href="https://github.com/Svyable/scrollq">Repository</a>
     <a href="https://scrollprize.org/">Vesuvius Challenge</a>
   </div>
