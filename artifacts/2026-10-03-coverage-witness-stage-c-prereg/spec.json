@@ -1,0 +1,310 @@
+{
+  "schema": "scrollq-research-coverage-witness-stage-c/1",
+  "status": "frozen-before-stage-c-witness-read",
+  "purpose": "Fresh-holdout, precision-first coverage-witness calibration after Stage B showed that discrete-harmonic continuation drifts across large curved holes. Stage C uses only visible annulus geometry, curvature-aware material-coordinate polynomial continuation, and explicit model-disagreement abstention before consulting the independent surface prediction.",
+  "classification_before_observation": "EXPERIMENT FURTHER",
+  "claim_boundary": "A pass would establish that a conservative visible-only continuation ensemble can recover correctly localized independent omission witnesses on six previously untouched PHerc0139 regions while rejecting frozen adjacent-winding controls. It would justify an experimental diagnostic, not whole-scroll completeness or target-scroll validity.",
+  "predecessor": {
+    "stage_b_spec_path": "artifacts/2026-10-03-coverage-witness-stage-b-prereg/spec.json",
+    "stage_b_result_path": "artifacts/2026-10-03-coverage-witness-stage-b-run/result.json",
+    "stage_b_decision": "fail",
+    "observed_failure_mechanism": "Discrete harmonic material-grid continuation accumulated large hidden-surface error as deletion size increased, causing low target precision and two wrong-wrap false accepts. Frozen Stage-B thresholds are not relaxed.",
+    "design_response": "Use fresh holdout centers and abstain when two curvature-aware visible-only continuations disagree."
+  },
+  "reference_surface": {
+    "scroll": "PHerc0139",
+    "segment": "20260317000000-w035_2026031718",
+    "tifxyz": "mesh/20260317000000-on-20250728140407-9.362um.tifxyz",
+    "exact_ct_root": "PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "binding_url": "https://scrollprize.org/tutorial5",
+    "grid_shape_yx": [
+      291,
+      262
+    ],
+    "tifxyz_sha256": {
+      "meta.json": "11752e63185cc6bc8842cf6f4d7aef84a7e3ec7b0b4eb5c10bf99842e7cd8dda",
+      "x.tif": "d827a5d2e51035c91da74b5fba4fea55c9df9d8f58c6ec7f534d6012ee2f7b69",
+      "y.tif": "41f1df324572b68450f4da92dcd4598844f602982f1965e5bea67e6de080d664",
+      "z.tif": "b61f8bbcd9cb538f43cd72678fd4d38a25cc1643daa4bcfdd7f2e9954f9a1e81"
+    }
+  },
+  "fresh_holdout_selection": {
+    "source": "artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json",
+    "excluded_stage_b_ids": [
+      "surface-0004",
+      "surface-0008",
+      "surface-0012",
+      "surface-0016",
+      "surface-0023",
+      "surface-0028"
+    ],
+    "eligibility_rule": "From the original 32 frozen groups, exclude Stage-B centers and retain only centers whose 51x51 material-grid evaluation window fits completely inside the 291x262 TIFXYZ grid.",
+    "eligible_count": 19,
+    "order": "original reference-plan group order",
+    "selection_rule": "For six samples from N=19 eligible groups, select zero-based ranks floor((i+0.5)*N/6) for i=0..5.",
+    "selected_zero_based_ranks": [
+      1,
+      4,
+      7,
+      11,
+      14,
+      17
+    ],
+    "selected_centers": [
+      {
+        "id": "surface-0003",
+        "grid_yx": [
+          33,
+          175
+        ],
+        "wrong_wrap_zyx": [
+          3425.0048059545556,
+          3942.192548123948,
+          3068.2425937073026
+        ],
+        "wrong_wrap_signed_distance_voxels": 15
+      },
+      {
+        "id": "surface-0009",
+        "grid_yx": [
+          82,
+          164
+        ],
+        "wrong_wrap_zyx": [
+          4288.238812577133,
+          4058.3094217638904,
+          3441.508162638358
+        ],
+        "wrong_wrap_signed_distance_voxels": -17
+      },
+      {
+        "id": "surface-0014",
+        "grid_yx": [
+          123,
+          41
+        ],
+        "wrong_wrap_zyx": [
+          5195.864265545838,
+          2677.9595384364825,
+          3456.817825747225
+        ],
+        "wrong_wrap_signed_distance_voxels": 26
+      },
+      {
+        "id": "surface-0019",
+        "grid_yx": [
+          163,
+          218
+        ],
+        "wrong_wrap_zyx": [
+          5942.954147510071,
+          4332.856552669642,
+          2535.8078690842567
+        ],
+        "wrong_wrap_signed_distance_voxels": 16
+      },
+      {
+        "id": "surface-0024",
+        "grid_yx": [
+          204,
+          36
+        ],
+        "wrong_wrap_zyx": [
+          6699.611606310131,
+          2909.036951010525,
+          3284.679084473773
+        ],
+        "wrong_wrap_signed_distance_voxels": 21
+      },
+      {
+        "id": "surface-0030",
+        "grid_yx": [
+          251,
+          146
+        ],
+        "wrong_wrap_zyx": [
+          7577.089544043295,
+          4271.02253813274,
+          3994.780700946154
+        ],
+        "wrong_wrap_signed_distance_voxels": -15.5
+      }
+    ],
+    "no_replacement_rule": "No selected center may be replaced because of continuation, prediction, CT, or scoring outcomes."
+  },
+  "independent_witness_source": {
+    "kind": "published-surface-prediction",
+    "model_id": "20260413222639",
+    "prediction_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/representations/predictions/surfaces/20250728140407-surface-20260413222639-surface-m7-L0-th0.2.zarr",
+    "stored_value_threshold": 127,
+    "published_threshold": 0.2,
+    "ct_support_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "ct_support_rule": "masked CT voxel value > 0",
+    "uses_ink": false,
+    "uses_sheetness_response": false
+  },
+  "deletion_protocol": {
+    "evaluation_window_size_vertices": 51,
+    "deletion_sizes_vertices": [
+      21,
+      31,
+      41
+    ],
+    "hidden_firewall": "All TIFXYZ XYZ values and validity bits inside the active deletion are removed before fitting, uncertainty estimation, normal construction, or independent-prediction sampling. Hidden reference is scoring-only.",
+    "rectangle_rule": "Odd square centered at the frozen material-grid center."
+  },
+  "continuation_ensemble": {
+    "coordinate_system": "material-grid centered coordinates normalized by evaluation half-width 25: u=(x-cx)/25, v=(y-cy)/25",
+    "visible_training_points": "All visible valid TIFXYZ vertices inside the 51x51 evaluation window and outside the active hidden rectangle.",
+    "model_a": {
+      "name": "tensor-polynomial-degree-2",
+      "basis": "u^i v^j for i,j in 0..2",
+      "terms": 9,
+      "solver": "numpy.linalg.lstsq with rcond=None"
+    },
+    "model_b": {
+      "name": "tensor-polynomial-degree-3",
+      "basis": "u^i v^j for i,j in 0..3",
+      "terms": 16,
+      "solver": "numpy.linalg.lstsq with rcond=None"
+    },
+    "output_model": "degree-3 prediction",
+    "analytic_normals": "Compute dXYZ/dx and dXYZ/dy analytically from each polynomial and use unit cross(dXYZ/dx, dXYZ/dy). Normal sign is arbitrary.",
+    "consensus": {
+      "max_position_disagreement_voxels": 8,
+      "min_abs_normal_cosine": 0.9,
+      "rule": "Generate an independent-prediction ray only where degree-2 and degree-3 predicted XYZ positions differ by <=8 voxels and absolute normal cosine is >=0.9. Otherwise abstain."
+    },
+    "visible_only_validation": {
+      "holdout_band_width_vertices": 2,
+      "definition": "Before final fitting, withhold visible valid cells in the two-cell inner collar immediately outside the hidden rectangle. Fit each model on the remaining visible window and score degree-3 prediction on the held-out collar. This validation never uses hidden cells.",
+      "every_variant_max_p95_error_voxels": 12,
+      "median_p95_error_each_size_max_voxels": 8
+    },
+    "conditioning_requirement": "Each fit must have at least four times as many visible training points as basis terms and finite least-squares coefficients."
+  },
+  "normal_ray_decomposition": {
+    "signed_offsets_voxels": [
+      -32,
+      -31,
+      -30,
+      -29,
+      -28,
+      -27,
+      -26,
+      -25,
+      -24,
+      -23,
+      -22,
+      -21,
+      -20,
+      -19,
+      -18,
+      -17,
+      -16,
+      -15,
+      -14,
+      -13,
+      -12,
+      -11,
+      -10,
+      -9,
+      -8,
+      -7,
+      -6,
+      -5,
+      -4,
+      -3,
+      -2,
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32
+    ],
+    "support_rule": "prediction > 127 AND aligned masked CT > 0",
+    "min_run_voxels": 2,
+    "run_definition": "Maximal contiguous supported integer-offset sequence; no response-dependent smoothing.",
+    "target_band_abs_midpoint_voxels_max": 8,
+    "competing_band_abs_midpoint_voxels_min": 12,
+    "competing_band_abs_midpoint_voxels_max": 32,
+    "guard_band": "8 < absolute run midpoint < 12 is ambiguity and is never target coverage.",
+    "target_selection": "Nearest absolute target-run midpoint; negative wins exact ties."
+  },
+  "scoring": {
+    "correct_target_tolerance_voxels": 8,
+    "omission_tolerance_voxels": 8,
+    "correct_target_definition": "Selected target witness is within 8 voxels of the original hidden TIFXYZ point at the same material index.",
+    "omission_definition": "Correct target witness is >8 voxels from the counterfactual submitted w035 surface with the active patch removed.",
+    "wrong_wrap_rejection_definition": "Frozen wrong-wrap point is >8 voxels from every selected target witness in the variant.",
+    "competitor_recovery_definition": "In the 41x41 variant, a competitor coordinate emitted at the center material index lies within 8 voxels of the frozen wrong-wrap point.",
+    "report_fields": [
+      "visible_training_count",
+      "visible_collar_validation_count",
+      "visible_collar_validation_p95_error",
+      "eligible_hidden_count",
+      "consensus_hidden_count",
+      "consensus_fraction",
+      "target_witness_count",
+      "correct_target_count",
+      "correct_target_recall",
+      "target_precision",
+      "omission_recall_among_correct_targets",
+      "wrong_wrap_min_target_distance",
+      "wrong_wrap_rejected",
+      "center_competitor_recovered",
+      "hidden_position_disagreement_quantiles_scoring_only",
+      "degree3_hidden_error_quantiles_scoring_only"
+    ]
+  },
+  "decision_rule": {
+    "minimum_target_witnesses_each_variant": 25,
+    "every_variant_min_correct_target_recall": 0.05,
+    "median_correct_target_recall_each_size": 0.15,
+    "every_variant_min_target_precision": 0.9,
+    "median_target_precision_each_size": 0.97,
+    "every_variant_min_omission_recall_among_correct_targets": 0.9,
+    "median_omission_recall_among_correct_targets_each_size": 0.98,
+    "visible_validation_every_variant_p95_max_voxels": 12,
+    "visible_validation_median_p95_each_size_max_voxels": 8,
+    "require_all_wrong_wraps_rejected_as_targets": true,
+    "size_41_min_centers_with_wrong_wrap_competitor_recovered": 4,
+    "missing_or_invalid_variant_policy": "Fail; do not replace a region or relax a threshold.",
+    "pass_interpretation": "A pass promotes the polynomial-consensus method only to an experimental diagnostic and supports replication with a second independent witness family. It does not prove recto completeness."
+  },
+  "reproducibility": {
+    "randomness": null,
+    "create_only_result": true,
+    "no_target_scroll_use": true,
+    "parameters_frozen_before_response": true
+  }
+}
