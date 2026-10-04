@@ -377,3 +377,14 @@ def test_hash_bound_external_binding_rejects_volume_mismatch(tmp_path):
             halo=2,
             validate_report_fn=lambda _report: [],
         )
+
+
+def test_git_blob_sha1_matches_git_hash_object(tmp_path):
+    import subprocess
+
+    path = tmp_path / "blob.bin"
+    path.write_bytes(b"scrollq\x00blob\n")
+    expected = subprocess.run(
+        ["git", "hash-object", str(path)], capture_output=True, text=True, check=True
+    ).stdout.strip()
+    assert plan._git_blob_sha1(path) == expected
