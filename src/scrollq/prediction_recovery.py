@@ -518,3 +518,78 @@ def projected_material_relaxation(
         "total_accepted_updates": int(total_accepted),
         "unique_recovered_voxel_fraction": float(len(unique) / len(flat)),
     }
+
+
+def score_projected_relaxation(
+    rows: list[dict[str, Any]],
+    *,
+    required_cohort_size: int = 4,
+    minimum_fraction_within_8_voxels_every_center: float = 0.50,
+    minimum_median_fraction_within_8_voxels: float = 0.75,
+    maximum_within_8_regression_vs_v1_each_center: float = 0.05,
+    maximum_median_error_voxels_every_center: float = 8.0,
+    maximum_median_p95_error_voxels: float = 16.0,
+    require_all_wrong_wrap_controls_rejected: bool = True,
+    minimum_median_unique_recovered_voxel_fraction: float = 0.50,
+) -> dict[str, Any]:
+    """Apply the frozen conditional correspondence-development gate."""
+    if len(rows) != required_cohort_size:
+        raise PredictionRecoveryError(
+            f"expected {required_cohort_size} correspondence rows, got {len(rows)}"
+        )
+    fractions = [float(row["v2_fraction_within_8_voxels"]) for row in rows]
+    baselines = [float(row["v1_fraction_within_8_voxels"]) for row in rows]
+    median_errors = [float(row["v2_median_error_voxels"]) for row in rows]
+    p95_errors = [float(row["v2_p95_error_voxels"]) for row in rows]
+    unique = [float(row["v2_unique_recovered_voxel_fraction"]) for row in rows]
+    wrong = [bool(row["v2_wrong_wrap_rejected"]) for row in rows]
+    identity = [
+        bool(row.get("v1_candidate_hash_exact"))
+        and bool(row.get("v1_component_label_exact"))
+        for row in rows
+    ]
+    regression = [
+        max(0.0, baseline - value)
+        for baseline, value in zip(baselines, fractions)
+    ]
+
+    checks = {
+        "cohort_complete": len(rows) == required_cohort_size,
+        "v1_identity_exact": all(identity),
+        "fraction_within_8_every_center": all(
+            value >= minimum_fraction_within_8_voxels_every_center
+            for value in fractions
+        ),
+        "median_fraction_within_8": (
+            float(np.median(fractions))
+            >= minimum_median_fraction_within_8_voxels
+        ),
+        "no_within_8_regression_over_limit": all(
+            value <= maximum_within_8_regression_vs_v1_each_center
+            for value in regression
+        ),
+        "median_error_every_center": all(
+            value <= maximum_median_error_voxels_every_center
+            for value in median_errors
+        ),
+        "median_p95_error": (
+            float(np.median(p95_errors)) <= maximum_median_p95_error_voxels
+        ),
+        "wrong_wrap_controls_rejected": (
+            (not require_all_wrong_wrap_controls_rejected) or all(wrong)
+        ),
+        "median_unique_recovered_voxel_fraction": (
+            float(np.median(unique))
+            >= minimum_median_unique_recovered_voxel_fraction
+        ),
+    }
+    return {
+        "status": "pass" if all(checks.values()) else "fail",
+        "cohort_size": len(rows),
+        "median_fraction_within_8_voxels": float(np.median(fractions)),
+        "median_p95_error_voxels": float(np.median(p95_errors)),
+        "median_unique_recovered_voxel_fraction": float(np.median(unique)),
+        "maximum_within_8_regression": float(max(regression)),
+        "wrong_wrap_rejected_count": sum(wrong),
+        "checks": checks,
+    }
