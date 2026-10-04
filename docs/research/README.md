@@ -40,6 +40,9 @@ campaign.
 | Cross-ply fiber-frame continuity | EXPERIMENT FURTHER; executable harness + synthetic splice control | Ink-blind CT-conditioned local material continuity + VC3D review | Real-CT adjacent-winding and legitimate-discontinuity benchmark |
 | Structure-aware conformal uncertainty sets for surface predictions | EXPERIMENT FURTHER; queued 2026-10-04, not preregistered | Calibrated "surface localized here" vs abstain; separates boundary error from missed-sheet mass | Verify the stored prediction is graded, fix achievable per-stratum n, then preregister on untouched natural ROIs |
 | Learned uncertainty head on a frozen backbone (SegWithU-style) | DEFERRED (WATCH) | Failure ranking / selective prediction for sheet switches | A frozen surface backbone with accessible features and isolated labels; none exists in this repo |
+| Sealed-truth timing for blind physical controls | INCLUDE as evaluation-only tooling ([`blind-control.md`](../blind-control.md)); no run yet | Records whether truth became visible before the prediction was committed; strengthens the leakage/provenance gate | First blind run on a pinned physical benchmark |
+| NIST synthetic carbonized-scroll CT | INCLUDE as evaluation-only benchmark; registered **unpinned** ([artifact](../../artifacts/2026-10-04-nist-model-scroll/README.md)) | Physical end-to-end positive control with text known before scanning | Acquire, record DOI/license evidence/byte inventory, seal truth, then one blind run |
+| CSWinUNETR (thin-structure segmentation) | WATCH; no explicit license found, so no vendoring or derivation | Long-range sheet continuity through low-contrast gaps | A license, then an architecture-only A/B on identical cubes/ROIs judged on winding bridges and sheet switches |
 | Fiber-coordinate canonicalization as a model architecture | DISMISS for now | Possible orientation normalization | Reconsider only if an ablation inside another experiment supports it |
 | CGAL `Mesh_smoothing_3` as an integration | DISMISS for current integration | Tetrahedral-mesh smoothing; inversion-barrier idea only | None; the barrier concept may inform tests |
 | Global histogram matching | DISMISS | Superficial domain normalization | None; retain only as a negative control |
@@ -47,6 +50,8 @@ campaign.
 | Ink-selected flattening | DISMISS | Could maximize visual persistence | None; creates geometry-selection leakage |
 | Immediate tile-origin backend | DISMISS pending Stage-A evidence | True crop-phase intervention | Reconsider only if stride/blend sensitivity is material |
 | Generic prediction hashing layer for ink | DISMISS as redundant | Artifact provenance | Existing ink validator already binds exact evaluated arrays |
+| Gaussian-splatting CT reconstruction (FaCT-GS) | DISMISS for the prize pipeline | Faster reconstruction from raw acquisitions | None; ScrolIQ holds reconstructed volumes and it adds a learned stage upstream of weak ink evidence |
+| Clinical low-dose CT reconstruction (CSRCT) | DISMISS | Sparse-prior reconstruction | None; simulated-data evidence, restricted article, no permissive implementation found |
 
 ## Files
 
