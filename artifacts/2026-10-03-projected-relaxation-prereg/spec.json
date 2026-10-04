@@ -1,0 +1,115 @@
+{
+  "schema": "scrollq-research-projected-component-relaxation/1",
+  "status": "frozen-after-connectivity-v1-fail-before-relaxation-read",
+  "purpose": "Conditional correspondence-development experiment on the four PHerc0139 w035 regions where prediction-connectivity-recovery-v1 already selected one wrong-wrap-safe surface-m7 component. The experiment changes only how the hidden 21x21 material grid is positioned on that already-selected component.",
+  "classification_before_observation": "EXPERIMENT FURTHER",
+  "claim_boundary": "A PASS establishes only that projected material-grid relaxation improves or preserves recovery on the four v1-selected development patches while staying on their exact v1 surface components. It does not repair v1's two component-selection abstentions, constitute a held-out result, prove arbitrary gap recovery, or justify Grand Prize transfer. Any promotion still requires an integrated frozen method and untouched holdout.",
+  "provenance": {
+    "frozen_at_repo_commit": "07bf17a2ba53928202885bbef8bc4380ef39b9a7",
+    "v1_spec_path": "artifacts/2026-10-03-prediction-connectivity-recovery-prereg/spec.json",
+    "v1_result_path": "artifacts/2026-10-03-prediction-connectivity-recovery-run/result.json",
+    "v1_scientific_decision": "fail",
+    "v1_failure_interpretation": "Component identity was wrong-wrap-safe on four centers, but one-shot nearest projection inherited in-plane correspondence error from the harmonic prior. Two other centers abstained before component selection because one visible side lacked enough prediction-supported anchors.",
+    "selection_disclosure": "This v2 cohort is explicitly selected from v1 development outcomes and is therefore development-only. No v2 success may be described as held-out validation."
+  },
+  "source_contract": {
+    "same_as_v1": true,
+    "scroll": "PHerc0139",
+    "exact_ct_root": "PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "tifxyz_segment": "20260317000000-w035_2026031718",
+    "uses_ink": false
+  },
+  "development_cohort": [
+    {
+      "id": "surface-0008",
+      "v1_candidate_sha256": "24685f0fdf37cd8044bd4ca9dce6ad1ab630b6ef4b9c8e276a2ebd342641aa81",
+      "v1_selected_label": 3,
+      "v1_fraction_within_8_voxels": 0.9931972789115646,
+      "v1_median_error_voxels": 2.468237075154394,
+      "v1_p95_error_voxels": 6.070365488221225
+    },
+    {
+      "id": "surface-0012",
+      "v1_candidate_sha256": "50af3214faa3880470c2aca772e11db2be5744b4fc1e2dcb64c9742afb089780",
+      "v1_selected_label": 1,
+      "v1_fraction_within_8_voxels": 0.4217687074829932,
+      "v1_median_error_voxels": 10.437266424272375,
+      "v1_p95_error_voxels": 37.11343224441235
+    },
+    {
+      "id": "surface-0016",
+      "v1_candidate_sha256": "aa28c9a83489fce89d63c33690e83b5034480981bf3ce473152ece33f2a14f42",
+      "v1_selected_label": 3,
+      "v1_fraction_within_8_voxels": 0.6848072562358276,
+      "v1_median_error_voxels": 3.9534715342260953,
+      "v1_p95_error_voxels": 20.40129380260641
+    },
+    {
+      "id": "surface-0023",
+      "v1_candidate_sha256": "69b17ead94367f448c5eca2f721ba54041b9cda5b3b51410320fdae604e09fec",
+      "v1_selected_label": 1,
+      "v1_fraction_within_8_voxels": 0.45351473922902497,
+      "v1_median_error_voxels": 9.670939697621366,
+      "v1_p95_error_voxels": 28.324846426201532
+    }
+  ],
+  "identity_freeze": {
+    "component_rule": "Recompute prediction-connectivity-recovery-v1 byte-for-byte. The regenerated v1 candidate SHA-256 and selected component label must equal the frozen values above before v2 is allowed to proceed.",
+    "no_component_reselection": true,
+    "no_seed_threshold_change": true,
+    "no_connectivity_change": true,
+    "wrong_wrap_rule_unchanged": true
+  },
+  "projected_relaxation": {
+    "name": "surface-constrained-material-laplacian-v1",
+    "grid": "the hidden 21x21 TIFXYZ material grid",
+    "initial_state": "v1 recovered raw prediction voxel for every hidden material cell",
+    "fixed_boundary": "Immediately adjacent visible TIFXYZ material neighbors outside the deletion rectangle. Only visible valid finite neighbors participate.",
+    "neighbor_stencil": "4-neighbor material grid",
+    "update": "Synchronous Jacobi. For each hidden cell, average all available four-neighbor coordinates, using current hidden candidates and fixed visible TIFXYZ boundary neighbors. Query the same frozen v1 raw selected-component point cloud for the nearest raw prediction voxel to that average.",
+    "projection_constraints": {
+      "maximum_neighbor_mean_to_component_distance_voxels": 16,
+      "maximum_per_iteration_candidate_movement_voxels": 16,
+      "failed_projection_action": "retain the previous candidate coordinate"
+    },
+    "iteration_count": 84,
+    "iteration_basis": "exactly 4 times the frozen 21-cell deletion width; fixed before any v2 relaxation response",
+    "update_order": "all proposals computed from the prior iteration, then committed simultaneously",
+    "component_geometry": "raw prediction>127 AND masked CT>0 voxels belonging to the exact v1 selected connectivity label; dilation-only voxels remain forbidden as output geometry",
+    "truth_blind": true,
+    "early_stopping": false,
+    "randomness": null
+  },
+  "candidate_firewall": {
+    "hidden_reference_xyz_forbidden_until_v2_candidate_hash": true,
+    "hidden_reference_validity_forbidden_until_v2_candidate_hash": true,
+    "v1_candidate_and_component_must_be_verified_before_relaxation": true,
+    "v2_candidate_sha256_frozen_before_scoring": true,
+    "metamorphic_expectation": "Changing hidden truth after the deletion must not alter v2 candidate bytes."
+  },
+  "scoring": {
+    "same_hidden_truth_and_denominators_as_v1": true,
+    "primary_accuracy_tolerance_voxels": 8,
+    "wrong_wrap_rejection_distance_voxels": 8,
+    "compare_v2_to_frozen_v1_per_center": true
+  },
+  "development_gate": {
+    "required_cohort_size": 4,
+    "require_all_v1_candidate_hashes_and_component_labels_exact": true,
+    "minimum_fraction_within_8_voxels_every_center": 0.50,
+    "minimum_median_fraction_within_8_voxels": 0.75,
+    "maximum_within_8_regression_vs_v1_each_center": 0.05,
+    "maximum_median_error_voxels_every_center": 8.0,
+    "maximum_median_p95_error_voxels": 16.0,
+    "require_all_wrong_wrap_controls_rejected": true,
+    "minimum_median_unique_recovered_voxel_fraction": 0.50,
+    "decision_rule": "PASS only if every frozen condition passes simultaneously. Otherwise FAIL. Do not tune iteration count, projection radii, cohort, thresholds, or update rule after observation.",
+    "pass_action": "Treat correspondence as supported development evidence only. Next, preregister an integrated component-selection plus projected-relaxation method before opening untouched holdout.",
+    "fail_action": "Preserve the negative result and change the correspondence mechanism rather than tuning this one on the four observed patches."
+  },
+  "reproducibility": {
+    "create_only_result": true,
+    "no_target_scroll_use": true,
+    "no_ink": true
+  }
+}
