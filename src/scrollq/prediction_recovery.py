@@ -376,3 +376,145 @@ def read_level_box(
                 )
                 out[out_slices] = array[chunk_slices]
     return out, missing
+
+
+def projected_material_relaxation(
+    initial_zyx: np.ndarray,
+    component_points_zyx: np.ndarray,
+    *,
+    top_boundary_zyx: np.ndarray,
+    bottom_boundary_zyx: np.ndarray,
+    left_boundary_zyx: np.ndarray,
+    right_boundary_zyx: np.ndarray,
+    iteration_count: int,
+    maximum_projection_residual_voxels: float,
+    maximum_movement_per_iteration_voxels: float,
+) -> dict[str, Any]:
+    """Relax a hidden material grid while projecting onto one frozen component.
+
+    Hidden reference geometry is deliberately absent from this API.
+    """
+    current = np.asarray(initial_zyx, dtype=np.float64).copy()
+    points = np.asarray(component_points_zyx, dtype=np.float64)
+    if current.ndim != 3 or current.shape[-1] != 3:
+        raise PredictionRecoveryError("initial_zyx must have shape [H,W,3]")
+    if not np.isfinite(current).all():
+        raise PredictionRecoveryError("initial_zyx must be finite for every hidden cell")
+    if points.ndim != 2 or points.shape[1] != 3 or not len(points):
+        raise PredictionRecoveryError("component_points_zyx must have non-empty shape [N,3]")
+    if not np.isfinite(points).all():
+        raise PredictionRecoveryError("component points must be finite")
+    if type(iteration_count) is not int or iteration_count < 1:
+        raise PredictionRecoveryError("iteration_count must be an integer >= 1")
+    max_residual = float(maximum_projection_residual_voxels)
+    max_movement = float(maximum_movement_per_iteration_voxels)
+    if not np.isfinite(max_residual) or max_residual <= 0:
+        raise PredictionRecoveryError("maximum projection residual must be finite and > 0")
+    if not np.isfinite(max_movement) or max_movement <= 0:
+        raise PredictionRecoveryError("maximum movement must be finite and > 0")
+
+    h, w = current.shape[:2]
+    boundaries = {
+        "top": np.asarray(top_boundary_zyx, dtype=np.float64),
+        "bottom": np.asarray(bottom_boundary_zyx, dtype=np.float64),
+        "left": np.asarray(left_boundary_zyx, dtype=np.float64),
+        "right": np.asarray(right_boundary_zyx, dtype=np.float64),
+    }
+    expected_shapes = {
+        "top": (w, 3),
+        "bottom": (w, 3),
+        "left": (h, 3),
+        "right": (h, 3),
+    }
+    for name, array in boundaries.items():
+        if array.shape != expected_shapes[name]:
+            raise PredictionRecoveryError(
+                f"{name}_boundary_zyx must have shape {expected_shapes[name]}"
+            )
+
+    tree = cKDTree(points)
+    history: list[dict[str, Any]] = []
+    total_accepted = 0
+
+    for iteration in range(iteration_count):
+        targets = np.empty_like(current)
+        target_valid = np.zeros((h, w), dtype=bool)
+        neighbor_counts = np.zeros((h, w), dtype=np.int16)
+
+        for iy in range(h):
+            for ix in range(w):
+                neighbors: list[np.ndarray] = []
+                if iy > 0:
+                    neighbors.append(current[iy - 1, ix])
+                elif np.isfinite(boundaries["top"][ix]).all():
+                    neighbors.append(boundaries["top"][ix])
+
+                if iy + 1 < h:
+                    neighbors.append(current[iy + 1, ix])
+                elif np.isfinite(boundaries["bottom"][ix]).all():
+                    neighbors.append(boundaries["bottom"][ix])
+
+                if ix > 0:
+                    neighbors.append(current[iy, ix - 1])
+                elif np.isfinite(boundaries["left"][iy]).all():
+                    neighbors.append(boundaries["left"][iy])
+
+                if ix + 1 < w:
+                    neighbors.append(current[iy, ix + 1])
+                elif np.isfinite(boundaries["right"][iy]).all():
+                    neighbors.append(boundaries["right"][iy])
+
+                finite = [row for row in neighbors if np.isfinite(row).all()]
+                if not finite:
+                    targets[iy, ix] = current[iy, ix]
+                    continue
+                targets[iy, ix] = np.mean(np.stack(finite, axis=0), axis=0)
+                neighbor_counts[iy, ix] = len(finite)
+                target_valid[iy, ix] = True
+
+        flat_targets = targets.reshape(-1, 3)
+        distances, indices = tree.query(flat_targets, k=1, workers=1)
+        proposals = points[np.asarray(indices, dtype=np.int64)].reshape(h, w, 3)
+        projection_residual = np.asarray(distances, dtype=np.float64).reshape(h, w)
+        movement = np.linalg.norm(proposals - current, axis=2)
+        accept = (
+            target_valid
+            & (projection_residual <= max_residual)
+            & (movement <= max_movement)
+        )
+
+        next_state = current.copy()
+        next_state[accept] = proposals[accept]
+        accepted_count = int(np.sum(accept))
+        total_accepted += accepted_count
+        accepted_movement = movement[accept]
+        history.append(
+            {
+                "iteration": iteration + 1,
+                "accepted_count": accepted_count,
+                "retained_count": int(h * w - accepted_count),
+                "minimum_neighbor_count": int(np.min(neighbor_counts[target_valid]))
+                if np.any(target_valid)
+                else 0,
+                "median_accepted_movement_voxels": (
+                    float(np.median(accepted_movement))
+                    if accepted_count
+                    else None
+                ),
+                "maximum_accepted_movement_voxels": (
+                    float(np.max(accepted_movement))
+                    if accepted_count
+                    else None
+                ),
+            }
+        )
+        current = next_state
+
+    flat = current.reshape(-1, 3)
+    unique = np.unique(flat.astype(np.int64), axis=0)
+    return {
+        "relaxed_zyx": current,
+        "history": history,
+        "total_accepted_updates": int(total_accepted),
+        "unique_recovered_voxel_fraction": float(len(unique) / len(flat)),
+    }
