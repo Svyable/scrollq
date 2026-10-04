@@ -81,6 +81,7 @@ jobs:
           test "$(docker run --rm "$PINNED" id -u)" = "10001"
           docker run --rm "$PINNED" scroliq-provenance --help >/dev/null
           docker run --rm "$PINNED" scroliq-package --help >/dev/null
+          docker run --rm "$PINNED" scroliq-submission-dry-run --help >/dev/null
 
       - name: Verify anonymous reviewer access
         run: |
