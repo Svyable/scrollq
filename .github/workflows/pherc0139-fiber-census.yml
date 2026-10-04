@@ -10,9 +10,9 @@ permissions:
   contents: write
 
 jobs:
-  census:
+  run:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -20,18 +20,11 @@ jobs:
           python-version: "3.12"
       - name: Install
         run: python -m pip install .
-      - name: Census + volume range check
+      - name: Run
         continue-on-error: true
-        run: python scripts/fiber_scroll_census.py --scroll PHerc0139 --out out/census/summary.json
+        run: python scripts/fiber_scroll_census.py --scroll PHerc0139 --out out/r/summary.json
+      - name: Print result
+        if: always()
+        run: python -c "import json; d=json.load(open('out/r/summary.json')); print(json.dumps({k: v for k, v in d.items() if k not in ('rows', 'per_fiber', 'per_fiber_mean_abs_dot')}, indent=1))"
       - name: Commit result (create-only)
-        run: |
-          set -euxo pipefail
-          dest=artifacts/2026-10-04-pherc0139-fiber-census
-          test ! -e "$dest/summary.json"
-          mkdir -p "$dest"
-          cp out/census/summary.json "$dest/summary.json"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$dest/summary.json"
-          git commit -m "Add PHerc0139 fiber census result"
-          git push origin "HEAD:${{ github.ref_name }}"
+        run: scripts/ci_commit_result.sh artifacts/2026-10-04-pherc0139-fiber-census "Add PHerc0139 fiber census result" out/r/summary.json
