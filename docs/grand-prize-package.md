@@ -12,6 +12,10 @@ It does not create missing scientific evidence. If `scroliq-provenance`
 would fail on the exact package root, or if required reviewer/reproduction
 materials are missing or inconsistent, the archive is not produced.
 
+## Dry-run the exact reviewer contract first
+
+Before producing the frozen submission ZIP, run [`scroliq-submission-dry-run`](submission-dry-run.md) against the same staging tree and reviewer materials. The dry run invokes the production package builder twice in isolated temporary archives, verifies both with the production verifier, and requires byte-identical archive SHA-256 digests. Only its JSON receipt remains.
+
 ## Build
 
 Keep the reviewer materials inside the same staging root as the scientific
