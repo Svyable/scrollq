@@ -17,7 +17,11 @@ The audit separates two failure classes that should not be collapsed into one
 
 The implementation is independent ScrollQ code. It does not copy the 2026
 MICCAI tumor-segmentation repository whose license had not been independently
-verified when this gate was designed.
+verified when this gate was designed. As of 2026-10-04 that repository declares
+the MIT license; this implementation remains independent, and any future reuse
+needs a pinned-revision entry in `THIRD_PARTY_NOTICES.md`. The set-level
+follow-up is queued in
+[`research/structure-aware-conformal-surface-uncertainty.md`](research/structure-aware-conformal-surface-uncertainty.md).
 
 ## Why vacuity is explicit
 
