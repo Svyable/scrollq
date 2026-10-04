@@ -66,6 +66,13 @@ ineligible for ranking. Private truth is intentionally scored in a separate
 trusted phase so model-author PR code never receives hidden labels or truth
 meshes. See [the model-evaluation protocol](docs/model-evaluation.md).
 
+**Held-out ink:** `scroliq-ink-results` converts one prize-ready
+`scroliq-ink-validate` artifact per expected region into that common contract.
+It re-verifies the model preflight, checkpoint identity, split/no-overlap
+declarations and evidence hashes; a missing or invalid winding becomes an
+explicit failed region instead of disappearing from the aggregate. See
+[the ink results adapter](docs/ink-results-adapter.md).
+
 **External Hub releases:** `scroliq-hf-pin` resolves a Hugging Face model or
 dataset branch/tag to its immutable repository SHA and records the exact file
 inventory plus explicit Git-LFS SHA-256 values when the Hub exposes them. This
