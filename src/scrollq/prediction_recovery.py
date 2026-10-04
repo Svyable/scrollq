@@ -1,0 +1,206 @@
+"""Research helpers for multi-sided surface-prediction gap recovery.
+
+These primitives are intentionally not a production CLI. They support the
+preregistered prediction-connectivity recovery experiment and keep component
+selection independent of hidden reference geometry.
+"""
+from __future__ import annotations
+
+from collections import defaultdict
+from typing import Any, Mapping, Sequence
+
+import numpy as np
+from scipy.ndimage import binary_dilation, label
+from scipy.spatial import cKDTree
+
+
+class PredictionRecoveryError(ValueError):
+    pass
+
+
+def boundary_anchor_cells(
+    rect_yx: tuple[int, int, int, int],
+    *,
+    ring_offset: int = 2,
+) -> dict[str, list[tuple[int, int]]]:
+    """Return deterministic four-sided visible anchor cells around a rectangle.
+
+    Corners belong to top/bottom. Left/right omit endpoints so every anchor has
+    exactly one side label.
+    """
+    if type(ring_offset) is not int or ring_offset < 1:
+        raise PredictionRecoveryError("ring_offset must be an integer >= 1")
+    y0, y1, x0, x1 = (int(v) for v in rect_yx)
+    if not (y0 < y1 and x0 < x1):
+        raise PredictionRecoveryError("rect_yx must be a non-empty half-open rectangle")
+
+    top_y = y0 - ring_offset
+    bottom_y = y1 - 1 + ring_offset
+    left_x = x0 - ring_offset
+    right_x = x1 - 1 + ring_offset
+    return {
+        "top": [(top_y, x) for x in range(x0, x1)],
+        "bottom": [(bottom_y, x) for x in range(x0, x1)],
+        "left": [(y, left_x) for y in range(y0 + 1, y1 - 1)],
+        "right": [(y, right_x) for y in range(y0 + 1, y1 - 1)],
+    }
+
+
+def label_connectivity(
+    raw_mask: np.ndarray,
+    *,
+    dilation_iterations: int = 1,
+) -> tuple[np.ndarray, int]:
+    """Label 26-connected components after connectivity-only dilation."""
+    raw = np.asarray(raw_mask, dtype=bool)
+    if raw.ndim != 3:
+        raise PredictionRecoveryError("raw_mask must have shape [z,y,x]")
+    if type(dilation_iterations) is not int or dilation_iterations < 0:
+        raise PredictionRecoveryError("dilation_iterations must be an integer >= 0")
+    structure = np.ones((3, 3, 3), dtype=bool)
+    connected = (
+        binary_dilation(raw, structure=structure, iterations=dilation_iterations)
+        if dilation_iterations
+        else raw
+    )
+    labels, count = label(connected, structure=structure)
+    return labels.astype(np.int32, copy=False), int(count)
+
+
+def select_seeded_component(
+    labels: np.ndarray,
+    seed_local_zyx_by_side: Mapping[str, Sequence[Sequence[int]]],
+    *,
+    required_sides: Sequence[str] = ("top", "bottom", "left", "right"),
+    minimum_seeds_per_side: int = 3,
+    minimum_total_seed_share: float = 0.5,
+) -> dict[str, Any]:
+    """Select exactly one component supported by the frozen multi-side rule."""
+    lab = np.asarray(labels)
+    if lab.ndim != 3 or not np.issubdtype(lab.dtype, np.integer):
+        raise PredictionRecoveryError("labels must be an integer [z,y,x] array")
+    if type(minimum_seeds_per_side) is not int or minimum_seeds_per_side < 1:
+        raise PredictionRecoveryError("minimum_seeds_per_side must be >= 1")
+    if not 0 < float(minimum_total_seed_share) <= 1:
+        raise PredictionRecoveryError("minimum_total_seed_share must be in (0,1]")
+
+    side_counts: dict[int, dict[str, int]] = defaultdict(
+        lambda: {str(side): 0 for side in required_sides}
+    )
+    total_counts: dict[int, int] = defaultdict(int)
+    valid_seed_count = 0
+
+    shape = np.asarray(lab.shape, dtype=np.int64)
+    normalized: dict[str, list[list[int]]] = {}
+    for side in required_sides:
+        rows = seed_local_zyx_by_side.get(str(side), ())
+        normalized[str(side)] = []
+        for raw_coord in rows:
+            coord = np.asarray(raw_coord, dtype=np.int64)
+            if coord.shape != (3,):
+                raise PredictionRecoveryError("seed coordinates must be integer ZYX triplets")
+            if np.any(coord < 0) or np.any(coord >= shape):
+                continue
+            label_id = int(lab[tuple(coord)])
+            if label_id <= 0:
+                continue
+            normalized[str(side)].append([int(v) for v in coord])
+            valid_seed_count += 1
+            total_counts[label_id] += 1
+            side_counts[label_id][str(side)] += 1
+
+    candidates = []
+    for label_id in sorted(total_counts):
+        total = int(total_counts[label_id])
+        share = float(total / valid_seed_count) if valid_seed_count else 0.0
+        per_side = side_counts[label_id]
+        eligible = (
+            all(per_side[str(side)] >= minimum_seeds_per_side for side in required_sides)
+            and share >= float(minimum_total_seed_share)
+        )
+        candidates.append(
+            {
+                "label": int(label_id),
+                "seed_count": total,
+                "seed_share": share,
+                "seed_count_by_side": dict(per_side),
+                "eligible": bool(eligible),
+            }
+        )
+
+    eligible = [row for row in candidates if row["eligible"]]
+    selected = eligible[0]["label"] if len(eligible) == 1 else None
+    return {
+        "status": "selected" if selected is not None else "abstain",
+        "selected_label": selected,
+        "valid_seed_count": int(valid_seed_count),
+        "valid_seed_count_by_side": {
+            side: len(normalized[str(side)]) for side in required_sides
+        },
+        "components_with_seed_votes": candidates,
+        "eligible_component_count": len(eligible),
+    }
+
+
+def raw_component_points(
+    raw_mask: np.ndarray,
+    labels: np.ndarray,
+    selected_label: int,
+    *,
+    origin_zyx: Sequence[int] = (0, 0, 0),
+) -> np.ndarray:
+    """Return global ZYX coordinates for raw voxels in one connectivity label."""
+    raw = np.asarray(raw_mask, dtype=bool)
+    lab = np.asarray(labels)
+    if raw.shape != lab.shape or raw.ndim != 3:
+        raise PredictionRecoveryError("raw_mask and labels must share [z,y,x] shape")
+    if type(selected_label) is not int or selected_label <= 0:
+        raise PredictionRecoveryError("selected_label must be a positive integer")
+    origin = np.asarray(origin_zyx, dtype=np.int64)
+    if origin.shape != (3,):
+        raise PredictionRecoveryError("origin_zyx must contain three integers")
+    points = np.argwhere(raw & (lab == selected_label))
+    if not len(points):
+        raise PredictionRecoveryError("selected component has no raw candidate voxels")
+    return points.astype(np.float64) + origin[None, :]
+
+
+def snap_to_component(
+    coarse_zyx: np.ndarray,
+    component_points_zyx: np.ndarray,
+    *,
+    maximum_distance_voxels: float,
+) -> dict[str, Any]:
+    """Snap coarse coordinates to nearest raw selected-component voxels."""
+    coarse = np.asarray(coarse_zyx, dtype=np.float64)
+    points = np.asarray(component_points_zyx, dtype=np.float64)
+    if coarse.ndim != 2 or coarse.shape[1] != 3:
+        raise PredictionRecoveryError("coarse_zyx must have shape [N,3]")
+    if points.ndim != 2 or points.shape[1] != 3 or len(points) == 0:
+        raise PredictionRecoveryError("component_points_zyx must have non-empty shape [M,3]")
+    if not np.isfinite(coarse).all() or not np.isfinite(points).all():
+        raise PredictionRecoveryError("coordinates must be finite")
+    maximum = float(maximum_distance_voxels)
+    if not np.isfinite(maximum) or maximum <= 0:
+        raise PredictionRecoveryError("maximum_distance_voxels must be finite and > 0")
+
+    tree = cKDTree(points)
+    distances, indices = tree.query(coarse, k=1, workers=1)
+    distances = np.asarray(distances, dtype=np.float64)
+    indices = np.asarray(indices, dtype=np.int64)
+    available = distances <= maximum
+    recovered = np.full_like(coarse, np.nan, dtype=np.float64)
+    recovered[available] = points[indices[available]]
+
+    if np.any(available):
+        unique = np.unique(recovered[available].astype(np.int64), axis=0)
+        unique_fraction = float(len(unique) / int(np.sum(available)))
+    else:
+        unique_fraction = 0.0
+    return {
+        "recovered_zyx": recovered,
+        "available": available,
+        "snap_distance_voxels": distances,
+        "candidate_available_fraction": float(np.mean(available)) if len(available) else 0.0,
+        "unique_recovered_voxel_fraction": unique_fraction,
+    }
