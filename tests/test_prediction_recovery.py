@@ -172,3 +172,31 @@ def test_development_score_fails_bad_selected_center_and_wrong_wrap():
     assert result["checks"]["candidate_available_fraction_every_selected_center"] is False
     assert result["checks"]["fraction_within_8_voxels_every_selected_center"] is False
     assert result["checks"]["wrong_wrap_controls_rejected"] is False
+
+
+class _FakeLevel:
+    shape = (7, 8, 9)
+    chunks = (3, 3, 4)
+
+    def chunk(self, idx):
+        z0, y0, x0 = [idx[d] * self.chunks[d] for d in range(3)]
+        if idx == (1, 1, 1):
+            return None
+        z1 = min(z0 + self.chunks[0], self.shape[0])
+        y1 = min(y0 + self.chunks[1], self.shape[1])
+        x1 = min(x0 + self.chunks[2], self.shape[2])
+        z, y, x = np.mgrid[z0:z1, y0:y1, x0:x1]
+        return (z * 20 + y * 3 + x).astype(np.uint8)
+
+
+def test_read_level_box_stitches_edge_chunks_and_zero_fills_absent_chunk():
+    level = _FakeLevel()
+    box, missing = pr.read_level_box(level, (2, 2, 2), (7, 8, 9))
+
+    assert box.shape == (5, 6, 7)
+    assert (1, 1, 1) in missing
+    assert box[0, 0, 0] == 2 * 20 + 2 * 3 + 2
+    # Global [3,3,4] lies in the intentionally absent chunk.
+    assert box[1, 1, 2] == 0
+    # Global [6,7,8] exercises all three edge chunks.
+    assert box[4, 5, 6] == (6 * 20 + 7 * 3 + 8)
