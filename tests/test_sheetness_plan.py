@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 
@@ -271,3 +272,108 @@ def test_cli_is_create_only(tmp_path, monkeypatch, capsys):
     assert plan.main(args) == 2
     assert out.read_text() == "keep"
     assert "refusing to overwrite" in capsys.readouterr().out
+
+
+def _git_blob_sha1(path: Path) -> str:
+    data = path.read_bytes()
+    return hashlib.sha1(
+        b"blob " + str(len(data)).encode("ascii") + bytes([0]) + data
+    ).hexdigest()
+
+
+def _surface_binding(tmp_path: Path, surface: Path, volume_root: str) -> Path:
+    binding = tmp_path / "surface-binding.json"
+    binding.write_text(
+        json.dumps(
+            {
+                "schema": "scroliq-tifxyz-volume-binding/1",
+                "volume_root": volume_root,
+                "source": {
+                    "repository": "https://github.com/example/frozen-surfaces",
+                    "commit": "a" * 40,
+                    "path": "meshes/reference",
+                },
+                "evidence_url": "https://github.com/example/frozen-surfaces/blob/" + "a" * 40 + "/README.md",
+                "files": {
+                    name: {"git_blob_sha1": _git_blob_sha1(surface / name)}
+                    for name in ("meta.json", "x.tif", "y.tif", "z.tif")
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    return binding
+
+
+def test_hash_bound_external_binding_allows_source_without_volume_token(tmp_path):
+    token = "20250521135224"
+    volume_root = f"PHerc0800/volumes/{token}-8.640um-1.2m-116keV-masked.zarr"
+    surface = _surface(tmp_path, "OTHER")
+    zpa = _zpa(tmp_path, volume_root)
+    binding = _surface_binding(tmp_path, surface, volume_root)
+
+    result = plan.build_plan(
+        tifxyz=surface,
+        zpa_report_path=zpa,
+        volume_root=volume_root,
+        surface_volume_token=token,
+        binding_url="https://github.com/example/frozen-surfaces",
+        surface_binding_path=binding,
+        samples=2,
+        offsets=(-2.0, 2.0),
+        halo=2,
+        validate_report_fn=lambda _report: [],
+    )
+
+    assert result["surface"]["binding_methods"] == ["hash-bound-external-binding"]
+    external = result["surface"]["external_binding"]
+    assert external["volume_root"] == volume_root
+    assert external["source"]["commit"] == "a" * 40
+    assert set(external["verified_git_blob_sha1"]) == {
+        "meta.json", "x.tif", "y.tif", "z.tif"
+    }
+
+
+def test_hash_bound_external_binding_rejects_byte_drift(tmp_path):
+    token = "20250521135224"
+    volume_root = f"PHerc0800/volumes/{token}-8.640um-1.2m-116keV-masked.zarr"
+    surface = _surface(tmp_path, "OTHER")
+    zpa = _zpa(tmp_path, volume_root)
+    binding = _surface_binding(tmp_path, surface, volume_root)
+    (surface / "meta.json").write_text('{"format":"tifxyz","changed":true}', encoding="utf-8")
+
+    with pytest.raises(plan.PlanError, match="blob mismatch"):
+        plan.build_plan(
+            tifxyz=surface,
+            zpa_report_path=zpa,
+            volume_root=volume_root,
+            surface_volume_token=token,
+            binding_url="https://github.com/example/frozen-surfaces",
+            surface_binding_path=binding,
+            samples=1,
+            offsets=(-2.0, 2.0),
+            halo=2,
+            validate_report_fn=lambda _report: [],
+        )
+
+
+def test_hash_bound_external_binding_rejects_volume_mismatch(tmp_path):
+    token = "20250521135224"
+    volume_root = f"PHerc0800/volumes/{token}-8.640um-1.2m-116keV-masked.zarr"
+    surface = _surface(tmp_path, "OTHER")
+    zpa = _zpa(tmp_path, volume_root)
+    binding = _surface_binding(tmp_path, surface, "PHerc0800/volumes/other.zarr")
+
+    with pytest.raises(plan.PlanError, match="volume_root does not exactly match"):
+        plan.build_plan(
+            tifxyz=surface,
+            zpa_report_path=zpa,
+            volume_root=volume_root,
+            surface_volume_token=token,
+            binding_url="https://github.com/example/frozen-surfaces",
+            surface_binding_path=binding,
+            samples=1,
+            offsets=(-2.0, 2.0),
+            halo=2,
+            validate_report_fn=lambda _report: [],
+        )
