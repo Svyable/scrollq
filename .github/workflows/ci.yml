@@ -75,6 +75,7 @@ jobs:
           test "$(docker inspect --format='{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$IMAGE")" = "$GITHUB_SHA"
           docker run --rm "$IMAGE" scroliq-provenance --help >/dev/null
           docker run --rm "$IMAGE" scroliq-package --help >/dev/null
+          docker run --rm "$IMAGE" scroliq-submission-dry-run --help >/dev/null
           docker run --rm "$IMAGE" scroliq-submission-image --help >/dev/null
           docker run --rm "$IMAGE" scroliq-legibility --help >/dev/null
           docker run --rm "$IMAGE" scroliq-vc3d-review --help >/dev/null
