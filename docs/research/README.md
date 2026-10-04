@@ -38,7 +38,10 @@ campaign.
 | Independent recto coverage witnesses | EXPERIMENT FURTHER; Stage-A deletion calibration passed | Falsify omitted surface outside a declared inventory | Identity/continuity-aware unconditioned witness test; raw surface existence is insufficient |
 | Fiber-texture fingerprints for sheet identity | EXPERIMENT FURTHER | Detect smooth but wrong-winding sheet switches | Adjacent-winding controls on real CT |
 | Cross-ply fiber-frame continuity | EXPERIMENT FURTHER; executable harness + synthetic splice control | Ink-blind CT-conditioned local material continuity + VC3D review | Real-CT adjacent-winding and legitimate-discontinuity benchmark |
+| Structure-aware conformal uncertainty sets for surface predictions | EXPERIMENT FURTHER; queued 2026-10-04, not preregistered | Calibrated "surface localized here" vs abstain; separates boundary error from missed-sheet mass | Verify the stored prediction is graded, fix achievable per-stratum n, then preregister on untouched natural ROIs |
+| Learned uncertainty head on a frozen backbone (SegWithU-style) | DEFERRED (WATCH) | Failure ranking / selective prediction for sheet switches | A frozen surface backbone with accessible features and isolated labels; none exists in this repo |
 | Fiber-coordinate canonicalization as a model architecture | DISMISS for now | Possible orientation normalization | Reconsider only if an ablation inside another experiment supports it |
+| CGAL `Mesh_smoothing_3` as an integration | DISMISS for current integration | Tetrahedral-mesh smoothing; inversion-barrier idea only | None; the barrier concept may inform tests |
 | Global histogram matching | DISMISS | Superficial domain normalization | None; retain only as a negative control |
 | Transport-only UV invariance | DISMISS | Coordinate arithmetic check | None; material-attached false positives persist too |
 | Ink-selected flattening | DISMISS | Could maximize visual persistence | None; creates geometry-selection leakage |
@@ -49,6 +52,7 @@ campaign.
 
 - [Ink and false-positive research](ink-and-false-positive-research.md)
 - [Geometry, coverage, and sheet-identity research](geometry-and-coverage-research.md)
+- [Structure-aware conformal surface uncertainty](structure-aware-conformal-surface-uncertainty.md)
 - [Reproducibility and proof-chain research](reproducibility-research.md)
 - [Dismissed and deferred ideas](dismissed-and-deferred.md)
 

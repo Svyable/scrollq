@@ -109,6 +109,54 @@ If larger-context models are used, they should face stronger physical
 falsification: local-evidence ablation, wrong-surface controls, held-out
 evaluation, and exact configuration provenance.
 
+## CGAL `Mesh_smoothing_3` as a ScrollQ dependency
+
+**Status:** DISMISS for current integration; WATCH as a possible diagnostic.
+Checked 2026-10-04.
+
+The package exists on CGAL `master`. Its `package_info` describes a component
+that takes a **3D volumetric mesh** and relocates vertices to trade element
+quality against fit to a geometric oracle, with a result free of inverted
+elements. The prize path operates on sheet surfaces and TIFXYZ meshes, not
+tetrahedral volume meshes, so there is nothing to apply it to.
+
+On licensing, the package's `license.txt` lists two lines, `GPL (v3 or later)`
+and `MIT/X11 (BSD like)`. Which terms govern which part, or whether they are
+alternatives, is not established here. Treat it as GPL-encumbered until CGAL's
+own licensing statement says otherwise; this is a secondary reason, not the
+deciding one. Its release timing (announcement date, CGAL 6.3 schedule) was
+**not verified**.
+
+Keep the inversion-barrier idea as a test-design reference for fold/inversion
+controls on surface meshes. Do not import the implementation. Reconsider only if
+a volumetric mesh becomes part of the evidence chain.
+
+## Learned uncertainty head on a frozen backbone (SegWithU-style)
+
+**Status:** DEFERRED (WATCH). Checked 2026-10-04.
+
+SegWithU (arXiv 2604.15271; `ProjectNeura/SegWithU`, Apache-2.0, last commit
+`a3157cfff5e50a69b0c880a3d50edfadb4da00d7` on 2026-07-08) attaches a small
+supervised uncertainty head to a frozen backbone and reports separate maps for
+calibration and for error ranking. Its published results are on ACDC,
+BraTS2024 and LiTS only; no papyrus evidence exists. The repository README
+indicates that a full release is still pending, so artifact availability is
+unverified.
+
+It cannot be tested here as proposed: it taps **intermediate features of a
+frozen backbone**, and ScrollQ owns no surface backbone or checkpoint. It
+consumes only a published prediction volume. The head also needs labels, so
+isolation of training surfaces from evaluation surfaces is a leakage control,
+not a formality.
+
+Trigger to revisit: a surface checkpoint with accessible features and a
+license that permits this use. Smallest test then: train only the head on
+development surfaces and compare it against entropy, margin and ensemble
+variance on held-out sheet switches, bridges and unsupported predictions,
+by risk-versus-coverage (AURC) and by how many wrong-winding voxels remain among
+the most-confident 50/75/90%. Use the output only for abstention, never as an
+extra feature fed to ink detection.
+
 ## Accumulating all plausible diagnostics
 
 **Status:** DISMISS as a research strategy.
@@ -142,7 +190,9 @@ their required inputs exist:
 - independent recto coverage witnesses;
 - fiber-texture physical sheet fingerprints;
 - sealed-scroll morphology transfer after the source scale discrepancy is
-  resolved.
+  resolved;
+- a learned uncertainty head on a frozen surface backbone, once a backbone
+  with accessible features exists.
 
 "Deferred" means the hypothesis survived reasoning, not that implementation has
 been approved.
