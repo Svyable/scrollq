@@ -4,7 +4,7 @@
 
 ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](https://scrollprize.org/) virtual-unwrapping pipeline. The existing `scrollq` package measures **real level-0 CT voxels** and keeps its current commands for compatibility, but the project is expanding beyond a single volume-quality ranking toward evidence-backed diagnostics for the Challenge's published [2026 Open Problems](https://scrollprize.org/2026_open_problems): scan degradation, surface topology, mesh connectivity, fibers, winding annotations, spiral fitting, label quality, ink reliability, and data-scale reproducibility.
 
-**[Live scan-quality survey](https://svyable.github.io/scrollq/)** · **[Grand Prize evidence board](https://svyable.github.io/scrollq/progress.html)** · **[October reviewer map](docs/SUBMISSION.md)** · **[2027 Grand Prize readiness](https://svyable.github.io/scrollq/grand-prize-readiness.html)** · **[Open-problems alignment](docs/open-problems-alignment.md)** · **[September 2026 Progress Prize write-up](https://svyable.github.io/scrollq/september-2026.html)** · **[October 2026 update](https://svyable.github.io/scrollq/october-2026-update.html)** · **[October 2026 goals](https://svyable.github.io/scrollq/october-2026.html)** · **[Reproducible campaign artifacts](artifacts/2026-09-30-scrollq/)**
+**[Live scan-quality survey](https://svyable.github.io/scrollq/)** · **[Grand Prize evidence board](https://svyable.github.io/scrollq/progress.html)** · **[October reviewer map](docs/SUBMISSION.md)** · **[2027 Grand Prize readiness](https://svyable.github.io/scrollq/grand-prize-readiness.html)** · **[Open-problems alignment](docs/open-problems-alignment.md)** · **[September 2026 Progress Prize write-up](https://svyable.github.io/scrollq/september-2026.html)** · **[October 2026 update](https://svyable.github.io/scrollq/october-2026-update.html)** · **[October 2026 goals](https://svyable.github.io/scrollq/october-2026.html)** · **[November 2026 goals](https://svyable.github.io/scrollq/november-2026.html)** · **[Review-queue guide](docs/review-queues.md)** · **[Reproducible campaign artifacts](artifacts/2026-09-30-scrollq/)**
 
 > The existing 0–100 ScrolIQ score is a **scan-health triage signal, not a readability or Grand Prize readiness score**. ScrolIQ treats unmeasured downstream stages as unknown rather than inferring them from CT quality.
 
@@ -290,6 +290,13 @@ produced with an exact `--volume-root` can be carried by
 `scroliq-passport --fiber-audit ...` as partial Fiber IQ evidence while still
 refusing to infer physical fiber or sheet identity.
 
+The [2026-10-04 census](artifacts/2026-10-04-fiber-corpus-census/)
+(`scripts/fiber_corpus_campaign.py`, run in Actions) extends this to all 136
+public PHercParis4 fibers, with the eight pinned fibers as its positive
+control: 388 gap and 519 sharp-turn candidates. Every gap sits in a fiber
+with fallback-interpolated spans, and the 57 fully native fibers have none.
+This is a co-occurrence that has not yet been tested at span level.
+
 **CUDA TEASAR acceleration:** Brook is now tracked as an external accelerator
 candidate under a preregistered [backend equivalence gate](docs/brook-teasar-gate.md).
 The gate requires target-domain geometry/downstream comparisons before speed can
@@ -473,6 +480,7 @@ The repository includes the exact outputs behind the September 30, 2026 campaign
 | Published PHercParis4 winding annotations are radially consistent | **2 / 13,700** comparable pairs inverted around the umbilicus, both sub-voxel; injection control catches **179 / 200** ±3 and **171 / 200** ±5 single-point mis-numberings (±2 undetectable by design) — [`paris4-winding-ray-order/`](artifacts/2026-10-01-paris4-winding-ray-order/) |
 | PHercParis4 winding annotations agree across collections through verified patches | **6 / 16,074** patch-collection constraints off by ≥ 2 windings; 206 / 254 relative collections tied to the absolute frame; injection control detects **194 / 200** +2 errors — [`paris4-winding-attachment/`](artifacts/2026-10-03-paris4-winding-attachment/) |
 | Fiber IQ runs on public VC3D fibers | **8** SHA-256-pinned PHercParis4 fibers (53,828 points): **11** gap and **26** sharp-turn review candidates, **0** control-line offsets / order inversions; subset, not passport evidence — [`public-fiber-audit/`](artifacts/2026-10-01-public-fiber-audit/) |
+| Fiber IQ census of the whole public PHercParis4 fiber set | **136 / 136** fibers (671,984 points, 5,503 spans, 9.1 % fallback), positive control = the 8 pinned fibers, unchanged: **388** gap and **519** sharp-turn candidates, **0** offsets / inversions; all 388 gaps in fibers with fallback spans (co-occurrence, untested) — [`fiber-corpus-census/`](artifacts/2026-10-04-fiber-corpus-census/) |
 | `scrollq-health` fails closed on missing integrity evidence | A non-existent root is **DO NOT TRAIN** (integrity UNKNOWN); the three published live verdicts are unchanged — [`health-verdicts-fail-closed/`](artifacts/2026-10-01-health-verdicts-fail-closed/) |
 
 The point is not that one heuristic ranking is final. The point is that **data quality and label coverage can be measured together**, turning an implicit resource-allocation decision into an inspectable one.
