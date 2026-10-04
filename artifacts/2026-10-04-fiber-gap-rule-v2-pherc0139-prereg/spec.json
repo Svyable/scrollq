@@ -1,0 +1,39 @@
+{
+  "protocol": "fiber-gap-rule-v2-pherc0139",
+  "frozen": "2026-10-04",
+  "question": "Does a span-aware gap rule remove the fallback-rendering artefact found by the 2026-10-04 span test without losing sensitivity to real breaks?",
+  "inputs": {
+    "census": "artifacts/2026-10-04-pherc0139-fiber-census/summary.json",
+    "census_manifest_sha256": "a0e03b30ea7034c608cb3610940324f7de9349a13c16b062445cbc3339966009",
+    "byte_rule": "every fiber re-downloaded and hash-matched against this census; any failure is RUN FAILED"
+  },
+  "rules": {
+    "old": "step > gap_factor x the fiber's median non-zero step (current scroliq-fiber rule)",
+    "span": "step > gap_factor x the median non-zero step of its own control span when that span has >= min_span_steps non-zero steps; otherwise the fiber median; steps outside spans use the fiber median"
+  },
+  "parameters": {
+    "gap_factor": 4.0,
+    "min_span_steps": 8,
+    "plant_factor": 6.0
+  },
+  "seed": 20261007,
+  "planted_control": {
+    "design": "for each fiber and each span class (native, fallback) with an eligible span (>= min_span_steps non-zero steps), one eligible span is drawn at random and one interior non-zero step is stretched; all later points are translated so nothing else changes",
+    "span_relative": "primary: the planted step becomes plant_factor x that span's own median step (a step much longer than its neighbours)",
+    "fiber_relative": "descriptive: the planted step becomes plant_factor x the fiber median step (reported, not part of the decision)",
+    "span_boundaries": "computed once on the unmodified line"
+  },
+  "decision": {
+    "min_recall": 0.95,
+    "max_fallback_ratio": 0.5,
+    "max_native_recall_loss": 0.02,
+    "min_planted_per_class": 30,
+    "rule": "ADOPT iff span-relative planted recall of the span rule >= min_recall in native AND fallback spans, real fallback-span candidates under the span rule <= max_fallback_ratio x the old rule's, and native planted recall of the span rule >= the old rule's - max_native_recall_loss. INSUFFICIENT if fewer than min_planted_per_class planted breaks in either class. Otherwise KEEP."
+  },
+  "disclosure": "Rule, thresholds and decision are copied unchanged from fiber-gap-rule-v1 (PHercParis4), whose verdict was INSUFFICIENT (24 < 30 fallback plants). PHerc0139 is independent data; no parameter was tuned on it.",
+  "interpretation_limits": [
+    "Planted breaks are geometric stretches of real lines, not real annotation errors.",
+    "A fiber-relative break inside a sparsely rendered span is, by construction, hard for a span-aware rule; that trade-off is reported descriptively.",
+    "ADOPT changes no published number by itself; adopting the rule in scroliq-fiber is a separate, versioned change."
+  ]
+}

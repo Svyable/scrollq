@@ -151,3 +151,21 @@ median 3.26× the fiber's typical step, so the whole-fiber 4× gap rule mostly
 measures rendering density there. Until a span-aware rule is evaluated
 (November N4), read `gaps` together with `fallback_segments`. Treat gaps inside
 native `trace` spans as the strong cues.
+
+A span-aware alternative (threshold relative to each span's own median step)
+was then evaluated pre-registered on both scrolls and **not adopted**. It was
+INSUFFICIENT on PHercParis4 and KEEP on PHerc0139, where it removed only a third
+of the fallback flags ([`fiber-gap-rule-v2-pherc0139-run/`](../artifacts/2026-10-04-fiber-gap-rule-v2-pherc0139-run/)).
+The guidance above stands.
+
+## CT-conditioned evidence for the public fibers (2026-10-04)
+
+The public PHercParis4 and PHerc0139 fibers name no CT volume. Two
+pre-registered tests per scroll, run in a range-compatible volume (PHerc0139: a
+disclosed 7-voxel near miss), found the following. Fiber points sit on denser
+material than same-region background (AUC 0.775 and 0.760; displaced fibers lose
+it). Fiber tangents lie within the local structure-tensor sheet plane (median
+3.3° and 3.5° out of plane). Axis-swapped wrong-frame controls pass in all four
+tests. This is evidence for the bindings, not a declaration of them. See
+`artifacts/2026-10-04-*fiber-ct-*-run/`.
+

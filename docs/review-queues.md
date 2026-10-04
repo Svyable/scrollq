@@ -60,6 +60,13 @@ spans that are rendered sparsely. Review `span_mode = trace` (2 points) and
 `step_ratio > 8` (17 points) first. No CT volume is declared for these
 coordinates (see goal O9).
 
+**PHerc0139 fiber cues (2026-10-04).** Four fibers do not sit on denser material
+than their own background in `20260102150214`:
+`kb_20260828T170342976_000047`, `kb_20260928T033335844_000218`,
+`lt_20260908T075121105_000082` and `lt_20260926T060937932_000191`. The most
+out-of-plane fiber is `kb_20260908T012312096_000113`. On PHercParis4 it is
+`kb_20260728T224853384_000201`. See the `*-fiber-ct-*-run/` artifacts.
+
 For sharp turns, or to re-derive positions for one fiber:
 
 Every row of the census summary names a public fiber (`source_url`, `sha256`)

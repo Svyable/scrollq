@@ -90,7 +90,7 @@ Working deadline: end of October, following the monthly progress-prize cadence. 
 <a href="https://scrollprize.org/prizes#progress-prizes">prize page</a> states once it is updated.</div>
 
 <div class="stats">
-<div class="stat"><div class="n">6 + 4</div><div class="l">October goals + stretch<br>each with an exit criterion</div></div>
+<div class="stat"><div class="n">6 + 5</div><div class="l">October goals + stretch<br>each with an exit criterion</div></div>
 <div class="stat"><div class="n warn">0.63</div><div class="l">scan-score stability ρ<br>gate 0.85 · to fix or retire (O5)</div></div>
 <div class="stat"><div class="n">77</div><div class="l">flagged mesh segments<br>precision unmeasured (O1)</div></div>
 <div class="stat"><div class="n good">2 / 13,700</div><div class="l">winding pairs out of order<br>next: cross-collection (O2)</div></div>
@@ -188,7 +188,7 @@ reversals) were both rechecked live today
 Remaining: maintainer review and approval to file, then any external feedback.</p></div>
 
 <h3 style="margin:1.4rem 0 .2rem;color:var(--gold)">Stretch goals · raised 2026-10-04</h3>
-<p class="meta" style="margin:0 0 .4rem">October's original six left room. These four came forward from November or were added. The same rules apply: pre-register first, positive controls, frozen dated artifacts.</p>
+<p class="meta" style="margin:0 0 .4rem">October's original six left room. These five came forward from November or were added. The same rules apply: pre-register first, positive controls, frozen dated artifacts.</p>
 
 <div class="goal" id="o7"><h3><span class="id">O7</span>Test the fiber fallback–gap pattern at span level</h3>
 <div class="chips"><span class="chip crit">real data</span><span class="chip crit">fixes a tool's blind spot</span><span class="chip state">done · SUPPORTED</span></div>
@@ -223,6 +223,21 @@ binding, not a declaration of it (<a href="https://github.com/Svyable/scrollq/tr
 <p><b>Why.</b> A queue that only exists as JSON does not get reviewed.</p>
 <p><b>Result.</b> The winding attachment, ray-order and fiber-gap queues are now VC3D PointCollections, and Mesh IQ ships as a VC3D review packet.
 See <a href="./review-queues.md">review-queues.md</a>.</p></div>
+
+<div class="goal" id="o11"><h3><span class="id">O11</span>Fiber IQ goes physical, on two scrolls</h3>
+<div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: fiber connectivity</span><span class="chip state">done · replicated</span></div>
+<p><b>Why.</b> November's N4 (span-aware gap rule, a second scroll, CT direction) needed no one else, so it moved into October.</p>
+<p><b>Result.</b>
+All <b>411</b> public PHerc0139 fibers are audited, and the planted-break detector control fired 411 / 411 times. Every one of their 1,622 gaps is again in a fiber with fallback spans.
+The fibers sit on CT material in <code>20260102150214</code> (AUC 0.760; wrong-frame control 0.468), which replicates PHercParis4 (0.775).
+In both scrolls the fibers also <b>run within the CT sheet plane</b>: their median tangent is 3.3° (PHercParis4) and 3.5° (PHerc0139) out of plane, against about 30° for random directions
+(D 0.418 and 0.414; both wrong-frame controls under the 0.1 bar).
+The span-aware gap rule is <b>not adopted</b>: INSUFFICIENT on PHercParis4 (24 fallback plants) and KEEP on PHerc0139, where it cut fallback flags by only a third.
+The PHerc0139 volume was a disclosed 7-voxel near miss, so these are evidence for bindings, not declarations
+(<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-pherc0139-fiber-census">census</a> ·
+<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-pherc0139-fiber-ct-support-run">support</a> ·
+<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-paris4-fiber-ct-direction-run">direction</a> ·
+<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-fiber-gap-rule-v2-pherc0139-run">gap rule</a>).</p></div>
 </div>
 </div>
 
