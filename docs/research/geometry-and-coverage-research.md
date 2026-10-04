@@ -192,7 +192,9 @@ On public or verified surfaces:
 
 An overlap-cycle variant can compare independently generated patches that claim
 to cover the same material region. If their CT-derived fingerprints disagree
-after coordinate registration, stitching should be reviewed.
+after coordinate registration, stitching should be reviewed. That variant is
+specified, and its synthetic software controls executed, in
+[the seam-authentication protocol](../papyrus-seam-fingerprint.md) (below).
 
 ### Executable cross-ply frame stage
 
@@ -238,6 +240,68 @@ represented in the negative/ambiguous set.
 - invalid-evaluation risk: **medium if smooth fibers are treated as ground truth**
 - VC3D compatibility: **high via review points/regions**
 - unnecessary surface area: **low if introduced as a diagnostic after real controls**
+
+## 2a. Phase-preserving microtexture seam authentication
+
+**Status:** EXPERIMENT FURTHER. Executable on synthetic sheets only; no real-CT
+measurement exists. Full specification and decision rule:
+[papyrus-seam-fingerprint.md](../papyrus-seam-fingerprint.md).
+
+Sheetness asks whether a surface is papyrus-like. Fiber tests ask whether its
+structure is coherent. Winding and braid tests ask whether its topology is
+plausible. This idea asks a different question: **is this literally the same
+physical piece of papyrus?** An adjacent winding can be smooth, sheet-like,
+similarly oriented and similarly thick; it should not reproduce the same
+microscopic arrangement of fiber crossings, voids and cracks.
+
+### Hypothesis
+
+When a seam joins patch A to patch B, the two independently sampled shallow CT
+slabs in the claimed overlap, rectified into local tangent coordinates and
+band-passed, contain a sharp, unique, geometrically compatible phase-correlation
+peak if and only if they read the same material. The peak position is then a
+residual-displacement estimate for seam refinement.
+
+How this differs from the existing `tangent-fiber-spectrum-v1` descriptor above:
+that descriptor compares orientation/spectral statistics of one patch against
+another and returns a similarity. The seam authenticator keeps phase, so it
+returns a correspondence: a displacement, a depth lag, a peak calibrated against
+phase-randomized surrogates of the same slab, and an explicit
+`UNKNOWN` when the texture cannot carry an answer. (An early prediction that the
+magnitude descriptor would be blind to phase randomization was tested and
+**falsified**: on synthetic shifted copies it does separate them. The difference
+is the output, not a failure of the older descriptor.)
+
+### What the first run found
+
+- A bare correlation test accepts a through-going crack shared by two different
+  windings (33 of 40 impostors) and accepts featureless papyrus whose two
+  patches read the same voxel noise. Both are fixed by gates that are ablated in
+  the committed artifacts so the hazard stays visible.
+- Slabs from one CT volume share voxel noise, so a peak there certifies "same
+  voxel neighborhood", not independent physical identity. Only a registered
+  independent rescan arm can test physical microstructure.
+
+### Promotion gate
+
+INCLUDE only if held-out real overlaps separate reliably from
+immediately-adjacent-winding controls and recover known displacement, with
+low-information regions abstaining. DISMISS, without adding a learned matcher,
+if performance comes mainly from gross fiber direction, depth, or shared
+rendering artifacts. Details and the proposed numeric criteria are in the
+protocol.
+
+### Self-evaluation
+
+- prize impact: **high** (a green/red/gray certificate on every patch join; possible sub-voxel seam refinement)
+- plausibility: **medium-high**; 9 µm resolution may erase the useful scales
+- evidence burden: **moderate**
+- implementation cost: **low for the prototype (done), moderate for robust tangent-slab sampling**
+- reproducibility burden: **low**
+- hallucinated-ink risk: **zero; ink is never read**
+- invalid-evaluation risk: **medium-high**: shared voxel noise and shared rendering pixels can fake identity (now measured, not just feared)
+- VC3D compatibility: **excellent via per-seam status and correlation-surface review**
+- unnecessary surface area: **low if it stays a seam validator/refiner**
 
 ## 3. Cross-parameterization geometry/ink separation
 

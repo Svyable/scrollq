@@ -44,6 +44,21 @@ because it makes a letterform look stronger.
 Flattening selection must remain ink-blind. Ink may test an already-frozen
 geometry afterward.
 
+## Learned (Siamese) patch matcher for sheet identity
+
+**Status:** DISMISS for now.
+
+Training a network to say whether two patches show the same papyrus is the
+obvious shortcut for [seam authentication](../papyrus-seam-fingerprint.md). It
+would be free to exploit scanner, depth, geometry or preprocessing shortcuts,
+and a score from it could not be traced to a physical cause. That makes the
+evidence harder to interpret than the failure it is meant to catch.
+
+The deterministic correlation experiment must first establish that physical
+identity information exists at all. Only then would learned descriptors earn a
+place, and then only as an ablation against the deterministic baseline on the
+same held-out adjacent-winding set.
+
 ## Immediate tile-origin / phase-offset backend
 
 **Status:** DISMISS pending evidence.
@@ -233,7 +248,8 @@ their required inputs exist:
 - cross-parameterization detector invariance;
 - stride/blend seam invariance;
 - independent recto coverage witnesses;
-- fiber-texture physical sheet fingerprints;
+- fiber-texture physical sheet fingerprints, including phase-preserving seam
+  authentication (synthetic software controls done; real CT unmeasured);
 - sealed-scroll morphology transfer after the source scale discrepancy is
   resolved;
 - a learned uncertainty head on a frozen surface backbone, once a backbone
