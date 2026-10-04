@@ -1,0 +1,37 @@
+name: PHerc0139 fiber census
+
+on:
+  push:
+    paths:
+      - ".github/workflows/pherc0139-fiber-census.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install .
+      - name: Census + volume range check
+        continue-on-error: true
+        run: python scripts/fiber_scroll_census.py --scroll PHerc0139 --out out/census/summary.json
+      - name: Commit result (create-only)
+        run: |
+          set -euxo pipefail
+          dest=artifacts/2026-10-04-pherc0139-fiber-census
+          test ! -e "$dest/summary.json"
+          mkdir -p "$dest"
+          cp out/census/summary.json "$dest/summary.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$dest/summary.json"
+          git commit -m "Add PHerc0139 fiber census result"
+          git push origin "HEAD:${{ github.ref_name }}"
