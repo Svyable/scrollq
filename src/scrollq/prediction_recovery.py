@@ -204,3 +204,124 @@ def snap_to_component(
         "candidate_available_fraction": float(np.mean(available)) if len(available) else 0.0,
         "unique_recovered_voxel_fraction": unique_fraction,
     }
+
+
+def score_development(
+    centers: list[dict[str, Any]],
+    *,
+    frozen_center_count: int = 6,
+    required_selected_component_centers: int = 5,
+    minimum_candidate_available_fraction_every_selected_center: float = 0.80,
+    minimum_fraction_within_8_voxels_every_selected_center: float = 0.50,
+    minimum_median_fraction_within_8_voxels_across_all_centers: float = 0.80,
+    maximum_median_error_voxels_every_selected_center: float = 8.0,
+    maximum_median_p95_error_voxels_across_selected_centers: float = 16.0,
+    require_all_wrong_wrap_controls_rejected: bool = True,
+    minimum_median_unique_recovered_voxel_fraction: float = 0.50,
+) -> dict[str, Any]:
+    """Apply the frozen all-center recovery gate."""
+    if len(centers) != frozen_center_count:
+        raise PredictionRecoveryError(
+            f"expected {frozen_center_count} frozen centers, got {len(centers)}"
+        )
+    selected = [row for row in centers if row.get("component_status") == "selected"]
+
+    fractions_all = [
+        float(row.get("fraction_within_8_voxels", 0.0) or 0.0)
+        if row.get("component_status") == "selected"
+        else 0.0
+        for row in centers
+    ]
+    selected_availability = [
+        float(row.get("candidate_available_fraction", 0.0) or 0.0)
+        for row in selected
+    ]
+    selected_fraction8 = [
+        float(row.get("fraction_within_8_voxels", 0.0) or 0.0)
+        for row in selected
+    ]
+    selected_median_error = [
+        row.get("median_error_voxels") for row in selected
+    ]
+    selected_p95 = [row.get("p95_error_voxels") for row in selected]
+    selected_unique = [
+        float(row.get("unique_recovered_voxel_fraction", 0.0) or 0.0)
+        for row in selected
+    ]
+    wrong_wrap_rows = [
+        bool(row.get("wrong_wrap_rejected", True))
+        for row in centers
+    ]
+
+    finite_median_error = [
+        float(v) for v in selected_median_error
+        if isinstance(v, (int, float)) and np.isfinite(float(v))
+    ]
+    finite_p95 = [
+        float(v) for v in selected_p95
+        if isinstance(v, (int, float)) and np.isfinite(float(v))
+    ]
+
+    checks = {
+        "selected_component_centers": (
+            len(selected) >= required_selected_component_centers
+        ),
+        "candidate_available_fraction_every_selected_center": (
+            bool(selected)
+            and all(
+                value >= minimum_candidate_available_fraction_every_selected_center
+                for value in selected_availability
+            )
+        ),
+        "fraction_within_8_voxels_every_selected_center": (
+            bool(selected)
+            and all(
+                value >= minimum_fraction_within_8_voxels_every_selected_center
+                for value in selected_fraction8
+            )
+        ),
+        "median_fraction_within_8_voxels_across_all_centers": (
+            float(np.median(fractions_all))
+            >= minimum_median_fraction_within_8_voxels_across_all_centers
+        ),
+        "median_error_voxels_every_selected_center": (
+            len(finite_median_error) == len(selected)
+            and bool(selected)
+            and all(
+                value <= maximum_median_error_voxels_every_selected_center
+                for value in finite_median_error
+            )
+        ),
+        "median_p95_error_voxels_across_selected_centers": (
+            len(finite_p95) == len(selected)
+            and bool(selected)
+            and float(np.median(finite_p95))
+            <= maximum_median_p95_error_voxels_across_selected_centers
+        ),
+        "wrong_wrap_controls_rejected": (
+            (not require_all_wrong_wrap_controls_rejected)
+            or all(wrong_wrap_rows)
+        ),
+        "median_unique_recovered_voxel_fraction": (
+            bool(selected_unique)
+            and float(np.median(selected_unique))
+            >= minimum_median_unique_recovered_voxel_fraction
+        ),
+    }
+
+    return {
+        "status": "pass" if all(checks.values()) else "fail",
+        "selected_component_center_count": len(selected),
+        "frozen_center_count": frozen_center_count,
+        "median_fraction_within_8_voxels_across_all_centers": float(
+            np.median(fractions_all)
+        ),
+        "median_p95_error_voxels_across_selected_centers": (
+            float(np.median(finite_p95)) if finite_p95 else None
+        ),
+        "median_unique_recovered_voxel_fraction": (
+            float(np.median(selected_unique)) if selected_unique else None
+        ),
+        "wrong_wrap_rejected_count": sum(wrong_wrap_rows),
+        "checks": checks,
+    }
