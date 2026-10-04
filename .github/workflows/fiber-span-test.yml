@@ -1,0 +1,39 @@
+name: Fiber Span Test (pre-registered)
+
+on:
+  push:
+    paths:
+      - ".github/workflows/fiber-span-test.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  span-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install .
+      - name: Run frozen span test
+        id: run
+        continue-on-error: true
+        run: python scripts/fiber_span_test.py --out-dir out/fiber-span-test
+      - name: Print full evidence
+        if: always()
+        run: |
+          echo "=== FIBER_SPAN_RESULT_BEGIN ==="
+          python -c "import json; print(json.dumps(json.load(open('out/fiber-span-test/result.json')),separators=(',',':')))"
+          echo "=== FIBER_SPAN_POINTS_BEGIN ==="
+          python -c "import json; print(json.dumps(json.load(open('out/fiber-span-test/fiber-gaps.points.json')),separators=(',',':'),sort_keys=True))"
+          echo "=== FIBER_SPAN_END ==="
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fiber-span-test
+          path: out/fiber-span-test/

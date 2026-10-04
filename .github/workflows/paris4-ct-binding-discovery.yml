@@ -1,0 +1,56 @@
+name: PHercParis4 CT binding discovery
+
+# Read-only: prints what the public spiral dataset declares about its CT volume.
+on:
+  push:
+    paths:
+      - ".github/workflows/paris4-ct-binding-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: dl.ash2txt.org spiral dataset index
+        run: |
+          set -u
+          base="https://dl.ash2txt.org/datasets/spiral_datasets/PHercParis4/"
+          echo "=== INDEX $base ==="
+          curl -fsSL --retry 3 "$base" | sed -e 's/<[^>]*>/ /g' | tr -s ' ' | grep -v '^\s*$' | head -200 || true
+          for f in README.md README.txt README readme.md metadata.json info.json volume.json meta.json; do
+            echo "=== FILE $f ==="
+            curl -fsSL --retry 2 "$base$f" | head -200 || echo "(absent)"
+          done
+          echo "=== INDEX ${base}fibers/ (head) ==="
+          curl -fsSL --retry 3 "${base}fibers/" | sed -e 's/<[^>]*>/ /g' | tr -s ' ' | head -40 || true
+      - name: Hugging Face bucket tree
+        run: |
+          for p in spiral spiral/PHercParis4; do
+            echo "=== HF TREE $p ==="
+            curl -fsSL --retry 3 "https://huggingface.co/api/buckets/scrollprize/datasets/tree/$p" | python3 -c "import json,sys; [print(e.get('type'), e.get('path'), e.get('size')) for e in json.load(sys.stdin)]" || true
+          done
+          for f in README.md metadata.json volume.json; do
+            echo "=== HF FILE spiral/PHercParis4/$f ==="
+            curl -fsSL "https://huggingface.co/buckets/scrollprize/datasets/resolve/spiral/PHercParis4/$f?download=true" | head -200 || echo "(absent)"
+          done
+      - name: Non-geometry fields of one pinned fiber
+        run: |
+          curl -fsSL -o f.json "https://huggingface.co/buckets/scrollprize/datasets/resolve/spiral/PHercParis4/fibers/dj_20260717T165249423_000001.json?download=true"
+          python3 - <<'PY'
+          import json
+          d = json.load(open("f.json"))
+          print("top-level keys:", sorted(d))
+          for k, v in d.items():
+              if k in ("line_points", "control_points"):
+                  print(k, "len", len(v))
+              else:
+                  print(k, "=", json.dumps(v)[:400])
+          seg = d["control_points"][0].get("segment_to_next", {})
+          print("segment keys:", sorted(seg))
+          print("manifests:", seg.get("normal_manifest"), "|", seg.get("fiber_manifest"))
+          print("config:", json.dumps(seg.get("config"))[:800])
+          PY
