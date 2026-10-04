@@ -127,3 +127,48 @@ def test_prediction_recovery_primitives_have_no_hidden_truth_argument():
         assert "truth" not in parameters
         assert "reference_xyz" not in parameters
         assert "hidden_valid" not in parameters
+
+
+def _scored_center(
+    *,
+    selected=True,
+    availability=0.9,
+    fraction8=0.9,
+    median_error=4.0,
+    p95=10.0,
+    unique=0.8,
+    wrong_rejected=True,
+):
+    return {
+        "component_status": "selected" if selected else "abstain",
+        "candidate_available_fraction": availability if selected else 0.0,
+        "fraction_within_8_voxels": fraction8 if selected else 0.0,
+        "median_error_voxels": median_error if selected else None,
+        "p95_error_voxels": p95 if selected else None,
+        "unique_recovered_voxel_fraction": unique if selected else 0.0,
+        "wrong_wrap_rejected": wrong_rejected,
+    }
+
+
+def test_development_score_allows_one_abstention_but_keeps_it_in_median():
+    centers = [_scored_center() for _ in range(5)] + [_scored_center(selected=False)]
+
+    result = pr.score_development(centers)
+
+    assert result["status"] == "pass"
+    assert result["selected_component_center_count"] == 5
+    assert result["median_fraction_within_8_voxels_across_all_centers"] == pytest.approx(0.9)
+    assert all(result["checks"].values())
+
+
+def test_development_score_fails_bad_selected_center_and_wrong_wrap():
+    centers = [_scored_center() for _ in range(6)]
+    centers[0] = _scored_center(availability=0.7, fraction8=0.4)
+    centers[1]["wrong_wrap_rejected"] = False
+
+    result = pr.score_development(centers)
+
+    assert result["status"] == "fail"
+    assert result["checks"]["candidate_available_fraction_every_selected_center"] is False
+    assert result["checks"]["fraction_within_8_voxels_every_selected_center"] is False
+    assert result["checks"]["wrong_wrap_controls_rejected"] is False
