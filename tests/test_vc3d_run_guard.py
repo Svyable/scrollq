@@ -61,6 +61,27 @@ def test_exit_zero_requires_new_semantically_valid_surface(tmp_path):
     assert all(gate["passed"] for gate in report["gates"])
 
 
+def test_missing_executable_records_null_identity_and_fails_closed(tmp_path):
+    command = ["definitely-not-a-real-vc3d-command-scrollq"]
+    report = run_guarded(
+        command,
+        output_tifxyz=tmp_path / "missing",
+        volume_root="PHerc-test/volumes/exact.zarr",
+        voxel_size_um=10.0,
+        stdout_log=tmp_path / "stdout.log",
+        stderr_log=tmp_path / "stderr.log",
+    )
+
+    assert report["proof_gate_pass"] is False
+    assert report["process"]["return_code"] is None
+    assert report["process"]["launch_error"]
+    assert report["executable"] == {
+        "requested": command[0],
+        "resolved": None,
+        "sha256": None,
+    }
+
+
 def test_exit_zero_missing_output_is_explicit_failure(tmp_path):
     report = run_guarded(
         [sys.executable, "-c", "print('success without output')"],
