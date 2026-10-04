@@ -1,0 +1,165 @@
+name: Prediction connectivity recovery
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/prediction-connectivity-recovery.yml"
+      - "src/scrollq/prediction_recovery.py"
+      - "scripts/research_prediction_connectivity_recovery.py"
+      - "tests/test_prediction_recovery.py"
+      - "artifacts/2026-10-03-prediction-connectivity-recovery-prereg/**"
+      - "artifacts/2026-10-03-prediction-connectivity-recovery-run/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Guard measured output
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="artifacts/2026-10-03-prediction-connectivity-recovery-run/result.json"
+          if [ -e "$out" ]; then
+            echo "prediction-connectivity recovery result already exists; frozen"
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Prove preregistration is merged and unchanged
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git fetch origin main --depth=1
+          path="artifacts/2026-10-03-prediction-connectivity-recovery-prereg/spec.json"
+          git cat-file -e "origin/main:$path"
+          git diff --exit-code origin/main -- "$path"
+
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install repository environment
+        if: steps.guard.outputs.skip != '1'
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+          python -m pip install -e .
+
+      - name: Run recovery primitive tests
+        if: steps.guard.outputs.skip != '1'
+        run: |
+          set -euxo pipefail
+          python -m pytest -q tests/test_prediction_recovery.py
+
+      - name: Fetch exact frozen w035 TIFXYZ
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mesh="input/20260317000000-on-20250728140407-9.362um.tifxyz"
+          base="https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260317000000-w035_2026031718/mesh/20260317000000-on-20250728140407-9.362um.tifxyz"
+          mkdir -p "$mesh"
+          for f in x.tif y.tif z.tif meta.json; do
+            curl -fsSL --retry 4 --retry-delay 2 -o "$mesh/$f" "$base/$f"
+          done
+
+      - name: Record frozen input hashes
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-prediction-connectivity-recovery-run"
+          mkdir -p "$outdir"
+          {
+            sha256sum artifacts/2026-10-03-prediction-connectivity-recovery-prereg/spec.json
+            sha256sum artifacts/2026-10-03-coverage-witness-pherc0139-prereg-v2/spec.json
+            sha256sum artifacts/2026-10-03-pherc0139-wrong-wrap-run/wrong-wrap-result.json
+            sha256sum artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json
+            sha256sum input/20260317000000-on-20250728140407-9.362um.tifxyz/{meta.json,x.tif,y.tif,z.tif}
+          } > "$outdir/inputs.sha256"
+          cat "$outdir/inputs.sha256"
+
+      - name: Run frozen recovery experiment
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          outdir="artifacts/2026-10-03-prediction-connectivity-recovery-run"
+          python scripts/research_prediction_connectivity_recovery.py \
+            --spec artifacts/2026-10-03-prediction-connectivity-recovery-prereg/spec.json \
+            --tifxyz input/20260317000000-on-20250728140407-9.362um.tifxyz \
+            --stage-a-spec artifacts/2026-10-03-coverage-witness-pherc0139-prereg-v2/spec.json \
+            --wrong-wrap-result artifacts/2026-10-03-pherc0139-wrong-wrap-run/wrong-wrap-result.json \
+            --reference-plan artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json \
+            --out "$outdir/result.json" \
+            | tee "$outdir/run.log"
+
+      - name: Verify recovery observation contract
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(
+              Path("artifacts/2026-10-03-prediction-connectivity-recovery-run/result.json").read_text()
+          )
+          assert result["schema"] == "scrollq-research-prediction-connectivity-recovery-result/1"
+          assert result["status"] == "measured"
+          assert result["decision"]["status"] in {"pass", "fail"}
+          assert result["firewall"]["candidate_generator_hidden_reference_arguments"] == []
+          assert len(result["firewall"]["candidate_hashes_frozen_before_scoring"]) == 6
+          assert len(set(result["firewall"]["candidate_hashes_frozen_before_scoring"])) == 6
+          for row in result["centers"]:
+              assert row["candidate"]["candidate_sha256"] == row["score"]["candidate_sha256"]
+          print("prediction-connectivity observation contract PASS")
+          print("scientific decision:", result["decision"]["status"])
+          print("selected centers:", result["decision"]["selected_component_center_count"])
+          print("median within 8:", result["decision"]["median_fraction_within_8_voxels_across_all_centers"])
+          print("median p95:", result["decision"]["median_p95_error_voxels_across_selected_centers"])
+          print("wrong-wrap rejected:", result["decision"]["wrong_wrap_rejected_count"])
+          print("median unique:", result["decision"]["median_unique_recovered_voxel_fraction"])
+          PY
+
+      - name: Record environment
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-prediction-connectivity-recovery-run"
+          {
+            python --version
+            python -m pip freeze
+          } > "$outdir/environment.txt"
+
+      - name: Commit measured result to campaign branch
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/2026-10-03-prediction-connectivity-recovery-run
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Measure prediction-connectivity surface recovery"
+          branch="${{ github.head_ref || github.ref_name }}"
+          if [ "$branch" = main ]; then
+            branch=campaign/prediction-connectivity-recovery
+          fi
+          git push origin "HEAD:$branch"
