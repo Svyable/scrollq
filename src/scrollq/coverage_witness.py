@@ -1,8 +1,8 @@
 """Research helpers for identity-aware coverage-witness experiments.
 
 These functions are intentionally not exposed as a console script. They support
-the preregistered Stage-B experiment for issue #151 and remain small enough to
-remove if the real-papyrus gate fails.
+the preregistered coverage-witness experiments for issue #151 and remain
+unexposed as production CLI surface until the real-papyrus gates justify it.
 """
 from __future__ import annotations
 
