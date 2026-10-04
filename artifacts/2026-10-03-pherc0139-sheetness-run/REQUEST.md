@@ -9,3 +9,5 @@ execution failures and must not be reclassified as a scientific negative.
 
 Frozen campaign:
 `artifacts/2026-10-03-pherc0139-sheetness-campaign/campaign-plan.json`
+
+Execution trigger revision 2: rerun after Actions-wrapper repair only; scientific contract unchanged.
