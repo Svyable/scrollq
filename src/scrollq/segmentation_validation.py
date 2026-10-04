@@ -505,9 +505,11 @@ def _load_tifxyz(
         largest = int(sizes.max()) if sizes.size else 0
     else:
         largest = 0
+    point_components = np.asarray(labels[valid], dtype=np.int32)
 
     return {
         "points": xyz,
+        "point_components": point_components,
         "valid_vertices": count,
         "components": int(component_count),
         "largest_component_fraction": float(largest / count),
@@ -546,6 +548,31 @@ def _region_metrics(
     t50, t95, tmax = _distance_summary(truth_to_pred)
     p50, p95, pmax = _distance_summary(pred_to_truth)
 
+    component_ids = np.asarray(truth_surface["point_components"], dtype=np.int32)
+    if component_ids.shape != truth_to_pred.shape:
+        raise SegmentationValidationError(
+            "truth component labels do not match truth vertices"
+        )
+    component_coverages: list[float] = []
+    for component_id in range(1, int(truth_surface["components"]) + 1):
+        keep = component_ids == component_id
+        if not np.any(keep):
+            raise SegmentationValidationError(
+                f"truth component {component_id} has no vertices"
+            )
+        component_coverages.append(
+            float(np.mean(truth_to_pred[keep] <= tolerance))
+        )
+    components_with_support = sum(value > 0.0 for value in component_coverages)
+    component_recall_any = (
+        float(components_with_support / len(component_coverages))
+        if component_coverages
+        else 0.0
+    )
+    component_min_coverage = (
+        float(min(component_coverages)) if component_coverages else 0.0
+    )
+
     return {
         PRIMARY_METRIC: min(t_cov, p_cov),
         "truth_to_prediction_coverage": t_cov,
@@ -561,6 +588,9 @@ def _region_metrics(
         "prediction_valid_vertices": float(prediction_surface["valid_vertices"]),
         "truth_components": float(truth_surface["components"]),
         "prediction_components": float(prediction_surface["components"]),
+        "truth_components_with_prediction_support": float(components_with_support),
+        "truth_component_recall_any": component_recall_any,
+        "truth_component_min_coverage": component_min_coverage,
         "truth_largest_component_fraction": float(
             truth_surface["largest_component_fraction"]
         ),
