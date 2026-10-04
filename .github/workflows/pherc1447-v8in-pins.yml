@@ -1,0 +1,205 @@
+name: PHerc1447 v8-in release pins
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/pherc1447-v8in-pins.yml"
+      - "scripts/hf_byte_inventory.py"
+      - "src/scrollq/hf_pin.py"
+      - "tests/test_hf_byte_inventory.py"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pherc1447-v8in-pins-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  OUT_DIR: artifacts/2026-10-04-pherc1447-v8in-pins
+  SURFACES_REV: 7e4d918712a8d8642a6fdeee45b80217c1e98317
+
+jobs:
+  pin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Guard frozen output
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -e "$OUT_DIR/byte-inventory.json" ]; then
+            echo "pins already frozen in $OUT_DIR; nothing to do"
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install repository environment
+        if: steps.guard.outputs.skip != '1'
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+          python -m pip install -e .
+
+      - name: Run pin and inventory tests
+        if: steps.guard.outputs.skip != '1'
+        run: python -m pytest -q tests/test_hf_pin.py tests/test_hf_byte_inventory.py
+
+      - name: Resolve the four Hub repositories to immutable commits
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p out/pins
+          scroliq-hf-pin --repo YoussefMoNader/ink-8um-v8in \
+            --repo-type model --revision main --require-public \
+            --out out/pins/v8in.hf-pin.json
+          scroliq-hf-pin --repo YoussefMoNader/ink-8um-v8in-pherc1447-loo-w062 \
+            --repo-type model --revision main --require-public \
+            --out out/pins/v8in-pherc1447-loo-w062.hf-pin.json
+          scroliq-hf-pin --repo YoussefMoNader/ink-8um-v8-patchpack \
+            --repo-type dataset --revision main --require-public \
+            --out out/pins/v8-patchpack.hf-pin.json
+          # Same immutable revision the merged AUC reproduction (#212) scored.
+          scroliq-hf-pin --repo YoussefMoNader/ink-8um-pherc1447-surfaces \
+            --repo-type dataset --revision "$SURFACES_REV" --require-public \
+            --out out/pins/pherc1447-surfaces.hf-pin.json
+
+      - name: Hash the exact bytes of every scoring-input file
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The training corpus is not a scoring input; it is pinned but not
+          # downloaded, and recorded as skipped_by_policy.
+          python scripts/hf_byte_inventory.py \
+            --pin out/pins/v8in.hf-pin.json \
+            --pin out/pins/v8in-pherc1447-loo-w062.hf-pin.json \
+            --pin out/pins/v8-patchpack.hf-pin.json \
+            --pin out/pins/pherc1447-surfaces.hf-pin.json \
+            --skip-download YoussefMoNader/ink-8um-v8-patchpack \
+            --max-repo-bytes 4294967296 \
+            --out out/byte-inventory.json | tee out/inventory.log
+
+      - name: Verify observation contract
+        if: steps.guard.outputs.skip != '1'
+        shell: python
+        run: |
+          import json
+          import os
+          from pathlib import Path
+
+          inv = json.loads(Path("out/byte-inventory.json").read_text())
+          by_id = {r["repo_id"]: r for r in inv["repos"]}
+          assert set(by_id) == {
+              "YoussefMoNader/ink-8um-v8in",
+              "YoussefMoNader/ink-8um-v8in-pherc1447-loo-w062",
+              "YoussefMoNader/ink-8um-v8-patchpack",
+              "YoussefMoNader/ink-8um-pherc1447-surfaces",
+          }, sorted(by_id)
+
+          for repo_id, repo in by_id.items():
+              status = repo["status"]
+              want = (
+                  "skipped_by_policy"
+                  if repo_id.endswith("v8-patchpack")
+                  else "hashed"
+              )
+              assert status == want, f"{repo_id}: status {status}, expected {want}"
+              assert len(repo["resolved_revision"]) == 40
+              print(
+                  f"{repo_id}: {status} rev={repo['resolved_revision'][:12]} "
+                  f"files={repo['pinned_file_count']} bytes={repo.get('total_bytes')}"
+              )
+
+          # The surfaces pin must be the exact revision #212 scored, and its
+          # independently streamed bytes must reproduce #212's eight hashes.
+          surfaces = by_id["YoussefMoNader/ink-8um-pherc1447-surfaces"]
+          assert surfaces["resolved_revision"] == os.environ["SURFACES_REV"]
+          expected = {
+              "w058/predictions/v8in.png": "976cb7a3e5f23ece2145689c729d7a57f342d1a54b00f2a02a2ae05fcb6826b1",
+              "w058/predictions/loo_w058.png": "fe42fe927b9265cd0dba30242c4d85e6df69d697d454bfc56287880fa676ca72",
+              "w058/labels/inklabels.png": "ba15dd60fc24d249d2ba6f036f902d340df8c035221d648214e6bb426004b18b",
+              "w058/labels/mask.png": "7f8d7e72acc4b3019a1a787e4dba00da6cf72dea3b01be255068780faf622ddd",
+              "w060/predictions/v8in.png": "b5126669af438b55b7e9bf535db9a504aec5d0dadcb9676d5d46e3fc9f520a4f",
+              "w060/predictions/loo_w060.png": "5d59bafa57735588110e9fbd2f5fa67ca614a4772ea14eb0d70b77aa2f99c48d",
+              "w060/labels/inklabels.png": "a8a4992895de72cb32d6dc33e42969ac77e34cc90354d7800eaaae25cb0778cb",
+              "w060/labels/mask.png": "56752a81c88560cdac1321f004ddf95bd6c89f2713aab9eeb0f5dedd07d690bf",
+          }
+          hashed = {row["path"]: row["sha256"] for row in surfaces["files"]}
+          for path, digest in expected.items():
+              assert hashed.get(path) == digest, f"{path}: {hashed.get(path)} != {digest}"
+          print("surfaces inventory reproduces all 8 hashes used by the AUC reproduction")
+
+          # Observation, not a gate: does any file in the base-model repository
+          # hash to the checkpoint SHA that #212 declares? A mismatch is evidence
+          # to act on in a follow-up, not a reason to withhold the pins.
+          checkpoint = "3b94548d7f9ba9f99bc4b0ad8cafcec6d42585c06304e1bd11e47b5d0f88c4cd"
+          base = by_id["YoussefMoNader/ink-8um-v8in"]
+          matches = [row["path"] for row in base["files"] if row["sha256"] == checkpoint]
+          cross = {
+              "schema": "scrollq-pherc1447-v8in-pin-cross-checks/1",
+              "surfaces_reproduce_pr212_hashes": True,
+              "base_checkpoint_sha256_declared_by_212": checkpoint,
+              "base_checkpoint_found_in_ink_8um_v8in": bool(matches),
+              "base_checkpoint_paths": matches,
+          }
+          Path("out/cross-checks.json").write_text(
+              json.dumps(cross, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          print("cross-checks:", cross)
+          print("observation contract PASS", inv["summary"])
+
+      - name: Record environment
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          {
+            python --version
+            python -m pip freeze
+          } > out/environment.txt
+
+      - name: Commit frozen pins to the campaign branch
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        env:
+          BRANCH_REF: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -euxo pipefail
+          mkdir -p "$OUT_DIR"
+          for f in out/pins/*.json out/byte-inventory.json out/cross-checks.json out/inventory.log out/environment.txt; do
+            test ! -e "$OUT_DIR/$(basename "$f")"
+            cp "$f" "$OUT_DIR/"
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUT_DIR"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Freeze PHerc1447 v8-in release pins and byte inventory"
+          branch="$BRANCH_REF"
+          if [ "$branch" = main ]; then
+            branch=campaign/pherc1447-v8in-pins
+          fi
+          for attempt in 1 2 3 4; do
+            if git push origin "HEAD:$branch"; then
+              exit 0
+            fi
+            git pull --rebase origin "$branch" || true
+            sleep $((attempt * 5))
+          done
+          echo "could not push frozen pins" >&2
+          exit 1
