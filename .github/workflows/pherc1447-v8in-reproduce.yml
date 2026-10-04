@@ -113,6 +113,7 @@ jobs:
 
           from scrollq.ink_validation import (
               _binarize_labels,
+              _binarize_mask,
               _load_2d,
               _normalize_prediction,
               evaluate_prediction,
@@ -135,7 +136,10 @@ jobs:
                   scale="uint8",
                   threshold=0.5,
               )
-              mask = _load_2d(inputs / winding / "labels" / "mask.png")
+              mask = _binarize_mask(
+                  _load_2d(inputs / winding / "labels" / "mask.png"),
+                  rule="positive",
+              )
               for arm, filename in (
                   ("base", "v8in.png"),
                   ("loo", f"loo_{winding}.png"),
@@ -224,7 +228,7 @@ jobs:
 
           for winding in w058 w060; do
             set +e
-            scroliq-ink-validate               --prediction "$root/inputs/$winding/predictions/v8in.png"               --labels "$root/inputs/$winding/labels/inklabels.png"               --validation-mask "$root/inputs/$winding/labels/mask.png"               --prediction-scale uint8               --label-scale uint8               --label-threshold 0.5               --threshold 0.5               --split-id "$winding"               --held-out               --training-overlap none               --ground-truth-source-url "$source_url"               --label-ancestry unknown               --model-checkpoint-sha256 "$BASE_CHECKPOINT_SHA256"               --model-window 24x64x64               --out "$root/$winding.base.ink-validation.json"               --format json               > "$root/$winding.base.stdout.json"
+            scroliq-ink-validate               --prediction "$root/inputs/$winding/predictions/v8in.png"               --labels "$root/inputs/$winding/labels/inklabels.png"               --validation-mask "$root/inputs/$winding/labels/mask.png"               --prediction-scale uint8               --label-scale uint8               --label-threshold 0.5               --mask-rule positive               --threshold 0.5               --split-id "$winding"               --held-out               --training-overlap none               --ground-truth-source-url "$source_url"               --label-ancestry unknown               --model-checkpoint-sha256 "$BASE_CHECKPOINT_SHA256"               --model-window 24x64x64               --out "$root/$winding.base.ink-validation.json"               --format json               > "$root/$winding.base.stdout.json"
             rc=$?
             set -e
             if [ "$rc" -ne 1 ]; then
