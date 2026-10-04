@@ -124,6 +124,54 @@ If larger-context models are used, they should face stronger physical
 falsification: local-evidence ablation, wrong-surface controls, held-out
 evaluation, and exact configuration provenance.
 
+## CGAL `Mesh_smoothing_3` as a ScrollQ dependency
+
+**Status:** DISMISS for current integration; WATCH as a possible diagnostic.
+Checked 2026-10-04.
+
+The package exists on CGAL `master`. Its `package_info` describes a component
+that takes a **3D volumetric mesh** and relocates vertices to trade element
+quality against fit to a geometric oracle, with a result free of inverted
+elements. The prize path operates on sheet surfaces and TIFXYZ meshes, not
+tetrahedral volume meshes, so there is nothing to apply it to.
+
+On licensing, the package's `license.txt` lists two lines, `GPL (v3 or later)`
+and `MIT/X11 (BSD like)`. Which terms govern which part, or whether they are
+alternatives, is not established here. Treat it as GPL-encumbered until CGAL's
+own licensing statement says otherwise; this is a secondary reason, not the
+deciding one. Its release timing (announcement date, CGAL 6.3 schedule) was
+**not verified**.
+
+Keep the inversion-barrier idea as a test-design reference for fold/inversion
+controls on surface meshes. Do not import the implementation. Reconsider only if
+a volumetric mesh becomes part of the evidence chain.
+
+## Learned uncertainty head on a frozen backbone (SegWithU-style)
+
+**Status:** DEFERRED (WATCH). Checked 2026-10-04.
+
+SegWithU (arXiv 2604.15271; `ProjectNeura/SegWithU`, Apache-2.0, last commit
+`a3157cfff5e50a69b0c880a3d50edfadb4da00d7` on 2026-07-08) attaches a small
+supervised uncertainty head to a frozen backbone and reports separate maps for
+calibration and for error ranking. Its published results are on ACDC,
+BraTS2024 and LiTS only; no papyrus evidence exists. The repository README
+indicates that a full release is still pending, so artifact availability is
+unverified.
+
+It cannot be tested here as proposed: it taps **intermediate features of a
+frozen backbone**, and ScrollQ owns no surface backbone or checkpoint. It
+consumes only a published prediction volume. The head also needs labels, so
+isolation of training surfaces from evaluation surfaces is a leakage control,
+not a formality.
+
+Trigger to revisit: a surface checkpoint with accessible features and a
+license that permits this use. Smallest test then: train only the head on
+development surfaces and compare it against entropy, margin and ensemble
+variance on held-out sheet switches, bridges and unsupported predictions,
+by risk-versus-coverage (AURC) and by how many wrong-winding voxels remain among
+the most-confident 50/75/90%. Use the output only for abstention, never as an
+extra feature fed to ink detection.
+
 ## Accumulating all plausible diagnostics
 
 **Status:** DISMISS as a research strategy.
@@ -131,6 +179,25 @@ evaluation, and exact configuration provenance.
 A broad diagnostic catalog can become a form of avoidance. The primary campaign
 needs whole-scroll reconstruction and legible text, not an indefinitely
 expanding certification framework.
+
+## 2026-10-04 scan: nothing new adopted from outside the Vesuvius stack
+
+**Status:** DEFER (no adoption).
+
+A pass over newly released ink checkpoints, CT reconstruction methods,
+flattening implementations and generic segmentation architectures found none
+that clears the evidence, licensing and prize-relevance threshold. Several
+generic thin-structure methods remain either domain-remote or insufficiently
+licensed. Adopting one now would add model complexity without addressing a
+demonstrated Vesuvius failure.
+
+The changes that did earn code that day were all integrity gates against
+failures already demonstrated in the official tool/data ecosystem (see
+[reproducibility-research.md](reproducibility-research.md) §5-7 and
+[geometry-and-coverage-research.md](geometry-and-coverage-research.md) §5-6).
+Reconsider a generic method only against a measured, reproduced Vesuvius
+failure it would fix, with its licence and the separate Vesuvius data terms
+checked.
 
 A new diagnostic earns code only if it does at least one of:
 
@@ -143,6 +210,32 @@ A new diagnostic earns code only if it does at least one of:
 
 Otherwise keep the idea in this folder, run the smallest possible experiment,
 or discard it.
+
+## Gaussian-splatting CT reconstruction (FaCT-GS)
+
+**Status:** DISMISS for the prize pipeline. Recorded 2026-10-04 from the
+maintainer briefing; the repository was not re-read from the build container.
+
+The top-level license is permissive, but as relayed it excludes
+`fact_gs/r2_gaussian` and submodule contents, so full dependency provenance is
+not simply "MIT". More importantly ScrolIQ works from *reconstructed*
+synchrotron volumes, not the raw acquisition problem this method solves.
+Reconstructing measured CT through an optimized Gaussian representation would add
+a learned, interpolated stage upstream of extremely weak carbon-ink evidence for
+a speed benefit that does not justify the new hallucination surface.
+
+Reconsider only with raw projection data in scope and a preregistered
+comparison against the existing reconstruction on a physical control.
+
+## Clinical low-dose CT reconstruction (CSRCT)
+
+**Status:** DISMISS for current incorporation. Recorded 2026-10-04 from the
+maintainer briefing.
+
+The method targets clinical low-dose CT and, as relayed, reports results on
+simulated data; the article is restricted-access and no permissively licensed
+implementation or checkpoint stack was found. The sparse-prior idea is
+interesting, but neither licensing nor evidence clears the bar.
 
 ## Deferred, not dismissed
 
@@ -158,7 +251,19 @@ their required inputs exist:
 - fiber-texture physical sheet fingerprints, including phase-preserving seam
   authentication (synthetic software controls done; real CT unmeasured);
 - sealed-scroll morphology transfer after the source scale discrepancy is
-  resolved.
+  resolved;
+- a learned uncertainty head on a frozen surface backbone, once a backbone
+  with accessible features exists;
+- CSWinUNETR (cross-shaped stripe attention for thin structures): WATCH. As
+  relayed on 2026-10-04 its repository has no explicit software license, and
+  public source is not permission to reuse it, so ScrolIQ neither vendors nor
+  derives code from it. If a license appears, the smallest experiment is an
+  architecture-only A/B on exactly the same licensed Vesuvius training cubes,
+  augmentations, optimizer and committed held-out ROIs as the existing surface
+  model, promoted on surface coverage, adjacent-winding bridges, Betti/component
+  error and sheet-switch count rather than Dice alone. The risk is that a
+  mechanism built to reconnect interrupted structures connects two neighbouring
+  windings instead.
 
 "Deferred" means the hypothesis survived reasoning, not that implementation has
 been approved.

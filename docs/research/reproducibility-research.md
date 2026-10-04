@@ -118,6 +118,70 @@ This is the preferred relationship between infrastructure and research:
 implement infrastructure when a concrete experiment or submission claim needs
 it, not as speculative certification surface area.
 
+## 5. Producer-success semantic validation
+
+**Status:** INCLUDE (2026-10-04). Extends `scroliq-vc3d-run-guard`;
+contract in [vc3d-run-guard.md](../vc3d-run-guard.md).
+
+### Problem
+
+A public VC3D report (maintainers' note; not reproduced here) describes
+`vc_grow_seg_from_seed` deleting the surface it just generated and exiting 0
+when the volume is an `s3://` path: voxel-size metadata is read through a local
+file operation, the resulting physical area falls below the minimum-area check,
+and the output directory is removed. Process supervision sees success.
+
+The guard already refused a missing, empty or sub-threshold surface. Three
+holes remained: the voxel size was a bare declaration, a no-op copy of the input
+passed, and a producer's own metadata was never compared with its vertices.
+
+### Implemented decision
+
+An exit-0 run is `PRODUCER_SEMANTIC_FAILURE` unless the output also has
+recomputed physical area from verified voxel spacing, a recorded extent that is
+consistent with the declared bbox and the volume bounds, and a decoded-geometry
+digest that differs from every declared input. Gates whose evidence was not
+supplied are listed in `unevaluated_gates`, not silently passed.
+
+### Why this earned INCLUDE
+
+- a specific code path and reproduction, not a hypothetical;
+- very low difficulty and negligible compute; no leakage risk;
+- the same gate set applies to any external TIFXYZ producer;
+- spurious-ink risk falls indirectly: rendering cannot proceed from silently
+  missing or malformed geometry.
+
+Other runners (`scroliq-spiral-run`, `scroliq-spiral-export`) keep their own
+receipts; adopting `evaluate_postconditions` there is a follow-up.
+
+## 6. Configured vs effective objective
+
+**Status:** INCLUDE as an audit field and validator (2026-10-04); the Lasagna
+experiment that motivated it is WATCH, see
+[geometry-and-coverage-research.md](geometry-and-coverage-research.md).
+Contract in [objective-audit.md](../objective-audit.md).
+
+A nonzero configured loss weight is not evidence that a term contributed
+gradients. Training or optimization passports now have a place to record
+per-term evaluation, finite and nonzero counts, accumulated contribution and
+gradient norm, and `scroliq-objective-audit` fails closed when a claimed
+safety/topology term never activates, or when an ablation arm's "disabled" term
+is not actually disabled. Claim boundary: it audits that terms did what the
+config says, not that the objective is good.
+
+## 7. Spatial metadata is recomputed, never trusted
+
+**Status:** INCLUDE (2026-10-04). Contract in
+[tifxyz-metadata-integrity.md](../tifxyz-metadata-integrity.md).
+
+A report that many verified PHercParis4 spiral-input patches carry `meta.json`
+bounds that no longer contain their valid vertices (most stale in Z) is a
+metadata-integrity problem, not a new project: a prefilter on a stale box
+silently discards valid geometry. The TIFXYZ audit now classifies the declared
+bbox against recomputed bounds, the run guard blocks stale output metadata, and
+`scroliq-bbox-census` reproduces the count over any patch pack with a positive
+control. The census has not yet been run on the real pack.
+
 ## Promotion rule for future proof-chain work
 
 A new provenance mechanism should earn INCLUDE only when all of the following

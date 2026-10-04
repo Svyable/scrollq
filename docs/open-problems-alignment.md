@@ -49,7 +49,10 @@ A passport does **not** infer unmeasured stages from the scan-quality score. Tod
 - `mesh`: partial when a volume-bound native TIFXYZ audit is supplied;
 - `fibers`: partial when a structurally valid `scroliq-fiber` report is explicitly bound to the exact selected volume; unbound/mismatched artifacts are excluded;
 - `ink`: partial when a volume-bound leakage/provenance/control audit is supplied;
+- `blind_control`: `measured` only for an anchored, attested sealed-truth chain bound to the exact volume id; `partial` when ordering is self-asserted or the reveal is pending; `blocked` on a violation. It records *when truth became visible relative to the prediction commitment* and carries no score ([`blind-control.md`](blind-control.md));
 - `surface`, `spiral`: `unknown` until direct evidence is supplied.
+
+The `blind_control` stage was added 2026-10-04 and `schema_version` stays `1.0` (additive). Passports generated before that date, including the frozen artifacts under `artifacts/`, do not contain it and are not edited.
 
 That asymmetry is intentional. It makes missing evidence visible instead of disguising it as confidence.
 

@@ -44,6 +44,7 @@ weight-free Pareto frontier (triage, not a readability claim).
   - `segmentation_validation.py` → `scroliq-segmentation-validate`: trusted blind TIFXYZ surface scorer using preregistered bidirectional coverage, salted hidden-truth commitments, exact vertex distances, topology gates, and common `scroliq-eval` region results
   - `segmentation_uncertainty.py` → `scroliq-segmentation-uq`: finite-sample split-conformal audit that keeps boundary error separate from complete disconnected-component omission and rejects vacuous bounds
   - `sheetness_campaign.py` → `scroliq-sheetness-campaign`: freezes dispersed per-probe CT boxes, exact Hessian-engine bytes/config, and one campaign-level decision rule before inference; seals one provenance-bound v3 spec per cutout and aggregates all frozen groups without dropping failures
+  - `blind_control.py` → `scroliq-blind-control`: benchmark manifests with `development_truth` / `sealed_truth` / `training_eligible`, a create-only seal → prediction-commitment → anchor → reveal → report chain, and the ordering verdict the passport carries as its `blind_control` stage; ordering and custody only, never a score. `docs/blind-control.md`; the registered NIST benchmark is unpinned, so it refuses to commit until its pins exist
   - evidence layers, each its own `scroliq-*` script: `passport.py`,
     `scan_map.py`, `provenance.py`, `recto_coverage.py`, `tifxyz_audit.py`
     (`scroliq-mesh`), `ink_audit.py`, `ink_validation.py`, `normal_response.py`,
@@ -53,7 +54,10 @@ weight-free Pareto frontier (triage, not a readability claim).
     `geometry_probe.py` → `scrollq-geometry-probe`; `fiber_audit.py` →
     `scroliq-fiber`; `fiber_frame.py` → `scroliq-fiber-frame` for the
     experimental ink-blind cross-ply CT continuity diagnostic
-  - `vc3d_run_guard.py` → `scroliq-vc3d-run-guard`: create-only external-command receipt that rejects exit-zero runs unless a newly produced TIFXYZ surface satisfies semantic vertex/quad/area postconditions; optional exact-volume CT preflight binding
+  - `vc3d_run_guard.py` → `scroliq-vc3d-run-guard`: create-only external-command receipt; an exit-zero run is `PRODUCER_SEMANTIC_FAILURE` unless the new TIFXYZ also passes vertex/quad/recomputed-area, voxel-spacing (vs a hashed `--volume-meta`), extent/bbox-consistency and output-differs-from-input (decoded-geometry digest) gates; unexercised gates are listed, not passed; optional exact-volume CT preflight binding
+  - `bbox_census.py` → `scroliq-bbox-census`: recomputes bounds over a TIFXYZ patch pack, compares with declared `meta.json` bboxes, counts vertices a declared-bbox filter would lose; positive control built in, empty census is `unverified`
+  - `objective_audit.py` → `scroliq-objective-audit`: configured-vs-effective objective passport audit (+ `ObjectiveTracker`); fails closed on never-evaluated/always-zero/non-finite/ungradiented claimed terms and on ablation arms that were not ablated
+  - `geometry_strata.py` → `scroliq-geometry-strata`: preregistered geometry-stratified, label-coverage-conditioned surface evaluation gate (`measure` derives curvature/tilt; `evaluate` applies the frozen rule). Machinery only; no real-data result yet
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
@@ -105,7 +109,11 @@ scroliq-pairs --list --out out/discovery.json          # registered rescan pairs
 scroliq-manifest --help                                # derive prize manifests
 scroliq-chunk-audit --index <metadata.min.json[.gz]> --out out/audit.json
 scroliq-segmentation-uq --help                      # structural boundary/component UQ gate
+scroliq-blind-control --help                          # sealed-truth timing for blind physical controls
 scroliq-vc3d-run-guard --help                       # exit code + semantic TIFXYZ postconditions
+scroliq-bbox-census --help                          # declared vs recomputed bbox over a patch pack
+scroliq-objective-audit --help                      # configured vs effective objective
+scroliq-geometry-strata --help                      # geometry-stratified evaluation gate
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests
@@ -217,6 +225,17 @@ console script. A new entry point must therefore be declared in
    the pinned eligibility list + bucket index (`scroliq-manifest`); the
    hand-copied Grand Prize and First Letters manifests are checked against them
    (`--compare-builtin`, regression-tested on the pinned snapshots).
+
+13. **Exit status, declared metadata and configured weights are claims, not
+   evidence.** A producer that exits 0 may have written nothing
+   (`scroliq-vc3d-run-guard`); a `meta.json` bbox may not contain its own
+   vertices (`recompute_bbox`/`compare_bbox`: never filter on a declared box
+   alone); a nonzero loss weight may never have contributed a gradient
+   (`scroliq-objective-audit`). Recompute from the artifact, compare, and list
+   any gate whose independent evidence was not supplied instead of passing it.
+   External reports behind these (VC3D exit-0 deletion, stale PHercParis4
+   bboxes, Lasagna silent-zero losses) come from the maintainers' research note
+   and are not reproduced here; say so when citing them.
 
 ## Working rules
 
