@@ -1,0 +1,158 @@
+name: Coverage witness Stage C
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/coverage-witness-stage-c.yml"
+      - "src/scrollq/coverage_witness.py"
+      - "tests/test_coverage_witness.py"
+      - "scripts/research_coverage_witness_stage_c.py"
+      - "artifacts/2026-10-03-coverage-witness-stage-c-run/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Guard measured output
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="artifacts/2026-10-03-coverage-witness-stage-c-run/result.json"
+          if [ -e "$out" ]; then
+            echo "Stage-C result already exists; frozen"
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != '1'
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install pinned repository environment
+        if: steps.guard.outputs.skip != '1'
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+          python -m pip install -e .
+
+      - name: Run continuation and firewall tests
+        if: steps.guard.outputs.skip != '1'
+        run: |
+          set -euxo pipefail
+          python -m pytest -q tests/test_coverage_witness.py
+
+      - name: Fetch exact frozen w035 TIFXYZ
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mesh="input/20260317000000-on-20250728140407-9.362um.tifxyz"
+          base="https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/segments/20260317000000-w035_2026031718/mesh/20260317000000-on-20250728140407-9.362um.tifxyz"
+          mkdir -p "$mesh"
+          for f in x.tif y.tif z.tif meta.json; do
+            curl -fsSL --retry 4 --retry-delay 2 -o "$mesh/$f" "$base/$f"
+          done
+          if curl -fsSL --retry 2 --retry-delay 2 -o "$mesh/mask.tif" "$base/mask.tif"; then
+            echo "mask.tif present"
+          else
+            rm -f "$mesh/mask.tif"
+            echo "mask.tif absent"
+          fi
+
+      - name: Record frozen input hashes
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-coverage-witness-stage-c-run"
+          {
+            sha256sum artifacts/2026-10-03-coverage-witness-stage-c-prereg/spec.json
+            sha256sum artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json
+            sha256sum artifacts/2026-10-03-pherc0139-wrong-wrap-run/wrong-wrap-result.json
+            sha256sum artifacts/2026-10-03-coverage-witness-stage-b-run/result.json
+            sha256sum input/20260317000000-on-20250728140407-9.362um.tifxyz/{meta.json,x.tif,y.tif,z.tif}
+          } > "$outdir/inputs.sha256"
+          cat "$outdir/inputs.sha256"
+
+      - name: Run frozen precision-first Stage C
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          outdir="artifacts/2026-10-03-coverage-witness-stage-c-run"
+          python scripts/research_coverage_witness_stage_c.py \
+            --spec artifacts/2026-10-03-coverage-witness-stage-c-prereg/spec.json \
+            --tifxyz input/20260317000000-on-20250728140407-9.362um.tifxyz \
+            --reference-plan artifacts/2026-10-03-pherc0139-sheetness-prereg/reference-plan.json \
+            --wrong-wrap-result artifacts/2026-10-03-pherc0139-wrong-wrap-run/wrong-wrap-result.json \
+            --out "$outdir/result.json" \
+            | tee "$outdir/run.log"
+
+      - name: Verify observation contract
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          outdir = Path("artifacts/2026-10-03-coverage-witness-stage-c-run")
+          result = json.loads((outdir / "result.json").read_text())
+          spec = Path("artifacts/2026-10-03-coverage-witness-stage-c-prereg/spec.json")
+          spec_sha = hashlib.sha256(spec.read_bytes()).hexdigest()
+
+          assert result["schema"] == "scrollq-research-coverage-witness-stage-c-result/1"
+          assert result["status"] == "measured"
+          assert result["spec"]["sha256"] == spec_sha
+          assert len(result["variants"]) == 18
+          assert result["holdout_source"]["selected_center_count"] == 6
+          assert result["independent_witness_source"]["missing_prediction_chunks"] == 0
+          assert result["independent_witness_source"]["missing_ct_chunks"] == 0
+          assert result["decision"]["status"] in {"pass", "fail"}
+          print("Stage-C observation contract PASS")
+          print("scientific decision:", result["decision"]["status"])
+          print("variant completeness:", result["decision"]["variant_completeness"])
+          print("wrong-wrap rejection:", result["decision"]["wrong_wrap_target_rejection"])
+          print("41x41 competitor recovery:", result["decision"]["size_41_competitor_recovery"])
+          PY
+
+      - name: Record environment
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          outdir="artifacts/2026-10-03-coverage-witness-stage-c-run"
+          {
+            python --version
+            python -m pip freeze
+          } > "$outdir/environment.txt"
+
+      - name: Commit measured result to campaign branch
+        if: steps.guard.outputs.skip != '1'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/2026-10-03-coverage-witness-stage-c-run
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Measure precision-first coverage witness Stage C"
+          branch="${{ github.head_ref || github.ref_name }}"
+          if [ "$branch" = main ]; then
+            branch=campaign/coverage-witness-stage-c
+          fi
+          git push origin "HEAD:$branch"

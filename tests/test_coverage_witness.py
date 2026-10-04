@@ -10,6 +10,10 @@ from scrollq.coverage_witness import (
     hide_rect,
     odd_rect,
     supported_runs,
+    fit_tensor_polynomial_surface,
+    evaluate_tensor_polynomial_surface,
+    inner_collar_mask,
+    polynomial_consensus,
 )
 
 
@@ -142,3 +146,105 @@ def test_classify_target_tie_prefers_negative_midpoint():
         competitor_abs_max=32,
     )
     assert out["target"].midpoint == -2.0
+
+
+def _bicubic_surface(h=31, w=33):
+    yy, xx = np.meshgrid(
+        np.arange(h, dtype=np.float64),
+        np.arange(w, dtype=np.float64),
+        indexing="ij",
+    )
+    u = (xx - 16.0) / 16.0
+    v = (yy - 15.0) / 16.0
+    xyz = np.stack(
+        [
+            100 + 40*u + 5*v + 8*u*u - 4*u*v + 3*v*v + 2*u**3,
+            200 - 7*u + 30*v + 5*u*v + 4*v**3,
+            300 + 10*u - 12*v + 6*u*u + 7*u*v + 5*v*v + 3*u**3*v,
+        ],
+        axis=-1,
+    )
+    return yy, xx, xyz
+
+
+def test_tensor_degree3_recovers_bicubic_surface_and_normals():
+    yy, xx, xyz = _bicubic_surface()
+    yx = np.stack([yy.ravel(), xx.ravel()], axis=1)
+    values = xyz.reshape(-1, 3)
+    model = fit_tensor_polynomial_surface(
+        yx,
+        values,
+        degree=3,
+        center_yx=(15.0, 16.0),
+        scale=16.0,
+    )
+    pred, normals = evaluate_tensor_polynomial_surface(model, yx)
+    np.testing.assert_allclose(pred, values, atol=1e-9, rtol=0)
+    assert model.rank == 16
+    assert np.isfinite(normals).all()
+    np.testing.assert_allclose(np.linalg.norm(normals, axis=1), 1.0, atol=1e-12)
+
+
+def test_polynomial_hidden_firewall_is_invariant():
+    yy, xx, xyz_a = _bicubic_surface()
+    xyz_b = xyz_a.copy()
+    valid = np.ones(xyz_a.shape[:2], dtype=bool)
+    rect = odd_rect((15, 16), 11)
+    y0, y1, x0, x1 = rect
+    xyz_b[y0:y1, x0:x1] += np.array([10000.0, -20000.0, 30000.0])
+
+    obs_a, val_a = hide_rect(xyz_a, valid, rect)
+    obs_b, val_b = hide_rect(xyz_b, valid, rect)
+    window = odd_rect((15, 16), 21)
+    wy0, wy1, wx0, wx1 = window
+
+    def fit_from_observed(obs, val):
+        rows = []
+        values = []
+        for y in range(wy0, wy1):
+            for x in range(wx0, wx1):
+                if val[y, x] and np.isfinite(obs[y, x]).all():
+                    rows.append([y, x])
+                    values.append(obs[y, x])
+        return fit_tensor_polynomial_surface(
+            np.asarray(rows, dtype=float),
+            np.asarray(values, dtype=float),
+            degree=3,
+            center_yx=(15.0, 16.0),
+            scale=10.0,
+        )
+
+    model_a = fit_from_observed(obs_a, val_a)
+    model_b = fit_from_observed(obs_b, val_b)
+    np.testing.assert_allclose(model_a.coefficients, model_b.coefficients, atol=0, rtol=0)
+
+
+def test_inner_collar_mask_selects_only_visible_near_boundary_cells():
+    yy, xx = np.meshgrid(np.arange(11), np.arange(11), indexing="ij")
+    yx = np.stack([yy.ravel(), xx.ravel()], axis=1)
+    rect = odd_rect((5, 5), 5)
+    mask = inner_collar_mask(yx, rect, width=2)
+    selected = {tuple(v) for v in yx[mask]}
+    assert (2, 5) in selected
+    assert (1, 5) in selected
+    assert (0, 5) not in selected
+    assert (5, 2) in selected
+    assert (5, 5) not in selected
+
+
+def test_polynomial_consensus_abstains_on_position_or_normal_disagreement():
+    xyz_a = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]], dtype=float)
+    xyz_b = np.array([[1, 0, 0], [9, 0, 0], [1, 0, 0]], dtype=float)
+    normal_a = np.array([[0, 0, 1], [0, 0, 1], [0, 0, 1]], dtype=float)
+    normal_b = np.array([[0, 0, 1], [0, 0, 1], [1, 0, 0]], dtype=float)
+    mask, distance, cosine = polynomial_consensus(
+        xyz_a,
+        normal_a,
+        xyz_b,
+        normal_b,
+        max_position_disagreement=8,
+        min_abs_normal_cosine=0.9,
+    )
+    assert mask.tolist() == [True, False, False]
+    assert distance.tolist() == [1.0, 9.0, 1.0]
+    assert cosine.tolist() == [1.0, 1.0, 0.0]
