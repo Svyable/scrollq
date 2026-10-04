@@ -469,6 +469,9 @@ The repository includes the exact outputs behind the September 30, 2026 campaign
 | **64 / 64** listed volcomp scroll volumes scored | [`volumes.json`](artifacts/2026-09-30-scrollq-n24-dense/volumes.json) |
 | Ranking is **representative**, honest about heterogeneity | Truly-disjoint resample ([`stability-truly-disjoint.json`](artifacts/2026-10-01-truly-disjoint/stability-truly-disjoint.json)): **Spearman ρ = 0.63**, mean **|Δscore| = 8.0**, top-10 overlap **4 / 10** — below our ρ ≥ 0.85 gate, because volumes are genuinely heterogeneous (swings up to 44 points between runs). Two-phase exclusion protocol guarantees 64/64 zero chunk overlap. We publish it because a representative ranking (mean 22.9 chunks decoded/volume) with honest uncertainty beats the earlier 3×3×3 ranking whose ρ = 0.99 we proved was inflated by shard re-reading. |
 | Pre-registered stability v2 (balanced, interleaved sample) | **FAIL**: Spearman ρ = **0.750** on 48 eligible volumes (gate 0.85), so the leaderboard shows **rank bands**. The design removed the sampling shift (+5.46 → +0.25) and Pearson r is 0.911, but close volumes still swap ranks. September scores differ from the v2 pooled score by **6.9** points on average — [`2026-10-stability-v2/`](artifacts/2026-10-stability-v2/) |
+| Prize frontiers under the v2 design | PHerc0813 leaves both frontiers; robust members only **PHerc1447** (Grand Prize) and **PHerc0800** (First Letters); the segment-free slot is a band within noise — [`prize-frontier-v2/`](artifacts/2026-10-04-prize-frontier-v2/) |
+| Fiber gap candidates track fallback interpolation (pre-registered) | **SUPPORTED**: 101 / 502 fallback spans vs 2 / 5,001 native spans carry a gap (RD 0.20, 95% CI 0.145–0.299; controls passed). Fallback spans are rendered at 3.26× the median step, so the gap rule mostly measures rendering density — [`fiber-span-test-run/`](artifacts/2026-10-04-fiber-span-test-run/) |
+| Public PHercParis4 fibers sit on CT material (pre-registered) | No volume is declared; exactly one readable volume (20260411134726, 2.4 µm) fits every point. There, fiber voxels beat same-region background at **AUC 0.775** (95% CI 0.760–0.789); displaced fibers fall to 0.555, and the wrong-frame control (0.429) passes. Evidence for, not a declaration of, the binding — [`fiber-ct-support-run/`](artifacts/2026-10-04-paris4-fiber-ct-support-run/) |
 | Acquisition dropout scan found no verified dead slices in the campaign | **0 hits across 64 volumes** |
 | Label coverage was highly concentrated in the open-data snapshot | **70 / 70** discovered ink-detection roots were on PHercParis4; the top quality-ranked scrolls had none |
 | High-quality, unlabeled targets were made actionable | **14** top-quartile volumes were flagged **“label next”** |
@@ -708,6 +711,15 @@ geometry testbed because it has six segments, but it is dominated by PHerc1447
 on both current qualifier axes. This is campaign triage only, not an
 ink-presence or Grand Prize success prediction.
 
+**Superseded by the v2 sampling design (2026-10-04).** Recomputed from the
+pre-registered stability v2 scores ([`prize-frontier-v2/`](artifacts/2026-10-04-prize-frontier-v2/)),
+PHerc0813 drops off the frontier in the pooled view and in both disjoint runs.
+**PHerc1447 is the only robust member.** The segment-free slot goes to
+PHerc0358 (pooled), PHerc0125/PHerc1203 (run A) or PHerc0358 (run B). The top
+five segment-free volumes lie within 2.6 points, inside the v2 noise, so read
+that slot as a band. PHerc1545 has an incomplete v2 sample and no score. The
+September result above stays as frozen, dated evidence.
+
 An optional sensitivity pass can add externally measured **surface-prediction
 CT support** without changing the primary ScrolIQ score or frontier:
 
@@ -892,6 +904,11 @@ scrollq-grand-prize --prize first-letters \
   --volumes artifacts/2026-09-30-resampling-stability/stability-n24-dense-prov.json \
   --run run1 --out out/first-letters-targets-run1.json
 ```
+
+Under the v2 design (2026-10-04, [`prize-frontier-v2/`](artifacts/2026-10-04-prize-frontier-v2/))
+the First Letters frontier is PHerc0358 + PHerc0800 (pooled and run B) and
+PHerc0800 + PHerc0846B (run A): **PHerc0800 is the only robust member**, and
+PHerc0813 is off it. The September analysis follows unchanged.
 
 On the published n24-dense scores the frontier is **PHerc0800, PHerc0813**;
 on the disjoint resample it is **PHerc0800, PHerc1545**. Only PHerc0800 is

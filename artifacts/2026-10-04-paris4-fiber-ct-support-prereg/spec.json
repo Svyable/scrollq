@@ -1,0 +1,48 @@
+{
+  "protocol": "paris4-fiber-ct-support-v1",
+  "frozen": "2026-10-04",
+  "question": "In the only public PHercParis4 volume whose shape can contain every census fiber point, do the fibers' traced positions sample denser material than background points in the same region, and does that advantage disappear when the fibers are displaced?",
+  "inputs": {
+    "census": "artifacts/2026-10-04-fiber-corpus-census/summary.json",
+    "census_manifest_sha256": "a28f3a950584dce9340a4f7609d00a939c739fb64c29ff6884b21304de196d35",
+    "binding_evidence": "artifacts/2026-10-04-paris4-fiber-binding/result.json (range compatibility only; dataset declares no volume)",
+    "byte_rule": "every fiber is re-downloaded and must hash-match the census; any failure is RUN FAILED"
+  },
+  "volume": {
+    "bucket_https": "https://vesuvius-challenge-open-data.s3.us-east-1.amazonaws.com",
+    "root": "PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+    "level": 1,
+    "scale": 2,
+    "read": "single uint8 voxel per point by HTTP range request; absent chunk = fill value 0 (counted, AGENTS lesson 3); points outside the level shape read 0 and are counted",
+    "coordinates": "VC3D xyz level-0 voxels; level-1 (z,y,x) = floor(xyz / 2) reversed"
+  },
+  "sampling": {
+    "points_per_fiber": 16,
+    "fiber_points": "line_points at round(linspace(0, n-1, 16)), duplicates dropped",
+    "shift_offsets_level0_xyz": [[80, 80, 0], [-80, -80, 0]],
+    "shift_note": "|offset| = 113 level-0 voxels = 272 um, roughly one sheet period; displaced fibers land on unrelated material",
+    "background": "one uniform random point per fiber point inside that fiber's own line bounding box",
+    "wrong_frame_control": "fiber points with x and y swapped",
+    "seed": 20261004
+  },
+  "decision": {
+    "statistics": [
+      "AUC(F vs R): P(fiber voxel > background voxel), ties 0.5",
+      "specificity: AUC(F vs R) - AUC(S vs R)",
+      "AUC(X vs R) for the wrong-frame control"
+    ],
+    "ci": "95% percentile intervals from a fiber-cluster bootstrap",
+    "bootstrap_reps": 2000,
+    "seed": 4102026,
+    "rule": "CONTROL FAILURE if the AUC(X vs R) CI lower bound > 0.5 (a wrong frame would also look supported). Otherwise SUPPORTED iff the AUC(F vs R) CI lower bound > 0.5 AND the specificity CI lower bound > 0; else NOT SUPPORTED."
+  },
+  "descriptive_only": [
+    "per-fiber AUC(F vs R) and the fraction of fibers flagged (AUC <= 0.5) for true and displaced fibers: the review queue",
+    "zero fraction per group (masked background or absent chunks)"
+  ],
+  "interpretation_limits": [
+    "SUPPORTED is evidence that the fibers sit on dense material in this volume's frame. It is not a declared binding: another scan sharing the frame cannot be excluded, and the two 7.91 um volumes have no readable shape.",
+    "Density is not papyrus identity, fiber direction, or sheet identity.",
+    "NOT SUPPORTED does not prove the fibers are wrong; it can mean the frame or the scale is different."
+  ]
+}

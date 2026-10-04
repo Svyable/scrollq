@@ -53,7 +53,7 @@ The highest-priority experiment is **November N2: one exact-volume surface resul
 
 The measurement infrastructure is ready; the campaign result is not. N2 freezes one exact prize-eligible volume, public metric spec, probe regions, engine identity and a salted commitment over private TIFXYZ truth **before** predictions exist. It then scores every preregistered region with bidirectional surface coverage, topology gates and explicit failures. A negative result counts as evidence and does not authorize changing the rule after the fact.
 
-[Issue #105](https://github.com/Svyable/scrollq/issues/105) remains the frozen PHerc0139 physical-sheetness reference/transfer experiment that informs the surface campaign; it is no longer a good summary of the whole project frontier by itself. Other active but subordinate dependencies are the blinded Mesh IQ review (N1), first external community-model evaluation (N3), CT-conditioned Fiber IQ (N4), held-out spiral score (N5), and the v2 Grand Prize frontier rerun (N6).
+[Issue #105](https://github.com/Svyable/scrollq/issues/105) remains the frozen PHerc0139 physical-sheetness reference/transfer experiment that informs the surface campaign; it is no longer a good summary of the whole project frontier by itself. Other active but subordinate dependencies are the blinded Mesh IQ review (N1), first external community-model evaluation (N3), CT-conditioned Fiber IQ (N4), and held-out spiral score (N5). The v2 Grand Prize frontier rerun was pulled into October and done on 2026-10-04: PHerc0813 left the frontier and PHerc1447 is its only robust member ([`prize-frontier-v2/`](../artifacts/2026-10-04-prize-frontier-v2/)).
 
 ## Reproducibility / integration surfaces
 

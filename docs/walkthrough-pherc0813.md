@@ -95,7 +95,12 @@ letting a 76.2 stand in for them.
 
 ## 7. What it points to next
 
-PHerc0813 sits on the Grand Prize Pareto frontier because it has the best
+> **Update 2026-10-04.** Under the v2 sampling design PHerc0813 is no longer on
+> the Grand Prize frontier (pooled v2 score 70.2; see
+> [`prize-frontier-v2/`](../artifacts/2026-10-04-prize-frontier-v2/)). The
+> paragraph below describes the frozen September result.
+
+PHerc0813 sat on the Grand Prize Pareto frontier because it had the best
 scan health of the 13 targets, but it has **no public segments**. PHerc1447,
 the other frontier member, has 15 segments but a lower score (61.7). The
 trade-off is explicit rather than hidden in a weight.

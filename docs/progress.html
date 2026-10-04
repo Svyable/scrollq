@@ -270,6 +270,16 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
   <div class="change-grid">
     <article class="change">
       <div class="date">OCT 04</div>
+      <h3>PHerc0813 is off the Grand Prize frontier under v2 sampling</h3>
+      <p>Re-derived from the pre-registered v2 scores, PHerc1447 is the only robust Grand Prize frontier member and PHerc0800 the only robust First Letters member. The segment-free slot is a band within noise.</p>
+    </article>
+    <article class="change">
+      <div class="date">OCT 04</div>
+      <h3>Fiber gap flags mostly measure fallback rendering</h3>
+      <p>Pre-registered and SUPPORTED with controls passing: 101 / 502 fallback spans vs 2 / 5,001 native spans carry a gap. Only 2 of 388 cues sit in native trace spans.</p>
+    </article>
+    <article class="change">
+      <div class="date">OCT 04</div>
       <h3>Every public PHercParis4 fiber audited, with a positive control</h3>
       <p>136 / 136 fibers, 388 gaps and 519 sharp turns. All 388 gaps fall in fibers that contain fallback-interpolated spans; the 57 fully native fibers have none. Not yet a causal claim.</p>
     </article>
@@ -282,16 +292,6 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
       <div class="date">OCT 03</div>
       <h3>Winding consistency moved from intuition to measurable constraints</h3>
       <p>2,111 / 2,232 points attached to verified patches; 6 / 16,074 constraints flagged; the +2 injection control detected 194 / 200 corruptions.</p>
-    </article>
-    <article class="change">
-      <div class="date">OCT 03</div>
-      <h3>CRC mismatches were independently confirmed as writer defects</h3>
-      <p>Bit-by-bit CRC-32C verification confirmed the 331 live-shard mismatches rather than treating them as an audit-tool artifact.</p>
-    </article>
-    <article class="change">
-      <div class="date">OCT 03</div>
-      <h3>Physical sheetness moved behind a frozen preregistration</h3>
-      <p>The PHerc0139 reference campaign freezes source identity, probes, parameters, and evaluation before reading the result, ready for exact-volume transfer.</p>
     </article>
   </div>
 </section>
@@ -417,6 +417,12 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
         <div class="title">Review queues documented; three upstream drafts ready (unfiled)</div>
         <div class="detail">One how-to covers all four queues, and the ray-order queue now exports to VC3D. Live rechecks confirm the PHerc0814 headers-without-chunks and the PHerc1447 debug mesh are still published, with the same bytes and the same findings. <a href="./review-queues.md">Guide →</a></div>
       </div>
+
+      <div class="event">
+        <div class="date">2026-10-04</div>
+        <div class="title">Ambitions raised: October gains O7–O10, November raised to N1–N9</div>
+        <div class="detail">The fiber span test came back SUPPORTED, so the gap rule mostly measures fallback rendering. Under the v2 frontier PHerc0813 is out and PHerc1447 is the only robust member. The public fibers sit on material in PHercParis4 20260411134726 (AUC 0.775; wrong-frame control passed). Every queue now loads in VC3D. <a href="./october-2026.html#o7">Details →</a></div>
+      </div>
     </div>
   </div>
 </section>
@@ -454,7 +460,7 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
 
   <div class="backlog-wrap">
     <div class="backlog">
-      <h3>ScrolIQ · O1–O6</h3>
+      <h3>ScrolIQ · O1–O10 (O7–O10 stretch, raised Oct 4)</h3>
 
       <div class="goal">
         <div class="ghead"><span class="gid">O1</span><span class="gtitle">Mesh IQ: how often are flags real defects?</span><span class="state partial">Partial</span></div>
@@ -484,6 +490,26 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
       <div class="goal">
         <div class="ghead"><span class="gid">O6</span><span class="gtitle">Put review queues in reviewers' hands</span><span class="state partial">Partial</span></div>
         <div class="gdetail">How-to for all four queues published; ray-order queue exports to VC3D; PHerc0814, PHerc1447 and PHerc0343P drafts ready but unfiled pending maintainer approval → N7.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">O7</span><span class="gtitle">Fiber fallback–gap pattern at span level</span><span class="state measured">Measured</span></div>
+        <div class="gdetail">Pre-registered: SUPPORTED, controls passed. 101 / 502 fallback vs 2 / 5,001 native spans; the gap rule mostly measures rendering density.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">O8</span><span class="gtitle">Prize frontiers under the v2 design</span><span class="state measured">Measured</span></div>
+        <div class="gdetail">PHerc0813 leaves both frontiers. Robust members: PHerc1447 (Grand Prize) and PHerc0800 (First Letters). The segment-free slot is a band.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">O9</span><span class="gtitle">Fiber CT volume + CT support</span><span class="state measured">Measured</span></div>
+        <div class="gdetail">No volume is declared; one readable candidate (20260411134726, 2.4 µm). Pre-registered CT test: SUPPORTED (AUC 0.775 vs background; displaced fibers 0.555; wrong-frame control 0.429). Evidence for the binding, not a declaration.</div>
+      </div>
+
+      <div class="goal">
+        <div class="ghead"><span class="gid">O10</span><span class="gtitle">Every review queue loads in VC3D</span><span class="state measured">Done</span></div>
+        <div class="gdetail">Winding attachment, ray order and 388 fiber gap cues as PointCollections, plus the Mesh IQ packet.</div>
       </div>
     </div>
 
@@ -539,37 +565,45 @@ footer .links{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.45rem}
 
   <div class="backlog-wrap">
     <div class="backlog">
-      <h3>Science · N1–N4</h3>
+      <h3>Science · N1–N4 (raised Oct 4)</h3>
       <div class="goal">
         <div class="ghead"><span class="gid">N1</span><span class="gtitle">Close O1: publish Mesh IQ flag precision</span><span class="state blocked">Needs reviewers</span></div>
         <div class="gdetail">Frozen 54-segment blinded sample; labels must come from human VC3D review. Cutoff Nov 21.</div>
       </div>
       <div class="goal">
-        <div class="ghead"><span class="gid">N2</span><span class="gtitle">One exact-volume surface result, scored blind</span><span class="state unknown">Not started</span></div>
-        <div class="gdetail">The bottleneck goal. Sheetness campaign, blind TIFXYZ scorer and target-freeze gate exist; volume choice and pre-registration come first.</div>
+        <div class="ghead"><span class="gid">N2</span><span class="gtitle">Two surface arms on one exact volume, scored blind</span><span class="state unknown">Not started</span></div>
+        <div class="gdetail">Raised: Phase-A sheetness failed, so two independent arms against one frozen truth. Stretch: recto-coverage accounting over a contiguous region.</div>
       </div>
       <div class="goal">
-        <div class="ghead"><span class="gid">N3</span><span class="gtitle">First blind evaluation of a community model</span><span class="state ready">Ready to test</span></div>
-        <div class="gdetail"><code>scroliq-eval</code> is ready, but no published evaluation exists yet. Needs a model owner's agreement.</div>
+        <div class="ghead"><span class="gid">N3</span><span class="gtitle">Three community models, one held-out split</span><span class="state ready">Ready to test</span></div>
+        <div class="gdetail">Raised from one model to three, covering surface and ink, published as a comparison with CIs. Needs model owners' agreement.</div>
       </div>
       <div class="goal">
-        <div class="ghead"><span class="gid">N4</span><span class="gtitle">Fiber IQ: CT support + fallback–gap test</span><span class="state partial">Partial</span></div>
-        <div class="gdetail">Census done (136 fibers). Span-level pre-registration and the exact CT binding come next.</div>
+        <div class="ghead"><span class="gid">N4</span><span class="gtitle">Fiber IQ: span-aware rule, PHerc0139, CT direction</span><span class="state unknown">Not started</span></div>
+        <div class="gdetail">The span test and CT support moved into October (O7, O9). Next: fix the gap rule, census a second scroll, and test CT orientation.</div>
       </div>
     </div>
     <div class="backlog">
-      <h3>Carryover & delivery · N5–N7</h3>
+      <h3>Carryover & delivery · N5–N9</h3>
       <div class="goal">
         <div class="ghead"><span class="gid">N5</span><span class="gtitle">Close O3: held-out spiral score</span><span class="state blocked">Needs GPU fit</span></div>
         <div class="gdetail">The evaluator is ready. The missing input is one real fit with declared withheld collections.</div>
       </div>
       <div class="goal">
-        <div class="ghead"><span class="gid">N6</span><span class="gtitle">Grand Prize frontier under the v2 design</span><span class="state unknown">Not started</span></div>
-        <div class="gdetail">Requires a new dated <code>as_of</code> campaign. September artifacts stay frozen.</div>
+        <div class="ghead"><span class="gid">N6</span><span class="gtitle">Surface-support survey of all 13 GP volumes</span><span class="state unknown">Not started</span></div>
+        <div class="gdetail">The old N6 was done in October (O8). A third independent axis is the honest way to break the frontier's segment-free tie.</div>
       </div>
       <div class="goal">
         <div class="ghead"><span class="gid">N7</span><span class="gtitle">Upstream: file approved reports; dl regression</span><span class="state blocked">Needs approval</span></div>
         <div class="gdetail">Three drafts are ready. Each will be filed only after the maintainer reproduces it and approves.</div>
+      </div>
+      <div class="goal">
+        <div class="ghead"><span class="gid">N8</span><span class="gtitle">End-to-end submission dry run</span><span class="state unknown">Not started</span></div>
+        <div class="gdetail">Take a non-qualifying N2 output through the container, package, provenance and validator.</div>
+      </div>
+      <div class="goal">
+        <div class="ghead"><span class="gid">N9</span><span class="gtitle">Outside evidence of use</span><span class="state blocked">Needs people</span></div>
+        <div class="gdetail">At least two external reviewers return labels, and one approved upstream report is filed.</div>
       </div>
     </div>
   </div>

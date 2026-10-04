@@ -90,7 +90,7 @@ Working deadline: end of October, following the monthly progress-prize cadence. 
 <a href="https://scrollprize.org/prizes#progress-prizes">prize page</a> states once it is updated.</div>
 
 <div class="stats">
-<div class="stat"><div class="n">6</div><div class="l">October goals<br>each with an exit criterion</div></div>
+<div class="stat"><div class="n">6 + 4</div><div class="l">October goals + stretch<br>each with an exit criterion</div></div>
 <div class="stat"><div class="n warn">0.63</div><div class="l">scan-score stability ρ<br>gate 0.85 · to fix or retire (O5)</div></div>
 <div class="stat"><div class="n">77</div><div class="l">flagged mesh segments<br>precision unmeasured (O1)</div></div>
 <div class="stat"><div class="n good">2 / 13,700</div><div class="l">winding pairs out of order<br>next: cross-collection (O2)</div></div>
@@ -171,7 +171,8 @@ Part 2, CT support with a shifted-fiber positive control, needs an exact CT bind
 rank bands. The new sample removed the systematic shift (+5.46 → +0.25) and cut the noise to the level chance predicts,
 and Pearson r is 0.911, so scores are reliable but close volumes still swap ranks. September scores differ from the
 v2 pooled score by 6.9 points on average, so the Grand Prize and First Letters frontiers need a new dated campaign
-(<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-stability-v2"><code>2026-10-stability-v2/</code></a>).</p></div>
+(<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-stability-v2"><code>2026-10-stability-v2/</code></a>).
+That campaign is now <a href="#o8">O8</a>.</p></div>
 <div class="goal" id="o6"><h3><span class="id">O6</span>Get the review queues into reviewers' hands</h3>
 <div class="chips"><span class="chip crit">gets used</span><span class="chip crit">released early</span><span class="chip crit">standard formats</span><span class="chip state">guides + drafts ready</span><span class="chip gate">needs maintainer approval</span></div>
 <p><b>Why.</b> The prize favours tools that get used. Every ScrolIQ queue (mesh flags, ray-order candidates, fiber gaps) already carries VC3D coordinates but lives in JSON.</p>
@@ -185,6 +186,43 @@ alongside the existing winding-attachment bundle. All three upstream reports are
 reversals) were both rechecked live today
 (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-review-queues">review-queues</a>).
 Remaining: maintainer review and approval to file, then any external feedback.</p></div>
+
+<h3 style="margin:1.4rem 0 .2rem;color:var(--gold)">Stretch goals · raised 2026-10-04</h3>
+<p class="meta" style="margin:0 0 .4rem">October's original six left room. These four came forward from November or were added. The same rules apply: pre-register first, positive controls, frozen dated artifacts.</p>
+
+<div class="goal" id="o7"><h3><span class="id">O7</span>Test the fiber fallback–gap pattern at span level</h3>
+<div class="chips"><span class="chip crit">real data</span><span class="chip crit">fixes a tool's blind spot</span><span class="chip state">done · SUPPORTED</span></div>
+<p><b>Why.</b> The census put every gap in a fiber with fallback spans. If that holds inside fibers, the gap detector is measuring rendering, not breaks.</p>
+<p><b>Done when.</b> A pre-registered span-level verdict with a positive control and a null control.</p>
+<p><b>Result.</b> <b>SUPPORTED</b>, with both controls passing. 101 of 502 fallback spans carry a gap candidate, against 2 of 5,001 native spans
+(risk difference 0.20, 95% CI 0.145–0.299). Fallback spans are rendered at 3.26× the median step, so the 4× gap rule mostly measures rendering density.
+Only 2 of 388 candidates sit in native trace spans; those are the cues worth review. All 388 candidates are now a VC3D file
+(<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-fiber-span-test-run">fiber-span-test-run</a>).</p></div>
+
+<div class="goal" id="o8"><h3><span class="id">O8</span>Re-derive the prize frontiers under the v2 sampling design</h3>
+<div class="chips"><span class="chip crit">frozen data</span><span class="chip crit">insightful, actionable</span><span class="chip state">done · frontier changed</span></div>
+<p><b>Why.</b> The September frontier rested on the slab-biased sample that O5 exposed. This was November's N6, pulled forward.</p>
+<p><b>Done when.</b> New dated frontiers from the v2 scores, with every live page updated together.</p>
+<p><b>Result.</b> <b>PHerc0813 is off both frontiers</b> in the pooled view and in each disjoint run. The only robust members are <b>PHerc1447</b>
+(Grand Prize) and <b>PHerc0800</b> (First Letters), both held there by their segments. The best segment-free volume is a band
+of five within 2.6 points, not a pick (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-prize-frontier-v2">prize-frontier-v2</a>).</p></div>
+
+<div class="goal" id="o9"><h3><span class="id">O9</span>Fiber IQ part 2: find the CT volume, then test CT support</h3>
+<div class="chips"><span class="chip crit">real data</span><span class="chip crit">open problem: fiber connectivity</span><span class="chip state">done · SUPPORTED</span></div>
+<p><b>Why.</b> Fiber geometry means little until it is checked against CT, and the public fibers name no CT volume.</p>
+<p><b>Done when.</b> The binding is established or shown to be undeclared. A pre-registered CT support test then runs with a displaced-fiber positive control and a wrong-frame control.</p>
+<p><b>Result.</b> The dataset declares no volume. A range check leaves one readable candidate,
+<code>20260411134726</code> (2.400 µm, 78 keV), and rules out the 1.129 µm, 137 keV and 45 µm scans
+(<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-paris4-fiber-binding">paris4-fiber-binding</a>). A pre-registered CT test in that volume then returned <b>SUPPORTED</b>, with the wrong-frame control passing. At level 1, fiber points are denser than background
+points in the same region (AUC 0.775, 95% CI 0.760–0.789). Displacing the fibers by 272 µm drops that to 0.555 (specificity CI 0.207–0.233),
+and an axis-swapped copy reads below background (0.429). 0 of 136 fibers are flagged, against 28% of displaced fibers. This is evidence for the
+binding, not a declaration of it (<a href="https://github.com/Svyable/scrollq/tree/main/artifacts/2026-10-04-paris4-fiber-ct-support-run">fiber-ct-support-run</a>).</p></div>
+
+<div class="goal" id="o10"><h3><span class="id">O10</span>Every review queue loads in VC3D</h3>
+<div class="chips"><span class="chip crit">gets used</span><span class="chip crit">standard formats</span><span class="chip state">done</span></div>
+<p><b>Why.</b> A queue that only exists as JSON does not get reviewed.</p>
+<p><b>Result.</b> The winding attachment, ray-order and fiber-gap queues are now VC3D PointCollections, and Mesh IQ ships as a VC3D review packet.
+See <a href="./review-queues.md">review-queues.md</a>.</p></div>
 </div>
 </div>
 

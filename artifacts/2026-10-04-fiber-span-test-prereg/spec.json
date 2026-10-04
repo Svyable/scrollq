@@ -1,0 +1,52 @@
+{
+  "protocol": "fiber-span-fallback-gap-v1",
+  "frozen": "2026-10-04",
+  "question": "Are fiber gap candidates over-represented in fallback-interpolated control-point spans compared with native trace spans?",
+  "inputs": {
+    "census": "artifacts/2026-10-04-fiber-corpus-census/summary.json",
+    "census_manifest_sha256": "a28f3a950584dce9340a4f7609d00a939c739fb64c29ff6884b21304de196d35",
+    "fibers": 136,
+    "byte_rule": "every fiber is re-downloaded and must match its census SHA-256; any download or hash failure makes the run RUN FAILED, never a smaller sample"
+  },
+  "definitions": {
+    "span": "control point k to control point k+1; line range [nearest line index of k, nearest line index of k+1)",
+    "fallback_span": "segment_to_next.interp_mode != 'trace'",
+    "native_span": "segment_to_next.interp_mode == 'trace'",
+    "gap_step": "line step longer than gap_factor x the fiber's median non-zero line step (scroliq-fiber rule)",
+    "gap_positive_span": "span containing at least one gap step",
+    "non_monotone_fiber": "nearest control indices decrease; excluded from the test and listed by name"
+  },
+  "parameters": {
+    "gap_factor": 4.0
+  },
+  "decision": {
+    "statistic": "pooled span-level risk difference P(gap | fallback) - P(gap | native)",
+    "ci": "95% percentile interval from a fiber-cluster bootstrap",
+    "bootstrap_reps": 10000,
+    "seed": 20261004,
+    "secondary": "Mantel-Haenszel odds ratio stratified by fiber (fibers with both span types)",
+    "rule": "SUPPORTED iff the CI lower bound > 0 AND the MH odds ratio > 1; otherwise NOT SUPPORTED",
+    "min_informative_fibers": 10,
+    "min_fallback_spans": 30,
+    "insufficient": "INSUFFICIENT if fewer informative fibers or fallback spans than the minimums"
+  },
+  "controls": {
+    "seed": 4102026,
+    "positive": "on the real span structure, plant gap outcomes only in fallback spans at positive_fallback_rate; the decision must return SUPPORTED",
+    "positive_fallback_rate": 0.3,
+    "null": "on the real span structure, draw gap outcomes independent of mode at the observed overall rate; the decision must return SUPPORTED in no more than max_null_false_positive_rate of null_replicates",
+    "null_replicates": 200,
+    "null_bootstrap_reps": 1000,
+    "max_null_false_positive_rate": 0.1,
+    "failure": "If either control fails the verdict is CONTROL FAILURE and no scientific claim is made"
+  },
+  "descriptive_only": [
+    "mechanism: per-span median step / fiber median step, fallback vs native (tests the sparser-rendering hypothesis; not part of the decision)",
+    "gap steps outside every span (before the first or after the last control)",
+    "VC3D PointCollections export of every gap candidate (goal O10)"
+  ],
+  "interpretation_limits": [
+    "SUPPORTED is an association at span level, not proof that fallback interpolation causes trace breaks: gap steps are defined relative to rendered step length, so sparser fallback rendering alone could produce it (see the mechanism arm).",
+    "No CT is read; nothing here says whether a gap is a physical sheet break."
+  ]
+}

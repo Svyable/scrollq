@@ -9,7 +9,8 @@ record. (October goal O6.)
 | Mesh IQ flags | 54-segment blinded sample (30 flagged, 4 debug controls, 20 clean) | `artifacts/2026-10-01-mesh-review-sample/` | VC3D, per CSV row |
 | Winding attachment | 5 points / 6 constraints, PHercParis4 | `artifacts/2026-10-03-paris4-winding-attachment/vc3d-review-points.json` | VC3D PointCollections |
 | Winding ray order | 4 points, PHercParis4 | `artifacts/2026-10-04-review-queues/PHercParis4.ray-order.points.json` | VC3D PointCollections |
-| Fiber gaps / sharp turns | 388 gaps + 519 turns in 107 of 136 fibers | `artifacts/2026-10-04-fiber-corpus-census/summary.json` | VC3D fiber files |
+| Fiber gaps | 388 gap candidates (2 in native trace spans) | `artifacts/2026-10-04-fiber-span-test-run/fiber-gaps.points.json` | VC3D PointCollections |
+| Fiber sharp turns | 519 in 100 of 136 fibers | `artifacts/2026-10-04-fiber-corpus-census/summary.json` | VC3D fiber files |
 
 ## 1 · Mesh IQ flags
 
@@ -51,6 +52,16 @@ scroliq-vc3d-review --kind winding-ray-order \
 
 ## 4 · Fiber gaps and sharp turns
 
+**Gaps load directly in VC3D:** `artifacts/2026-10-04-fiber-span-test-run/fiber-gaps.points.json`
+has one point per gap candidate, at the midpoint of the long step. Each point
+is tagged with `source_file`, `line_step`, `span`, `span_mode` and `step_ratio`.
+The pre-registered span test showed 386 of the 388 sit in fallback-interpolated
+spans that are rendered sparsely. Review `span_mode = trace` (2 points) and
+`step_ratio > 8` (17 points) first. No CT volume is declared for these
+coordinates (see goal O9).
+
+For sharp turns, or to re-derive positions for one fiber:
+
 Every row of the census summary names a public fiber (`source_url`, `sha256`)
 and its gap / sharp-turn counts. To get exact positions for one fiber:
 
@@ -62,10 +73,8 @@ scroliq-fiber fiber.json --out fiber.audit.json
 
 `findings` in the report give the `line_points` index of each gap (`segment`)
 and sharp turn (`vertex`); open the fiber in VC3D and step to that index.
-Start with the fibers carrying the most gaps (`kb_20260729T173121463_000209`,
-26). Record whether each candidate is a real trace break, a sheet switch, or a
-rendering artefact of a fallback-interpolated span: every gap in the census
-sits in a fiber with fallback spans, and that hypothesis is untested.
+Record whether each candidate is a real trace break, a sheet switch, or a
+rendering artefact of a fallback-interpolated span.
 
 ## Upstream reports (drafts, unfiled)
 

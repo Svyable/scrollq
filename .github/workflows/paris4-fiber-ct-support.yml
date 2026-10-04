@@ -1,0 +1,46 @@
+name: PHercParis4 fiber CT support (pre-registered)
+
+# Ran on 2026-10-04 (runs 37169930475, 37170123443). Manual only from now on:
+# the commit step is create-only and would fail on a re-run.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ct-support:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install .
+      - name: Run frozen CT support test
+        continue-on-error: true
+        run: python scripts/paris4_fiber_ct_support.py --out-dir out/ct-support --workers 48
+      - name: Print full evidence
+        if: always()
+        run: |
+          echo "=== CT_SUPPORT_RESULT ==="
+          python -c "import json; print(json.dumps(json.load(open('out/ct-support/result.json')),separators=(',',':')))"
+      - name: Commit result (create-only)
+        run: |
+          set -euxo pipefail
+          dest=artifacts/2026-10-04-paris4-fiber-ct-support-run
+          test ! -e "$dest/result.json"
+          mkdir -p "$dest"
+          cp out/ct-support/result.json "$dest/result.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$dest/result.json"
+          git commit -m "Add PHercParis4 fiber CT support result (deterministic re-run)"
+          git push origin "HEAD:${{ github.ref_name }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: paris4-fiber-ct-support
+          path: out/ct-support/

@@ -151,8 +151,8 @@ console script. A new entry point must therefore be declared in
    leaderboard is a triage band, not a precise 1-to-64 ranking. Largest
    mover: PHerc0841, 31.4 → 75.1 (Δ=43.7). 13 sparse volumes could not
    supply 24 fresh chunks in phase 2 (visible via `excluded_chunks`).
-   The Pareto frontier (PHerc0813 + PHerc1447) and label-next flags are
-   robust to this noise.
+   (The claim that the frontier PHerc0813 + PHerc1447 was robust to this noise
+   did not survive the v2 design; see below.)
    **Stability v2, 2026-10-01** (pre-registered: `docs/stability-v2-protocol.md`,
    `artifacts/2026-10-stability-v2/`): the default x-major candidate order lets a
    24-chunk sample sit in one or two x-slabs. With a balanced, interleaved order
@@ -161,8 +161,13 @@ console script. A new entry point must therefore be declared in
    ρ = 0.750 on 48 eligible volumes — **FAIL**, so the leaderboard shows rank
    bands (`scrollq-leaderboard --rank-bands`). Pearson is 0.911: scores are
    reliable, ranks among close volumes are not. September scores differ from the
-   v2 pooled score by 6.9 points on average (PHerc0813 −6.0), so the frontier
-   claim above is **under re-evaluation**, pending a new dated v2-design campaign.
+   v2 pooled score by 6.9 points on average (PHerc0813 −6.0). Re-derived from the
+   v2 scores on 2026-10-04 (`artifacts/2026-10-04-prize-frontier-v2/`,
+   `bin/prize_frontier_v2.py`): **PHerc0813 is off both frontiers** in every v2
+   view. The only robust members (on pooled, run A and run B frontiers) are
+   **PHerc1447** (Grand Prize) and **PHerc0800** (First Letters), both held there
+   by segment count. The "best segment-free volume" slot is a band within noise,
+   not a pick. PHerc1545 has an incomplete v2 sample and stays off.
 5. **Weights are a judgment call, published with every score.** Changing them
    is fine; hiding them is not. Update the September page when they change.
 6. **Sampling provenance travels with the score.** Every result carries
