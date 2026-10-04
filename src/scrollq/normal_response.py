@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 import numpy as np
+from scipy.ndimage import label as connected_components
 
 from .ink_validation import (
     SHA256_RE,
@@ -25,7 +26,7 @@ from .ink_validation import (
     evaluate_prediction,
 )
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 PROTOCOL = "surface-normal-response-v1"
 REQUIRED_OFFSETS_VOXELS = (-6, -4, -2, 2, 4, 6)
 
@@ -92,6 +93,187 @@ def _peak_histogram(
     }
 
 
+def _component_profiles(
+    primary: np.ndarray,
+    labels: np.ndarray,
+    validation_mask: np.ndarray,
+    offsets: Mapping[int, np.ndarray],
+    *,
+    threshold: float,
+    min_component_pixels: int,
+    surface_xyz: np.ndarray | None,
+) -> dict[str, Any]:
+    """Summarize fixed-support depth profiles for nominal predicted components.
+
+    Components are defined once on the nominal thresholded prediction. Every
+    offset is then measured on exactly that same pixel support; offset maps are
+    never re-thresholded or re-segmented. This prevents a drifting component
+    from manufacturing apparent depth consistency.
+    """
+    if (
+        isinstance(min_component_pixels, bool)
+        or not isinstance(min_component_pixels, int)
+        or min_component_pixels < 1
+    ):
+        raise ValueError("min_component_pixels must be an integer >= 1")
+
+    primary = np.asarray(primary, dtype=np.float32)
+    labels = np.asarray(labels)
+    mask = np.asarray(validation_mask)
+    if surface_xyz is not None:
+        surface_xyz = np.asarray(surface_xyz, dtype=np.float64)
+        expected = primary.shape + (3,)
+        if surface_xyz.shape != expected:
+            raise ValueError(
+                f"surface_xyz shape mismatch: expected {expected}, got "
+                f"{surface_xyz.shape}"
+            )
+        if not np.all(np.isfinite(surface_xyz)):
+            raise ValueError("surface_xyz must contain finite coordinates")
+
+    binary = (primary >= threshold) & (mask > 0)
+    component_map, component_count = connected_components(
+        binary, structure=np.ones((3, 3), dtype=np.uint8)
+    )
+    all_offsets = tuple(sorted((0, *offsets)))
+    arrays = {
+        offset: primary if offset == 0 else np.asarray(offsets[offset], dtype=np.float32)
+        for offset in all_offsets
+    }
+
+    rows: list[dict[str, Any]] = []
+    review_queue: list[dict[str, Any]] = []
+    ignored_small = 0
+    for component_id in range(1, int(component_count) + 1):
+        support = component_map == component_id
+        pixels = int(np.count_nonzero(support))
+        if pixels < min_component_pixels:
+            ignored_small += 1
+            continue
+
+        means = {
+            offset: float(np.asarray(arrays[offset], dtype=np.float32)[support].mean())
+            for offset in all_offsets
+        }
+        nominal_mean = means[0]
+        off_max = max(means[offset] for offset in offsets)
+        strongest_off_offsets = [
+            int(offset) for offset in sorted(offsets)
+            if means[offset] == off_max
+        ]
+        global_max = max(means.values())
+        peak_offsets = [
+            int(offset) for offset in all_offsets if means[offset] == global_max
+        ]
+        strict_nominal_peak = nominal_mean > off_max
+        half_level = 0.5 * nominal_mean
+        half_support_offsets = [
+            int(offset) for offset in all_offsets if means[offset] >= half_level
+        ]
+        half_span = (
+            int(max(half_support_offsets) - min(half_support_offsets))
+            if half_support_offsets
+            else None
+        )
+
+        coords = np.argwhere(support)
+        centroid_yx = coords.mean(axis=0)
+        distance2 = np.sum((coords - centroid_yx[None, :]) ** 2, axis=1)
+        review_pixel = coords[int(np.argmin(distance2))]
+        ink_pixels = int(np.count_nonzero((labels > 0) & support))
+        row: dict[str, Any] = {
+            "component_id": int(component_id),
+            "pixels": pixels,
+            "centroid_yx": [float(centroid_yx[0]), float(centroid_yx[1])],
+            "review_pixel_yx": [int(review_pixel[0]), int(review_pixel[1])],
+            "ground_truth_ink_pixels": ink_pixels,
+            "ground_truth_ink_fraction": float(ink_pixels / pixels),
+            "has_ground_truth_ink": ink_pixels > 0,
+            "profile": [
+                {"offset_voxels": int(offset), "mean_probability": means[offset]}
+                for offset in all_offsets
+            ],
+            "nominal_mean_probability": nominal_mean,
+            "strongest_off_surface_mean_probability": float(off_max),
+            "strongest_off_surface_offsets_voxels": strongest_off_offsets,
+            "center_advantage_mean_probability": float(nominal_mean - off_max),
+            "off_surface_persistence_ratio": (
+                float(off_max / nominal_mean) if nominal_mean > 0 else None
+            ),
+            "peak_offsets_voxels": peak_offsets,
+            "strict_nominal_peak": bool(strict_nominal_peak),
+            "half_nominal_support_offsets_voxels": half_support_offsets,
+            "half_nominal_support_span_voxels": half_span,
+        }
+        if surface_xyz is not None:
+            xyz = surface_xyz[int(review_pixel[0]), int(review_pixel[1])]
+            row["xyz"] = [float(value) for value in xyz]
+        rows.append(row)
+
+        if not strict_nominal_peak and "xyz" in row:
+            review_queue.append(
+                {
+                    "component_id": row["component_id"],
+                    "pixels": row["pixels"],
+                    "xyz": row["xyz"],
+                    "center_advantage_mean_probability": row[
+                        "center_advantage_mean_probability"
+                    ],
+                    "nominal_mean_probability": row["nominal_mean_probability"],
+                    "strongest_off_surface_mean_probability": row[
+                        "strongest_off_surface_mean_probability"
+                    ],
+                    "strongest_off_surface_offsets_voxels": row[
+                        "strongest_off_surface_offsets_voxels"
+                    ],
+                    "peak_offsets_voxels": row["peak_offsets_voxels"],
+                    "has_ground_truth_ink": row["has_ground_truth_ink"],
+                }
+            )
+
+    def group_summary(has_ink: bool) -> dict[str, Any]:
+        group = [row for row in rows if row["has_ground_truth_ink"] is has_ink]
+        strict = sum(bool(row["strict_nominal_peak"]) for row in group)
+        return {
+            "components": len(group),
+            "strict_nominal_peak_components": strict,
+            "strict_nominal_peak_fraction": (
+                float(strict / len(group)) if group else None
+            ),
+        }
+
+    strict_total = sum(bool(row["strict_nominal_peak"]) for row in rows)
+    return {
+        "definition": (
+            "8-connected components of the nominal prediction at the declared "
+            "threshold, restricted to the validation mask; every depth profile "
+            "uses the fixed nominal component support"
+        ),
+        "min_component_pixels": min_component_pixels,
+        "predicted_components_total": int(component_count),
+        "analyzed_components": len(rows),
+        "ignored_small_components": ignored_small,
+        "strict_nominal_peak_components": strict_total,
+        "review_candidate_components": len(rows) - strict_total,
+        "review_candidate_rule": (
+            "nominal component mean probability is not strictly greater than "
+            "the mean probability on every non-zero surface offset"
+        ),
+        "ground_truth_groups": {
+            "with_ink_overlap": group_summary(True),
+            "without_ink_overlap": group_summary(False),
+        },
+        "components": rows,
+        "review_queue": review_queue,
+        "vc3d_review_ready": bool(review_queue),
+        "claim_boundary": (
+            "Component depth profiles are held-out falsification evidence, not "
+            "a glyph recognizer. A non-nominal peak is a review cue; a nominal "
+            "peak is not proof of ink."
+        ),
+    }
+
+
 def evaluate_normal_response(
     prediction: np.ndarray,
     labels: np.ndarray,
@@ -99,6 +281,8 @@ def evaluate_normal_response(
     normal_offsets: Mapping[int, np.ndarray],
     *,
     threshold: float = 0.5,
+    min_component_pixels: int = 4,
+    surface_xyz: np.ndarray | None = None,
 ) -> dict[str, Any]:
     """Measure whether held-out ink evidence is localized to the true surface."""
     primary = np.asarray(prediction, dtype=np.float32)
@@ -205,6 +389,16 @@ def evaluate_normal_response(
         },
     }
 
+    components = _component_profiles(
+        primary,
+        labels,
+        validation_mask,
+        offsets,
+        threshold=threshold,
+        min_component_pixels=min_component_pixels,
+        surface_xyz=surface_xyz,
+    )
+
     return {
         "protocol": PROTOCOL,
         "required_offsets_voxels": list(required),
@@ -220,6 +414,7 @@ def evaluate_normal_response(
         "primary_evaluation": primary_metrics,
         "offset_evaluations": offset_evaluations,
         "localization": localization,
+        "components": components,
         "center_win_gate": {
             "rule": (
                 "primary_probability >= threshold AND "
@@ -263,6 +458,8 @@ def build_report(
     surface_geometry_sha256: str,
     sampling_manifest_sha256: str,
     input_records: dict[str, Any] | None = None,
+    min_component_pixels: int = 4,
+    surface_xyz: np.ndarray | None = None,
 ) -> dict[str, Any]:
     if training_overlap not in {"none", "present", "unknown"}:
         raise ValueError("training_overlap must be one of none/present/unknown")
@@ -291,6 +488,8 @@ def build_report(
         validation_mask,
         normal_offsets,
         threshold=threshold,
+        min_component_pixels=min_component_pixels,
+        surface_xyz=surface_xyz,
     )
 
     reasons: list[str] = []
@@ -409,6 +608,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap.add_argument("--model-window", type=_parse_window, required=True)
     ap.add_argument("--surface-geometry-sha256", required=True)
     ap.add_argument(
+        "--surface-xyz",
+        help=(
+            "optional .npy array shaped (H,W,3) mapping prediction pixels to "
+            "level-0 voxel XYZ for component review export"
+        ),
+    )
+    ap.add_argument(
+        "--min-component-pixels",
+        type=int,
+        default=4,
+        help="ignore nominal predicted components smaller than this size (default: 4)",
+    )
+    ap.add_argument(
         "--sampling-manifest",
         required=True,
         help=(
@@ -430,6 +642,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     labels = _load_2d(labels_path)
     mask = _load_2d(mask_path)
+
+    surface_xyz = None
+    surface_xyz_path = None
+    if args.surface_xyz:
+        surface_xyz_path = Path(args.surface_xyz)
+        try:
+            surface_xyz = np.load(surface_xyz_path, allow_pickle=False)
+        except (OSError, ValueError) as exc:
+            raise SystemExit(f"cannot read --surface-xyz: {exc}") from exc
 
     normal_offsets: dict[int, np.ndarray] = {}
     normal_inputs: list[dict[str, Any]] = []
@@ -463,6 +684,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         model_window_voxels=args.model_window,
         surface_geometry_sha256=args.surface_geometry_sha256,
         sampling_manifest_sha256=sampling_manifest_sha256,
+        min_component_pixels=args.min_component_pixels,
+        surface_xyz=surface_xyz,
         input_records={
             "prediction": {
                 "path": str(prediction_path),
@@ -482,6 +705,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             },
             "normal_offsets": sorted(
                 normal_inputs, key=lambda row: row["offset_voxels"]
+            ),
+            **(
+                {
+                    "surface_xyz": {
+                        "path": str(surface_xyz_path),
+                        "sha256": _sha256_file(surface_xyz_path),
+                    }
+                }
+                if surface_xyz_path is not None
+                else {}
             ),
         },
     )
@@ -520,6 +753,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             "background_zero_peak="
             f"{loc['strict_zero_peak_fraction']['background']} "
             f"fpr_delta={gate['false_positive_rate']}"
+        )
+        components = report["normal_response"]["components"]
+        print(
+            "components="
+            f"{components['analyzed_components']} "
+            "review_candidates="
+            f"{components['review_candidate_components']}"
         )
         for reason in report["readiness_reasons"]:
             print(f"- {reason}")

@@ -2,7 +2,8 @@
 
 Supported sources: the preregistered winding-attachment result, the
 winding ray-order audit (``scroliq-winding`` ``ray_order.review_queue``),
-and cross-ply fiber-frame discontinuity reports.
+cross-ply fiber-frame discontinuity reports, and surface-normal ink component
+persistence reports.
 The exporter is deterministic, carries the source SHA-256, and preserves
 review context in PointCollection tags so the file can be loaded directly
 through VC3D or ``vc3d_load_points_json``.
@@ -24,7 +25,8 @@ POINTCOLLECTIONS_VERSION = "1"
 KIND = "winding-attachment"
 RAY_ORDER_KIND = "winding-ray-order"
 FIBER_FRAME_KIND = "fiber-frame-discontinuity"
-KINDS = (KIND, RAY_ORDER_KIND, FIBER_FRAME_KIND)
+NORMAL_RESPONSE_KIND = "normal-response-component"
+KINDS = (KIND, RAY_ORDER_KIND, FIBER_FRAME_KIND, NORMAL_RESPONSE_KIND)
 
 LIMITATION = (
     "These markers are review cues, not confirmed annotation or patch errors. "
@@ -422,6 +424,150 @@ def build_fiber_frame_bundle(
     }
 
 
+def build_normal_response_bundle(
+    document: Any,
+    *,
+    source_name: str,
+    source_sha256: str,
+    scroll: str,
+) -> dict[str, Any]:
+    """Convert non-surface-locked ink components into PointCollections v1."""
+    if not isinstance(document, dict):
+        raise ReviewExportError("source must be a JSON object")
+    if document.get("tool") != "scroliq-normal-response":
+        raise ReviewExportError("source is not a scroliq-normal-response report")
+    if (
+        not isinstance(source_sha256, str)
+        or len(source_sha256) != 64
+        or any(ch not in "0123456789abcdef" for ch in source_sha256)
+    ):
+        raise ReviewExportError("source_sha256 must be lowercase 64-hex")
+    if not isinstance(scroll, str) or not scroll.strip():
+        raise ReviewExportError("scroll must be non-empty")
+
+    normal = document.get("normal_response")
+    if not isinstance(normal, dict):
+        raise ReviewExportError("source.normal_response must be an object")
+    components = normal.get("components")
+    if not isinstance(components, dict):
+        raise ReviewExportError("normal_response.components must be an object")
+    queue = components.get("review_queue")
+    if not isinstance(queue, list) or not queue:
+        raise ReviewExportError(
+            "normal_response.components.review_queue must be non-empty; "
+            "rerun scroliq-normal-response with --surface-xyz"
+        )
+
+    collections: dict[str, Any] = {}
+    seen: set[int] = set()
+    for collection_index, row in enumerate(queue, start=1):
+        if not isinstance(row, dict):
+            raise ReviewExportError(
+                f"component review_queue[{collection_index - 1}] must be an object"
+            )
+        component_id = row.get("component_id")
+        pixels = row.get("pixels")
+        xyz = row.get("xyz")
+        center_advantage = row.get("center_advantage_mean_probability")
+        nominal_mean = row.get("nominal_mean_probability")
+        strongest_off = row.get("strongest_off_surface_mean_probability")
+        peak_offsets = row.get("peak_offsets_voxels")
+        if (
+            isinstance(component_id, bool)
+            or not isinstance(component_id, int)
+            or component_id <= 0
+        ):
+            raise ReviewExportError("component_id must be a positive integer")
+        if component_id in seen:
+            raise ReviewExportError(f"duplicate component_id {component_id}")
+        seen.add(component_id)
+        if isinstance(pixels, bool) or not isinstance(pixels, int) or pixels <= 0:
+            raise ReviewExportError(
+                f"component {component_id} pixels must be a positive integer"
+            )
+        if (
+            not isinstance(xyz, list)
+            or len(xyz) != 3
+            or not all(_finite_number(v) for v in xyz)
+        ):
+            raise ReviewExportError(
+                f"component {component_id} needs finite xyz"
+            )
+        for value, label in (
+            (center_advantage, "center advantage"),
+            (nominal_mean, "nominal mean"),
+            (strongest_off, "strongest off-surface mean"),
+        ):
+            if not _finite_number(value):
+                raise ReviewExportError(
+                    f"component {component_id} {label} must be finite"
+                )
+        if (
+            not isinstance(peak_offsets, list)
+            or not peak_offsets
+            or not all(
+                isinstance(value, int) and not isinstance(value, bool)
+                for value in peak_offsets
+            )
+        ):
+            raise ReviewExportError(
+                f"component {component_id} peak_offsets_voxels must be integers"
+            )
+
+        point_id = str(collection_index)
+        collections[point_id] = {
+            "name": f"ScrolIQ normal response · component {component_id}",
+            "points": {
+                point_id: {
+                    "p": [float(value) for value in xyz],
+                    "creation_time": 0,
+                }
+            },
+            "metadata": {
+                "coordinate_space": "level0-voxel-xyz",
+                "review_only": True,
+            },
+            "color": [0.9, 0.35, 0.35],
+            "tags": {
+                "scroliq_kind": NORMAL_RESPONSE_KIND,
+                "source_sha256": source_sha256,
+                "component_id": str(component_id),
+                "pixels": str(pixels),
+                "center_advantage_mean_probability": str(float(center_advantage)),
+                "nominal_mean_probability": str(float(nominal_mean)),
+                "strongest_off_surface_mean_probability": str(float(strongest_off)),
+                "peak_offsets_voxels": json.dumps(
+                    peak_offsets, separators=(",", ":")
+                ),
+                "has_ground_truth_ink": str(
+                    bool(row.get("has_ground_truth_ink"))
+                ).lower(),
+            },
+        }
+
+    return {
+        "scroliq_review_bundle": {
+            "schema_version": SCHEMA_VERSION,
+            "tool": TOOL,
+            "kind": NORMAL_RESPONSE_KIND,
+            "scroll": scroll,
+            "coordinate_space": "level0-voxel-xyz",
+            "source": source_name,
+            "source_sha256": source_sha256,
+            "source_verdict": document.get("experimental_evidence_ready"),
+            "review_points": len(collections),
+            "source_findings": len(queue),
+            "limitation": (
+                "These are predicted ink components whose mean response is not "
+                "strictly maximal on the nominal surface. They are falsification "
+                "review cues, not confirmed false ink."
+            ),
+        },
+        "vc_pointcollections_json_version": POINTCOLLECTIONS_VERSION,
+        "collections": collections,
+    }
+
+
 def export_file(
     source: str | Path,
     output: str | Path,
@@ -445,6 +591,7 @@ def export_file(
         KIND: build_winding_attachment_bundle,
         RAY_ORDER_KIND: build_ray_order_bundle,
         FIBER_FRAME_KIND: build_fiber_frame_bundle,
+        NORMAL_RESPONSE_KIND: build_normal_response_bundle,
     }
     builder = builders[kind]
     bundle = builder(
@@ -462,13 +609,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog=TOOL,
         description=(
-            "Export a ScrolIQ winding or fiber-frame review queue as a native "
-            "VC3D PointCollections v1 JSON file."
+            "Export a ScrolIQ winding, fiber-frame, or normal-response review "
+            "queue as native VC3D PointCollections v1 JSON."
         ),
     )
     parser.add_argument(
         "--input", required=True,
-        help="winding result/audit JSON or scroliq-fiber-frame report",
+        help="winding result/audit, fiber-frame, or normal-response JSON",
     )
     parser.add_argument(
         "--kind", choices=KINDS, default=KIND,

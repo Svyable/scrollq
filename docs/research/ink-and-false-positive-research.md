@@ -53,6 +53,26 @@ artifact is complete enough to inspect. It is deliberately not a claim of ink,
 legibility, or Grand Prize readiness. See
 [normal-response.md](../normal-response.md).
 
+### Component-level advance
+
+The v2 report now closes a gap in the original pixel-only design: it freezes
+8-connected components from the nominal prediction and measures each entire
+component on the identical material support across the full offset stack. This
+produces per-component peak offsets, nominal-vs-off-surface mean advantage,
+off-surface persistence, and coarse depth-span evidence.
+
+This is materially stronger for glyph-like false positives because a plausible
+letter is evaluated as one coherent prediction rather than as disconnected
+pixels. It also avoids re-segmenting each offset, which would permit spatial
+drift to masquerade as depth persistence.
+
+With an optional hash-bound surface XYZ map, non-nominal-peak components become
+native VC3D review points through `scroliq-vc3d-review --kind
+normal-response-component`. No automatic suppression is applied. The component
+layer remains **EXPERIMENT FURTHER** until held-out real-ink campaigns show that
+component depth specificity separates true ink from false positives across
+folds/checkpoints.
+
 ### Promotion gate
 
 Promote only if held-out true ink shows materially stronger and more stable
