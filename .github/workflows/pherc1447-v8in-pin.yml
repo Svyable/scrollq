@@ -1,0 +1,41 @@
+name: PHerc1447 v8-in pin capture
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/pherc1447-v8in-pin.yml"
+      - "bin/pin_pherc1447_v8in.sh"
+      - "src/scrollq/hf_pin.py"
+      - "pyproject.toml"
+
+permissions:
+  contents: read
+
+jobs:
+  pin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ScrolIQ
+        run: python -m pip install -e .
+
+      - name: Capture immutable Hub revisions
+        run: |
+          mkdir -p out/pherc1447-v8in-pins
+          bash bin/pin_pherc1447_v8in.sh out/pherc1447-v8in-pins
+          sha256sum out/pherc1447-v8in-pins/*.json | tee out/pherc1447-v8in-pins/SHA256SUMS
+
+      - name: Upload pin evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pherc1447-v8in-hf-pins
+          path: out/pherc1447-v8in-pins/
+          if-no-files-found: error
+          retention-days: 30
