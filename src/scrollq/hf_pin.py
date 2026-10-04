@@ -102,7 +102,7 @@ def pin_repo(
     try:
         response = get(
             endpoint,
-            params={"files_metadata": "true"},
+            params={"blobs": "true"},
             timeout=timeout,
             headers={"User-Agent": "ScrolIQ/0.1 scroliq-hf-pin"},
         )
