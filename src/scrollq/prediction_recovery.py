@@ -376,3 +376,220 @@ def read_level_box(
                 )
                 out[out_slices] = array[chunk_slices]
     return out, missing
+
+
+def projected_material_relaxation(
+    initial_zyx: np.ndarray,
+    component_points_zyx: np.ndarray,
+    *,
+    top_boundary_zyx: np.ndarray,
+    bottom_boundary_zyx: np.ndarray,
+    left_boundary_zyx: np.ndarray,
+    right_boundary_zyx: np.ndarray,
+    iteration_count: int,
+    maximum_projection_residual_voxels: float,
+    maximum_movement_per_iteration_voxels: float,
+) -> dict[str, Any]:
+    """Relax a hidden material grid while projecting onto one frozen component.
+
+    Hidden reference geometry is deliberately absent from this API.
+    """
+    current = np.asarray(initial_zyx, dtype=np.float64).copy()
+    points = np.asarray(component_points_zyx, dtype=np.float64)
+    if current.ndim != 3 or current.shape[-1] != 3:
+        raise PredictionRecoveryError("initial_zyx must have shape [H,W,3]")
+    if not np.isfinite(current).all():
+        raise PredictionRecoveryError("initial_zyx must be finite for every hidden cell")
+    if points.ndim != 2 or points.shape[1] != 3 or not len(points):
+        raise PredictionRecoveryError("component_points_zyx must have non-empty shape [N,3]")
+    if not np.isfinite(points).all():
+        raise PredictionRecoveryError("component points must be finite")
+    if type(iteration_count) is not int or iteration_count < 1:
+        raise PredictionRecoveryError("iteration_count must be an integer >= 1")
+    max_residual = float(maximum_projection_residual_voxels)
+    max_movement = float(maximum_movement_per_iteration_voxels)
+    if not np.isfinite(max_residual) or max_residual <= 0:
+        raise PredictionRecoveryError("maximum projection residual must be finite and > 0")
+    if not np.isfinite(max_movement) or max_movement <= 0:
+        raise PredictionRecoveryError("maximum movement must be finite and > 0")
+
+    h, w = current.shape[:2]
+    boundaries = {
+        "top": np.asarray(top_boundary_zyx, dtype=np.float64),
+        "bottom": np.asarray(bottom_boundary_zyx, dtype=np.float64),
+        "left": np.asarray(left_boundary_zyx, dtype=np.float64),
+        "right": np.asarray(right_boundary_zyx, dtype=np.float64),
+    }
+    expected_shapes = {
+        "top": (w, 3),
+        "bottom": (w, 3),
+        "left": (h, 3),
+        "right": (h, 3),
+    }
+    for name, array in boundaries.items():
+        if array.shape != expected_shapes[name]:
+            raise PredictionRecoveryError(
+                f"{name}_boundary_zyx must have shape {expected_shapes[name]}"
+            )
+
+    tree = cKDTree(points)
+    history: list[dict[str, Any]] = []
+    total_accepted = 0
+
+    for iteration in range(iteration_count):
+        targets = np.empty_like(current)
+        target_valid = np.zeros((h, w), dtype=bool)
+        neighbor_counts = np.zeros((h, w), dtype=np.int16)
+
+        for iy in range(h):
+            for ix in range(w):
+                neighbors: list[np.ndarray] = []
+                if iy > 0:
+                    neighbors.append(current[iy - 1, ix])
+                elif np.isfinite(boundaries["top"][ix]).all():
+                    neighbors.append(boundaries["top"][ix])
+
+                if iy + 1 < h:
+                    neighbors.append(current[iy + 1, ix])
+                elif np.isfinite(boundaries["bottom"][ix]).all():
+                    neighbors.append(boundaries["bottom"][ix])
+
+                if ix > 0:
+                    neighbors.append(current[iy, ix - 1])
+                elif np.isfinite(boundaries["left"][iy]).all():
+                    neighbors.append(boundaries["left"][iy])
+
+                if ix + 1 < w:
+                    neighbors.append(current[iy, ix + 1])
+                elif np.isfinite(boundaries["right"][iy]).all():
+                    neighbors.append(boundaries["right"][iy])
+
+                finite = [row for row in neighbors if np.isfinite(row).all()]
+                if not finite:
+                    targets[iy, ix] = current[iy, ix]
+                    continue
+                targets[iy, ix] = np.mean(np.stack(finite, axis=0), axis=0)
+                neighbor_counts[iy, ix] = len(finite)
+                target_valid[iy, ix] = True
+
+        flat_targets = targets.reshape(-1, 3)
+        distances, indices = tree.query(flat_targets, k=1, workers=1)
+        proposals = points[np.asarray(indices, dtype=np.int64)].reshape(h, w, 3)
+        projection_residual = np.asarray(distances, dtype=np.float64).reshape(h, w)
+        movement = np.linalg.norm(proposals - current, axis=2)
+        accept = (
+            target_valid
+            & (projection_residual <= max_residual)
+            & (movement <= max_movement)
+        )
+
+        next_state = current.copy()
+        next_state[accept] = proposals[accept]
+        accepted_count = int(np.sum(accept))
+        total_accepted += accepted_count
+        accepted_movement = movement[accept]
+        history.append(
+            {
+                "iteration": iteration + 1,
+                "accepted_count": accepted_count,
+                "retained_count": int(h * w - accepted_count),
+                "minimum_neighbor_count": int(np.min(neighbor_counts[target_valid]))
+                if np.any(target_valid)
+                else 0,
+                "median_accepted_movement_voxels": (
+                    float(np.median(accepted_movement))
+                    if accepted_count
+                    else None
+                ),
+                "maximum_accepted_movement_voxels": (
+                    float(np.max(accepted_movement))
+                    if accepted_count
+                    else None
+                ),
+            }
+        )
+        current = next_state
+
+    flat = current.reshape(-1, 3)
+    unique = np.unique(flat.astype(np.int64), axis=0)
+    return {
+        "relaxed_zyx": current,
+        "history": history,
+        "total_accepted_updates": int(total_accepted),
+        "unique_recovered_voxel_fraction": float(len(unique) / len(flat)),
+    }
+
+
+def score_projected_relaxation(
+    rows: list[dict[str, Any]],
+    *,
+    required_cohort_size: int = 4,
+    minimum_fraction_within_8_voxels_every_center: float = 0.50,
+    minimum_median_fraction_within_8_voxels: float = 0.75,
+    maximum_within_8_regression_vs_v1_each_center: float = 0.05,
+    maximum_median_error_voxels_every_center: float = 8.0,
+    maximum_median_p95_error_voxels: float = 16.0,
+    require_all_wrong_wrap_controls_rejected: bool = True,
+    minimum_median_unique_recovered_voxel_fraction: float = 0.50,
+) -> dict[str, Any]:
+    """Apply the frozen conditional correspondence-development gate."""
+    if len(rows) != required_cohort_size:
+        raise PredictionRecoveryError(
+            f"expected {required_cohort_size} correspondence rows, got {len(rows)}"
+        )
+    fractions = [float(row["v2_fraction_within_8_voxels"]) for row in rows]
+    baselines = [float(row["v1_fraction_within_8_voxels"]) for row in rows]
+    median_errors = [float(row["v2_median_error_voxels"]) for row in rows]
+    p95_errors = [float(row["v2_p95_error_voxels"]) for row in rows]
+    unique = [float(row["v2_unique_recovered_voxel_fraction"]) for row in rows]
+    wrong = [bool(row["v2_wrong_wrap_rejected"]) for row in rows]
+    identity = [
+        bool(row.get("v1_candidate_hash_exact"))
+        and bool(row.get("v1_component_label_exact"))
+        for row in rows
+    ]
+    regression = [
+        max(0.0, baseline - value)
+        for baseline, value in zip(baselines, fractions)
+    ]
+
+    checks = {
+        "cohort_complete": len(rows) == required_cohort_size,
+        "v1_identity_exact": all(identity),
+        "fraction_within_8_every_center": all(
+            value >= minimum_fraction_within_8_voxels_every_center
+            for value in fractions
+        ),
+        "median_fraction_within_8": (
+            float(np.median(fractions))
+            >= minimum_median_fraction_within_8_voxels
+        ),
+        "no_within_8_regression_over_limit": all(
+            value <= maximum_within_8_regression_vs_v1_each_center
+            for value in regression
+        ),
+        "median_error_every_center": all(
+            value <= maximum_median_error_voxels_every_center
+            for value in median_errors
+        ),
+        "median_p95_error": (
+            float(np.median(p95_errors)) <= maximum_median_p95_error_voxels
+        ),
+        "wrong_wrap_controls_rejected": (
+            (not require_all_wrong_wrap_controls_rejected) or all(wrong)
+        ),
+        "median_unique_recovered_voxel_fraction": (
+            float(np.median(unique))
+            >= minimum_median_unique_recovered_voxel_fraction
+        ),
+    }
+    return {
+        "status": "pass" if all(checks.values()) else "fail",
+        "cohort_size": len(rows),
+        "median_fraction_within_8_voxels": float(np.median(fractions)),
+        "median_p95_error_voxels": float(np.median(p95_errors)),
+        "median_unique_recovered_voxel_fraction": float(np.median(unique)),
+        "maximum_within_8_regression": float(max(regression)),
+        "wrong_wrap_rejected_count": sum(wrong),
+        "checks": checks,
+    }
