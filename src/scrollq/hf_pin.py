@@ -78,6 +78,7 @@ def pin_repo(
     revision: str = "main",
     require_files: Sequence[str] = (),
     require_sha256: Sequence[str] = (),
+    require_public: bool = False,
     timeout: float = 20.0,
     request_get: Callable[..., Any] | None = None,
 ) -> dict[str, Any]:
@@ -116,6 +117,9 @@ def pin_repo(
     resolved = payload.get("sha")
     if not isinstance(resolved, str) or not SHA40_RE.fullmatch(resolved):
         raise HubPinError("Hub API response lacks an immutable 40-hex repo sha")
+
+    if require_public and payload.get("private") is True:
+        raise HubPinError("Hub repository is private but public access is required")
 
     siblings = payload.get("siblings")
     if not isinstance(siblings, list):
@@ -164,6 +168,7 @@ def pin_repo(
         "files": files,
         "required_files": sorted(set(require_files)),
         "required_sha256_files": sorted(set(require_sha256)),
+        "public_access_required": bool(require_public),
         "summary": {
             "files": len(files),
             "files_with_content_sha256": sum(
@@ -200,6 +205,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             "repeatable"
         ),
     )
+    parser.add_argument(
+        "--require-public",
+        action="store_true",
+        help="fail if the Hub reports the repository as private",
+    )
     parser.add_argument("--timeout", type=float, default=20.0)
     parser.add_argument("--out", required=True)
     args = parser.parse_args(argv)
@@ -211,6 +221,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             revision=args.revision,
             require_files=args.require_file,
             require_sha256=args.require_sha256,
+            require_public=args.require_public,
             timeout=args.timeout,
         )
     except HubPinError as exc:
