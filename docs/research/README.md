@@ -37,7 +37,9 @@ campaign.
 | Scored-result run identity binding | INCLUDE, merged in PR #147 | Prevent stale score files from masquerading as current results | Maintain adapter compliance |
 | Independent recto coverage witnesses | EXPERIMENT FURTHER; Stage-A deletion calibration passed | Falsify omitted surface outside a declared inventory | Identity/continuity-aware unconditioned witness test; raw surface existence is insufficient |
 | Fiber-texture fingerprints for sheet identity | EXPERIMENT FURTHER | Detect smooth but wrong-winding sheet switches | Adjacent-winding controls on real CT |
+| Phase-preserving microtexture seam authentication | EXPERIMENT FURTHER; executable synthetic harness (`scroliq-seam-fingerprint`); real CT unmeasured | Prove a claimed patch overlap is the same physical sheet, and bound its residual displacement | Real-CT adjacent-winding benchmark with an independent-scan arm (see [protocol](../papyrus-seam-fingerprint.md)) |
 | Cross-ply fiber-frame continuity | EXPERIMENT FURTHER; executable harness + synthetic splice control | Ink-blind CT-conditioned local material continuity + VC3D review | Real-CT adjacent-winding and legitimate-discontinuity benchmark |
+| Learned (Siamese) patch matcher for sheet identity | DISMISS for now | Could learn weak identity cues | None until the deterministic correlation test shows physical identity information exists |
 | Fiber-coordinate canonicalization as a model architecture | DISMISS for now | Possible orientation normalization | Reconsider only if an ablation inside another experiment supports it |
 | Global histogram matching | DISMISS | Superficial domain normalization | None; retain only as a negative control |
 | Transport-only UV invariance | DISMISS | Coordinate arithmetic check | None; material-attached false positives persist too |

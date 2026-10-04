@@ -354,6 +354,31 @@ justify substitution, and keeps Brook's current GPL-3.0-only dependency outside
 the permissively licensed submission path unless that licensing boundary is
 resolved.
 
+### Papyrus microtexture seam authentication (experimental)
+
+`scroliq-seam-fingerprint` asks whether two patches that a join claims overlap
+really read the same piece of papyrus, by looking for a sharp, unique,
+geometrically compatible phase-correlation peak between their band-passed CT
+slabs. It returns `AUTHENTICATED`, `CONTRADICTED` or `UNKNOWN`; low-information
+texture can only be `UNKNOWN`, and ink is never read.
+
+```bash
+scroliq-seam-fingerprint controls --out out/controls.json --seed-base 700000 --n 40 --sweep-n 12
+scroliq-seam-fingerprint pair --input out/pair.npz --volume-root <exact root> \
+  --surface-a-sha256 <64-hex> --surface-b-sha256 <64-hex> \
+  --sampling-manifest out/sampling.json --out out/seam.json
+```
+
+The status is **EXPERIMENT FURTHER** and the evidence is synthetic only: the
+software controls (including a phase-randomization/block-shuffle falsification
+pair and two ablations that show why each gate exists) are committed under
+[`artifacts/2026-10-04-seam-fingerprint-synthetic/`](artifacts/2026-10-04-seam-fingerprint-synthetic/).
+No real-CT result exists. Slabs from one CT volume share voxel noise, so a peak
+there is a registration check, not independent physical identity; only
+registered independent rescans can test that. The pre-registered real-CT
+benchmark, decision rule, development log and known limits are in
+[`docs/papyrus-seam-fingerprint.md`](docs/papyrus-seam-fingerprint.md).
+
 ## Ink-blind flattening comparison
 
 `scroliq-flatten-compare` is the generic promotion gate for alternative column
