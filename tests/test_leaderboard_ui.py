@@ -53,3 +53,7 @@ def test_committed_pages_copy_is_clean_and_not_duplicated():
     assert "label next" not in page.lower()
     assert "label-coverage candidate" in page
     assert page.count('id="grand-prize"') == 1
+
+
+def test_generator_csv_newline_is_js_escape():
+    assert r'lines.join("\n")' in PAGE
