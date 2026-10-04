@@ -1285,7 +1285,9 @@ def audit_tifxyz(
 
     # Spatial metadata is always recomputed from the valid vertices; the
     # declared bbox is only ever compared against it, never trusted alone.
-    bbox: dict[str, Any] = {"metadata_present": meta.get("bbox") is not None, "status": "undeclared"}
+    # "unverified" until there are vertices to compare against: an empty
+    # surface must not look like one that simply declared no bbox.
+    bbox: dict[str, Any] = {"metadata_present": meta.get("bbox") is not None, "status": "unverified"}
     if valid_count:
         pts = xyz[valid]
         observed = np.asarray([pts.min(axis=0), pts.max(axis=0)])

@@ -900,6 +900,28 @@ independent `verify` command re-hashes and re-decodes those artifacts; with
 `--binary` it also rechecks the executable fingerprint. See
 [the VC3D render-receipt contract](docs/vc3d-render-receipt.md).
 
+### Semantic integrity gates
+
+Four checks treat a *claim* as something to be recomputed, not trusted:
+
+- `scroliq-vc3d-run-guard` — an external geometry producer that exits 0 is
+  `PRODUCER_SEMANTIC_FAILURE` unless its new TIFXYZ also has recomputed physical
+  area under a verified voxel size, an extent consistent with its own metadata
+  and the volume, and geometry that differs from its declared inputs.
+  See [the guard contract](docs/vc3d-run-guard.md).
+- `scroliq-bbox-census` and the TIFXYZ audit recompute spatial bounds from valid
+  vertices and flag stale declared bboxes; a declared bbox is never used alone to
+  filter. See [TIFXYZ metadata integrity](docs/tifxyz-metadata-integrity.md).
+- `scroliq-objective-audit` — a training/optimization passport separates
+  `configured_objective` from `effective_objective` and fails closed when a
+  claimed term never contributed. See [the objective audit](docs/objective-audit.md).
+- `scroliq-geometry-strata` — a preregistered gate that asks whether a model's
+  improvement holds where geometry is hard and labels are thin, not only on easy,
+  well-labeled strata. Machinery only: no real-data result yet. See
+  [geometry-stratified evaluation](docs/geometry-strata.md); the related
+  multi-sheet experiment is a design draft in
+  [the Lasagna A/B/C protocol](docs/lasagna-abc-protocol.md).
+
 ### 2027 Grand Prize submission images
 
 `scroliq-submission-image` turns final VC3D renders into the exact reviewer-facing image forms required by the prize. The `column` command derives the 1 cm scale-bar length from the eligible CT voxel size plus the same pyramid level and `--scale` parameters used by `vc_render_tifxyz`, appends the bar in a footer without touching papyrus pixels, and writes a SHA-pinned scale proof. The `banner` command assembles the frozen column images in numeric order and overlays every column number, rejecting gaps or duplicates. See [the submission-image contract](docs/grand-prize-images.md).

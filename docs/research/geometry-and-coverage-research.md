@@ -282,6 +282,64 @@ Reconsider only as an ablation inside the fiber/morphology research:
 No standalone subsystem should be added merely because the representation is
 conceptually elegant.
 
+## 5. Label-coverage-conditioned surface evaluation
+
+**Status:** EXPERIMENT FURTHER (2026-10-04); machinery implemented in
+`scroliq-geometry-strata`, no real-data result yet. Design and decision rule in
+[geometry-strata.md](../geometry-strata.md).
+
+### Hypothesis
+
+If surface labels cover well under half of a predicted surface and the
+unlabeled part is geometrically structured (public report; not reproduced
+here), an ordinary held-out comparison can be optimistic: improvement may live
+only in the easy, well-labeled strata.
+
+### Minimal experiment
+
+Not another model. Bin each committed ROI by geometry measured *before* looking
+at performance, report baseline and candidate per bin with the fraction of the
+actual target scroll each bin represents, and promote only if improvement is
+demonstrated where geometry is hard or labels are thin.
+
+### Promotion gate
+
+Geometry-stratified generalization: the frozen spec passes
+(`STRATA_PASS`) on a real run, with every required stratum adequately
+evaluated. A real run on the committed segmentation ROIs and the target
+inventory is the next evidence.
+
+### Self-evaluation
+
+- prize impact: **high** (avoids false confidence)
+- plausibility: **medium-high**; evidence burden: **medium** (needs the
+  inventory covariates and enough ROIs per stratum)
+- implementation cost: **low-medium**; compute: **low**
+- reproducibility burden: **low** if bins and holdouts are committed first
+- leakage risk: **low**; invalid-evaluation risk: **medium** (strata are
+  marginal; joint hard corners can be missed)
+- spurious-ink risk falls indirectly: the hardest compressed geometry is where
+  a wrong-sheet render produces the most convincing false texture
+
+## 6. Multi-sheet consistency (Lasagna)
+
+**Status:** EXPERIMENT FURTHER, held at WATCH (2026-10-04). Design draft in
+[lasagna-abc-protocol.md](../lasagna-abc-protocol.md); not frozen, not run.
+
+Lasagna reportedly optimizes several stacked sheets jointly, the inductive bias
+tightly compressed regions need. A reported defect (dense normal/spacing losses
+zeroed when no outer-shell mesh exists) means the README recommendation is not
+enough: the planned A/B/C test (independent sheets; stacked with verified-active
+dense losses; the same with them verified-disabled) records *effective* loss
+activation next to ordering violations, minimum spacing, held-out coverage and
+sheet switches. Three of those measurements do not yet exist for fitted sheets
+and must be built, with positive controls, first.
+
+- prize impact: **potentially high**; integration difficulty: **medium**
+- evidence: **medium**; compute: **medium-high**; leakage risk: **low**
+- geometry-hallucination risk: **medium**; a consistency prior can preserve a
+  wrong ordering as effectively as a right one
+
 ## Research ordering
 
 Geometry research should remain downstream of measured campaign failures:

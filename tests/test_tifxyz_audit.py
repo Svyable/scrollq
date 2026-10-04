@@ -579,6 +579,15 @@ def test_audit_bbox_status_for_consistent_loose_and_undeclared(tmp_path):
     assert bare["bbox"]["observed_bbox_xyz"] == [[0.0, 0.0, 10.0], [8.0, 8.0, 10.0]]
 
 
+def test_empty_surface_with_declared_bbox_is_unverified_not_undeclared(tmp_path):
+    result = audit_tifxyz(_surf(tmp_path, "e", empty=True))
+
+    assert result["status"] == "fail"
+    assert result["bbox"]["metadata_present"] is True
+    assert result["bbox"]["status"] == "unverified"
+    assert "observed_bbox_xyz" not in result["bbox"]
+
+
 @pytest.mark.parametrize(
     "declared, reason",
     [
