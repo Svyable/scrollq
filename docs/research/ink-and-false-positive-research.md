@@ -300,6 +300,111 @@ a mechanistic relationship to seam/tiling nuisance variables.
 - VC3D compatibility: **excellent**
 - unnecessary surface area: **low if kept as an experiment wrapper**
 
+
+## 7. Deterministic volumetric-texture corroboration
+
+**Status:** WATCH. Clean-room experiment only. Do not copy, vendor, modify, or
+depend on the deposited implementation; do not feed this signal into training
+or weak-label generation.
+
+### External result and provenance
+
+Korotetskyi and Haindl, *Volumetric Texture Analysis for Unsupervised Ink
+Detection in Herculaneum Papyri* (2026), DOI
+[10.5281/zenodo.20766169](https://doi.org/10.5281/zenodo.20766169), applies
+three training-free 3-D signals directly to an unwrapped CT depth slab:
+first-order statistics, Laws texture energy, and block spatial
+autocorrelation. The published method fuses the volumetric responses, projects
+them through a depth prior, applies a soft Markov random field, and adaptively
+thresholds the result.
+
+The Zenodo record reports evaluation on 25 manually annotated PHerc.172
+specimens, with the best individual descriptor at mean MCC 0.374 and positive
+MCC on every specimen. It also reports partially recognizable structure on a
+full segment agreeing with an overlapping community ink prediction. Treat
+those as **external reported results**, not ScrollQ measurements.
+
+The Zenodo record currently exposes a 259.2 MB submission archive and paper,
+but its Rights field states only copyright © 2026 Oleksandr Korotetskyi and
+Michal Haindl. No MIT/Apache/BSD/CC software license was established in the
+2026-10-04 review. Therefore the deposited implementation is not an admissible
+dependency for ScrollQ unless a compatible license is later established.
+
+### Why it is distinct
+
+This is not another morphology/topography branch. It operates on volumetric CT
+texture rather than surface relief, requires no learned checkpoint, and can
+produce an inspectable per-voxel evidence field. Its highest-value role is
+therefore as an independent witness for existing false-positive controls:
+synthetic detectability, derivation invariance, normal-response / local-evidence
+tests, and hallucinated-ink review.
+
+The independence is the feature. Turning the signal immediately into another
+training feature or pseudo-label source would weaken that independence and can
+create circular agreement, especially because unopened-scroll ink labels are
+iteratively expanded from model predictions rather than infrared ground truth.
+
+### Smallest clean-room experiment
+
+Independently implement only the three published standard descriptors from
+their mathematical definitions. Do not consult or translate the deposited
+source implementation.
+
+Freeze one held-out surface slab, descriptor parameters, depth handling,
+normalization, and comparison metrics before reading the target result. Compare
+the deterministic evidence maps with the current frozen learned ink model under
+four preregistered conditions:
+
+1. known / papyrologically supported ink;
+2. supervised non-ink;
+3. harmless derivation or intensity perturbations;
+4. synthetic planted strokes used only as a detectability control.
+
+Record rank correlation and top-k spatial overlap, but make the primary review
+artifact the four-way support partition:
+
+- learned + texture;
+- learned only;
+- texture only;
+- neither.
+
+A letter-like learned prediction that lacks deterministic texture support and
+is unstable under harmless derivation changes should carry less evidentiary
+weight. Texture agreement alone must never be promoted to proof of ink.
+
+### Promotion gate
+
+Promote from WATCH to EXPERIMENT FURTHER / INCLUDE only if the clean-room
+implementation adds reproducible discrimination on ScrollQ's independently
+committed controls, including supervised negatives, without using target
+predictions to choose parameters. Cross-scroll evidence is required before any
+production weighting is considered.
+
+A successful result may enter only as a post-hoc evidence channel or
+corroboration gate at first. Training use requires a separate decision,
+separate leakage analysis, and compatible licensing evidence.
+
+### Kill criterion
+
+Dismiss if the deterministic descriptors mainly reproduce generic papyrus
+texture, if agreement is driven by the same annotations/predictions used to
+evaluate the external paper, if performance collapses outside PHerc.172, or if
+the added channel cannot separate learned-model-only false positives from
+supported ink better than existing controls.
+
+### Self-evaluation
+
+- prize impact: **medium-high through validation credibility, not expected raw leaderboard gain**
+- plausibility: **medium-high**
+- evidence burden: **moderate-high; independent held-out controls and cross-scroll replication**
+- implementation cost: **low-medium**
+- reproducibility burden: **low if parameters and clean-room provenance are frozen**
+- hallucination risk: **low as inference-only corroboration; higher if fed back into training**
+- licensing risk: **blocking for reuse of deposited code; low for an independently authored implementation of published standard methods**
+- VC3D compatibility: **high as a registered evidence texture / review channel**
+- unnecessary surface area: **low if kept outside the predictor and dependency graph**
+
+
 ## Research ordering
 
 These experiments should not all run at once. Prefer the cheapest strong
