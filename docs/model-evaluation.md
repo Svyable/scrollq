@@ -124,6 +124,11 @@ adapter goes further: it publishes a salted commitment to private truth-surface
 hashes before scoring, so the truth cannot be silently swapped later without
 publishing raw truth hashes that could leak benchmark membership.
 
+For physical blind controls, the *order* of prediction commitment and truth
+visibility is recorded separately by `scroliq-blind-control`
+(`docs/blind-control.md`); that record carries no score and does not replace the
+identifier check above.
+
 ## Uncertainty and ranking
 
 ScrolIQ reports the mean primary metric and a deterministic 95% percentile
