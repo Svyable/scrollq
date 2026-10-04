@@ -44,6 +44,7 @@ weight-free Pareto frontier (triage, not a readability claim).
   - `segmentation_validation.py` → `scroliq-segmentation-validate`: trusted blind TIFXYZ surface scorer using preregistered bidirectional coverage, salted hidden-truth commitments, exact vertex distances, topology gates, and common `scroliq-eval` region results
   - `segmentation_uncertainty.py` → `scroliq-segmentation-uq`: finite-sample split-conformal audit that keeps boundary error separate from complete disconnected-component omission and rejects vacuous bounds
   - `sheetness_campaign.py` → `scroliq-sheetness-campaign`: freezes dispersed per-probe CT boxes, exact Hessian-engine bytes/config, and one campaign-level decision rule before inference; seals one provenance-bound v3 spec per cutout and aggregates all frozen groups without dropping failures
+  - `blind_control.py` → `scroliq-blind-control`: benchmark manifests with `development_truth` / `sealed_truth` / `training_eligible`, a create-only seal → prediction-commitment → anchor → reveal → report chain, and the ordering verdict the passport carries as its `blind_control` stage; ordering and custody only, never a score. `docs/blind-control.md`; the registered NIST benchmark is unpinned, so it refuses to commit until its pins exist
   - evidence layers, each its own `scroliq-*` script: `passport.py`,
     `scan_map.py`, `provenance.py`, `recto_coverage.py`, `tifxyz_audit.py`
     (`scroliq-mesh`), `ink_audit.py`, `ink_validation.py`, `normal_response.py`,
@@ -108,6 +109,7 @@ scroliq-pairs --list --out out/discovery.json          # registered rescan pairs
 scroliq-manifest --help                                # derive prize manifests
 scroliq-chunk-audit --index <metadata.min.json[.gz]> --out out/audit.json
 scroliq-segmentation-uq --help                      # structural boundary/component UQ gate
+scroliq-blind-control --help                          # sealed-truth timing for blind physical controls
 scroliq-vc3d-run-guard --help                       # exit code + semantic TIFXYZ postconditions
 scroliq-bbox-census --help                          # declared vs recomputed bbox over a patch pack
 scroliq-objective-audit --help                      # configured vs effective objective

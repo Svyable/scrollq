@@ -148,6 +148,32 @@ A new diagnostic earns code only if it does at least one of:
 Otherwise keep the idea in this folder, run the smallest possible experiment,
 or discard it.
 
+## Gaussian-splatting CT reconstruction (FaCT-GS)
+
+**Status:** DISMISS for the prize pipeline. Recorded 2026-10-04 from the
+maintainer briefing; the repository was not re-read from the build container.
+
+The top-level license is permissive, but as relayed it excludes
+`fact_gs/r2_gaussian` and submodule contents, so full dependency provenance is
+not simply "MIT". More importantly ScrolIQ works from *reconstructed*
+synchrotron volumes, not the raw acquisition problem this method solves.
+Reconstructing measured CT through an optimized Gaussian representation would add
+a learned, interpolated stage upstream of extremely weak carbon-ink evidence for
+a speed benefit that does not justify the new hallucination surface.
+
+Reconsider only with raw projection data in scope and a preregistered
+comparison against the existing reconstruction on a physical control.
+
+## Clinical low-dose CT reconstruction (CSRCT)
+
+**Status:** DISMISS for current incorporation. Recorded 2026-10-04 from the
+maintainer briefing.
+
+The method targets clinical low-dose CT and, as relayed, reports results on
+simulated data; the article is restricted-access and no permissively licensed
+implementation or checkpoint stack was found. The sparse-prior idea is
+interesting, but neither licensing nor evidence clears the bar.
+
 ## Deferred, not dismissed
 
 The following remain live but should not consume primary-pipeline priority until
@@ -161,7 +187,17 @@ their required inputs exist:
 - independent recto coverage witnesses;
 - fiber-texture physical sheet fingerprints;
 - sealed-scroll morphology transfer after the source scale discrepancy is
-  resolved.
+  resolved;
+- CSWinUNETR (cross-shaped stripe attention for thin structures): WATCH. As
+  relayed on 2026-10-04 its repository has no explicit software license, and
+  public source is not permission to reuse it, so ScrolIQ neither vendors nor
+  derives code from it. If a license appears, the smallest experiment is an
+  architecture-only A/B on exactly the same licensed Vesuvius training cubes,
+  augmentations, optimizer and committed held-out ROIs as the existing surface
+  model, promoted on surface coverage, adjacent-winding bridges, Betti/component
+  error and sheet-switch count rather than Dice alone. The risk is that a
+  mechanism built to reconnect interrupted structures connects two neighbouring
+  windings instead.
 
 "Deferred" means the hypothesis survived reasoning, not that implementation has
 been approved.
