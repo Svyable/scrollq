@@ -12,6 +12,8 @@ scroliq-ink-validate \
   --labels heldout/inklabels.tif \
   --validation-mask heldout/validation_mask.tif \
   --prediction-scale uint8 \
+  --label-scale uint8 \
+  --label-threshold 0.5 \
   --threshold 0.5 \
   --split-id public-kfold-fold-3 \
   --held-out \
@@ -50,4 +52,8 @@ A strong result should remain reproducible on held-out known ground truth while 
 
 ## Supported arrays
 
-The CLI accepts 2D `.png`, `.tif`/`.tiff`, or `.npy` arrays. PNG inputs are decoded directly as their stored grayscale integer values; RGB/RGBA images fail the 2D check rather than being silently converted. Integer predictions must use their declared encoding (`uint8` or `uint16`) or a dtype that `auto` can infer. Floating predictions in `auto` mode must already be in `[0,1]`; out-of-range floats fail rather than being silently rescaled.
+The CLI accepts 2D `.png`, `.tif`/`.tiff`, or `.npy` arrays. PNGs stored as RGB with three exactly identical channels are collapsed losslessly to that shared channel; true-color images are rejected rather than silently grayscale-converted. RGBA inputs additionally require fully opaque alpha.
+
+Binary labels remain strict by default. For soft or anti-aliased labels, callers must declare `--label-scale unit|uint8|uint16` and an explicit `--label-threshold`; ScrolIQ normalizes the stored values and uses the strict comparison `label > threshold`, recording the source scale, threshold, and comparison in the report. For example, `--label-scale uint8 --label-threshold 0.5` classifies uint8 values 128–255 as ink, matching a `label > 127` convention.
+
+Integer predictions must use their declared encoding (`uint8` or `uint16`) or a dtype that `auto` can infer. Floating predictions in `auto` mode must already be in `[0,1]`; out-of-range floats fail rather than being silently rescaled.
