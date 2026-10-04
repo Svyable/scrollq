@@ -48,4 +48,4 @@ A strong result should remain reproducible on held-out known ground truth while 
 
 ## Supported arrays
 
-The CLI accepts 2D `.tif`/`.tiff` or `.npy` arrays. Integer predictions must use their declared encoding (`uint8` or `uint16`) or a dtype that `auto` can infer. Floating predictions in `auto` mode must already be in `[0,1]`; out-of-range floats fail rather than being silently rescaled.
+The CLI accepts 2D `.png`, `.tif`/`.tiff`, or `.npy` arrays. PNG inputs are decoded directly as their stored grayscale integer values; RGB/RGBA images fail the 2D check rather than being silently converted. Integer predictions must use their declared encoding (`uint8` or `uint16`) or a dtype that `auto` can infer. Floating predictions in `auto` mode must already be in `[0,1]`; out-of-range floats fail rather than being silently rescaled.
