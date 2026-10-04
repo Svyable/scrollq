@@ -127,8 +127,11 @@ evidence. Volume-bound reports can be attached with
 as partial evidence and fails closed on missing or cross-volume bindings.
 
 The next Fiber IQ evidence step is to establish a defensible exact CT-volume
-mapping for public fibers, add CT-conditioned orientation/support diagnostics,
-and broaden the campaign toward cross-fiber connectivity.
+mapping for public fibers and broaden the campaign toward cross-fiber
+connectivity. A separate experimental CT-conditioned orientation layer now
+exists as [`scroliq-fiber-frame`](fiber-frame.md): it measures depth-resolved
+cross-ply frame continuity on already-rectified shallow CT slabs, but remains
+outside the production path until real adjacent-winding controls pass.
 
 GPU TEASAR/skeletonization backends are evaluated separately from this persisted
 trace audit. Brook is tracked under the preregistered

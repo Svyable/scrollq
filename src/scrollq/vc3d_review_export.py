@@ -1,7 +1,8 @@
 """Export ScrolIQ diagnostic review queues as native VC3D PointCollections.
 
-Supported sources: the preregistered winding-attachment result and the
-winding ray-order audit (``scroliq-winding`` ``ray_order.review_queue``).
+Supported sources: the preregistered winding-attachment result, the
+winding ray-order audit (``scroliq-winding`` ``ray_order.review_queue``),
+and cross-ply fiber-frame discontinuity reports.
 The exporter is deterministic, carries the source SHA-256, and preserves
 review context in PointCollection tags so the file can be loaded directly
 through VC3D or ``vc3d_load_points_json``.
@@ -22,7 +23,8 @@ SCHEMA_VERSION = 1
 POINTCOLLECTIONS_VERSION = "1"
 KIND = "winding-attachment"
 RAY_ORDER_KIND = "winding-ray-order"
-KINDS = (KIND, RAY_ORDER_KIND)
+FIBER_FRAME_KIND = "fiber-frame-discontinuity"
+KINDS = (KIND, RAY_ORDER_KIND, FIBER_FRAME_KIND)
 
 LIMITATION = (
     "These markers are review cues, not confirmed annotation or patch errors. "
@@ -307,6 +309,119 @@ def build_ray_order_bundle(
     }
 
 
+def build_fiber_frame_bundle(
+    document: Any,
+    *,
+    source_name: str,
+    source_sha256: str,
+    scroll: str,
+) -> dict[str, Any]:
+    """Convert cross-ply fiber-frame findings into PointCollections v1."""
+    if not isinstance(document, dict):
+        raise ReviewExportError("source must be a JSON object")
+    if document.get("tool") != "scroliq-fiber-frame":
+        raise ReviewExportError("source is not a scroliq-fiber-frame report")
+    if (
+        not isinstance(source_sha256, str)
+        or len(source_sha256) != 64
+        or any(ch not in "0123456789abcdef" for ch in source_sha256)
+    ):
+        raise ReviewExportError("source_sha256 must be lowercase 64-hex")
+    if not isinstance(scroll, str) or not scroll.strip():
+        raise ReviewExportError("scroll must be non-empty")
+
+    analysis = document.get("analysis")
+    if not isinstance(analysis, dict):
+        raise ReviewExportError("source.analysis must be an object")
+    queue = analysis.get("review_queue")
+    if not isinstance(queue, list) or not queue:
+        raise ReviewExportError(
+            "analysis.review_queue must be non-empty; run fiber-frame with xyz"
+        )
+
+    collections: dict[str, Any] = {}
+    seen: set[str] = set()
+    for collection_index, row in enumerate(queue, start=1):
+        if not isinstance(row, dict):
+            raise ReviewExportError(
+                f"analysis.review_queue[{collection_index - 1}] must be an object"
+            )
+        finding_id = row.get("finding_id")
+        xyz = row.get("xyz")
+        delta = row.get("frame_delta_degrees")
+        tile_a = row.get("tile_a")
+        tile_b = row.get("tile_b")
+        if not isinstance(finding_id, str) or not finding_id:
+            raise ReviewExportError("fiber-frame finding_id must be non-empty")
+        if finding_id in seen:
+            raise ReviewExportError(f"duplicate fiber-frame finding_id {finding_id!r}")
+        seen.add(finding_id)
+        if (
+            not isinstance(xyz, list)
+            or len(xyz) != 3
+            or not all(_finite_number(v) for v in xyz)
+        ):
+            raise ReviewExportError(
+                f"fiber-frame finding {finding_id!r} needs finite xyz"
+            )
+        if not _finite_number(delta) or float(delta) < 0:
+            raise ReviewExportError(
+                f"fiber-frame finding {finding_id!r} has invalid frame delta"
+            )
+        if (
+            not isinstance(tile_a, list)
+            or not isinstance(tile_b, list)
+            or len(tile_a) != 2
+            or len(tile_b) != 2
+            or not all(isinstance(v, int) and not isinstance(v, bool) for v in tile_a + tile_b)
+        ):
+            raise ReviewExportError(
+                f"fiber-frame finding {finding_id!r} has invalid tile ids"
+            )
+
+        point_id = str(collection_index)
+        collections[point_id] = {
+            "name": f"ScrolIQ fiber frame · {finding_id}",
+            "points": {
+                point_id: {
+                    "p": [float(v) for v in xyz],
+                    "creation_time": 0,
+                }
+            },
+            "metadata": {
+                "coordinate_space": "level0-voxel-xyz",
+                "review_only": True,
+            },
+            "color": [0.75, 0.45, 0.95],
+            "tags": {
+                "scroliq_kind": FIBER_FRAME_KIND,
+                "source_sha256": source_sha256,
+                "finding_id": finding_id,
+                "frame_delta_degrees": str(float(delta)),
+                "tile_a": json.dumps(tile_a, separators=(",", ":")),
+                "tile_b": json.dumps(tile_b, separators=(",", ":")),
+            },
+        }
+
+    return {
+        "scroliq_review_bundle": {
+            "schema_version": SCHEMA_VERSION,
+            "tool": TOOL,
+            "kind": FIBER_FRAME_KIND,
+            "scroll": scroll,
+            "coordinate_space": "level0-voxel-xyz",
+            "source": source_name,
+            "source_sha256": source_sha256,
+            "source_verdict": analysis.get("status"),
+            "review_points": len(collections),
+            "source_findings": len(queue),
+            "limitation": LIMITATION,
+        },
+        "vc_pointcollections_json_version": POINTCOLLECTIONS_VERSION,
+        "collections": collections,
+    }
+
+
 def export_file(
     source: str | Path,
     output: str | Path,
@@ -326,10 +441,12 @@ def export_file(
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ReviewExportError(f"cannot read source: {exc}") from exc
 
-    builder = (
-        build_ray_order_bundle if kind == RAY_ORDER_KIND
-        else build_winding_attachment_bundle
-    )
+    builders = {
+        KIND: build_winding_attachment_bundle,
+        RAY_ORDER_KIND: build_ray_order_bundle,
+        FIBER_FRAME_KIND: build_fiber_frame_bundle,
+    }
+    builder = builders[kind]
     bundle = builder(
         document,
         source_name=src.name,
@@ -345,14 +462,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog=TOOL,
         description=(
-            "Export a ScrolIQ winding review queue (attachment or ray order) "
-            "as a native "
+            "Export a ScrolIQ winding or fiber-frame review queue as a native "
             "VC3D PointCollections v1 JSON file."
         ),
     )
     parser.add_argument(
         "--input", required=True,
-        help="winding-attachment result.json or winding-audit JSON",
+        help="winding result/audit JSON or scroliq-fiber-frame report",
     )
     parser.add_argument(
         "--kind", choices=KINDS, default=KIND,

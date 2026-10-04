@@ -194,6 +194,32 @@ An overlap-cycle variant can compare independently generated patches that claim
 to cover the same material region. If their CT-derived fingerprints disagree
 after coordinate registration, stitching should be reviewed.
 
+### Executable cross-ply frame stage
+
+A first measurement harness is now implemented as `scroliq-fiber-frame`. It
+consumes a shallow CT slab that has already been rectified into
+`(normal-depth, y, x)` surface coordinates. Within each spatial tile it builds
+a 2-D structure tensor independently at each depth, clusters the depth-wise
+axial orientations into two unordered modes, and compares those two-axis frames
+between neighboring tiles.
+
+The first synthetic positive control is intentionally narrow: a continuous
+8-depth crossed-sinusoid slab yields no frame-switch findings, while rotating
+both depth modes by 35 degrees on exactly one half of the surface produces only
+the four expected tile-boundary findings at a 25-degree preregistered review
+threshold. This demonstrates that the statistic is sensitive to a coherent
+cross-ply frame splice rather than to mode ordering. It is **not** evidence that
+real carbonized papyrus exposes recoverable cross-ply modes.
+
+The report binds the exact NPZ slab, candidate-surface geometry digest, exact CT
+volume root, and a frozen sampling-manifest digest. Optional level-0 XYZ
+coordinates turn flagged boundaries into deterministic VC3D PointCollections
+through `scroliq-vc3d-review --kind fiber-frame-discontinuity`.
+
+The scientific status remains **EXPERIMENT FURTHER**. Real-CT adjacent-winding
+controls, legitimate folds/tears/joins, low-texture regions, and cross-scroll
+replication are required before the field may influence reconstruction.
+
 ### Promotion gate
 
 Require separation between same-sheet continuity and adjacent-winding controls
