@@ -278,3 +278,209 @@ def classify_runs(
         "guard": guards,
         "competitors": competitors,
     }
+
+@dataclass(frozen=True)
+class TensorPolynomialSurface:
+    degree: int
+    center_yx: tuple[float, float]
+    scale: float
+    coefficients: np.ndarray
+    rank: int
+    singular_values: np.ndarray
+
+    @property
+    def terms(self) -> int:
+        return (self.degree + 1) ** 2
+
+    @property
+    def condition_number(self) -> float:
+        if self.singular_values.size == 0:
+            return float("inf")
+        smallest = float(self.singular_values[-1])
+        largest = float(self.singular_values[0])
+        if smallest <= 0:
+            return float("inf")
+        return largest / smallest
+
+
+def _poly_features(
+    yx: np.ndarray,
+    *,
+    degree: int,
+    center_yx: tuple[float, float],
+    scale: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    pts = np.asarray(yx, dtype=np.float64)
+    if pts.ndim != 2 or pts.shape[1] != 2:
+        raise CoverageWitnessError("yx must have shape [N,2]")
+    if degree < 0:
+        raise CoverageWitnessError("degree must be >= 0")
+    if not np.isfinite(scale) or scale <= 0:
+        raise CoverageWitnessError("scale must be finite and > 0")
+    cy, cx = float(center_yx[0]), float(center_yx[1])
+    v = (pts[:, 0] - cy) / scale
+    u = (pts[:, 1] - cx) / scale
+
+    cols = []
+    dcols_dx = []
+    dcols_dy = []
+    for i in range(degree + 1):
+        for j in range(degree + 1):
+            cols.append((u ** i) * (v ** j))
+            if i == 0:
+                dcols_dx.append(np.zeros_like(u))
+            else:
+                dcols_dx.append((i / scale) * (u ** (i - 1)) * (v ** j))
+            if j == 0:
+                dcols_dy.append(np.zeros_like(v))
+            else:
+                dcols_dy.append((j / scale) * (u ** i) * (v ** (j - 1)))
+    return (
+        np.stack(cols, axis=1),
+        np.stack(dcols_dx, axis=1),
+        np.stack(dcols_dy, axis=1),
+    )
+
+
+def fit_tensor_polynomial_surface(
+    yx: np.ndarray,
+    xyz: np.ndarray,
+    *,
+    degree: int,
+    center_yx: tuple[float, float],
+    scale: float,
+    min_points_per_term: int = 4,
+) -> TensorPolynomialSurface:
+    """Fit XYZ as a tensor polynomial in normalized material-grid coordinates."""
+    pts = np.asarray(yx, dtype=np.float64)
+    values = np.asarray(xyz, dtype=np.float64)
+    if values.ndim != 2 or values.shape[1] != 3 or values.shape[0] != pts.shape[0]:
+        raise CoverageWitnessError("xyz must have shape [N,3] aligned with yx")
+    if not np.isfinite(pts).all() or not np.isfinite(values).all():
+        raise CoverageWitnessError("polynomial fit inputs must be finite")
+    terms = (degree + 1) ** 2
+    required = int(min_points_per_term) * terms
+    if pts.shape[0] < required:
+        raise CoverageWitnessError(
+            f"polynomial degree {degree} requires at least {required} points, "
+            f"got {pts.shape[0]}"
+        )
+
+    design, _, _ = _poly_features(
+        pts, degree=degree, center_yx=center_yx, scale=scale
+    )
+    coeffs, _, rank, singular = np.linalg.lstsq(design, values, rcond=None)
+    if int(rank) != terms:
+        raise CoverageWitnessError(
+            f"polynomial degree {degree} design rank {rank} != {terms}"
+        )
+    if not np.isfinite(coeffs).all() or not np.isfinite(singular).all():
+        raise CoverageWitnessError("polynomial fit produced non-finite values")
+    return TensorPolynomialSurface(
+        degree=int(degree),
+        center_yx=(float(center_yx[0]), float(center_yx[1])),
+        scale=float(scale),
+        coefficients=np.asarray(coeffs, dtype=np.float64),
+        rank=int(rank),
+        singular_values=np.asarray(singular, dtype=np.float64),
+    )
+
+
+def evaluate_tensor_polynomial_surface(
+    model: TensorPolynomialSurface,
+    yx: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return predicted XYZ and analytic unit normals for material positions."""
+    pts = np.asarray(yx, dtype=np.float64)
+    design, dx_design, dy_design = _poly_features(
+        pts,
+        degree=model.degree,
+        center_yx=model.center_yx,
+        scale=model.scale,
+    )
+    xyz = design @ model.coefficients
+    dxyz_dx = dx_design @ model.coefficients
+    dxyz_dy = dy_design @ model.coefficients
+    normals = np.cross(dxyz_dx, dxyz_dy)
+    norms = np.linalg.norm(normals, axis=1)
+    good = np.isfinite(normals).all(axis=1) & np.isfinite(norms) & (norms > 1e-8)
+    out_normals = np.full_like(normals, np.nan, dtype=np.float64)
+    out_normals[good] = normals[good] / norms[good, None]
+    return np.asarray(xyz, dtype=np.float64), out_normals
+
+
+def inner_collar_mask(
+    yx: np.ndarray,
+    rect_yx: tuple[int, int, int, int],
+    *,
+    width: int,
+) -> np.ndarray:
+    """Visible cells within Chebyshev distance <= width outside a rectangle."""
+    if type(width) is not int or width < 1:
+        raise CoverageWitnessError("collar width must be an integer >= 1")
+    pts = np.asarray(yx, dtype=np.int64)
+    if pts.ndim != 2 or pts.shape[1] != 2:
+        raise CoverageWitnessError("yx must have shape [N,2]")
+    y0, y1, x0, x1 = rect_yx
+    y = pts[:, 0]
+    x = pts[:, 1]
+    inside = (y0 <= y) & (y < y1) & (x0 <= x) & (x < x1)
+
+    dy = np.maximum.reduce(
+        [
+            y0 - y,
+            y - (y1 - 1),
+            np.zeros_like(y),
+        ]
+    )
+    dx = np.maximum.reduce(
+        [
+            x0 - x,
+            x - (x1 - 1),
+            np.zeros_like(x),
+        ]
+    )
+    distance = np.maximum(dy, dx)
+    return (~inside) & (distance >= 1) & (distance <= width)
+
+
+def polynomial_consensus(
+    xyz_a: np.ndarray,
+    normals_a: np.ndarray,
+    xyz_b: np.ndarray,
+    normals_b: np.ndarray,
+    *,
+    max_position_disagreement: float,
+    min_abs_normal_cosine: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return consensus mask, position disagreement, and absolute normal cosine."""
+    a = np.asarray(xyz_a, dtype=np.float64)
+    b = np.asarray(xyz_b, dtype=np.float64)
+    na = np.asarray(normals_a, dtype=np.float64)
+    nb = np.asarray(normals_b, dtype=np.float64)
+    if a.shape != b.shape or a.ndim != 2 or a.shape[1] != 3:
+        raise CoverageWitnessError("polynomial XYZ arrays must align as [N,3]")
+    if na.shape != a.shape or nb.shape != a.shape:
+        raise CoverageWitnessError("normal arrays must align with XYZ arrays")
+    if max_position_disagreement < 0:
+        raise CoverageWitnessError("max_position_disagreement must be >= 0")
+    if not 0 <= min_abs_normal_cosine <= 1:
+        raise CoverageWitnessError("min_abs_normal_cosine must be in [0,1]")
+
+    disagreement = np.linalg.norm(a - b, axis=1)
+    cosine = np.abs(np.sum(na * nb, axis=1))
+    finite = (
+        np.isfinite(a).all(axis=1)
+        & np.isfinite(b).all(axis=1)
+        & np.isfinite(na).all(axis=1)
+        & np.isfinite(nb).all(axis=1)
+        & np.isfinite(disagreement)
+        & np.isfinite(cosine)
+    )
+    mask = (
+        finite
+        & (disagreement <= float(max_position_disagreement))
+        & (cosine >= float(min_abs_normal_cosine))
+    )
+    return mask, disagreement, cosine
+
