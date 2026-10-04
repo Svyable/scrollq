@@ -9,8 +9,8 @@ https://scrollprize.org/prizes
 
 ## Five-minute review path
 
-1. **Start with the live Grand Prize evidence board:** https://svyable.github.io/scrollq/progress.html
-2. **Read the exact current bottleneck and next experiment:** [November N2 — one exact-volume surface result, scored blind](november-2026.html#n2).
+1. **October Progress Prize evidence — claim → committed real-data artifact → falsification control:** start with [What is already demonstrated on real Challenge data](#what-is-already-demonstrated-on-real-challenge-data) below.
+2. **See the same evidence visually:** https://svyable.github.io/scrollq/progress.html. Future Grand Prize work is tracked separately and is not presented as October evidence.
 3. **Verify the strongest current real-data controls:** [two-scroll Fiber IQ evidence](fiber-audit.md) (547 / 547 public fibers plus replicated CT support/direction), [PHercParis4 winding attachment](../artifacts/2026-10-03-paris4-winding-attachment/), and [same-byte TIFXYZ cross-check](../artifacts/2026-10-02-doctor-same-byte/).
 4. **Check the blind evaluation contract:** [held-out segmentation validation](segmentation-validation.md) and the [model-evaluation protocol](model-evaluation.md).
 5. **Reproduce and inspect:** [pinned reviewer container](grand-prize-container.md) · [VC3D-native review queues](review-queues.md) · [source](https://github.com/Svyable/scrollq).
@@ -50,7 +50,7 @@ The project’s stronger contribution is the **evidence contract across stages**
 
 That makes the output useful even when a diagnostic produces a negative result: it tells the next stage what is known, what is not known, and what must not be trusted.
 
-## Current Grand Prize frontier
+## Future work — not October evidence
 
 The highest-priority experiment is **November N2: one exact-volume surface result, scored blind**:
 [November 2026 goals — N2](november-2026.html#n2).
