@@ -9,6 +9,7 @@ def _artifact(volume_id: str, name: str = "evidence") -> dict:
         "kind": name,
         "uri": f"https://example.invalid/evidence/{name}.json",
         "sha256": "a" * 64,
+        "retrieved_sha256": "a" * 64,
         "volume_id": volume_id,
         "claim": f"{name} evidence for exact eligible volume",
     }
@@ -145,6 +146,38 @@ def test_manifest_binding_changes_when_manifest_changes():
 
     assert baseline["manifest_sha256"] != rebound["manifest_sha256"]
     assert baseline["manifest_target_sha256"] == rebound["manifest_target_sha256"]
+
+
+def test_remote_artifact_without_retrieval_digest_fails_closed():
+    document = _document()
+    artifact = document["prerequisites"]["input_integrity"]["artifacts"][0]
+    artifact.pop("retrieved_sha256")
+
+    report = target_gate.evaluate_target_gate(document)
+
+    assert report["status"] == "blocked"
+    assert "input_integrity" in report["blocking_checks"]
+    check = next(row for row in report["checks"] if row["id"] == "input_integrity")
+    assert any(
+        "retrieved_sha256 must be lowercase 64-hex for remote evidence" in reason
+        for reason in check["reasons"]
+    )
+
+
+def test_remote_artifact_retrieval_digest_mismatch_fails_closed():
+    document = _document()
+    artifact = document["prerequisites"]["surface_foothold"]["artifacts"][0]
+    artifact["retrieved_sha256"] = "b" * 64
+
+    report = target_gate.evaluate_target_gate(document)
+
+    assert report["status"] == "blocked"
+    assert "surface_foothold" in report["blocking_checks"]
+    check = next(row for row in report["checks"] if row["id"] == "surface_foothold")
+    assert any(
+        "retrieved_sha256 does not match declared sha256" in reason
+        for reason in check["reasons"]
+    )
 
 
 def test_repository_artifact_hash_is_verified(tmp_path):
