@@ -25,6 +25,20 @@ The tool measures:
 - the effect of a conservative center-wins gate on precision, recall, false
   positive rate, and balanced accuracy at the already-declared ink threshold.
 
+Schema v2 also measures **connected predicted components**. Components are
+defined once from the nominal prediction using 8-connectivity and then held
+fixed across every offset. For each component the report records the mean
+probability-vs-depth profile, nominal advantage over the strongest off-surface
+mean, peak offset(s), an off-surface persistence ratio, and a coarse
+half-nominal support span. Small components can be excluded with
+`--min-component-pixels`.
+
+The fixed-support rule matters: offset maps are never re-thresholded or
+re-segmented to manufacture apparent persistence. A component is a review
+candidate when its nominal-surface mean is **not strictly greater** than every
+non-zero-offset mean. That rule creates a falsification queue; it is not a
+claim that the component is false ink.
+
 The center-wins gate is fixed: a pixel must already pass the declared ink
 threshold and its zero-offset probability must be strictly greater than every
 non-zero-offset probability. The tool does not tune a margin from evaluation
@@ -39,6 +53,19 @@ A protocol-complete report binds:
 - a frozen sampling-manifest SHA-256;
 - the primary, labels, validation mask, and every offset map by SHA-256;
 - split identity and the explicit training-overlap declaration.
+
+Optionally provide a level-0 `(H,W,3)` surface-coordinate map with
+`--surface-xyz`. The file is SHA-256 bound into the report and gives each
+review-candidate component a deterministic physical review point. Those points
+can be exported to VC3D without inventing a winding annotation:
+
+```bash
+scroliq-vc3d-review \
+  --input heldout/normal-response.json \
+  --kind normal-response-component \
+  --scroll PHercParis4 \
+  --out heldout/normal-response.points.json
+```
 
 The sampling manifest should record the CT source, geometry identifier,
 normal-orientation convention, interpolation/sampling settings, offset
@@ -69,6 +96,8 @@ scroliq-normal-response \
   --model-checkpoint-sha256 <64-hex> \
   --model-window 17x256x256 \
   --surface-geometry-sha256 <64-hex> \
+  --surface-xyz heldout/surface-xyz.npy \
+  --min-component-pixels 4 \
   --sampling-manifest heldout/normal-sampling-manifest.json \
   --out heldout/normal-response.json
 ```

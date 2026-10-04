@@ -27,7 +27,7 @@ campaign.
 
 | Idea | Current status | Primary value | Next evidence |
 |---|---|---|---|
-| Surface-normal ink response / surface-lock profiles | EXPERIMENT FURTHER; basic offset controls already supported | Physical falsification of surface-bound ink | Held-out continuous offset curves across checkpoints and negative controls |
+| Surface-normal ink response / surface-lock profiles | EXPERIMENT FURTHER; v2 adds fixed-support component profiles + VC3D review | Physical falsification of surface-bound ink, including glyph-like component persistence | Held-out component separation across checkpoints and negative controls |
 | Causal context ablation | EXPERIMENT FURTHER | Detect predictions that survive destruction of local CT evidence | Held-out central-vs-distant intervention study |
 | Morphology/topography corroboration | INCLUDE as source-control framework; target transfer EXPERIMENT FURTHER | Independent physical support for ink | Resolve source scale discrepancy, then validate transfer conservatively |
 | Acquisition-physics normalization and conditioning | EXPERIMENT FURTHER | Reduce cross-scan/domain shift without larger semantic context | Leave-one-acquisition-regime-out benchmark |

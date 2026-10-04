@@ -48,7 +48,8 @@ weight-free Pareto frontier (triage, not a readability claim).
     `scan_map.py`, `provenance.py`, `recto_coverage.py`, `tifxyz_audit.py`
     (`scroliq-mesh`), `ink_audit.py`, `ink_validation.py`, `normal_response.py`,
     `winding_audit.py`; `normal_response.py` → `scroliq-normal-response` for the
-    frozen held-out surface-normal falsification sweep;
+    frozen held-out surface-normal falsification sweep, including fixed-support
+    predicted-component depth profiles and optional VC3D review coordinates;
     `geometry_probe.py` → `scrollq-geometry-probe`; `fiber_audit.py` →
     `scroliq-fiber`; `fiber_frame.py` → `scroliq-fiber-frame` for the
     experimental ink-blind cross-ply CT continuity diagnostic
