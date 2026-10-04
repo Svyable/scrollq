@@ -181,6 +181,41 @@ exact-volume source attestation, score/truth hashes, anchors, tracker parameters
 anchor-exclusion radius, tolerance and success threshold before a measured run;
 see [`docs/horizon-validation.md`](docs/horizon-validation.md).
 
+
+## Independent absolute-turn validation
+
+`scroliq-winding-validate` grades a winding solver against a **frozen,
+independently established sparse relationship set** instead of letting a
+candidate segmentation grade itself. Each held-out relation records the signed
+physical turn separation between two base-volume XYZ anchors. Candidate output
+is bound to the exact frozen spec hash and exact volume, and any relation used
+for fitting is forbidden from the held-out set.
+
+The metric is gauge-invariant: it scores `turn(b) - turn(a)`, so a harmless
+global relabeling of every winding does not count as an error. The report keeps
+**exact**, **catastrophic one-wrap hops**, and **multi-wrap errors** separate,
+and keeps `suspended`, `unscorable`, `failed`, and missing relations in the
+full denominator.
+
+```bash
+# Freeze/record this hash before candidate inference.
+scroliq-winding-validate \
+  --spec winding-validation-spec.json \
+  --print-spec-hash
+
+# Score candidate relation predictions.
+scroliq-winding-validate \
+  --spec winding-validation-spec.json \
+  --predictions candidate-winding.json \
+  --out winding-validation-report.json
+```
+
+A pass requires every held-out relationship to be present, scorable, and exact.
+The reference source is SHA-256-bound and must explicitly declare that it was
+created without seeing candidate output. ScrolIQ verifies that contract and the
+held-out IDs; it does not pretend to independently prove the human/reference
+creation process. See [the winding validation protocol](docs/winding-validation.md).
+
 ## Winding annotation audit
 
 `scroliq-winding` audits the conventional VC3D / spiral-fitting point-collection inputs before they are trusted as geometry evidence:
