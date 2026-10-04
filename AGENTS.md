@@ -49,7 +49,8 @@ weight-free Pareto frontier (triage, not a readability claim).
     `winding_audit.py`; `normal_response.py` → `scroliq-normal-response` for the
     frozen held-out surface-normal falsification sweep;
     `geometry_probe.py` → `scrollq-geometry-probe`; `fiber_audit.py` →
-    `scroliq-fiber`
+    `scroliq-fiber`; `fiber_frame.py` → `scroliq-fiber-frame` for the
+    experimental ink-blind cross-ply CT continuity diagnostic
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's

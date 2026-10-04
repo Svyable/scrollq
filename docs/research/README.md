@@ -37,6 +37,7 @@ campaign.
 | Scored-result run identity binding | INCLUDE, merged in PR #147 | Prevent stale score files from masquerading as current results | Maintain adapter compliance |
 | Independent recto coverage witnesses | EXPERIMENT FURTHER; Stage-A deletion calibration passed | Falsify omitted surface outside a declared inventory | Identity/continuity-aware unconditioned witness test; raw surface existence is insufficient |
 | Fiber-texture fingerprints for sheet identity | EXPERIMENT FURTHER | Detect smooth but wrong-winding sheet switches | Adjacent-winding controls on real CT |
+| Cross-ply fiber-frame continuity | EXPERIMENT FURTHER; executable harness + synthetic splice control | Ink-blind CT-conditioned local material continuity + VC3D review | Real-CT adjacent-winding and legitimate-discontinuity benchmark |
 | Fiber-coordinate canonicalization as a model architecture | DISMISS for now | Possible orientation normalization | Reconsider only if an ablation inside another experiment supports it |
 | Global histogram matching | DISMISS | Superficial domain normalization | None; retain only as a negative control |
 | Transport-only UV invariance | DISMISS | Coordinate arithmetic check | None; material-attached false positives persist too |
