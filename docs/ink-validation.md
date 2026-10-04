@@ -14,6 +14,7 @@ scroliq-ink-validate \
   --prediction-scale uint8 \
   --label-scale uint8 \
   --label-threshold 0.5 \
+  --mask-rule positive \
   --threshold 0.5 \
   --split-id public-kfold-fold-3 \
   --held-out \
@@ -55,5 +56,7 @@ A strong result should remain reproducible on held-out known ground truth while 
 The CLI accepts 2D `.png`, `.tif`/`.tiff`, or `.npy` arrays. PNGs stored as RGB with three exactly identical channels are collapsed losslessly to that shared channel; true-color images are rejected rather than silently grayscale-converted. RGBA inputs additionally require fully opaque alpha.
 
 Binary labels remain strict by default. For soft or anti-aliased labels, callers must declare `--label-scale unit|uint8|uint16` and an explicit `--label-threshold`; ScrolIQ normalizes the stored values and uses the strict comparison `label > threshold`, recording the source scale, threshold, and comparison in the report. For example, `--label-scale uint8 --label-threshold 0.5` classifies uint8 values 128–255 as ink, matching a `label > 127` convention.
+
+Validation masks remain strict binary by default. When an upstream evidence contract explicitly defines certainty as `mask > 0`, pass `--mask-rule positive`; ScrolIQ records that rule and binarizes only after hashing the untouched source file. This is intentionally opt-in so arbitrary soft masks are never accepted as binary evidence by accident.
 
 Integer predictions must use their declared encoding (`uint8` or `uint16`) or a dtype that `auto` can infer. Floating predictions in `auto` mode must already be in `[0,1]`; out-of-range floats fail rather than being silently rescaled.
