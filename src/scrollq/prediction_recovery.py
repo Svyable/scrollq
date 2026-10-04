@@ -325,3 +325,54 @@ def score_development(
         "wrong_wrap_rejected_count": sum(wrong_wrap_rows),
         "checks": checks,
     }
+
+
+def read_level_box(
+    level: Any,
+    lo_zyx: Sequence[int],
+    hi_zyx: Sequence[int],
+) -> tuple[np.ndarray, list[tuple[int, int, int]]]:
+    """Read one half-open uint8 Zarr-v2 box, treating absent fill chunks as zero."""
+    shape = np.asarray(level.shape, dtype=np.int64)
+    chunks = np.asarray(level.chunks, dtype=np.int64)
+    lo = np.asarray(lo_zyx, dtype=np.int64)
+    hi = np.asarray(hi_zyx, dtype=np.int64)
+    if lo.shape != (3,) or hi.shape != (3,):
+        raise PredictionRecoveryError("box bounds must be ZYX triplets")
+    if np.any(lo < 0) or np.any(hi > shape) or np.any(lo >= hi):
+        raise PredictionRecoveryError("box is empty or outside level bounds")
+
+    out_shape = tuple(int(v) for v in (hi - lo))
+    out = np.zeros(out_shape, dtype=np.uint8)
+    first = lo // chunks
+    last = (hi - 1) // chunks
+    missing: list[tuple[int, int, int]] = []
+
+    for cz in range(int(first[0]), int(last[0]) + 1):
+        for cy in range(int(first[1]), int(last[1]) + 1):
+            for cx in range(int(first[2]), int(last[2]) + 1):
+                cidx = (cz, cy, cx)
+                chunk = level.chunk(cidx)
+                if chunk is None:
+                    missing.append(cidx)
+                    continue
+                array = np.asarray(chunk, dtype=np.uint8)
+                global_lo = np.asarray(cidx, dtype=np.int64) * chunks
+                global_hi = global_lo + np.asarray(array.shape, dtype=np.int64)
+                ov_lo = np.maximum(lo, global_lo)
+                ov_hi = np.minimum(hi, global_hi)
+                if np.any(ov_lo >= ov_hi):
+                    continue
+                out_slices = tuple(
+                    slice(int(ov_lo[d] - lo[d]), int(ov_hi[d] - lo[d]))
+                    for d in range(3)
+                )
+                chunk_slices = tuple(
+                    slice(
+                        int(ov_lo[d] - global_lo[d]),
+                        int(ov_hi[d] - global_lo[d]),
+                    )
+                    for d in range(3)
+                )
+                out[out_slices] = array[chunk_slices]
+    return out, missing
