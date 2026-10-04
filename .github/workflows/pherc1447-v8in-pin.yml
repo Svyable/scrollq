@@ -98,7 +98,7 @@ jobs:
                   response.raise_for_status()
                   data = response.content
 
-                  header = f"blob {len(data)}\\0".encode("ascii")
+                  header = f"blob {len(data)}\0".encode("ascii")
                   observed_blob = hashlib.sha1(header + data).hexdigest()
                   if observed_blob != expected_blob:
                       raise SystemExit(
