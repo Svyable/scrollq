@@ -1,0 +1,5452 @@
+{
+  "decision": {
+    "checks": {
+      "intact_false_positive_fraction": true,
+      "intact_seam_coverage": false,
+      "target_left_wrong_right_detection_fraction": false,
+      "target_left_wrong_right_seam_coverage": false,
+      "usable_groups": false,
+      "wrong_left_target_right_detection_fraction": false,
+      "wrong_left_target_right_seam_coverage": false
+    },
+    "claim_boundary": "A development pass establishes only that the already-implemented cross-ply frame statistic detects frozen adjacent-winding half-slab substitutions more often than it falsely flags the intact w035 seam on these ten development regions. It does not prove arbitrary sheet identity, recto completeness, reconstruction correctness, ink, readability, or Grand Prize eligibility.",
+    "classification_after_development": "DISMISS cross-ply-seam-v1",
+    "frozen_group_count": 10,
+    "intact_false_positive_fraction": 0.0,
+    "pooled_seam_comparison_coverage_fraction": {
+      "intact": 0.125,
+      "target_left_wrong_right": 0.025,
+      "wrong_left_target_right": 0.075
+    },
+    "seam_positive_group_counts": {
+      "intact": 0,
+      "target_left_wrong_right": 0,
+      "wrong_left_target_right": 0
+    },
+    "status": "fail",
+    "target_left_wrong_right_detection_fraction": 0.0,
+    "usable_group_count": 0,
+    "wrong_left_target_right_detection_fraction": 0.0
+  },
+  "firewall": {
+    "holdout_ct_reads": 0,
+    "holdout_ids": [
+      "surface-0002",
+      "surface-0006",
+      "surface-0010",
+      "surface-0013",
+      "surface-0017",
+      "surface-0020",
+      "surface-0022",
+      "surface-0026",
+      "surface-0029",
+      "surface-0032"
+    ],
+    "sampled_development_ids": [
+      "surface-0001",
+      "surface-0005",
+      "surface-0007",
+      "surface-0011",
+      "surface-0015",
+      "surface-0018",
+      "surface-0021",
+      "surface-0025",
+      "surface-0027",
+      "surface-0031"
+    ]
+  },
+  "groups": [
+    {
+      "grid_yx": [
+        16,
+        32
+      ],
+      "id": "surface-0001",
+      "reason": "one or more seam variants lacked three recoverable comparisons",
+      "status": "unusable",
+      "target_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 0.9999728732638888,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "variants": {
+        "intact": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 1,
+              "neighbor_comparisons": 1,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.3125,
+              "valid_tiles": 5
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  62.27233802788507,
+                  99.14307026122616
+                ],
+                "axes_b_degrees": [
+                  26.1759016711138,
+                  87.66953810571135
+                ],
+                "finding_id": "0:2->0:3",
+                "frame_delta_degrees": 36.09643635677127,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  0,
+                  2
+                ],
+                "tile_b": [
+                  0,
+                  3
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  77.0095334394969,
+                  110.94880716062063
+                ],
+                "axis_separation_degrees": 33.939273721123726,
+                "bounds_yx": [
+                  0,
+                  16,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  8,
+                  8
+                ],
+                "grid": [
+                  0,
+                  0
+                ],
+                "mean_depth_coherence": 0.5097318722214756,
+                "mode_weight_share_min": 0.42855487593239794,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  62.27233802788507,
+                  99.14307026122616
+                ],
+                "axis_separation_degrees": 36.87073223334109,
+                "bounds_yx": [
+                  0,
+                  16,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  8,
+                  40
+                ],
+                "grid": [
+                  0,
+                  2
+                ],
+                "mean_depth_coherence": 0.6842450595285956,
+                "mode_weight_share_min": 0.2034784906326455,
+                "valid_depth_slices": 9
+              },
+              {
+                "axes_degrees": [
+                  26.1759016711138,
+                  87.66953810571135
+                ],
+                "axis_separation_degrees": 61.493636434597555,
+                "bounds_yx": [
+                  0,
+                  16,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  8,
+                  56
+                ],
+                "grid": [
+                  0,
+                  3
+                ],
+                "mean_depth_coherence": 0.47200968177294844,
+                "mode_weight_share_min": 0.46497928311749637,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  86.94018745178151,
+                  148.6455039992502
+                ],
+                "axis_separation_degrees": 61.70531654746868,
+                "bounds_yx": [
+                  32,
+                  48,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  40,
+                  56
+                ],
+                "grid": [
+                  2,
+                  3
+                ],
+                "mean_depth_coherence": 0.47763446706727547,
+                "mode_weight_share_min": 0.4484792923993825,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  2.1689654463053727,
+                  111.29867426431467
+                ],
+                "axis_separation_degrees": 70.87029118199071,
+                "bounds_yx": [
+                  48,
+                  64,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  56,
+                  8
+                ],
+                "grid": [
+                  3,
+                  0
+                ],
+                "mean_depth_coherence": 0.42674560442259146,
+                "mode_weight_share_min": 0.30303840708507906,
+                "valid_depth_slices": 8
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "target_left_wrong_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 0,
+              "neighbor_comparisons": 0,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.25,
+              "valid_tiles": 4
+            },
+            "findings": [],
+            "frames": [
+              {
+                "axes_degrees": [
+                  77.0095334394969,
+                  110.94880716062063
+                ],
+                "axis_separation_degrees": 33.939273721123726,
+                "bounds_yx": [
+                  0,
+                  16,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  8,
+                  8
+                ],
+                "grid": [
+                  0,
+                  0
+                ],
+                "mean_depth_coherence": 0.5097318722214756,
+                "mode_weight_share_min": 0.42855487593239794,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  80.04538447525884,
+                  112.57358888442275
+                ],
+                "axis_separation_degrees": 32.528204409163905,
+                "bounds_yx": [
+                  16,
+                  32,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  24,
+                  56
+                ],
+                "grid": [
+                  1,
+                  3
+                ],
+                "mean_depth_coherence": 0.5863153999061448,
+                "mode_weight_share_min": 0.283913668861034,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  2.1689654463053727,
+                  111.29867426431467
+                ],
+                "axis_separation_degrees": 70.87029118199071,
+                "bounds_yx": [
+                  48,
+                  64,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  56,
+                  8
+                ],
+                "grid": [
+                  3,
+                  0
+                ],
+                "mean_depth_coherence": 0.42674560442259146,
+                "mode_weight_share_min": 0.30303840708507906,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  93.501495374889,
+                  141.48296568706013
+                ],
+                "axis_separation_degrees": 47.981470312171126,
+                "bounds_yx": [
+                  48,
+                  64,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  56,
+                  40
+                ],
+                "grid": [
+                  3,
+                  2
+                ],
+                "mean_depth_coherence": 0.5033186291203064,
+                "mode_weight_share_min": 0.32168517021486065,
+                "valid_depth_slices": 7
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "insufficient",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "wrong_left_target_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 0,
+              "neighbor_comparisons": 0,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.1875,
+              "valid_tiles": 3
+            },
+            "findings": [],
+            "frames": [
+              {
+                "axes_degrees": [
+                  26.1759016711138,
+                  87.66953810571135
+                ],
+                "axis_separation_degrees": 61.493636434597555,
+                "bounds_yx": [
+                  0,
+                  16,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  8,
+                  56
+                ],
+                "grid": [
+                  0,
+                  3
+                ],
+                "mean_depth_coherence": 0.47200968177294844,
+                "mode_weight_share_min": 0.46497928311749637,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  87.38985241063703,
+                  117.04835003022481
+                ],
+                "axis_separation_degrees": 29.658497619587777,
+                "bounds_yx": [
+                  32,
+                  48,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  40,
+                  24
+                ],
+                "grid": [
+                  2,
+                  1
+                ],
+                "mean_depth_coherence": 0.6291608695724792,
+                "mode_weight_share_min": 0.24768073501317206,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  86.94018745178151,
+                  148.6455039992502
+                ],
+                "axis_separation_degrees": 61.70531654746868,
+                "bounds_yx": [
+                  32,
+                  48,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  40,
+                  56
+                ],
+                "grid": [
+                  2,
+                  3
+                ],
+                "mean_depth_coherence": 0.47763446706727547,
+                "mode_weight_share_min": 0.4484792923993825,
+                "valid_depth_slices": 5
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "insufficient",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        }
+      },
+      "wrong_wrap_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 1.0,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "wrong_wrap_zyx": [
+        3123.9634192011777,
+        2331.4659766225113,
+        3237.06497990474
+      ]
+    },
+    {
+      "grid_yx": [
+        49,
+        237
+      ],
+      "id": "surface-0005",
+      "reason": "one or more seam variants lacked three recoverable comparisons",
+      "status": "unusable",
+      "target_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 0.99951171875,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "variants": {
+        "intact": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 1,
+              "neighbor_comparisons": 3,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.3125,
+              "valid_tiles": 5
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  76.72880872220526,
+                  178.50991880703776
+                ],
+                "axes_b_degrees": [
+                  41.971777747338905,
+                  77.72037837709954
+                ],
+                "finding_id": "1:2->1:3",
+                "frame_delta_degrees": 43.46185894030114,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  1,
+                  2
+                ],
+                "tile_b": [
+                  1,
+                  3
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  111.41051013336666,
+                  164.73421760595073
+                ],
+                "axis_separation_degrees": 53.323707472584076,
+                "bounds_yx": [
+                  0,
+                  16,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  8,
+                  24
+                ],
+                "grid": [
+                  0,
+                  1
+                ],
+                "mean_depth_coherence": 0.4267814205232149,
+                "mode_weight_share_min": 0.2897274234535895,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  89.7352446727519,
+                  178.1059457380966
+                ],
+                "axis_separation_degrees": 88.3707010653447,
+                "bounds_yx": [
+                  0,
+                  16,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  8,
+                  40
+                ],
+                "grid": [
+                  0,
+                  2
+                ],
+                "mean_depth_coherence": 0.5681547282112198,
+                "mode_weight_share_min": 0.4816133454495933,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  133.7546380348147,
+                  170.06042638583935
+                ],
+                "axis_separation_degrees": 36.30578835102466,
+                "bounds_yx": [
+                  16,
+                  32,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  24,
+                  8
+                ],
+                "grid": [
+                  1,
+                  0
+                ],
+                "mean_depth_coherence": 0.5474022103688401,
+                "mode_weight_share_min": 0.45149833507314613,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  76.72880872220526,
+                  178.50991880703776
+                ],
+                "axis_separation_degrees": 78.2188899151675,
+                "bounds_yx": [
+                  16,
+                  32,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  24,
+                  40
+                ],
+                "grid": [
+                  1,
+                  2
+                ],
+                "mean_depth_coherence": 0.5509143116194992,
+                "mode_weight_share_min": 0.17401086558337822,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  41.971777747338905,
+                  77.72037837709954
+                ],
+                "axis_separation_degrees": 35.74860062976063,
+                "bounds_yx": [
+                  16,
+                  32,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  24,
+                  56
+                ],
+                "grid": [
+                  1,
+                  3
+                ],
+                "mean_depth_coherence": 0.5620673836075772,
+                "mode_weight_share_min": 0.46445100263080275,
+                "valid_depth_slices": 8
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [
+            {
+              "flagged": false,
+              "frame_delta_degrees": 21.675265460614753,
+              "tile_a": [
+                0,
+                1
+              ],
+              "tile_b": [
+                0,
+                2
+              ]
+            }
+          ],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 1
+        },
+        "target_left_wrong_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 0,
+              "neighbor_comparisons": 1,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.1875,
+              "valid_tiles": 3
+            },
+            "findings": [],
+            "frames": [
+              {
+                "axes_degrees": [
+                  133.7546380348147,
+                  170.06042638583935
+                ],
+                "axis_separation_degrees": 36.30578835102466,
+                "bounds_yx": [
+                  16,
+                  32,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  24,
+                  8
+                ],
+                "grid": [
+                  1,
+                  0
+                ],
+                "mean_depth_coherence": 0.5474022103688401,
+                "mode_weight_share_min": 0.45149833507314613,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  95.97970615528948,
+                  177.7060904808118
+                ],
+                "axis_separation_degrees": 81.72638432552233,
+                "bounds_yx": [
+                  16,
+                  32,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  24,
+                  40
+                ],
+                "grid": [
+                  1,
+                  2
+                ],
+                "mean_depth_coherence": 0.4575783839209889,
+                "mode_weight_share_min": 0.4531349157424368,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  14.48607765189677,
+                  77.18484851920972
+                ],
+                "axis_separation_degrees": 62.69877086731295,
+                "bounds_yx": [
+                  16,
+                  32,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  24,
+                  56
+                ],
+                "grid": [
+                  1,
+                  3
+                ],
+                "mean_depth_coherence": 0.5725319735515281,
+                "mode_weight_share_min": 0.22574998253194956,
+                "valid_depth_slices": 6
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "wrong_left_target_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 1,
+              "neighbor_comparisons": 1,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.1875,
+              "valid_tiles": 3
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  15.34202923935524,
+                  146.95931108061973
+                ],
+                "axes_b_degrees": [
+                  63.56388729596339,
+                  159.7105611948916
+                ],
+                "finding_id": "3:0->3:1",
+                "frame_delta_degrees": 48.22185805660815,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  3,
+                  0
+                ],
+                "tile_b": [
+                  3,
+                  1
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  41.971777747338905,
+                  77.72037837709954
+                ],
+                "axis_separation_degrees": 35.74860062976063,
+                "bounds_yx": [
+                  16,
+                  32,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  24,
+                  56
+                ],
+                "grid": [
+                  1,
+                  3
+                ],
+                "mean_depth_coherence": 0.5620673836075772,
+                "mode_weight_share_min": 0.46445100263080275,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  15.34202923935524,
+                  146.95931108061973
+                ],
+                "axis_separation_degrees": 48.382718158735514,
+                "bounds_yx": [
+                  48,
+                  64,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  56,
+                  8
+                ],
+                "grid": [
+                  3,
+                  0
+                ],
+                "mean_depth_coherence": 0.47311409553733047,
+                "mode_weight_share_min": 0.258856248083076,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  63.56388729596339,
+                  159.7105611948916
+                ],
+                "axis_separation_degrees": 83.85332610107179,
+                "bounds_yx": [
+                  48,
+                  64,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  56,
+                  24
+                ],
+                "grid": [
+                  3,
+                  1
+                ],
+                "mean_depth_coherence": 0.45595140186852934,
+                "mode_weight_share_min": 0.4559666252909045,
+                "valid_depth_slices": 4
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        }
+      },
+      "wrong_wrap_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 1.0,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "wrong_wrap_zyx": [
+        3802.3451672356878,
+        3910.4137341058854,
+        1947.7751504051964
+      ]
+    },
+    {
+      "grid_yx": [
+        66,
+        77
+      ],
+      "id": "surface-0007",
+      "reason": "one or more seam variants lacked three recoverable comparisons",
+      "status": "unusable",
+      "target_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 0.9998643663194444,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "variants": {
+        "intact": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 3,
+              "neighbor_comparisons": 3,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.375,
+              "valid_tiles": 6
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  139.8328255646819,
+                  165.89451180309513
+                ],
+                "axes_b_degrees": [
+                  24.5181650933354,
+                  51.015859929486865
+                ],
+                "finding_id": "0:0->1:0",
+                "frame_delta_degrees": 65.12134812639174,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  0,
+                  0
+                ],
+                "tile_b": [
+                  1,
+                  0
+                ]
+              },
+              {
+                "axes_a_degrees": [
+                  36.559726214546004,
+                  68.10529059092488
+                ],
+                "axes_b_degrees": [
+                  7.515192234668428,
+                  34.575639511038645
+                ],
+                "finding_id": "0:2->1:2",
+                "frame_delta_degrees": 33.529651079886236,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  0,
+                  2
+                ],
+                "tile_b": [
+                  1,
+                  2
+                ]
+              },
+              {
+                "axes_a_degrees": [
+                  7.515192234668428,
+                  34.575639511038645
+                ],
+                "axes_b_degrees": [
+                  36.027279163757726,
+                  67.07434756610922
+                ],
+                "finding_id": "1:2->1:3",
+                "frame_delta_degrees": 32.49870805507058,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  1,
+                  2
+                ],
+                "tile_b": [
+                  1,
+                  3
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  139.8328255646819,
+                  165.89451180309513
+                ],
+                "axis_separation_degrees": 26.061686238413216,
+                "bounds_yx": [
+                  0,
+                  16,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  8,
+                  8
+                ],
+                "grid": [
+                  0,
+                  0
+                ],
+                "mean_depth_coherence": 0.569985442209974,
+                "mode_weight_share_min": 0.2954628521725454,
+                "valid_depth_slices": 9
+              },
+              {
+                "axes_degrees": [
+                  36.559726214546004,
+                  68.10529059092488
+                ],
+                "axis_separation_degrees": 31.545564376378877,
+                "bounds_yx": [
+                  0,
+                  16,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  8,
+                  40
+                ],
+                "grid": [
+                  0,
+                  2
+                ],
+                "mean_depth_coherence": 0.5111157806210005,
+                "mode_weight_share_min": 0.21017083305926063,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  24.5181650933354,
+                  51.015859929486865
+                ],
+                "axis_separation_degrees": 26.497694836151464,
+                "bounds_yx": [
+                  16,
+                  32,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  24,
+                  8
+                ],
+                "grid": [
+                  1,
+                  0
+                ],
+                "mean_depth_coherence": 0.5634116520436606,
+                "mode_weight_share_min": 0.361134052012294,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  7.515192234668428,
+                  34.575639511038645
+                ],
+                "axis_separation_degrees": 27.06044727637022,
+                "bounds_yx": [
+                  16,
+                  32,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  24,
+                  40
+                ],
+                "grid": [
+                  1,
+                  2
+                ],
+                "mean_depth_coherence": 0.5794407827239365,
+                "mode_weight_share_min": 0.19462045363236613,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  36.027279163757726,
+                  67.07434756610922
+                ],
+                "axis_separation_degrees": 31.0470684023515,
+                "bounds_yx": [
+                  16,
+                  32,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  24,
+                  56
+                ],
+                "grid": [
+                  1,
+                  3
+                ],
+                "mean_depth_coherence": 0.4593039828254432,
+                "mode_weight_share_min": 0.4280193971992878,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  48.74420957546926,
+                  74.00494098064013
+                ],
+                "axis_separation_degrees": 25.260731405170866,
+                "bounds_yx": [
+                  48,
+                  64,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  56,
+                  24
+                ],
+                "grid": [
+                  3,
+                  1
+                ],
+                "mean_depth_coherence": 0.5444890513484888,
+                "mode_weight_share_min": 0.3124658589119868,
+                "valid_depth_slices": 9
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "target_left_wrong_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 3,
+              "neighbor_comparisons": 4,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.375,
+              "valid_tiles": 6
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  139.8328255646819,
+                  165.89451180309513
+                ],
+                "axes_b_degrees": [
+                  90.85226617571544,
+                  176.4160361403447
+                ],
+                "finding_id": "0:0->0:1",
+                "frame_delta_degrees": 48.98055938896647,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  0,
+                  0
+                ],
+                "tile_b": [
+                  0,
+                  1
+                ]
+              },
+              {
+                "axes_a_degrees": [
+                  139.8328255646819,
+                  165.89451180309513
+                ],
+                "axes_b_degrees": [
+                  24.5181650933354,
+                  51.015859929486865
+                ],
+                "finding_id": "0:0->1:0",
+                "frame_delta_degrees": 65.12134812639174,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  0,
+                  0
+                ],
+                "tile_b": [
+                  1,
+                  0
+                ]
+              },
+              {
+                "axes_a_degrees": [
+                  24.5181650933354,
+                  51.015859929486865
+                ],
+                "axes_b_degrees": [
+                  4.589751787190779,
+                  80.06077705504842
+                ],
+                "finding_id": "1:0->1:1",
+                "frame_delta_degrees": 29.044917125561554,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  1,
+                  0
+                ],
+                "tile_b": [
+                  1,
+                  1
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  139.8328255646819,
+                  165.89451180309513
+                ],
+                "axis_separation_degrees": 26.061686238413216,
+                "bounds_yx": [
+                  0,
+                  16,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  8,
+                  8
+                ],
+                "grid": [
+                  0,
+                  0
+                ],
+                "mean_depth_coherence": 0.569985442209974,
+                "mode_weight_share_min": 0.2954628521725454,
+                "valid_depth_slices": 9
+              },
+              {
+                "axes_degrees": [
+                  90.85226617571544,
+                  176.4160361403447
+                ],
+                "axis_separation_degrees": 85.56376996462924,
+                "bounds_yx": [
+                  0,
+                  16,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  8,
+                  24
+                ],
+                "grid": [
+                  0,
+                  1
+                ],
+                "mean_depth_coherence": 0.7341135988259494,
+                "mode_weight_share_min": 0.1876368867210336,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  24.5181650933354,
+                  51.015859929486865
+                ],
+                "axis_separation_degrees": 26.497694836151464,
+                "bounds_yx": [
+                  16,
+                  32,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  24,
+                  8
+                ],
+                "grid": [
+                  1,
+                  0
+                ],
+                "mean_depth_coherence": 0.5634116520436606,
+                "mode_weight_share_min": 0.361134052012294,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  4.589751787190779,
+                  80.06077705504842
+                ],
+                "axis_separation_degrees": 75.47102526785764,
+                "bounds_yx": [
+                  16,
+                  32,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  24,
+                  24
+                ],
+                "grid": [
+                  1,
+                  1
+                ],
+                "mean_depth_coherence": 0.6392731965315116,
+                "mode_weight_share_min": 0.3278038642382436,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  43.83314034332027,
+                  135.69437050111705
+                ],
+                "axis_separation_degrees": 88.13876984220322,
+                "bounds_yx": [
+                  32,
+                  48,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  40,
+                  56
+                ],
+                "grid": [
+                  2,
+                  3
+                ],
+                "mean_depth_coherence": 0.4218679283712962,
+                "mode_weight_share_min": 0.22482332600407132,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  39.7233015139492,
+                  73.78073643888744
+                ],
+                "axis_separation_degrees": 34.05743492493824,
+                "bounds_yx": [
+                  48,
+                  64,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  56,
+                  40
+                ],
+                "grid": [
+                  3,
+                  2
+                ],
+                "mean_depth_coherence": 0.5439710918658509,
+                "mode_weight_share_min": 0.1560331939325555,
+                "valid_depth_slices": 8
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "wrong_left_target_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 1,
+              "neighbor_comparisons": 3,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.3125,
+              "valid_tiles": 5
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  90.51818212564142,
+                  164.6004917309145
+                ],
+                "axes_b_degrees": [
+                  43.618915752147586,
+                  94.08406119978034
+                ],
+                "finding_id": "0:0->1:0",
+                "frame_delta_degrees": 59.01842402123307,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  0,
+                  0
+                ],
+                "tile_b": [
+                  1,
+                  0
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  90.51818212564142,
+                  164.6004917309145
+                ],
+                "axis_separation_degrees": 74.0823096052731,
+                "bounds_yx": [
+                  0,
+                  16,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  8,
+                  8
+                ],
+                "grid": [
+                  0,
+                  0
+                ],
+                "mean_depth_coherence": 0.5342164533723934,
+                "mode_weight_share_min": 0.3103809244551103,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  44.415264666442766,
+                  81.353143112389
+                ],
+                "axis_separation_degrees": 36.93787844594624,
+                "bounds_yx": [
+                  0,
+                  16,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  8,
+                  40
+                ],
+                "grid": [
+                  0,
+                  2
+                ],
+                "mean_depth_coherence": 0.6996423548989898,
+                "mode_weight_share_min": 0.1532183513825112,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  43.618915752147586,
+                  94.08406119978034
+                ],
+                "axis_separation_degrees": 50.46514544763275,
+                "bounds_yx": [
+                  16,
+                  32,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  24,
+                  8
+                ],
+                "grid": [
+                  1,
+                  0
+                ],
+                "mean_depth_coherence": 0.40575217338343417,
+                "mode_weight_share_min": 0.31707488744874035,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  19.85204914595246,
+                  74.31774517617936
+                ],
+                "axis_separation_degrees": 54.465696030226894,
+                "bounds_yx": [
+                  16,
+                  32,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  24,
+                  40
+                ],
+                "grid": [
+                  1,
+                  2
+                ],
+                "mean_depth_coherence": 0.49612607137637516,
+                "mode_weight_share_min": 0.22758425933430404,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  36.027279163757726,
+                  67.07434756610922
+                ],
+                "axis_separation_degrees": 31.0470684023515,
+                "bounds_yx": [
+                  16,
+                  32,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  24,
+                  56
+                ],
+                "grid": [
+                  1,
+                  3
+                ],
+                "mean_depth_coherence": 0.4593039828254432,
+                "mode_weight_share_min": 0.4280193971992878,
+                "valid_depth_slices": 7
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        }
+      },
+      "wrong_wrap_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 0.999755859375,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "wrong_wrap_zyx": [
+        4052.539612781352,
+        2741.314502955201,
+        4110.330842091861
+      ]
+    },
+    {
+      "grid_yx": [
+        98,
+        217
+      ],
+      "id": "surface-0011",
+      "reason": "one or more seam variants lacked three recoverable comparisons",
+      "status": "unusable",
+      "target_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 1.0,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "variants": {
+        "intact": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 0,
+              "neighbor_comparisons": 1,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.3125,
+              "valid_tiles": 5
+            },
+            "findings": [],
+            "frames": [
+              {
+                "axes_degrees": [
+                  43.959211727605904,
+                  151.8491791449606
+                ],
+                "axis_separation_degrees": 72.1100325826453,
+                "bounds_yx": [
+                  0,
+                  16,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  8,
+                  24
+                ],
+                "grid": [
+                  0,
+                  1
+                ],
+                "mean_depth_coherence": 0.46612756846828646,
+                "mode_weight_share_min": 0.28859296977354915,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  2.7094465285118847,
+                  146.42413714321754
+                ],
+                "axis_separation_degrees": 36.28530938529434,
+                "bounds_yx": [
+                  16,
+                  32,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  24,
+                  56
+                ],
+                "grid": [
+                  1,
+                  3
+                ],
+                "mean_depth_coherence": 0.46405891090101364,
+                "mode_weight_share_min": 0.4631329526054245,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  56.830096739911795,
+                  83.94341362572983
+                ],
+                "axis_separation_degrees": 27.113316885818037,
+                "bounds_yx": [
+                  32,
+                  48,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  40,
+                  8
+                ],
+                "grid": [
+                  2,
+                  0
+                ],
+                "mean_depth_coherence": 0.5400773323787224,
+                "mode_weight_share_min": 0.19519462750415162,
+                "valid_depth_slices": 9
+              },
+              {
+                "axes_degrees": [
+                  36.21283635966432,
+                  81.58063738435746
+                ],
+                "axis_separation_degrees": 45.36780102469314,
+                "bounds_yx": [
+                  48,
+                  64,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  56,
+                  8
+                ],
+                "grid": [
+                  3,
+                  0
+                ],
+                "mean_depth_coherence": 0.45290813866217755,
+                "mode_weight_share_min": 0.3545574824756383,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  25.194048217215407,
+                  161.60133367137857
+                ],
+                "axis_separation_degrees": 43.59271454583683,
+                "bounds_yx": [
+                  48,
+                  64,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  56,
+                  56
+                ],
+                "grid": [
+                  3,
+                  3
+                ],
+                "mean_depth_coherence": 0.4558884467664709,
+                "mode_weight_share_min": 0.3163811847936097,
+                "valid_depth_slices": 8
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "target_left_wrong_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 3,
+              "neighbor_comparisons": 5,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.4375,
+              "valid_tiles": 7
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  69.46776219383845,
+                  133.566828144493
+                ],
+                "axes_b_degrees": [
+                  52.62890811026203,
+                  85.78923849300618
+                ],
+                "finding_id": "0:1->0:2",
+                "frame_delta_degrees": 47.77758965148682,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  0,
+                  1
+                ],
+                "tile_b": [
+                  0,
+                  2
+                ]
+              },
+              {
+                "axes_a_degrees": [
+                  52.62890811026203,
+                  85.78923849300618
+                ],
+                "axes_b_degrees": [
+                  17.84182177776486,
+                  76.9801047519425
+                ],
+                "finding_id": "0:2->0:3",
+                "frame_delta_degrees": 34.78708633249717,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  0,
+                  2
+                ],
+                "tile_b": [
+                  0,
+                  3
+                ]
+              },
+              {
+                "axes_a_degrees": [
+                  17.84182177776486,
+                  76.9801047519425
+                ],
+                "axes_b_degrees": [
+                  41.79924057830074,
+                  178.42371921265482
+                ],
+                "finding_id": "0:3->1:3",
+                "frame_delta_degrees": 35.180864173641766,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  0,
+                  3
+                ],
+                "tile_b": [
+                  1,
+                  3
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  69.46776219383845,
+                  133.566828144493
+                ],
+                "axis_separation_degrees": 64.09906595065455,
+                "bounds_yx": [
+                  0,
+                  16,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  8,
+                  24
+                ],
+                "grid": [
+                  0,
+                  1
+                ],
+                "mean_depth_coherence": 0.4173519469928212,
+                "mode_weight_share_min": 0.22932409478856908,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  52.62890811026203,
+                  85.78923849300618
+                ],
+                "axis_separation_degrees": 33.16033038274415,
+                "bounds_yx": [
+                  0,
+                  16,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  8,
+                  40
+                ],
+                "grid": [
+                  0,
+                  2
+                ],
+                "mean_depth_coherence": 0.7185058052767618,
+                "mode_weight_share_min": 0.19130911602624084,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  17.84182177776486,
+                  76.9801047519425
+                ],
+                "axis_separation_degrees": 59.13828297417764,
+                "bounds_yx": [
+                  0,
+                  16,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  8,
+                  56
+                ],
+                "grid": [
+                  0,
+                  3
+                ],
+                "mean_depth_coherence": 0.4768612008627473,
+                "mode_weight_share_min": 0.38065929359931483,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  41.79924057830074,
+                  178.42371921265482
+                ],
+                "axis_separation_degrees": 43.37552136564591,
+                "bounds_yx": [
+                  16,
+                  32,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  24,
+                  56
+                ],
+                "grid": [
+                  1,
+                  3
+                ],
+                "mean_depth_coherence": 0.5826761938116848,
+                "mode_weight_share_min": 0.22144689836044296,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  56.830096739911795,
+                  83.94341362572983
+                ],
+                "axis_separation_degrees": 27.113316885818037,
+                "bounds_yx": [
+                  32,
+                  48,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  40,
+                  8
+                ],
+                "grid": [
+                  2,
+                  0
+                ],
+                "mean_depth_coherence": 0.5400773323787224,
+                "mode_weight_share_min": 0.19519462750415162,
+                "valid_depth_slices": 9
+              },
+              {
+                "axes_degrees": [
+                  0.8391876582662224,
+                  32.65693854908136
+                ],
+                "axis_separation_degrees": 31.817750890815137,
+                "bounds_yx": [
+                  32,
+                  48,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  40,
+                  56
+                ],
+                "grid": [
+                  2,
+                  3
+                ],
+                "mean_depth_coherence": 0.4044367510941047,
+                "mode_weight_share_min": 0.38284230404292197,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  36.21283635966432,
+                  81.58063738435746
+                ],
+                "axis_separation_degrees": 45.36780102469314,
+                "bounds_yx": [
+                  48,
+                  64,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  56,
+                  8
+                ],
+                "grid": [
+                  3,
+                  0
+                ],
+                "mean_depth_coherence": 0.45290813866217755,
+                "mode_weight_share_min": 0.3545574824756383,
+                "valid_depth_slices": 6
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [
+            {
+              "flagged": true,
+              "frame_delta_degrees": 47.77758965148682,
+              "tile_a": [
+                0,
+                1
+              ],
+              "tile_b": [
+                0,
+                2
+              ]
+            }
+          ],
+          "flagged_comparison_count": 1,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 1
+        },
+        "wrong_left_target_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 1,
+              "neighbor_comparisons": 1,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.25,
+              "valid_tiles": 4
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  95.25676227119277,
+                  124.65069606971124
+                ],
+                "axes_b_degrees": [
+                  25.194048217215407,
+                  161.60133367137857
+                ],
+                "finding_id": "3:2->3:3",
+                "frame_delta_degrees": 70.06271405397736,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  3,
+                  2
+                ],
+                "tile_b": [
+                  3,
+                  3
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  93.54370431557338,
+                  169.23590335295276
+                ],
+                "axis_separation_degrees": 75.69219903737938,
+                "bounds_yx": [
+                  16,
+                  32,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  24,
+                  24
+                ],
+                "grid": [
+                  1,
+                  1
+                ],
+                "mean_depth_coherence": 0.5178579524810045,
+                "mode_weight_share_min": 0.2293977418120103,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  2.7094465285118847,
+                  146.42413714321754
+                ],
+                "axis_separation_degrees": 36.28530938529434,
+                "bounds_yx": [
+                  16,
+                  32,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  24,
+                  56
+                ],
+                "grid": [
+                  1,
+                  3
+                ],
+                "mean_depth_coherence": 0.46405891090101364,
+                "mode_weight_share_min": 0.4631329526054245,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  95.25676227119277,
+                  124.65069606971124
+                ],
+                "axis_separation_degrees": 29.393933798518475,
+                "bounds_yx": [
+                  48,
+                  64,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  56,
+                  40
+                ],
+                "grid": [
+                  3,
+                  2
+                ],
+                "mean_depth_coherence": 0.4930833741086076,
+                "mode_weight_share_min": 0.27121687174439474,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  25.194048217215407,
+                  161.60133367137857
+                ],
+                "axis_separation_degrees": 43.59271454583683,
+                "bounds_yx": [
+                  48,
+                  64,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  56,
+                  56
+                ],
+                "grid": [
+                  3,
+                  3
+                ],
+                "mean_depth_coherence": 0.4558884467664709,
+                "mode_weight_share_min": 0.3163811847936097,
+                "valid_depth_slices": 8
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        }
+      },
+      "wrong_wrap_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 1.0,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "wrong_wrap_zyx": [
+        4709.963014371134,
+        4117.800574277805,
+        2430.2810213118596
+      ]
+    },
+    {
+      "grid_yx": [
+        131,
+        79
+      ],
+      "id": "surface-0015",
+      "reason": "one or more seam variants lacked three recoverable comparisons",
+      "status": "unusable",
+      "target_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 1.0,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "variants": {
+        "intact": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 0,
+              "neighbor_comparisons": 2,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.25,
+              "valid_tiles": 4
+            },
+            "findings": [],
+            "frames": [
+              {
+                "axes_degrees": [
+                  32.085449980165286,
+                  70.39061415082988
+                ],
+                "axis_separation_degrees": 38.30516417066459,
+                "bounds_yx": [
+                  0,
+                  16,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  8,
+                  40
+                ],
+                "grid": [
+                  0,
+                  2
+                ],
+                "mean_depth_coherence": 0.611506814720997,
+                "mode_weight_share_min": 0.3453134425805231,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  42.974208248828276,
+                  70.18961256536181
+                ],
+                "axis_separation_degrees": 27.215404316533537,
+                "bounds_yx": [
+                  16,
+                  32,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  24,
+                  40
+                ],
+                "grid": [
+                  1,
+                  2
+                ],
+                "mean_depth_coherence": 0.5227906922366948,
+                "mode_weight_share_min": 0.4045572754730424,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  48.56018745414839,
+                  78.80216887692437
+                ],
+                "axis_separation_degrees": 30.24198142277598,
+                "bounds_yx": [
+                  32,
+                  48,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  40,
+                  40
+                ],
+                "grid": [
+                  2,
+                  2
+                ],
+                "mean_depth_coherence": 0.6078354979323157,
+                "mode_weight_share_min": 0.25151472225931637,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  101.01718576604526,
+                  178.54613188627485
+                ],
+                "axis_separation_degrees": 77.52894612022959,
+                "bounds_yx": [
+                  48,
+                  64,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  56,
+                  24
+                ],
+                "grid": [
+                  3,
+                  1
+                ],
+                "mean_depth_coherence": 0.5138892862076379,
+                "mode_weight_share_min": 0.2028923296113769,
+                "valid_depth_slices": 4
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "target_left_wrong_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 0,
+              "neighbor_comparisons": 1,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.1875,
+              "valid_tiles": 3
+            },
+            "findings": [],
+            "frames": [
+              {
+                "axes_degrees": [
+                  18.216644151307147,
+                  84.34852122831654
+                ],
+                "axis_separation_degrees": 66.13187707700939,
+                "bounds_yx": [
+                  0,
+                  16,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  8,
+                  24
+                ],
+                "grid": [
+                  0,
+                  1
+                ],
+                "mean_depth_coherence": 0.6541555000085405,
+                "mode_weight_share_min": 0.4550684044622775,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  19.7995801624686,
+                  94.58463629875523
+                ],
+                "axis_separation_degrees": 74.78505613628663,
+                "bounds_yx": [
+                  0,
+                  16,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  8,
+                  56
+                ],
+                "grid": [
+                  0,
+                  3
+                ],
+                "mean_depth_coherence": 0.501228224584589,
+                "mode_weight_share_min": 0.31566757707969273,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  4.141406670377472,
+                  89.49234292461331
+                ],
+                "axis_separation_degrees": 85.35093625423583,
+                "bounds_yx": [
+                  16,
+                  32,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  24,
+                  24
+                ],
+                "grid": [
+                  1,
+                  1
+                ],
+                "mean_depth_coherence": 0.5520378383163159,
+                "mode_weight_share_min": 0.20182211462183333,
+                "valid_depth_slices": 5
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "wrong_left_target_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 0,
+              "neighbor_comparisons": 0,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.125,
+              "valid_tiles": 2
+            },
+            "findings": [],
+            "frames": [
+              {
+                "axes_degrees": [
+                  53.138622955886476,
+                  80.36651836522886
+                ],
+                "axis_separation_degrees": 27.22789540934238,
+                "bounds_yx": [
+                  0,
+                  16,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  8,
+                  40
+                ],
+                "grid": [
+                  0,
+                  2
+                ],
+                "mean_depth_coherence": 0.6064342349503551,
+                "mode_weight_share_min": 0.34231967392116636,
+                "valid_depth_slices": 9
+              },
+              {
+                "axes_degrees": [
+                  99.65089884672007,
+                  146.74872438729508
+                ],
+                "axis_separation_degrees": 47.097825540575016,
+                "bounds_yx": [
+                  16,
+                  32,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  24,
+                  24
+                ],
+                "grid": [
+                  1,
+                  1
+                ],
+                "mean_depth_coherence": 0.5010215046304318,
+                "mode_weight_share_min": 0.49587333885063256,
+                "valid_depth_slices": 5
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "insufficient",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        }
+      },
+      "wrong_wrap_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 1.0,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "wrong_wrap_zyx": [
+        5320.311851089248,
+        2977.2913211927885,
+        4158.742134066229
+      ]
+    },
+    {
+      "grid_yx": [
+        155,
+        194
+      ],
+      "id": "surface-0018",
+      "reason": "one or more seam variants lacked three recoverable comparisons",
+      "status": "unusable",
+      "target_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 1.0,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "variants": {
+        "intact": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 4,
+              "neighbor_comparisons": 9,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.5,
+              "valid_tiles": 8
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  24.520526195292042,
+                  72.10798686168361
+                ],
+                "axes_b_degrees": [
+                  74.85194826535009,
+                  168.25372901878058
+                ],
+                "finding_id": "0:1->1:1",
+                "frame_delta_degrees": 36.26679717651146,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  0,
+                  1
+                ],
+                "tile_b": [
+                  1,
+                  1
+                ]
+              },
+              {
+                "axes_a_degrees": [
+                  81.29848330345652,
+                  179.96394339011198
+                ],
+                "axes_b_degrees": [
+                  52.02756372443807,
+                  170.59434297667096
+                ],
+                "finding_id": "1:2->1:3",
+                "frame_delta_degrees": 29.270919579018454,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  1,
+                  2
+                ],
+                "tile_b": [
+                  1,
+                  3
+                ]
+              },
+              {
+                "axes_a_degrees": [
+                  81.29848330345652,
+                  179.96394339011198
+                ],
+                "axes_b_degrees": [
+                  5.0183318305379325,
+                  50.98848893619301
+                ],
+                "finding_id": "1:2->2:2",
+                "frame_delta_degrees": 30.309994367263513,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  1,
+                  2
+                ],
+                "tile_b": [
+                  2,
+                  2
+                ]
+              },
+              {
+                "axes_a_degrees": [
+                  31.729442667767607,
+                  178.25480058269747
+                ],
+                "axes_b_degrees": [
+                  19.41695585720886,
+                  80.80078432749006
+                ],
+                "finding_id": "2:3->3:3",
+                "frame_delta_degrees": 49.07134165972246,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  2,
+                  3
+                ],
+                "tile_b": [
+                  3,
+                  3
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  24.520526195292042,
+                  72.10798686168361
+                ],
+                "axis_separation_degrees": 47.58746066639157,
+                "bounds_yx": [
+                  0,
+                  16,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  8,
+                  24
+                ],
+                "grid": [
+                  0,
+                  1
+                ],
+                "mean_depth_coherence": 0.5028683957867016,
+                "mode_weight_share_min": 0.4020673442325399,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  5.917134386044041,
+                  82.85828074695367
+                ],
+                "axis_separation_degrees": 76.94114636090963,
+                "bounds_yx": [
+                  0,
+                  16,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  8,
+                  40
+                ],
+                "grid": [
+                  0,
+                  2
+                ],
+                "mean_depth_coherence": 0.5157866030204625,
+                "mode_weight_share_min": 0.4574312642844499,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  74.85194826535009,
+                  168.25372901878058
+                ],
+                "axis_separation_degrees": 86.59821924656951,
+                "bounds_yx": [
+                  16,
+                  32,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  24,
+                  24
+                ],
+                "grid": [
+                  1,
+                  1
+                ],
+                "mean_depth_coherence": 0.4173269144207469,
+                "mode_weight_share_min": 0.47479222404622023,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  81.29848330345652,
+                  179.96394339011198
+                ],
+                "axis_separation_degrees": 81.33453991334454,
+                "bounds_yx": [
+                  16,
+                  32,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  24,
+                  40
+                ],
+                "grid": [
+                  1,
+                  2
+                ],
+                "mean_depth_coherence": 0.444909603426181,
+                "mode_weight_share_min": 0.32237285996890513,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  52.02756372443807,
+                  170.59434297667096
+                ],
+                "axis_separation_degrees": 61.43322074776711,
+                "bounds_yx": [
+                  16,
+                  32,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  24,
+                  56
+                ],
+                "grid": [
+                  1,
+                  3
+                ],
+                "mean_depth_coherence": 0.4468865174909989,
+                "mode_weight_share_min": 0.2605755808939911,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  5.0183318305379325,
+                  50.98848893619301
+                ],
+                "axis_separation_degrees": 45.970157105655076,
+                "bounds_yx": [
+                  32,
+                  48,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  40,
+                  40
+                ],
+                "grid": [
+                  2,
+                  2
+                ],
+                "mean_depth_coherence": 0.5196103278218944,
+                "mode_weight_share_min": 0.30146905665179985,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  31.729442667767607,
+                  178.25480058269747
+                ],
+                "axis_separation_degrees": 33.474642085070144,
+                "bounds_yx": [
+                  32,
+                  48,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  40,
+                  56
+                ],
+                "grid": [
+                  2,
+                  3
+                ],
+                "mean_depth_coherence": 0.6264917878115535,
+                "mode_weight_share_min": 0.35509798431040435,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  19.41695585720886,
+                  80.80078432749006
+                ],
+                "axis_separation_degrees": 61.3838284702812,
+                "bounds_yx": [
+                  48,
+                  64,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  56,
+                  56
+                ],
+                "grid": [
+                  3,
+                  3
+                ],
+                "mean_depth_coherence": 0.4900715542383304,
+                "mode_weight_share_min": 0.4369770767272334,
+                "valid_depth_slices": 4
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [
+            {
+              "flagged": false,
+              "frame_delta_degrees": 18.603391809248002,
+              "tile_a": [
+                0,
+                1
+              ],
+              "tile_b": [
+                0,
+                2
+              ]
+            },
+            {
+              "flagged": false,
+              "frame_delta_degrees": 11.710214371331404,
+              "tile_a": [
+                1,
+                1
+              ],
+              "tile_b": [
+                1,
+                2
+              ]
+            }
+          ],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 2
+        },
+        "target_left_wrong_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 1,
+              "neighbor_comparisons": 2,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.25,
+              "valid_tiles": 4
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  91.75570206966798,
+                  151.82214870229816
+                ],
+                "axes_b_degrees": [
+                  4.275771917865868,
+                  79.53245613462707
+                ],
+                "finding_id": "0:2->0:3",
+                "frame_delta_degrees": 32.45362321556772,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  0,
+                  2
+                ],
+                "tile_b": [
+                  0,
+                  3
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  91.75570206966798,
+                  151.82214870229816
+                ],
+                "axis_separation_degrees": 60.06644663263019,
+                "bounds_yx": [
+                  0,
+                  16,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  8,
+                  40
+                ],
+                "grid": [
+                  0,
+                  2
+                ],
+                "mean_depth_coherence": 0.7961145283881125,
+                "mode_weight_share_min": 0.36087443760080545,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  4.275771917865868,
+                  79.53245613462707
+                ],
+                "axis_separation_degrees": 75.2566842167612,
+                "bounds_yx": [
+                  0,
+                  16,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  8,
+                  56
+                ],
+                "grid": [
+                  0,
+                  3
+                ],
+                "mean_depth_coherence": 0.503879727343824,
+                "mode_weight_share_min": 0.49268367920884076,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  76.3401698065628,
+                  175.0844526310364
+                ],
+                "axis_separation_degrees": 81.25571717552639,
+                "bounds_yx": [
+                  16,
+                  32,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  24,
+                  24
+                ],
+                "grid": [
+                  1,
+                  1
+                ],
+                "mean_depth_coherence": 0.3796678460455622,
+                "mode_weight_share_min": 0.19404631249597598,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  2.3095337981737316,
+                  91.4993609273261
+                ],
+                "axis_separation_degrees": 89.18982712915236,
+                "bounds_yx": [
+                  32,
+                  48,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  40,
+                  24
+                ],
+                "grid": [
+                  2,
+                  1
+                ],
+                "mean_depth_coherence": 0.42266800833090623,
+                "mode_weight_share_min": 0.3540737041535295,
+                "valid_depth_slices": 4
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "wrong_left_target_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 2,
+              "neighbor_comparisons": 4,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.375,
+              "valid_tiles": 6
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  0.7531161217740199,
+                  74.62783691823343
+                ],
+                "axes_b_degrees": [
+                  31.729442667767607,
+                  178.25480058269747
+                ],
+                "finding_id": "2:2->2:3",
+                "frame_delta_degrees": 42.89839425046582,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  2,
+                  2
+                ],
+                "tile_b": [
+                  2,
+                  3
+                ]
+              },
+              {
+                "axes_a_degrees": [
+                  31.729442667767607,
+                  178.25480058269747
+                ],
+                "axes_b_degrees": [
+                  19.41695585720886,
+                  80.80078432749006
+                ],
+                "finding_id": "2:3->3:3",
+                "frame_delta_degrees": 49.07134165972246,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  2,
+                  3
+                ],
+                "tile_b": [
+                  3,
+                  3
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  17.55421850683423,
+                  88.50724299480494
+                ],
+                "axis_separation_degrees": 70.95302448797071,
+                "bounds_yx": [
+                  0,
+                  16,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  8,
+                  24
+                ],
+                "grid": [
+                  0,
+                  1
+                ],
+                "mean_depth_coherence": 0.6971635373846584,
+                "mode_weight_share_min": 0.4241235594483615,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  84.8654157685877,
+                  179.46544751035535
+                ],
+                "axis_separation_degrees": 85.39996825823235,
+                "bounds_yx": [
+                  0,
+                  16,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  8,
+                  40
+                ],
+                "grid": [
+                  0,
+                  2
+                ],
+                "mean_depth_coherence": 0.4885913639738439,
+                "mode_weight_share_min": 0.4518316665462235,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  52.02756372443807,
+                  170.59434297667096
+                ],
+                "axis_separation_degrees": 61.43322074776711,
+                "bounds_yx": [
+                  16,
+                  32,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  24,
+                  56
+                ],
+                "grid": [
+                  1,
+                  3
+                ],
+                "mean_depth_coherence": 0.4468865174909989,
+                "mode_weight_share_min": 0.2605755808939911,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  0.7531161217740199,
+                  74.62783691823343
+                ],
+                "axis_separation_degrees": 73.87472079645941,
+                "bounds_yx": [
+                  32,
+                  48,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  40,
+                  40
+                ],
+                "grid": [
+                  2,
+                  2
+                ],
+                "mean_depth_coherence": 0.5888616805237489,
+                "mode_weight_share_min": 0.462910446928864,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  31.729442667767607,
+                  178.25480058269747
+                ],
+                "axis_separation_degrees": 33.474642085070144,
+                "bounds_yx": [
+                  32,
+                  48,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  40,
+                  56
+                ],
+                "grid": [
+                  2,
+                  3
+                ],
+                "mean_depth_coherence": 0.6264917878115535,
+                "mode_weight_share_min": 0.35509798431040435,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  19.41695585720886,
+                  80.80078432749006
+                ],
+                "axis_separation_degrees": 61.3838284702812,
+                "bounds_yx": [
+                  48,
+                  64,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  56,
+                  56
+                ],
+                "grid": [
+                  3,
+                  3
+                ],
+                "mean_depth_coherence": 0.4900715542383304,
+                "mode_weight_share_min": 0.4369770767272334,
+                "valid_depth_slices": 4
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [
+            {
+              "flagged": false,
+              "frame_delta_degrees": 18.08877099647887,
+              "tile_a": [
+                0,
+                1
+              ],
+              "tile_b": [
+                0,
+                2
+              ]
+            }
+          ],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 1
+        }
+      },
+      "wrong_wrap_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 0.9999457465277778,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "wrong_wrap_zyx": [
+        5739.681098073046,
+        4387.788390228193,
+        2994.452775696819
+      ]
+    },
+    {
+      "grid_yx": [
+        180,
+        25
+      ],
+      "id": "surface-0021",
+      "reason": "one or more seam variants lacked three recoverable comparisons",
+      "status": "unusable",
+      "target_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 1.0,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "variants": {
+        "intact": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 2,
+              "neighbor_comparisons": 3,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.3125,
+              "valid_tiles": 5
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  114.44147756349689,
+                  157.40486572874934
+                ],
+                "axes_b_degrees": [
+                  52.73456048022913,
+                  134.4131861107443
+                ],
+                "finding_id": "1:0->2:0",
+                "frame_delta_degrees": 61.70691708326776,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  1,
+                  0
+                ],
+                "tile_b": [
+                  2,
+                  0
+                ]
+              },
+              {
+                "axes_a_degrees": [
+                  52.73456048022913,
+                  134.4131861107443
+                ],
+                "axes_b_degrees": [
+                  11.285202253393878,
+                  74.27344890432603
+                ],
+                "finding_id": "2:0->3:0",
+                "frame_delta_degrees": 56.87201614264957,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  2,
+                  0
+                ],
+                "tile_b": [
+                  3,
+                  0
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  9.50668789823435,
+                  98.73360003125292
+                ],
+                "axis_separation_degrees": 89.22691213301857,
+                "bounds_yx": [
+                  0,
+                  16,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  8,
+                  40
+                ],
+                "grid": [
+                  0,
+                  2
+                ],
+                "mean_depth_coherence": 0.6258596677253213,
+                "mode_weight_share_min": 0.4662645551786612,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  114.44147756349689,
+                  157.40486572874934
+                ],
+                "axis_separation_degrees": 42.963388165252454,
+                "bounds_yx": [
+                  16,
+                  32,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  24,
+                  8
+                ],
+                "grid": [
+                  1,
+                  0
+                ],
+                "mean_depth_coherence": 0.4123293434059502,
+                "mode_weight_share_min": 0.4188785053757532,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  4.045287295923207,
+                  122.36578841990914
+                ],
+                "axis_separation_degrees": 61.679498876014065,
+                "bounds_yx": [
+                  16,
+                  32,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  24,
+                  40
+                ],
+                "grid": [
+                  1,
+                  2
+                ],
+                "mean_depth_coherence": 0.6415073206131567,
+                "mode_weight_share_min": 0.38845799272035775,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  52.73456048022913,
+                  134.4131861107443
+                ],
+                "axis_separation_degrees": 81.67862563051517,
+                "bounds_yx": [
+                  32,
+                  48,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  40,
+                  8
+                ],
+                "grid": [
+                  2,
+                  0
+                ],
+                "mean_depth_coherence": 0.4670178804019755,
+                "mode_weight_share_min": 0.20865214948720562,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  11.285202253393878,
+                  74.27344890432603
+                ],
+                "axis_separation_degrees": 62.988246650932155,
+                "bounds_yx": [
+                  48,
+                  64,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  56,
+                  8
+                ],
+                "grid": [
+                  3,
+                  0
+                ],
+                "mean_depth_coherence": 0.5176587849475547,
+                "mode_weight_share_min": 0.40522211164640826,
+                "valid_depth_slices": 8
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "target_left_wrong_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 2,
+              "neighbor_comparisons": 2,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.25,
+              "valid_tiles": 4
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  114.44147756349689,
+                  157.40486572874934
+                ],
+                "axes_b_degrees": [
+                  52.73456048022913,
+                  134.4131861107443
+                ],
+                "finding_id": "1:0->2:0",
+                "frame_delta_degrees": 61.70691708326776,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  1,
+                  0
+                ],
+                "tile_b": [
+                  2,
+                  0
+                ]
+              },
+              {
+                "axes_a_degrees": [
+                  52.73456048022913,
+                  134.4131861107443
+                ],
+                "axes_b_degrees": [
+                  11.285202253393878,
+                  74.27344890432603
+                ],
+                "finding_id": "2:0->3:0",
+                "frame_delta_degrees": 56.87201614264957,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  2,
+                  0
+                ],
+                "tile_b": [
+                  3,
+                  0
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  114.44147756349689,
+                  157.40486572874934
+                ],
+                "axis_separation_degrees": 42.963388165252454,
+                "bounds_yx": [
+                  16,
+                  32,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  24,
+                  8
+                ],
+                "grid": [
+                  1,
+                  0
+                ],
+                "mean_depth_coherence": 0.4123293434059502,
+                "mode_weight_share_min": 0.4188785053757532,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  91.48615482485287,
+                  121.44242059792646
+                ],
+                "axis_separation_degrees": 29.956265773073582,
+                "bounds_yx": [
+                  16,
+                  32,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  24,
+                  56
+                ],
+                "grid": [
+                  1,
+                  3
+                ],
+                "mean_depth_coherence": 0.5152681618293209,
+                "mode_weight_share_min": 0.34160541525323745,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  52.73456048022913,
+                  134.4131861107443
+                ],
+                "axis_separation_degrees": 81.67862563051517,
+                "bounds_yx": [
+                  32,
+                  48,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  40,
+                  8
+                ],
+                "grid": [
+                  2,
+                  0
+                ],
+                "mean_depth_coherence": 0.4670178804019755,
+                "mode_weight_share_min": 0.20865214948720562,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  11.285202253393878,
+                  74.27344890432603
+                ],
+                "axis_separation_degrees": 62.988246650932155,
+                "bounds_yx": [
+                  48,
+                  64,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  56,
+                  8
+                ],
+                "grid": [
+                  3,
+                  0
+                ],
+                "mean_depth_coherence": 0.5176587849475547,
+                "mode_weight_share_min": 0.40522211164640826,
+                "valid_depth_slices": 8
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "wrong_left_target_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 0,
+              "neighbor_comparisons": 1,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.25,
+              "valid_tiles": 4
+            },
+            "findings": [],
+            "frames": [
+              {
+                "axes_degrees": [
+                  64.81084610943611,
+                  102.65608839655822
+                ],
+                "axis_separation_degrees": 37.845242287122105,
+                "bounds_yx": [
+                  0,
+                  16,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  8,
+                  24
+                ],
+                "grid": [
+                  0,
+                  1
+                ],
+                "mean_depth_coherence": 0.5341432493085703,
+                "mode_weight_share_min": 0.1556945341790862,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  19.253568582449123,
+                  93.03113398736181
+                ],
+                "axis_separation_degrees": 73.77756540491269,
+                "bounds_yx": [
+                  16,
+                  32,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  24,
+                  8
+                ],
+                "grid": [
+                  1,
+                  0
+                ],
+                "mean_depth_coherence": 0.587037833174499,
+                "mode_weight_share_min": 0.27047343039521665,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  43.80874926542714,
+                  78.89042451688208
+                ],
+                "axis_separation_degrees": 35.08167525145494,
+                "bounds_yx": [
+                  32,
+                  48,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  40,
+                  8
+                ],
+                "grid": [
+                  2,
+                  0
+                ],
+                "mean_depth_coherence": 0.6630781681319876,
+                "mode_weight_share_min": 0.180827918735214,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  21.53136926064269,
+                  81.4346966249486
+                ],
+                "axis_separation_degrees": 59.90332736430591,
+                "bounds_yx": [
+                  48,
+                  64,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  56,
+                  40
+                ],
+                "grid": [
+                  3,
+                  2
+                ],
+                "mean_depth_coherence": 0.5288421166478109,
+                "mode_weight_share_min": 0.15088026530088502,
+                "valid_depth_slices": 5
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        }
+      },
+      "wrong_wrap_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 1.0,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "wrong_wrap_zyx": [
+        6238.998448970615,
+        2760.514339986218,
+        3119.8750744066833
+      ]
+    },
+    {
+      "grid_yx": [
+        212,
+        20
+      ],
+      "id": "surface-0025",
+      "reason": "one or more seam variants lacked three recoverable comparisons",
+      "status": "unusable",
+      "target_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 0.999267578125,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "variants": {
+        "intact": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 1,
+              "neighbor_comparisons": 1,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.125,
+              "valid_tiles": 2
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  89.28829578140609,
+                  153.7236531137533
+                ],
+                "axes_b_degrees": [
+                  131.42094625039363,
+                  159.31890232303616
+                ],
+                "finding_id": "2:1->3:1",
+                "frame_delta_degrees": 42.132650468987535,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  2,
+                  1
+                ],
+                "tile_b": [
+                  3,
+                  1
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  89.28829578140609,
+                  153.7236531137533
+                ],
+                "axis_separation_degrees": 64.43535733234721,
+                "bounds_yx": [
+                  32,
+                  48,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  40,
+                  24
+                ],
+                "grid": [
+                  2,
+                  1
+                ],
+                "mean_depth_coherence": 0.6672760866720533,
+                "mode_weight_share_min": 0.29032454650014133,
+                "valid_depth_slices": 9
+              },
+              {
+                "axes_degrees": [
+                  131.42094625039363,
+                  159.31890232303616
+                ],
+                "axis_separation_degrees": 27.89795607264253,
+                "bounds_yx": [
+                  48,
+                  64,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  56,
+                  24
+                ],
+                "grid": [
+                  3,
+                  1
+                ],
+                "mean_depth_coherence": 0.5287222316729752,
+                "mode_weight_share_min": 0.18248369234020978,
+                "valid_depth_slices": 8
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "target_left_wrong_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 1,
+              "neighbor_comparisons": 1,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.1875,
+              "valid_tiles": 3
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  61.683177191953455,
+                  87.96558808721963
+                ],
+                "axes_b_degrees": [
+                  90.06172786773959,
+                  143.4144245463203
+                ],
+                "finding_id": "1:1->2:1",
+                "frame_delta_degrees": 55.448836459100676,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  1,
+                  1
+                ],
+                "tile_b": [
+                  2,
+                  1
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  61.683177191953455,
+                  87.96558808721963
+                ],
+                "axis_separation_degrees": 26.282410895266175,
+                "bounds_yx": [
+                  16,
+                  32,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  24,
+                  24
+                ],
+                "grid": [
+                  1,
+                  1
+                ],
+                "mean_depth_coherence": 0.7802201933292888,
+                "mode_weight_share_min": 0.3391404448036411,
+                "valid_depth_slices": 9
+              },
+              {
+                "axes_degrees": [
+                  90.06172786773959,
+                  143.4144245463203
+                ],
+                "axis_separation_degrees": 53.35269667858071,
+                "bounds_yx": [
+                  32,
+                  48,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  40,
+                  24
+                ],
+                "grid": [
+                  2,
+                  1
+                ],
+                "mean_depth_coherence": 0.6291340247238686,
+                "mode_weight_share_min": 0.15968704701692535,
+                "valid_depth_slices": 9
+              },
+              {
+                "axes_degrees": [
+                  59.758310597286766,
+                  128.19653161031292
+                ],
+                "axis_separation_degrees": 68.43822101302615,
+                "bounds_yx": [
+                  32,
+                  48,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  40,
+                  56
+                ],
+                "grid": [
+                  2,
+                  3
+                ],
+                "mean_depth_coherence": 0.5439100291501212,
+                "mode_weight_share_min": 0.22863162576881627,
+                "valid_depth_slices": 7
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "wrong_left_target_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 0,
+              "neighbor_comparisons": 0,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.125,
+              "valid_tiles": 2
+            },
+            "findings": [],
+            "frames": [
+              {
+                "axes_degrees": [
+                  26.642307195690577,
+                  91.66568012080687
+                ],
+                "axis_separation_degrees": 65.02337292511629,
+                "bounds_yx": [
+                  32,
+                  48,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  40,
+                  8
+                ],
+                "grid": [
+                  2,
+                  0
+                ],
+                "mean_depth_coherence": 0.7008711460772381,
+                "mode_weight_share_min": 0.22613007456088804,
+                "valid_depth_slices": 9
+              },
+              {
+                "axes_degrees": [
+                  29.527687202016693,
+                  87.02536924817113
+                ],
+                "axis_separation_degrees": 57.49768204615444,
+                "bounds_yx": [
+                  48,
+                  64,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  56,
+                  24
+                ],
+                "grid": [
+                  3,
+                  1
+                ],
+                "mean_depth_coherence": 0.4413343972790026,
+                "mode_weight_share_min": 0.313078390201555,
+                "valid_depth_slices": 5
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "insufficient",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        }
+      },
+      "wrong_wrap_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 0.9994032118055556,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "wrong_wrap_zyx": [
+        6845.704793349941,
+        2842.8285527906646,
+        2976.699871422681
+      ]
+    },
+    {
+      "grid_yx": [
+        227,
+        214
+      ],
+      "id": "surface-0027",
+      "reason": "one or more seam variants lacked three recoverable comparisons",
+      "status": "unusable",
+      "target_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 0.9999728732638888,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "variants": {
+        "intact": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 1,
+              "neighbor_comparisons": 2,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.3125,
+              "valid_tiles": 5
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  33.36793710123682,
+                  178.03956600138216
+                ],
+                "axes_b_degrees": [
+                  31.6320284600294,
+                  63.962643791990644
+                ],
+                "finding_id": "2:1->2:2",
+                "frame_delta_degrees": 33.59246245864725,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  2,
+                  1
+                ],
+                "tile_b": [
+                  2,
+                  2
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  76.41460680000996,
+                  170.249594589346
+                ],
+                "axis_separation_degrees": 86.16501221066396,
+                "bounds_yx": [
+                  0,
+                  16,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  8,
+                  40
+                ],
+                "grid": [
+                  0,
+                  2
+                ],
+                "mean_depth_coherence": 0.6118859329329711,
+                "mode_weight_share_min": 0.3710367275527733,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  10.59892457339158,
+                  77.1434202524354
+                ],
+                "axis_separation_degrees": 66.54449567904382,
+                "bounds_yx": [
+                  0,
+                  16,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  8,
+                  56
+                ],
+                "grid": [
+                  0,
+                  3
+                ],
+                "mean_depth_coherence": 0.5863206525193594,
+                "mode_weight_share_min": 0.30978459622662574,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  33.36793710123682,
+                  178.03956600138216
+                ],
+                "axis_separation_degrees": 35.32837109985468,
+                "bounds_yx": [
+                  32,
+                  48,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  40,
+                  24
+                ],
+                "grid": [
+                  2,
+                  1
+                ],
+                "mean_depth_coherence": 0.723751175546137,
+                "mode_weight_share_min": 0.4860714920591791,
+                "valid_depth_slices": 9
+              },
+              {
+                "axes_degrees": [
+                  31.6320284600294,
+                  63.962643791990644
+                ],
+                "axis_separation_degrees": 32.33061533196124,
+                "bounds_yx": [
+                  32,
+                  48,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  40,
+                  40
+                ],
+                "grid": [
+                  2,
+                  2
+                ],
+                "mean_depth_coherence": 0.5600554875592884,
+                "mode_weight_share_min": 0.177958685533596,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  147.4062520557818,
+                  175.57070089675355
+                ],
+                "axis_separation_degrees": 28.164448840971744,
+                "bounds_yx": [
+                  48,
+                  64,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  56,
+                  8
+                ],
+                "grid": [
+                  3,
+                  0
+                ],
+                "mean_depth_coherence": 0.5330028782598831,
+                "mode_weight_share_min": 0.21353231181431576,
+                "valid_depth_slices": 7
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [
+            {
+              "flagged": true,
+              "frame_delta_degrees": 33.59246245864725,
+              "tile_a": [
+                2,
+                1
+              ],
+              "tile_b": [
+                2,
+                2
+              ]
+            }
+          ],
+          "flagged_comparison_count": 1,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 1
+        },
+        "target_left_wrong_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 0,
+              "neighbor_comparisons": 0,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.3125,
+              "valid_tiles": 5
+            },
+            "findings": [],
+            "frames": [
+              {
+                "axes_degrees": [
+                  22.60646165291971,
+                  87.56214513842421
+                ],
+                "axis_separation_degrees": 64.95568348550451,
+                "bounds_yx": [
+                  0,
+                  16,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  8,
+                  24
+                ],
+                "grid": [
+                  0,
+                  1
+                ],
+                "mean_depth_coherence": 0.7698838859617646,
+                "mode_weight_share_min": 0.40968928549990563,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  2.676305624802791,
+                  77.18673782877336
+                ],
+                "axis_separation_degrees": 74.51043220397057,
+                "bounds_yx": [
+                  32,
+                  48,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  40,
+                  24
+                ],
+                "grid": [
+                  2,
+                  1
+                ],
+                "mean_depth_coherence": 0.5180698181820831,
+                "mode_weight_share_min": 0.21144157763807023,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  55.002857436174956,
+                  84.59480800410878
+                ],
+                "axis_separation_degrees": 29.59195056793383,
+                "bounds_yx": [
+                  32,
+                  48,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  40,
+                  56
+                ],
+                "grid": [
+                  2,
+                  3
+                ],
+                "mean_depth_coherence": 0.5104737604184802,
+                "mode_weight_share_min": 0.4106093318620074,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  147.4062520557818,
+                  175.57070089675355
+                ],
+                "axis_separation_degrees": 28.164448840971744,
+                "bounds_yx": [
+                  48,
+                  64,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  56,
+                  8
+                ],
+                "grid": [
+                  3,
+                  0
+                ],
+                "mean_depth_coherence": 0.5330028782598831,
+                "mode_weight_share_min": 0.21353231181431576,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  104.02006614419516,
+                  159.95007366956753
+                ],
+                "axis_separation_degrees": 55.930007525372375,
+                "bounds_yx": [
+                  48,
+                  64,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  56,
+                  40
+                ],
+                "grid": [
+                  3,
+                  2
+                ],
+                "mean_depth_coherence": 0.48566904996501187,
+                "mode_weight_share_min": 0.1601606259500928,
+                "valid_depth_slices": 6
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "insufficient",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "wrong_left_target_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 2,
+              "neighbor_comparisons": 3,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.3125,
+              "valid_tiles": 5
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  43.53696450280677,
+                  113.99051480098905
+                ],
+                "axes_b_degrees": [
+                  79.53898810966477,
+                  166.83999327424496
+                ],
+                "finding_id": "0:1->0:2",
+                "frame_delta_degrees": 52.849478473255914,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  0,
+                  1
+                ],
+                "tile_b": [
+                  0,
+                  2
+                ]
+              },
+              {
+                "axes_a_degrees": [
+                  43.53696450280677,
+                  113.99051480098905
+                ],
+                "axes_b_degrees": [
+                  93.94647048838848,
+                  161.46447786808068
+                ],
+                "finding_id": "0:1->1:1",
+                "frame_delta_degrees": 50.40950598558172,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  0,
+                  1
+                ],
+                "tile_b": [
+                  1,
+                  1
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  43.53696450280677,
+                  113.99051480098905
+                ],
+                "axis_separation_degrees": 70.45355029818228,
+                "bounds_yx": [
+                  0,
+                  16,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  8,
+                  24
+                ],
+                "grid": [
+                  0,
+                  1
+                ],
+                "mean_depth_coherence": 0.40401925924508564,
+                "mode_weight_share_min": 0.20759385839031813,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  79.53898810966477,
+                  166.83999327424496
+                ],
+                "axis_separation_degrees": 87.30100516458019,
+                "bounds_yx": [
+                  0,
+                  16,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  8,
+                  40
+                ],
+                "grid": [
+                  0,
+                  2
+                ],
+                "mean_depth_coherence": 0.6024719830695864,
+                "mode_weight_share_min": 0.2478798780378077,
+                "valid_depth_slices": 7
+              },
+              {
+                "axes_degrees": [
+                  10.59892457339158,
+                  77.1434202524354
+                ],
+                "axis_separation_degrees": 66.54449567904382,
+                "bounds_yx": [
+                  0,
+                  16,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  8,
+                  56
+                ],
+                "grid": [
+                  0,
+                  3
+                ],
+                "mean_depth_coherence": 0.5863206525193594,
+                "mode_weight_share_min": 0.30978459622662574,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  93.94647048838848,
+                  161.46447786808068
+                ],
+                "axis_separation_degrees": 67.5180073796922,
+                "bounds_yx": [
+                  16,
+                  32,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  24,
+                  24
+                ],
+                "grid": [
+                  1,
+                  1
+                ],
+                "mean_depth_coherence": 0.49481680348833984,
+                "mode_weight_share_min": 0.19948176321438482,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  23.866513087498273,
+                  90.95529869661306
+                ],
+                "axis_separation_degrees": 67.08878560911478,
+                "bounds_yx": [
+                  32,
+                  48,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  40,
+                  8
+                ],
+                "grid": [
+                  2,
+                  0
+                ],
+                "mean_depth_coherence": 0.576495986527475,
+                "mode_weight_share_min": 0.3842129346283964,
+                "valid_depth_slices": 6
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [
+            {
+              "flagged": true,
+              "frame_delta_degrees": 52.849478473255914,
+              "tile_a": [
+                0,
+                1
+              ],
+              "tile_b": [
+                0,
+                2
+              ]
+            }
+          ],
+          "flagged_comparison_count": 1,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 1
+        }
+      },
+      "wrong_wrap_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 0.9998643663194444,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "wrong_wrap_zyx": [
+        7173.192226371475,
+        4461.478172534633,
+        2717.6032087062263
+      ]
+    },
+    {
+      "grid_yx": [
+        259,
+        133
+      ],
+      "id": "surface-0031",
+      "reason": "one or more seam variants lacked three recoverable comparisons",
+      "status": "unusable",
+      "target_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 1.0,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "variants": {
+        "intact": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 1,
+              "neighbor_comparisons": 3,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.3125,
+              "valid_tiles": 5
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  49.24331974488741,
+                  81.7453106547149
+                ],
+                "axes_b_degrees": [
+                  101.63880190233621,
+                  151.76964402579574
+                ],
+                "finding_id": "1:0->1:1",
+                "frame_delta_degrees": 70.02433337108084,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  1,
+                  0
+                ],
+                "tile_b": [
+                  1,
+                  1
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  49.24331974488741,
+                  81.7453106547149
+                ],
+                "axis_separation_degrees": 32.50199090982749,
+                "bounds_yx": [
+                  16,
+                  32,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  24,
+                  8
+                ],
+                "grid": [
+                  1,
+                  0
+                ],
+                "mean_depth_coherence": 0.49910489353781506,
+                "mode_weight_share_min": 0.49665636842028565,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  101.63880190233621,
+                  151.76964402579574
+                ],
+                "axis_separation_degrees": 50.13084212345953,
+                "bounds_yx": [
+                  16,
+                  32,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  24,
+                  24
+                ],
+                "grid": [
+                  1,
+                  1
+                ],
+                "mean_depth_coherence": 0.5996004237392819,
+                "mode_weight_share_min": 0.4941110104771742,
+                "valid_depth_slices": 6
+              },
+              {
+                "axes_degrees": [
+                  80.0750725386415,
+                  154.18328697991367
+                ],
+                "axis_separation_degrees": 74.10821444127217,
+                "bounds_yx": [
+                  32,
+                  48,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  40,
+                  24
+                ],
+                "grid": [
+                  2,
+                  1
+                ],
+                "mean_depth_coherence": 0.4129578891689055,
+                "mode_weight_share_min": 0.2804777608812773,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  92.27340725883522,
+                  159.68062103000142
+                ],
+                "axis_separation_degrees": 67.4072137711662,
+                "bounds_yx": [
+                  32,
+                  48,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  40,
+                  40
+                ],
+                "grid": [
+                  2,
+                  2
+                ],
+                "mean_depth_coherence": 0.49566451291913916,
+                "mode_weight_share_min": 0.4871157264893348,
+                "valid_depth_slices": 4
+              },
+              {
+                "axes_degrees": [
+                  4.102267089312793,
+                  37.83563142564167
+                ],
+                "axis_separation_degrees": 33.733364336328876,
+                "bounds_yx": [
+                  48,
+                  64,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  56,
+                  56
+                ],
+                "grid": [
+                  3,
+                  3
+                ],
+                "mean_depth_coherence": 0.5344996223370321,
+                "mode_weight_share_min": 0.37877014279204446,
+                "valid_depth_slices": 6
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [
+            {
+              "flagged": false,
+              "frame_delta_degrees": 12.198334720193714,
+              "tile_a": [
+                2,
+                1
+              ],
+              "tile_b": [
+                2,
+                2
+              ]
+            }
+          ],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 1
+        },
+        "target_left_wrong_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 1,
+              "neighbor_comparisons": 1,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.125,
+              "valid_tiles": 2
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  49.24331974488741,
+                  81.7453106547149
+                ],
+                "axes_b_degrees": [
+                  101.18610921164756,
+                  134.13025214907677
+                ],
+                "finding_id": "1:0->1:1",
+                "frame_delta_degrees": 52.38494149436187,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  1,
+                  0
+                ],
+                "tile_b": [
+                  1,
+                  1
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  49.24331974488741,
+                  81.7453106547149
+                ],
+                "axis_separation_degrees": 32.50199090982749,
+                "bounds_yx": [
+                  16,
+                  32,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  24,
+                  8
+                ],
+                "grid": [
+                  1,
+                  0
+                ],
+                "mean_depth_coherence": 0.49910489353781506,
+                "mode_weight_share_min": 0.49665636842028565,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  101.18610921164756,
+                  134.13025214907677
+                ],
+                "axis_separation_degrees": 32.944142937429206,
+                "bounds_yx": [
+                  16,
+                  32,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  24,
+                  24
+                ],
+                "grid": [
+                  1,
+                  1
+                ],
+                "mean_depth_coherence": 0.583788750684349,
+                "mode_weight_share_min": 0.4727812071736292,
+                "valid_depth_slices": 5
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [],
+          "flagged_comparison_count": 0,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 0
+        },
+        "wrong_left_target_right": {
+          "analysis": {
+            "claim_boundary": "A cross-ply frame discontinuity is a review cue only. It does not prove a sheet switch, recto polarity, or geometry error; folds, tears, cracks, joins, weak texture, and sampling defects can alter the local orientation field.",
+            "coverage": {
+              "flagged_comparisons": 1,
+              "neighbor_comparisons": 2,
+              "total_tiles": 16,
+              "valid_tile_fraction": 0.25,
+              "valid_tiles": 4
+            },
+            "findings": [
+              {
+                "axes_a_degrees": [
+                  10.371705749112888,
+                  83.99268918206015
+                ],
+                "axes_b_degrees": [
+                  90.55251919160601,
+                  159.21139362898072
+                ],
+                "finding_id": "2:1->2:2",
+                "frame_delta_degrees": 31.160312120132176,
+                "kind": "cross_ply_frame_discontinuity",
+                "switch_threshold_degrees": 25.0,
+                "tile_a": [
+                  2,
+                  1
+                ],
+                "tile_b": [
+                  2,
+                  2
+                ]
+              }
+            ],
+            "frames": [
+              {
+                "axes_degrees": [
+                  2.969715649171203,
+                  67.30322252107733
+                ],
+                "axis_separation_degrees": 64.33350687190612,
+                "bounds_yx": [
+                  32,
+                  48,
+                  0,
+                  16
+                ],
+                "center_yx": [
+                  40,
+                  8
+                ],
+                "grid": [
+                  2,
+                  0
+                ],
+                "mean_depth_coherence": 0.635724179593396,
+                "mode_weight_share_min": 0.3539577971799837,
+                "valid_depth_slices": 8
+              },
+              {
+                "axes_degrees": [
+                  10.371705749112888,
+                  83.99268918206015
+                ],
+                "axis_separation_degrees": 73.62098343294726,
+                "bounds_yx": [
+                  32,
+                  48,
+                  16,
+                  32
+                ],
+                "center_yx": [
+                  40,
+                  24
+                ],
+                "grid": [
+                  2,
+                  1
+                ],
+                "mean_depth_coherence": 0.5178762559650257,
+                "mode_weight_share_min": 0.23639264281003333,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  90.55251919160601,
+                  159.21139362898072
+                ],
+                "axis_separation_degrees": 68.6588744373747,
+                "bounds_yx": [
+                  32,
+                  48,
+                  32,
+                  48
+                ],
+                "center_yx": [
+                  40,
+                  40
+                ],
+                "grid": [
+                  2,
+                  2
+                ],
+                "mean_depth_coherence": 0.5210848180764078,
+                "mode_weight_share_min": 0.24612933981483062,
+                "valid_depth_slices": 5
+              },
+              {
+                "axes_degrees": [
+                  4.102267089312793,
+                  37.83563142564167
+                ],
+                "axis_separation_degrees": 33.733364336328876,
+                "bounds_yx": [
+                  48,
+                  64,
+                  48,
+                  64
+                ],
+                "center_yx": [
+                  56,
+                  56
+                ],
+                "grid": [
+                  3,
+                  3
+                ],
+                "mean_depth_coherence": 0.5344996223370321,
+                "mode_weight_share_min": 0.37877014279204446,
+                "valid_depth_slices": 6
+              }
+            ],
+            "method": "depth-resolved-cross-ply-structure-tensor-v1",
+            "parameters": {
+              "min_coherence": 0.35,
+              "min_mode_share": 0.15,
+              "min_separation_degrees": 25.0,
+              "sigma": 1.0,
+              "switch_degrees": 25.0,
+              "tile_size": 16
+            },
+            "review_queue": [],
+            "shape_depth_y_x": [
+              9,
+              64,
+              64
+            ],
+            "status": "measured",
+            "vc3d_review_ready": false
+          },
+          "comparisons": [
+            {
+              "flagged": true,
+              "frame_delta_degrees": 31.160312120132176,
+              "tile_a": [
+                2,
+                1
+              ],
+              "tile_b": [
+                2,
+                2
+              ]
+            }
+          ],
+          "flagged_comparison_count": 1,
+          "seam_positive": false,
+          "status": "insufficient",
+          "valid_comparison_count": 1
+        }
+      },
+      "wrong_wrap_source": {
+        "in_bounds_count": 36864,
+        "new_missing_chunks": [],
+        "nonzero_fraction": 0.9999728732638888,
+        "sample_count": 36864,
+        "status": "ok"
+      },
+      "wrong_wrap_zyx": [
+        7728.162123795326,
+        4068.9790340432783,
+        4118.64688872554
+      ]
+    }
+  ],
+  "inputs": {
+    "center_source_spec_sha256": "f320d48422209d499ec80827ec45a85a21be45eaa56ce0621aecfdcdfc790b5d",
+    "ct_level0_shape_zyx": [
+      20974,
+      6621,
+      6621
+    ],
+    "ct_url": "https://vesuvius-challenge-open-data.s3.amazonaws.com/PHerc0139/volumes/20250728140407-9.362um-1.2m-113keV-masked.zarr",
+    "fingerprint_result_sha256": "41d7b0ad2e52a7cf3a989a9f9ee5f4e5e59bb208c9018aa843de6433e8c26bef",
+    "missing_ct_chunks": [],
+    "tifxyz_sha256": {
+      "meta.json": "11752e63185cc6bc8842cf6f4d7aef84a7e3ec7b0b4eb5c10bf99842e7cd8dda",
+      "x.tif": "d827a5d2e51035c91da74b5fba4fea55c9df9d8f58c6ec7f534d6012ee2f7b69",
+      "y.tif": "41f1df324572b68450f4da92dcd4598844f602982f1965e5bea67e6de080d664",
+      "z.tif": "b61f8bbcd9cb538f43cd72678fd4d38a25cc1643daa4bcfdd7f2e9954f9a1e81"
+    },
+    "wrong_wrap_result_sha256": "61131cc162c950f317e2dafddadee10e9b8118258c04aea8fa385fb2713a845f"
+  },
+  "schema": "scrollq-research-fiber-seam-dev-result/1",
+  "spec": {
+    "path": "artifacts/2026-10-03-fiber-seam-prereg/spec.json",
+    "sha256": "2a6a32cb11e64311049d76233d403a41facad0a3880dbb1313950f22a90130a6"
+  },
+  "status": "measured"
+}
