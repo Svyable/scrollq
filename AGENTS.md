@@ -42,6 +42,7 @@ weight-free Pareto frontier (triage, not a readability claim).
     (phantom = prediction > 127 on masked CT == 0) with bootstrap 95% CI
   - `model_eval.py` → `scroliq-eval`: task-neutral model registry/evaluation envelope; fail-closed provenance, held-out overlap checks, deterministic bootstrap CIs, and region failure accounting. Contracts live in `models/` and `docs/model-evaluation.md`
   - `segmentation_validation.py` → `scroliq-segmentation-validate`: trusted blind TIFXYZ surface scorer using preregistered bidirectional coverage, salted hidden-truth commitments, exact vertex distances, topology gates, and common `scroliq-eval` region results
+  - `segmentation_uncertainty.py` → `scroliq-segmentation-uq`: finite-sample split-conformal audit that keeps boundary error separate from complete disconnected-component omission and rejects vacuous bounds
   - `sheetness_campaign.py` → `scroliq-sheetness-campaign`: freezes dispersed per-probe CT boxes, exact Hessian-engine bytes/config, and one campaign-level decision rule before inference; seals one provenance-bound v3 spec per cutout and aggregates all frozen groups without dropping failures
   - evidence layers, each its own `scroliq-*` script: `passport.py`,
     `scan_map.py`, `provenance.py`, `recto_coverage.py`, `tifxyz_audit.py`
@@ -94,6 +95,7 @@ python -m pytest tests/ -q
 scroliq-pairs --list --out out/discovery.json          # registered rescan pairs
 scroliq-manifest --help                                # derive prize manifests
 scroliq-chunk-audit --index <metadata.min.json[.gz]> --out out/audit.json
+scroliq-segmentation-uq --help                      # structural boundary/component UQ gate
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests

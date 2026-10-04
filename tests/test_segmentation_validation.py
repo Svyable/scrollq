@@ -185,6 +185,38 @@ def test_extra_wrong_sheet_surface_reduces_prediction_to_truth_coverage(tmp_path
     assert row["metrics"]["symmetric_p95_voxels"] > 5
 
 
+def test_completely_missed_truth_component_is_measured(tmp_path):
+    fixture = list(_fixture(tmp_path, tolerance=0.1))
+    dataset, spec, truth, predictions, truth_root, pred_root = fixture
+
+    truth_valid = np.ones((5, 5), dtype=bool)
+    truth_valid[:, 2] = False
+    pred_valid = np.zeros((5, 5), dtype=bool)
+    pred_valid[:, :2] = True
+
+    for root, valid in (
+        (truth_root / "r1.tifxyz", truth_valid),
+        (pred_root / "r1.tifxyz", pred_valid),
+    ):
+        for path in root.iterdir():
+            path.unlink()
+        root.rmdir()
+        _write_surface(root, valid=valid)
+
+    spec["truth_commitment_sha256"] = compute_truth_commitment(
+        dataset_document=dataset,
+        truth_document=truth,
+        truth_root=truth_root,
+    )["truth_commitment_sha256"]
+    predictions["spec_sha256"] = digest(spec)
+
+    row = _evaluate(tuple(fixture))["regions"][0]
+    assert row["metrics"]["truth_components"] == 2
+    assert row["metrics"]["truth_components_with_prediction_support"] == 1
+    assert row["metrics"]["truth_component_recall_any"] == pytest.approx(0.5)
+    assert row["metrics"]["truth_component_min_coverage"] == 0.0
+
+
 def test_hidden_truth_tampering_is_rejected_by_public_commitment(tmp_path):
     fixture = _fixture(tmp_path)
     truth_root = fixture[-2]
