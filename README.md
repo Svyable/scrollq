@@ -66,6 +66,14 @@ ineligible for ranking. Private truth is intentionally scored in a separate
 trusted phase so model-author PR code never receives hidden labels or truth
 meshes. See [the model-evaluation protocol](docs/model-evaluation.md).
 
+**External Hub releases:** `scroliq-hf-pin` resolves a Hugging Face model or
+dataset branch/tag to its immutable repository SHA and records the exact file
+inventory plus explicit Git-LFS SHA-256 values when the Hub exposes them. This
+prevents a later `main` update from silently changing the model or labels behind
+a published evaluation. See [immutable Hugging Face release pinning](docs/huggingface-release-pinning.md).
+The first frozen application is the
+[PHerc1447 v8-in held-out ink campaign](docs/pherc1447-v8in-protocol.md).
+
 **Held-out surface recovery:** `scroliq-segmentation-validate` is now the
 segmentation adapter for that harness. It freezes a public exact-volume metric
 spec, binds it to a salted commitment over private TIFXYZ truth, and scores the
