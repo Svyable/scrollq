@@ -60,13 +60,13 @@ def _resolve_executable(command: Sequence[str]) -> dict[str, Any]:
     if not command:
         raise VC3DRunGuardError("guarded command must not be empty")
     token = command[0]
-    candidate = (
-        Path(token).expanduser()
-        if os.path.sep in token
-        else Path(shutil.which(token) or "")
-    )
-    if not str(candidate):
-        return {"requested": token, "resolved": None, "sha256": None}
+    if os.path.sep in token:
+        candidate = Path(token).expanduser()
+    else:
+        discovered = shutil.which(token)
+        if discovered is None:
+            return {"requested": token, "resolved": None, "sha256": None}
+        candidate = Path(discovered)
     try:
         resolved = candidate.resolve()
     except OSError:
