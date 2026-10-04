@@ -29,7 +29,9 @@ scroliq-ink-validate \
 
 The command exits zero only when the report is complete enough to pin as prize evidence: the split is declared held-out, training overlap is explicitly `none`, label ancestry is explicitly `independent` of the evaluated model/teacher lineage, both ink and background are present in the validation mask, and at least one falsification control was evaluated. The declaration is not independently proven by this command; `scroliq-provenance` separately checks region-set exclusion.
 
-Pseudo-labels and teacher-derived dense labels remain useful development evidence, but they must be declared `related` (or `unknown` when ancestry cannot be established) when the evaluated checkpoint descends from the same teacher family. Such a report is measured and written normally but fails the prize-evidence gate, preventing circular validation from being promoted to independent proof. `--label-source-sha256` can pin the teacher artifact or provenance record that establishes the ancestry decision.\n\nNo arbitrary performance cutoff is imposed. The tool reports measurements and control deltas so reviewers can see whether the correct physical surface carries more ink evidence than deliberately wrong surfaces.
+Pseudo-labels and teacher-derived dense labels remain useful development evidence, but they must be declared `related` (or `unknown` when ancestry cannot be established) when the evaluated checkpoint descends from the same teacher family. Such a report is measured and written normally but fails the prize-evidence gate, preventing circular validation from being promoted to independent proof. `--label-source-sha256` can pin the teacher artifact or provenance record that establishes the ancestry decision.
+
+No arbitrary performance cutoff is imposed. The tool reports measurements and control deltas so reviewers can see whether the correct physical surface carries more ink evidence than deliberately wrong surfaces.
 
 ROC AUC is reported alongside thresholded metrics rather than replacing them. This matters for cross-scroll and leave-one-region-out model checks where authors publish AUC: ScrolIQ can now reproduce that threshold-independent discrimination measure inside the same hash-pinned artifact while still retaining false-positive rate, balanced accuracy, calibration-sensitive Brier score, and physical falsification controls.
 
@@ -48,4 +50,4 @@ A strong result should remain reproducible on held-out known ground truth while 
 
 ## Supported arrays
 
-The CLI accepts 2D `.tif`/`.tiff` or `.npy` arrays. Integer predictions must use their declared encoding (`uint8` or `uint16`) or a dtype that `auto` can infer. Floating predictions in `auto` mode must already be in `[0,1]`; out-of-range floats fail rather than being silently rescaled.
+The CLI accepts 2D `.png`, `.tif`/`.tiff`, or `.npy` arrays. PNG inputs are decoded directly as their stored grayscale integer values; RGB/RGBA images fail the 2D check rather than being silently converted. Integer predictions must use their declared encoding (`uint8` or `uint16`) or a dtype that `auto` can infer. Floating predictions in `auto` mode must already be in `[0,1]`; out-of-range floats fail rather than being silently rescaled.
