@@ -1,0 +1,53 @@
+{
+  "protocol": "paris4-fiber-ct-direction-v1",
+  "frozen": "2026-10-04",
+  "question": "Do the public PHercParis4 fibers run within the papyrus sheet seen in CT, i.e. is the fiber tangent closer to perpendicular to the local CT sheet normal than a random direction is?",
+  "inputs": {
+    "census": "artifacts/2026-10-04-fiber-corpus-census/summary.json",
+    "census_manifest_sha256": "a28f3a950584dce9340a4f7609d00a939c739fb64c29ff6884b21304de196d35",
+    "support_evidence": "artifacts/2026-10-04-paris4-fiber-ct-support-run/result.json (SUPPORTED; evidence for, not a declaration of, the binding)",
+    "byte_rule": "every fiber re-downloaded and hash-matched; any failure is RUN FAILED"
+  },
+  "volume": {
+    "bucket_https": "https://vesuvius-challenge-open-data.s3.us-east-1.amazonaws.com",
+    "root": "PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+    "level": 1,
+    "scale": 2,
+    "read": "whole uncompressed level-1 chunks covering each cube; absent chunk = fill value 0"
+  },
+  "sampling": {
+    "points_per_fiber": 8,
+    "point_rule": "line indices round(linspace(h, n-1-h, 8)), duplicates dropped, h = tangent_half_window",
+    "tangent_half_window": 5,
+    "tangent": "unit vector line[i+h] - line[i-h] (VC3D xyz)",
+    "seed": 20261006
+  },
+  "structure_tensor": {
+    "radius": 12,
+    "grad_sigma": 1.0,
+    "window_sigma": 4.0,
+    "normal": "eigenvector of the largest eigenvalue of the Gaussian-window-weighted gradient outer-product tensor at the cube centre, expressed in (x, y, z)",
+    "min_coherence": 0.1,
+    "max_zero_fraction": 0.5,
+    "skip_rule": "points whose cube leaves the volume, is more than max_zero_fraction zero, or has coherence (l1-l2)/(l1+l2) below min_coherence are skipped and counted"
+  },
+  "groups": {
+    "F": "fiber points with their own tangents",
+    "R": "the same normals against one uniform random unit direction each (null reference: |r.n| ~ U(0,1))",
+    "X": "wrong-frame control: points and tangents with x and y swapped",
+    "XR": "random directions against the X normals"
+  },
+  "decision": {
+    "statistic": "D = mean |r.n| - mean |t.n|, paired at the same points",
+    "ci": "95% percentile interval, fiber-cluster bootstrap",
+    "bootstrap_reps": 2000,
+    "seed": 5102026,
+    "min_D": 0.1,
+    "rule": "CONTROL FAILURE if the swapped-frame D CI lower bound > min_D. Otherwise SUPPORTED iff the D CI lower bound > min_D; else NOT SUPPORTED."
+  },
+  "interpretation_limits": [
+    "SUPPORTED means fiber tangents tend to lie in the local CT sheet plane; it does not identify which sheet, nor verify horizontal/vertical fiber identity.",
+    "The structure tensor sees dominant layering; in compressed or damaged regions the normal may follow other structure.",
+    "The volume binding is evidence-based, not declared by the dataset."
+  ]
+}
