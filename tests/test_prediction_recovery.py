@@ -269,3 +269,53 @@ def test_projected_relaxation_api_has_no_hidden_truth_parameter():
     assert "truth" not in parameters
     assert "reference_xyz" not in parameters
     assert "hidden_valid" not in parameters
+
+
+def _relaxation_score_row(
+    *,
+    baseline=0.70,
+    value=0.85,
+    median_error=4.0,
+    p95=12.0,
+    unique=0.8,
+    wrong=True,
+    identity=True,
+):
+    return {
+        "v1_fraction_within_8_voxels": baseline,
+        "v2_fraction_within_8_voxels": value,
+        "v2_median_error_voxels": median_error,
+        "v2_p95_error_voxels": p95,
+        "v2_unique_recovered_voxel_fraction": unique,
+        "v2_wrong_wrap_rejected": wrong,
+        "v1_candidate_hash_exact": identity,
+        "v1_component_label_exact": identity,
+    }
+
+
+def test_projected_relaxation_gate_passes_improved_cohort():
+    rows = [
+        _relaxation_score_row(baseline=0.99, value=0.98),
+        _relaxation_score_row(baseline=0.42, value=0.80),
+        _relaxation_score_row(baseline=0.68, value=0.84),
+        _relaxation_score_row(baseline=0.45, value=0.76),
+    ]
+
+    result = pr.score_projected_relaxation(rows)
+
+    assert result["status"] == "pass"
+    assert result["median_fraction_within_8_voxels"] >= 0.75
+    assert result["maximum_within_8_regression"] == pytest.approx(0.01)
+    assert all(result["checks"].values())
+
+
+def test_projected_relaxation_gate_blocks_regression_and_identity_drift():
+    rows = [_relaxation_score_row() for _ in range(4)]
+    rows[0] = _relaxation_score_row(baseline=0.99, value=0.90)
+    rows[1]["v1_candidate_hash_exact"] = False
+
+    result = pr.score_projected_relaxation(rows)
+
+    assert result["status"] == "fail"
+    assert result["checks"]["no_within_8_regression_over_limit"] is False
+    assert result["checks"]["v1_identity_exact"] is False
