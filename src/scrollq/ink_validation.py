@@ -113,6 +113,23 @@ def _binarize_labels(
     return (unit > threshold).astype(np.uint8)
 
 
+def _binarize_mask(arr: np.ndarray, *, rule: str = "binary") -> np.ndarray:
+    """Return a binary 0/1 validation mask under an explicit source rule."""
+    x = np.asarray(arr)
+    if not np.all(np.isfinite(x)):
+        raise ValueError("validation mask contains NaN or infinite values")
+    if rule == "binary":
+        if not np.all(np.isin(x, (0, 1, 255))):
+            raise ValueError(
+                "binary validation mask must contain only 0/1 or 0/255; "
+                "use --mask-rule positive only when the source contract is mask > 0"
+            )
+        return (x > 0).astype(np.uint8)
+    if rule == "positive":
+        return (x > 0).astype(np.uint8)
+    raise ValueError(f"unknown mask rule {rule!r}")
+
+
 def _normalize_prediction(arr: np.ndarray, scale: str = "auto") -> np.ndarray:
     x = np.asarray(arr)
     if not np.all(np.isfinite(x)):
@@ -491,6 +508,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         default=0.5,
         help="strict > threshold used after non-binary label normalization",
     )
+    ap.add_argument(
+        "--mask-rule",
+        choices=("binary", "positive"),
+        default="binary",
+        help=(
+            "validation-mask interpretation; 'positive' applies the explicit "
+            "source rule mask > 0 instead of requiring a binary source array"
+        ),
+    )
     ap.add_argument("--threshold", type=float, default=0.5)
     ap.add_argument("--split-id", required=True)
     ap.add_argument("--held-out", action="store_true")
@@ -543,7 +569,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         scale=args.label_scale,
         threshold=args.label_threshold,
     )
-    mask = _load_2d(mask_path)
+    mask_raw = _load_2d(mask_path)
+    mask = _binarize_mask(mask_raw, rule=args.mask_rule)
 
     control_arrays: dict[str, np.ndarray] = {}
     control_inputs: list[dict[str, str]] = []
@@ -591,6 +618,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             "validation_mask": {
                 "path": str(mask_path),
                 "sha256": _sha256_file(mask_path),
+                "source_rule": args.mask_rule,
+                "binarization_comparison": (
+                    "> 0" if args.mask_rule == "positive" else "binary source > 0"
+                ),
             },
             "controls": control_inputs,
         },
