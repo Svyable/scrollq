@@ -6,7 +6,15 @@ import sys
 import numpy as np
 from PIL import Image
 
-from scrollq.tifxyz_audit import audit_tifxyz, review_queue_pointcollections
+import pytest
+
+from scrollq.tifxyz_audit import (
+    audit_tifxyz,
+    compare_bbox,
+    geometry_digest,
+    recompute_bbox,
+    review_queue_pointcollections,
+)
 
 
 def _write_tifxyz(
@@ -518,3 +526,163 @@ def test_review_queue_rejects_negative_limit(tmp_path):
     with np.testing.assert_raises_regex(ValueError, "review_limit_per_kind"):
         audit_tifxyz(surface, review_limit_per_kind=-1)
 
+
+
+def _surf(tmp_path, name, **kwargs):
+    folder = tmp_path / name
+    folder.mkdir()
+    return _write_tifxyz(folder, **kwargs)
+
+
+# --- spatial metadata is recomputed from vertices, never trusted ----------
+
+
+def test_audit_bbox_block_reports_axis_and_magnitude_of_staleness(tmp_path):
+    surface = _write_tifxyz(tmp_path)
+    # Valid vertices sit at z=10; the declared z range ends 654 voxels below.
+    meta = json.loads((surface / "meta.json").read_text())
+    meta["bbox"] = [[0, 0, -700], [8, 8, 10 - 654]]
+    (surface / "meta.json").write_text(json.dumps(meta))
+
+    result = audit_tifxyz(surface)
+
+    bbox = result["bbox"]
+    assert bbox["status"] == "stale"
+    assert bbox["stale_axes"] == ["z"]
+    assert bbox["max_excess_voxels"] == 654.0
+    assert bbox["contains_observed_vertices"] is False
+    assert any(f["kind"] == "stale-bbox" for f in result["findings"])
+    assert any("does not contain all valid vertices" in w for w in result["warnings"])
+    assert result["status"] == "partial"
+
+
+def test_audit_bbox_status_for_consistent_loose_and_undeclared(tmp_path):
+    exact = audit_tifxyz(_surf(tmp_path, "a"))
+    assert exact["bbox"]["status"] == "consistent"
+    assert not [f for f in exact["findings"] if f["kind"] == "stale-bbox"]
+
+    loose_root = _surf(tmp_path, "b")
+    meta = json.loads((loose_root / "meta.json").read_text())
+    meta["bbox"] = [[-50, -50, 0], [500, 500, 500]]
+    (loose_root / "meta.json").write_text(json.dumps(meta))
+    loose = audit_tifxyz(loose_root)
+    assert loose["bbox"]["status"] == "consistent"
+    assert loose["bbox"]["max_slack_voxels"] == 492.0  # 500 - 8 on x and y
+
+    bare_root = _surf(tmp_path, "c")
+    meta = json.loads((bare_root / "meta.json").read_text())
+    del meta["bbox"]
+    (bare_root / "meta.json").write_text(json.dumps(meta))
+    bare = audit_tifxyz(bare_root)
+    assert bare["bbox"]["status"] == "undeclared"
+    assert bare["bbox"]["metadata_present"] is False
+    assert bare["bbox"]["observed_bbox_xyz"] == [[0.0, 0.0, 10.0], [8.0, 8.0, 10.0]]
+
+
+@pytest.mark.parametrize(
+    "declared, reason",
+    [
+        ("0,0,0,1,1,1", "must be"),
+        ([[0, 0, 0], [1, 1]], "must be"),
+        ([[0, 0, 0], [1, 1, "2"]], "must be"),
+        ([[0, 0, 0], [1, 1, True]], "must be"),
+        ([[0, 0, 0], [1, 1, float("nan")]], "non-finite"),
+        ([[5, 0, 0], [1, 1, 1]], "minima exceed maxima"),
+    ],
+)
+def test_compare_bbox_marks_malformed_declarations_unreadable(declared, reason):
+    result = compare_bbox(declared, [[0, 0, 0], [1, 1, 1]])
+    assert result["status"] == "unreadable"
+    assert reason in result["reason"]
+
+
+def test_compare_bbox_tolerance_and_per_axis_excess():
+    observed = [[10.0, 10.0, 10.0], [20.0, 20.0, 20.0]]
+    declared = [[10, 10, 10], [20, 20, 19.4]]
+    assert compare_bbox(declared, observed, tolerance_voxels=1.0)["status"] == "consistent"
+    strict = compare_bbox(declared, observed, tolerance_voxels=0.5)
+    assert strict["status"] == "stale" and strict["stale_axes"] == ["z"]
+    assert strict["excess_voxels_xyz"] == pytest.approx([0.0, 0.0, 0.6])
+    below = compare_bbox([[12, 10, 10], [20, 20, 20]], observed)
+    assert below["stale_axes"] == ["x"] and below["max_excess_voxels"] == 2.0
+    with pytest.raises(ValueError):
+        compare_bbox(declared, observed, tolerance_voxels=-1)
+
+
+def test_recompute_bbox_ignores_meta_json_and_masked_vertices(tmp_path):
+    surface = _write_tifxyz(tmp_path, hole=True)
+    meta = json.loads((surface / "meta.json").read_text())
+    meta["bbox"] = [[1000, 1000, 1000], [2000, 2000, 2000]]
+    (surface / "meta.json").write_text(json.dumps(meta))
+
+    result = recompute_bbox(surface)
+
+    assert result["status"] == "ok"
+    assert result["observed_bbox_xyz"] == [[0.0, 0.0, 10.0], [8.0, 8.0, 10.0]]
+    assert result["valid_vertices"] == 24
+
+
+def test_recompute_bbox_distinguishes_empty_from_unreadable(tmp_path):
+    assert recompute_bbox(_surf(tmp_path, "e", empty=True))["status"] == "empty"
+    missing = tmp_path / "missing"
+    missing.mkdir()
+    result = recompute_bbox(missing)
+    assert result["status"] == "unreadable" and result["observed_bbox_xyz"] is None
+
+
+def test_validity_rules_differ_only_where_documented(tmp_path):
+    root = tmp_path / "surface"
+    root.mkdir()
+    x = np.array([[0.0, 5.0], [6.0, 7.0]], dtype=np.float32)
+    y = np.array([[0.0, 5.0], [6.0, 7.0]], dtype=np.float32)
+    z = np.array([[0.0, 4.0], [4.0, 4.0]], dtype=np.float32)  # z==0 corner
+    for name, arr in (("x.tif", x), ("y.tif", y), ("z.tif", z)):
+        Image.fromarray(arr).save(root / name)
+
+    tifxyz = recompute_bbox(root, validity="tifxyz")
+    upstream = recompute_bbox(root, validity="nonnegative-xyz")
+
+    assert tifxyz["valid_vertices"] == 3
+    assert upstream["valid_vertices"] == 4
+    assert tifxyz["observed_bbox_xyz"][0] == [5.0, 5.0, 4.0]
+    assert upstream["observed_bbox_xyz"][0] == [0.0, 0.0, 0.0]
+    with pytest.raises(ValueError, match="unknown vertex validity rule"):
+        recompute_bbox(root, validity="whatever")
+
+
+def test_geometry_digest_is_independent_of_encoding_and_masked_junk(tmp_path):
+    a = _surf(tmp_path, "a", hole=True)
+    b = _surf(tmp_path, "b", hole=True)
+    # Re-encode b's coordinates and put junk in the hole cell (still invalid).
+    for name in ("x.tif", "y.tif", "z.tif"):
+        arr = np.array(Image.open(b / name))
+        if name != "z.tif":
+            arr[2, 2] = -999.0
+        Image.fromarray(arr).save(b / name, compression="tiff_deflate")
+    assert (a / "x.tif").read_bytes() != (b / "x.tif").read_bytes()
+
+    assert geometry_digest(a)["coordinate_sha256"] == geometry_digest(b)["coordinate_sha256"]
+
+
+def test_geometry_digest_changes_with_one_vertex_or_the_validity_pattern(tmp_path):
+    base = geometry_digest(_surf(tmp_path, "a"))
+    moved_root = _surf(tmp_path, "b")
+    x = np.array(Image.open(moved_root / "x.tif"))
+    x[4, 4] += 0.5
+    Image.fromarray(x).save(moved_root / "x.tif")
+    holed = geometry_digest(_surf(tmp_path, "c", hole=True))
+
+    digests = {
+        base["coordinate_sha256"],
+        geometry_digest(moved_root)["coordinate_sha256"],
+        holed["coordinate_sha256"],
+    }
+    assert len(digests) == 3
+    assert base["valid_vertices"] == 25 and holed["valid_vertices"] == 24
+
+
+def test_geometry_digest_rejects_unreadable_surface(tmp_path):
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    with pytest.raises(ValueError, match="missing required"):
+        geometry_digest(empty)
