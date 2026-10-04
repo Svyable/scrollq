@@ -1,0 +1,280 @@
+name: PHerc1447 v8-in AUC reproduction
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/pherc1447-v8in-reproduce.yml"
+      - "src/scrollq/ink_validation.py"
+      - "pyproject.toml"
+
+permissions:
+  contents: read
+
+env:
+  SURFACES_REV: 7e4d918712a8d8642a6fdeee45b80217c1e98317
+  SURFACES_REPO: YoussefMoNader/ink-8um-pherc1447-surfaces
+  BASE_CHECKPOINT_SHA256: 3b94548d7f9ba9f99bc4b0ad8cafcec6d42585c06304e1bd11e47b5d0f88c4cd
+  PHERC1447_VOLUME_ID: "20250521151220"
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ScrolIQ
+        run: python -m pip install -e .
+
+      - name: Download immutable released arrays
+        shell: python
+        run: |
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          from urllib.parse import quote
+
+          import requests
+
+          revision = os.environ["SURFACES_REV"]
+          repo = os.environ["SURFACES_REPO"]
+          root = Path("out/pherc1447-v8in-reproduce")
+          inputs = root / "inputs"
+          inputs.mkdir(parents=True, exist_ok=True)
+
+          expected = {
+              "w058/predictions/v8in.png": "976cb7a3e5f23ece2145689c729d7a57f342d1a54b00f2a02a2ae05fcb6826b1",
+              "w058/predictions/loo_w058.png": "fe42fe927b9265cd0dba30242c4d85e6df69d697d454bfc56287880fa676ca72",
+              "w058/labels/inklabels.png": "ba15dd60fc24d249d2ba6f036f902d340df8c035221d648214e6bb426004b18b",
+              "w058/labels/mask.png": "7f8d7e72acc4b3019a1a787e4dba00da6cf72dea3b01be255068780faf622ddd",
+              "w060/predictions/v8in.png": "b5126669af438b55b7e9bf535db9a504aec5d0dadcb9676d5d46e3fc9f520a4f",
+              "w060/predictions/loo_w060.png": "5d59bafa57735588110e9fbd2f5fa67ca614a4772ea14eb0d70b77aa2f99c48d",
+              "w060/labels/inklabels.png": "a8a4992895de72cb32d6dc33e42969ac77e34cc90354d7800eaaae25cb0778cb",
+              "w060/labels/mask.png": "56752a81c88560cdac1321f004ddf95bd6c89f2713aab9eeb0f5dedd07d690bf",
+          }
+
+          records = []
+          for relative, wanted_sha in expected.items():
+              url = (
+                  f"https://huggingface.co/datasets/{repo}/resolve/"
+                  f"{revision}/{quote(relative, safe='/')}"
+              )
+              response = requests.get(
+                  url,
+                  timeout=60,
+                  headers={"User-Agent": "ScrolIQ PHerc1447 AUC reproduction"},
+              )
+              response.raise_for_status()
+              data = response.content
+              observed = hashlib.sha256(data).hexdigest()
+              if observed != wanted_sha:
+                  raise SystemExit(
+                      f"SHA-256 mismatch for {relative}: {observed} != {wanted_sha}"
+                  )
+              destination = inputs / relative
+              destination.parent.mkdir(parents=True, exist_ok=True)
+              destination.write_bytes(data)
+              records.append(
+                  {
+                      "path": relative,
+                      "sha256": observed,
+                      "size": len(data),
+                      "immutable_url": url,
+                  }
+              )
+
+          (root / "input-manifest.json").write_text(
+              json.dumps(
+                  {
+                      "schema_version": 1,
+                      "repo": repo,
+                      "resolved_revision": revision,
+                      "files": records,
+                  },
+                  indent=2,
+                  sort_keys=True,
+              )
+              + "\n",
+              encoding="utf-8",
+          )
+
+      - name: Measure released AUCs
+        shell: python
+        run: |
+          import json
+          import os
+          from pathlib import Path
+
+          from scrollq.ink_validation import (
+              _binarize_labels,
+              _binarize_mask,
+              _load_2d,
+              _normalize_prediction,
+              evaluate_prediction,
+          )
+
+          root = Path("out/pherc1447-v8in-reproduce")
+          inputs = root / "inputs"
+
+          published = {
+              ("w058", "base"): 0.862,
+              ("w058", "loo"): 0.845,
+              ("w060", "base"): 0.810,
+              ("w060", "loo"): 0.803,
+          }
+
+          rows = []
+          for winding in ("w058", "w060"):
+              labels = _binarize_labels(
+                  _load_2d(inputs / winding / "labels" / "inklabels.png"),
+                  scale="uint8",
+                  threshold=0.5,
+              )
+              mask = _binarize_mask(
+                  _load_2d(inputs / winding / "labels" / "mask.png"),
+                  rule="positive",
+              )
+              for arm, filename in (
+                  ("base", "v8in.png"),
+                  ("loo", f"loo_{winding}.png"),
+              ):
+                  prediction = _normalize_prediction(
+                      _load_2d(inputs / winding / "predictions" / filename),
+                      "uint8",
+                  )
+                  metrics = evaluate_prediction(
+                      prediction,
+                      labels,
+                      mask,
+                      threshold=0.5,
+                  )
+                  expected = published[(winding, arm)]
+                  observed = metrics["roc_auc"]
+                  delta = observed - expected
+                  rows.append(
+                      {
+                          "winding": winding,
+                          "arm": arm,
+                          "roc_auc": observed,
+                          "published_roc_auc": expected,
+                          "delta": delta,
+                          "matches_published_within_0_002": abs(delta) <= 0.002,
+                          "metrics": metrics,
+                      }
+                  )
+
+          document = {
+              "schema_version": 1,
+              "purpose": "independent reproduction of released PHerc1447 AUCs",
+              "source": {
+                  "repo": os.environ["SURFACES_REPO"],
+                  "resolved_revision": os.environ["SURFACES_REV"],
+                  "eligible_volume_id": os.environ["PHERC1447_VOLUME_ID"],
+              },
+              "scoring_contract": {
+                  "prediction_scale": "uint8 / 255",
+                  "label_scale": "uint8 / 255",
+                  "label_rule": "strict label > 0.5 after normalization (equivalent to uint8 > 127)",
+                  "mask_rule": "mask > 0",
+                  "auc": "ScrolIQ deterministic average-rank ROC AUC",
+              },
+              "model_context": {
+                  "base_checkpoint_sha256": os.environ["BASE_CHECKPOINT_SHA256"],
+                  "model_window_zyx": [24, 64, 64],
+                  "pherc1447_reverse_layers": True,
+                  "note": "This step scores released prediction arrays; it does not rerun inference.",
+              },
+              "interpretation": {
+                  "base": "Released base predictions are described upstream as zero-shot on PHerc1447.",
+                  "loo": (
+                      "w058/w060 LOO prediction arrays can be scored, but the "
+                      "corresponding fold checkpoints are not publicly released; "
+                      "treat these as prediction-array reproduction, not full "
+                      "model-run reproduction."
+                  ),
+                  "w062": (
+                      "Excluded from pixel-ground-truth scoring because the public "
+                      "release intentionally omits labels after a later SLIM "
+                      "re-flattening changed the grid."
+                  ),
+              },
+              "rows": rows,
+          }
+          (root / "auc-reproduction.json").write_text(
+              json.dumps(document, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+
+          for row in rows:
+              print(
+                  f"{row['winding']} {row['arm']}: "
+                  f"AUC={row['roc_auc']:.9f} "
+                  f"published={row['published_roc_auc']:.3f} "
+                  f"delta={row['delta']:+.9f}"
+              )
+
+      - name: Build base-model ScrolIQ measurement reports
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=out/pherc1447-v8in-reproduce
+          source_url="https://huggingface.co/datasets/$SURFACES_REPO/tree/$SURFACES_REV"
+
+          for winding in w058 w060; do
+            set +e
+            scroliq-ink-validate               --prediction "$root/inputs/$winding/predictions/v8in.png"               --labels "$root/inputs/$winding/labels/inklabels.png"               --validation-mask "$root/inputs/$winding/labels/mask.png"               --prediction-scale uint8               --label-scale uint8               --label-threshold 0.5               --mask-rule positive               --threshold 0.5               --split-id "$winding"               --held-out               --training-overlap none               --ground-truth-source-url "$source_url"               --label-ancestry unknown               --model-checkpoint-sha256 "$BASE_CHECKPOINT_SHA256"               --model-window 24x64x64               --out "$root/$winding.base.ink-validation.json"               --format json               > "$root/$winding.base.stdout.json"
+            rc=$?
+            set -e
+            if [ "$rc" -ne 1 ]; then
+              echo "expected non-prize-ready measurement exit 1 for $winding, got $rc" >&2
+              exit 1
+            fi
+          done
+
+      - name: Verify expected measurement blockers
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          root = Path("out/pherc1447-v8in-reproduce")
+          expected = {
+              "label ancestry is not explicitly independent of the evaluated model",
+              "no falsification-control prediction was evaluated",
+          }
+          for winding in ("w058", "w060"):
+              report = json.loads(
+                  (root / f"{winding}.base.ink-validation.json").read_text()
+              )
+              if report["prize_evidence_ready"]:
+                  raise SystemExit(f"{winding}: unexpectedly prize-evidence-ready")
+              reasons = set(report["readiness_reasons"])
+              if reasons != expected:
+                  raise SystemExit(
+                      f"{winding}: unexpected readiness blockers: {sorted(reasons)}"
+                  )
+              print(
+                  f"{winding}: measured AUC={report['evaluation']['roc_auc']:.9f}; "
+                  f"blocked exactly by label ancestry + missing physical control"
+              )
+
+      - name: Hash reproduction evidence
+        shell: bash
+        run: |
+          cd out/pherc1447-v8in-reproduce
+          find . -type f ! -name SHA256SUMS -print0             | sort -z             | xargs -0 sha256sum > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Upload reproduction evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pherc1447-v8in-auc-reproduction
+          path: out/pherc1447-v8in-reproduce/
+          if-no-files-found: error
+          retention-days: 30
