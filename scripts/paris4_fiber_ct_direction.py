@@ -31,6 +31,10 @@ from scipy import ndimage
 ROOT = Path(__file__).resolve().parents[1]
 SPEC_PATH = ROOT / "artifacts/2026-10-04-paris4-fiber-ct-direction-prereg/spec.json"
 SPEC_SHA256 = "3690f5ccfeb72ea56b3fb14ffd55c450269f7c8347a515864fc8f6b916a159da"
+# Every frozen spec this runner may execute, by repo-relative path.
+FROZEN_SPECS = {
+    "artifacts/2026-10-04-paris4-fiber-ct-direction-prereg/spec.json": SPEC_SHA256,
+}
 CENSUS = ROOT / "artifacts/2026-10-04-fiber-corpus-census/summary.json"
 UA = {"User-Agent": "scrollq-paris4-fiber-ct-direction/1"}
 
@@ -159,14 +163,18 @@ class ChunkCache:
         return out
 
 
-def run(out_dir: Path, workers: int) -> int:
-    raw = SPEC_PATH.read_bytes()
+def run(out_dir: Path, workers: int, spec_path: Path = SPEC_PATH) -> int:
+    rel = spec_path.resolve().relative_to(ROOT).as_posix()
+    if rel not in FROZEN_SPECS:
+        print(f"{rel} is not a frozen spec", file=sys.stderr)
+        return 3
+    raw = spec_path.read_bytes()
     sha = hashlib.sha256(raw).hexdigest()
-    if sha != SPEC_SHA256:
-        print(f"spec hash {sha} != frozen {SPEC_SHA256}", file=sys.stderr)
+    if sha != FROZEN_SPECS[rel]:
+        print(f"spec hash {sha} != frozen {FROZEN_SPECS[rel]}", file=sys.stderr)
         return 3
     spec = json.loads(raw)
-    census = json.loads(CENSUS.read_text())
+    census = json.loads((ROOT / spec["inputs"]["census"]).read_text())
     if census["manifest_sha256"] != spec["inputs"]["census_manifest_sha256"]:
         print("census manifest differs", file=sys.stderr)
         return 3
@@ -261,9 +269,10 @@ def run(out_dir: Path, workers: int) -> int:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--spec", default=str(SPEC_PATH), help="a frozen spec listed in FROZEN_SPECS")
     ap.add_argument("--workers", type=int, default=16)
     a = ap.parse_args(argv)
-    return run(Path(a.out_dir), a.workers)
+    return run(Path(a.out_dir), a.workers, Path(a.spec))
 
 
 if __name__ == "__main__":

@@ -27,6 +27,10 @@ from fiber_span_test import parse_fiber, span_table  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 SPEC_PATH = ROOT / "artifacts/2026-10-04-fiber-gap-rule-prereg/spec.json"
 SPEC_SHA256 = "09ea046e97c5d274d8587dd7aa2b2bade14c418c2b39659cb77a9c450164da56"
+# Every frozen spec this runner may execute, by repo-relative path.
+FROZEN_SPECS = {
+    "artifacts/2026-10-04-fiber-gap-rule-prereg/spec.json": SPEC_SHA256,
+}
 CENSUS = ROOT / "artifacts/2026-10-04-fiber-corpus-census/summary.json"
 UA = {"User-Agent": "scrollq-fiber-gap-rule-eval/1"}
 
@@ -134,14 +138,18 @@ def summarize(per: list[dict[str, Any]], spec: dict[str, Any]) -> dict[str, Any]
             "fibers": len(per), "non_monotone": sum(1 for r in per if r["status"] != "ok")}
 
 
-def run(out: Path) -> int:
-    raw = SPEC_PATH.read_bytes()
+def run(out: Path, spec_path: Path = SPEC_PATH) -> int:
+    rel = spec_path.resolve().relative_to(ROOT).as_posix()
+    if rel not in FROZEN_SPECS:
+        print(f"{rel} is not a frozen spec", file=sys.stderr)
+        return 3
+    raw = spec_path.read_bytes()
     sha = hashlib.sha256(raw).hexdigest()
-    if sha != SPEC_SHA256:
-        print(f"spec hash {sha} != frozen {SPEC_SHA256}", file=sys.stderr)
+    if sha != FROZEN_SPECS[rel]:
+        print(f"spec hash {sha} != frozen {FROZEN_SPECS[rel]}", file=sys.stderr)
         return 3
     spec = json.loads(raw)
-    census = json.loads(CENSUS.read_text())
+    census = json.loads((ROOT / spec["inputs"]["census"]).read_text())
     if census["manifest_sha256"] != spec["inputs"]["census_manifest_sha256"]:
         print("census manifest differs", file=sys.stderr)
         return 3
@@ -172,7 +180,9 @@ def run(out: Path) -> int:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out-dir", required=True)
-    return run(Path(ap.parse_args(argv).out_dir))
+    ap.add_argument("--spec", default=str(SPEC_PATH), help="a frozen spec listed in FROZEN_SPECS")
+    a = ap.parse_args(argv)
+    return run(Path(a.out_dir), Path(a.spec))
 
 
 if __name__ == "__main__":
