@@ -134,14 +134,18 @@ The future `model-evals.html` page should rank by uncertainty bands rather
 than pretending close point estimates are exact. Models whose intervals overlap
 should share a rank band unless a preregistered comparison rule says otherwise.
 
-## Adapter roadmap
+## Task adapters
 
-The next implementation layer is intentionally narrow:
+The common region-results contract now has two concrete adapters:
 
-- **Ink:** adapter over `scroliq-ink-validate`, one region score per blind
-  label/mask region, preserving falsification-control evidence.
-- **Geometry:** adapter over `scroliq-geometry-validate`, with held-out targets
-  and missing predictions kept in the denominator.
+- **Ink — implemented:** `scroliq-ink-results` verifies one
+  `scroliq-ink-validate` artifact per expected region, requires held-out /
+  no-overlap / prize-ready evidence and the verified checkpoint identity, then
+  emits every missing or invalid region as an explicit failure. See
+  `docs/ink-results-adapter.md`.
+- **Geometry:** `scroliq-geometry-validate` supplies held-out target metrics;
+  a thin common-results adapter remains to be implemented for direct
+  `scroliq-eval` aggregation.
 - **Segmentation — implemented:** `scroliq-segmentation-validate` compares all
   valid predicted/truth TIFXYZ vertices up to a preregistered hard cap. Its
   primary metric is the minimum of prediction→truth and truth→prediction
@@ -149,5 +153,5 @@ The next implementation layer is intentionally narrow:
   topology gates, and a salted hidden-truth commitment. See
   `docs/segmentation-validation.md`.
 
-Once all three adapters emit the same region-results contract, CI can evaluate
-community models without changing the ranking/provenance layer.
+Ink and segmentation can now enter the same ranking/provenance layer without
+hand-transcribing task metrics. Geometry remains the final adapter gap.
