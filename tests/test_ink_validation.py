@@ -4,6 +4,7 @@ import pytest
 
 from scrollq.ink_validation import (
     _binarize_labels,
+    _binarize_mask,
     _load_2d,
     _normalize_prediction,
     build_report,
@@ -200,6 +201,19 @@ def test_binary_label_mode_stays_strict():
             np.array([[0, 127, 255]], dtype=np.uint8),
             scale="binary",
         )
+
+
+def test_positive_mask_rule_preserves_any_positive_certainty():
+    raw = np.array([[0, 1, 127, 255]], dtype=np.uint8)
+
+    mask = _binarize_mask(raw, rule="positive")
+
+    assert mask.tolist() == [[0, 1, 1, 1]]
+
+
+def test_binary_mask_rule_stays_strict():
+    with pytest.raises(ValueError, match="use --mask-rule positive"):
+        _binarize_mask(np.array([[0, 127, 255]], dtype=np.uint8), rule="binary")
 
 
 def test_uint8_prediction_normalization():
