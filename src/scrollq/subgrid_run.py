@@ -20,6 +20,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+import numpy as np
+
 from .obj_audit import audit_obj
 
 SCHEMA_VERSION = 1
@@ -119,6 +121,110 @@ def verify_checkout(
     }
 
 
+def validate_explicit_npz(path: str | Path) -> dict[str, Any]:
+    """Validate the pinned upstream explicit edge-intersection interchange."""
+    src = Path(path).expanduser().resolve()
+    if not src.is_file():
+        raise SubgridRunError(f"explicit edge-intersection input does not exist: {src}")
+    if src.suffix.lower() != ".npz":
+        raise SubgridRunError("input_npz must use the explicit .npz interchange format")
+
+    required = {"vertices", "tets", "edges", "isect_offsets", "isect_ts"}
+    try:
+        with np.load(src, allow_pickle=False) as archive:
+            missing = sorted(required - set(archive.files))
+            if missing:
+                raise SubgridRunError(
+                    "explicit .npz is missing required array(s): " + ", ".join(missing)
+                )
+            vertices = np.asarray(archive["vertices"])
+            tets = np.asarray(archive["tets"])
+            edges = np.asarray(archive["edges"])
+            offsets = np.asarray(archive["isect_offsets"])
+            ts = np.asarray(archive["isect_ts"])
+            normals = (
+                np.asarray(archive["isect_normals"])
+                if "isect_normals" in archive.files
+                else None
+            )
+    except (OSError, ValueError) as exc:
+        raise SubgridRunError(f"cannot read explicit .npz input: {exc}") from exc
+
+    if vertices.ndim != 2 or vertices.shape[1:] != (3,) or len(vertices) < 4:
+        raise SubgridRunError("vertices must have shape (V,3) with V >= 4")
+    if not np.issubdtype(vertices.dtype, np.number) or not np.isfinite(vertices).all():
+        raise SubgridRunError("vertices must contain finite numeric coordinates")
+    if tets.ndim != 2 or tets.shape[1:] != (4,) or len(tets) < 1:
+        raise SubgridRunError("tets must have shape (T,4) with T >= 1")
+    if not np.issubdtype(tets.dtype, np.integer):
+        raise SubgridRunError("tets must use an integer dtype")
+    if int(tets.min()) < 0 or int(tets.max()) >= len(vertices):
+        raise SubgridRunError("tets reference vertex indices outside vertices")
+    if any(len(set(map(int, row))) != 4 for row in tets):
+        raise SubgridRunError("each tet must reference four distinct vertices")
+
+    if edges.ndim != 2 or edges.shape[1:] != (2,) or len(edges) < 1:
+        raise SubgridRunError("edges must have shape (E,2) with E >= 1")
+    if not np.issubdtype(edges.dtype, np.integer):
+        raise SubgridRunError("edges must use an integer dtype")
+    if int(edges.min()) < 0 or int(edges.max()) >= len(vertices):
+        raise SubgridRunError("edges reference vertex indices outside vertices")
+    if np.any(edges[:, 0] >= edges[:, 1]):
+        raise SubgridRunError("every explicit edge must be stored with i < j")
+    edge_pairs = [tuple(map(int, row)) for row in edges]
+    if len(edge_pairs) != len(set(edge_pairs)):
+        raise SubgridRunError("explicit edges contain duplicate vertex pairs")
+
+    if offsets.ndim != 1 or len(offsets) != len(edges) + 1:
+        raise SubgridRunError("isect_offsets must have shape (E+1,)")
+    if not np.issubdtype(offsets.dtype, np.integer):
+        raise SubgridRunError("isect_offsets must use an integer dtype")
+    offsets64 = offsets.astype(np.int64, copy=False)
+    if int(offsets64[0]) != 0 or np.any(np.diff(offsets64) <= 0):
+        raise SubgridRunError(
+            "isect_offsets must start at zero and give every stored edge >=1 intersection"
+        )
+
+    if ts.ndim != 1 or not np.issubdtype(ts.dtype, np.number):
+        raise SubgridRunError("isect_ts must be a one-dimensional numeric array")
+    if int(offsets64[-1]) != len(ts):
+        raise SubgridRunError("isect_offsets final value must equal len(isect_ts)")
+    if len(ts) < 1 or not np.isfinite(ts).all() or np.any((ts < 0) | (ts > 1)):
+        raise SubgridRunError("isect_ts must be finite values in [0,1]")
+    for edge_index in range(len(edges)):
+        values = ts[offsets64[edge_index] : offsets64[edge_index + 1]]
+        if np.any(values[1:] < values[:-1]):
+            raise SubgridRunError(
+                f"isect_ts for edge {edge_index} are not sorted ascending"
+            )
+
+    if normals is not None:
+        if (
+            normals.ndim != 2
+            or normals.shape != (len(ts), 3)
+            or not np.issubdtype(normals.dtype, np.number)
+            or not np.isfinite(normals).all()
+        ):
+            raise SubgridRunError(
+                "optional isect_normals must have finite numeric shape (N_total,3)"
+            )
+
+    return {
+        "path": str(src),
+        "sha256": _sha256(src),
+        "bytes": src.stat().st_size,
+        "vertices": int(len(vertices)),
+        "tets": int(len(tets)),
+        "edges_with_intersections": int(len(edges)),
+        "intersections": int(len(ts)),
+        "normals_present": normals is not None,
+        "contract": (
+            "hbaktash/subgrid-marching explicit_input_format.md at "
+            f"{PINNED_COMMIT}"
+        ),
+    }
+
+
 def _non_even_tets(stdout_path: Path) -> dict[str, Any]:
     try:
         text = stdout_path.read_text(encoding="utf-8", errors="replace")
@@ -188,15 +294,11 @@ def run_candidate(
 ) -> dict[str, Any]:
     """Run the frozen default primal Subgrid candidate on explicit intersections."""
     upstream = verify_checkout(checkout, expected_commit=expected_commit)
-    input_path = Path(input_npz).expanduser().resolve()
-    output_path = Path(output_obj).expanduser()
-    stdout_path = Path(stdout_log).expanduser()
-    stderr_path = Path(stderr_log).expanduser()
-
-    if not input_path.is_file():
-        raise SubgridRunError(f"explicit edge-intersection input does not exist: {input_path}")
-    if input_path.suffix.lower() != ".npz":
-        raise SubgridRunError("input_npz must use the explicit .npz interchange format")
+    input_evidence = validate_explicit_npz(input_npz)
+    input_path = Path(input_evidence["path"])
+    output_path = Path(output_obj).expanduser().resolve()
+    stdout_path = Path(stdout_log).expanduser().resolve()
+    stderr_path = Path(stderr_log).expanduser().resolve()
     for path, label in (
         (output_path, "output OBJ"),
         (stdout_path, "stdout log"),
@@ -289,9 +391,7 @@ def run_candidate(
         "upstream": upstream,
         "input": {
             "format": "subgrid-explicit-edge-intersections-npz",
-            "path": str(input_path),
-            "sha256": _sha256(input_path),
-            "bytes": input_path.stat().st_size,
+            **input_evidence,
         },
         "command": command,
         "process": {
