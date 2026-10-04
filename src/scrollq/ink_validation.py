@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 import numpy as np
+from PIL import Image
 import tifffile
 
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -41,9 +42,12 @@ def _load_2d(path: str | Path) -> np.ndarray:
         arr = np.load(p, allow_pickle=False)
     elif suffix in {".tif", ".tiff"}:
         arr = tifffile.imread(p)
+    elif suffix == ".png":
+        with Image.open(p) as image:
+            arr = np.array(image)
     else:
         raise ValueError(
-            f"unsupported array format for {p}; expected .npy, .tif, or .tiff"
+            f"unsupported array format for {p}; expected .npy, .png, .tif, or .tiff"
         )
     arr = np.asarray(arr)
     if arr.ndim != 2:
