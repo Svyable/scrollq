@@ -165,6 +165,25 @@ A broad diagnostic catalog can become a form of avoidance. The primary campaign
 needs whole-scroll reconstruction and legible text, not an indefinitely
 expanding certification framework.
 
+## 2026-10-04 scan: nothing new adopted from outside the Vesuvius stack
+
+**Status:** DEFER (no adoption).
+
+A pass over newly released ink checkpoints, CT reconstruction methods,
+flattening implementations and generic segmentation architectures found none
+that clears the evidence, licensing and prize-relevance threshold. Several
+generic thin-structure methods remain either domain-remote or insufficiently
+licensed. Adopting one now would add model complexity without addressing a
+demonstrated Vesuvius failure.
+
+The changes that did earn code that day were all integrity gates against
+failures already demonstrated in the official tool/data ecosystem (see
+[reproducibility-research.md](reproducibility-research.md) §5-7 and
+[geometry-and-coverage-research.md](geometry-and-coverage-research.md) §5-6).
+Reconsider a generic method only against a measured, reproduced Vesuvius
+failure it would fix, with its licence and the separate Vesuvius data terms
+checked.
+
 A new diagnostic earns code only if it does at least one of:
 
 - closes a failed gate in the active campaign;

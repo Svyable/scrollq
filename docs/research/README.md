@@ -50,6 +50,11 @@ campaign.
 | Ink-selected flattening | DISMISS | Could maximize visual persistence | None; creates geometry-selection leakage |
 | Immediate tile-origin backend | DISMISS pending Stage-A evidence | True crop-phase intervention | Reconsider only if stride/blend sensitivity is material |
 | Generic prediction hashing layer for ink | DISMISS as redundant | Artifact provenance | Existing ink validator already binds exact evaluated arrays |
+| Producer-success semantic validation (exit status is not evidence) | INCLUDE (2026-10-04) | An exit-0 geometry producer can emit nothing, a physically impossible surface, or a no-op copy | Adopt `evaluate_postconditions` in other runners |
+| Recomputed spatial metadata (declared bbox never alone) | INCLUDE (2026-10-04) | Stale bounds silently discard valid geometry in prefilters and separation certificates | Run `scroliq-bbox-census` on the PHercParis4 pack |
+| Configured vs effective objective audit | INCLUDE (2026-10-04) | A nonzero loss weight is not a contributing loss | Wire into model-card preflight |
+| Label-coverage-conditioned surface evaluation | EXPERIMENT FURTHER (2026-10-04) | Aggregate held-out gain can live only in easy, well-labeled geometry | Real run of the frozen strata spec on committed ROIs |
+| Multi-sheet consistency (Lasagna) A/B/C | EXPERIMENT FURTHER, held at WATCH (2026-10-04) | Joint stacked-sheet prior for compressed regions | Task 0 instrumentation plus three fitted-sheet measurements |
 | Gaussian-splatting CT reconstruction (FaCT-GS) | DISMISS for the prize pipeline | Faster reconstruction from raw acquisitions | None; ScrolIQ holds reconstructed volumes and it adds a learned stage upstream of weak ink evidence |
 | Clinical low-dose CT reconstruction (CSRCT) | DISMISS | Sparse-prior reconstruction | None; simulated-data evidence, restricted article, no permissive implementation found |
 

@@ -159,6 +159,175 @@ def _mask(path: Path, shape: tuple[int, int]) -> tuple[np.ndarray | None, dict[s
     }
 
 
+VALIDITY_RULES = ("tifxyz", "nonnegative-xyz")
+_AXES = ("x", "y", "z")
+
+
+def _valid_vertex_mask(
+    xyz: np.ndarray,
+    keep: np.ndarray | None,
+    *,
+    rule: str = "tifxyz",
+) -> tuple[np.ndarray, int]:
+    """Return ``(valid, nonfinite_count)`` under one named validity rule.
+
+    ``tifxyz`` is this audit's rule: VC3D marks holes with ``-1``, so a vertex
+    is valid when ``z > 0`` (and inside the optional mask). ``nonnegative-xyz``
+    is the upstream spiral-input convention: every coordinate is ``>= 0``.
+    The two differ only for vertices with ``z == 0`` or a negative x/y, so
+    callers that compare against a published count must record which one ran.
+    """
+    if rule == "tifxyz":
+        valid = xyz[..., 2] > 0
+    elif rule == "nonnegative-xyz":
+        valid = (xyz >= 0).all(axis=-1)
+    else:
+        raise ValueError(f"unknown vertex validity rule {rule!r}; use one of {VALIDITY_RULES}")
+    if keep is not None:
+        valid = valid & keep
+    nonfinite = valid & ~np.isfinite(xyz).all(axis=-1)
+    return valid & ~nonfinite, int(nonfinite.sum())
+
+
+def _is_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def load_valid_vertices(
+    path: str | Path,
+    *,
+    validity: str = "tifxyz",
+) -> tuple[np.ndarray, np.ndarray, dict[str, Any]]:
+    """Decode a TIFXYZ directory into ``(xyz, valid, info)`` without auditing it.
+
+    Raises ``ValueError`` when the coordinate files are missing, undecodable or
+    disagree in shape; a surface with zero valid vertices is returned, not
+    raised, so callers can report it as empty rather than as unreadable.
+    """
+    root = Path(path)
+    missing = [n for n in ("x.tif", "y.tif", "z.tif") if not (root / n).is_file()]
+    if missing:
+        raise ValueError("missing required TIFXYZ files: " + ", ".join(missing))
+    try:
+        x = np.asarray(_read_tiff(root / "x.tif"), dtype=np.float32)
+        y = np.asarray(_read_tiff(root / "y.tif"), dtype=np.float32)
+        z = np.asarray(_read_tiff(root / "z.tif"), dtype=np.float32)
+    except Exception as exc:  # noqa: BLE001 - surface any decoder failure uniformly
+        raise ValueError(f"coordinate TIFFs could not be decoded: {exc}") from exc
+    if any(a.ndim != 2 for a in (x, y, z)):
+        raise ValueError("x.tif, y.tif, and z.tif must be single-channel 2D images")
+    if not (x.shape == y.shape == z.shape):
+        raise ValueError(f"coordinate TIFF shapes differ: x={x.shape}, y={y.shape}, z={z.shape}")
+    keep, mask_info = _mask(root / "mask.tif", z.shape)
+    xyz = np.stack([x, y, z], axis=-1)
+    valid, nonfinite = _valid_vertex_mask(xyz, keep, rule=validity)
+    return xyz, valid, {
+        "shape_yx": [int(z.shape[0]), int(z.shape[1])],
+        "valid_vertices": int(valid.sum()),
+        "nonfinite_vertices": nonfinite,
+        "validity_rule": validity,
+        "mask": mask_info,
+    }
+
+
+def recompute_bbox(path: str | Path, *, validity: str = "tifxyz") -> dict[str, Any]:
+    """Recompute the XYZ bounds of a TIFXYZ surface from its valid vertices.
+
+    Never reads ``meta.json``: the point of this function is a spatial extent
+    that does not depend on what the producer declared. ``status`` is ``ok``,
+    ``empty`` (decoded, but no valid vertex) or ``unreadable``.
+    """
+    if validity not in VALIDITY_RULES:  # a bad argument is not a bad surface
+        raise ValueError(f"unknown vertex validity rule {validity!r}; use one of {VALIDITY_RULES}")
+    try:
+        xyz, valid, info = load_valid_vertices(path, validity=validity)
+    except ValueError as exc:
+        return {"status": "unreadable", "reason": str(exc), "observed_bbox_xyz": None,
+                "valid_vertices": 0, "validity_rule": validity}
+    if not info["valid_vertices"]:
+        return {"status": "empty", "observed_bbox_xyz": None, **info}
+    pts = xyz[valid]
+    return {
+        "status": "ok",
+        "observed_bbox_xyz": [pts.min(axis=0).tolist(), pts.max(axis=0).tolist()],
+        **info,
+    }
+
+
+def compare_bbox(
+    declared: Any,
+    observed: Any,
+    *,
+    tolerance_voxels: float = 1e-3,
+) -> dict[str, Any]:
+    """Compare a declared ``meta.json`` bbox with bounds recomputed from vertices.
+
+    ``stale`` means valid vertices lie outside the declared box by more than
+    ``tolerance_voxels`` on at least one axis. Such a box is not an upper bound
+    on the surface, so a spatial filter built on it can silently drop geometry.
+    A box that merely contains the surface loosely is ``consistent``; the slack
+    is recorded but is not a defect.
+    """
+    if not math.isfinite(tolerance_voxels) or tolerance_voxels < 0:
+        raise ValueError("tolerance_voxels must be finite and >= 0")
+    out: dict[str, Any] = {"status": "undeclared", "tolerance_voxels": float(tolerance_voxels)}
+    if declared is None:
+        return out
+    if not (
+        isinstance(declared, list)
+        and len(declared) == 2
+        and all(isinstance(row, list) and len(row) == 3 and all(_is_number(v) for v in row)
+                for row in declared)
+    ):
+        return {**out, "status": "unreadable",
+                "reason": "bbox must be [[x0,y0,z0],[x1,y1,z1]] of finite numbers"}
+    box = np.asarray(declared, dtype=np.float64)
+    if not np.isfinite(box).all():
+        return {**out, "status": "unreadable", "reason": "bbox contains non-finite numbers"}
+    if (box[0] > box[1]).any():
+        return {**out, "status": "unreadable", "reason": "bbox minima exceed maxima",
+                "metadata_bbox_xyz": box.tolist()}
+    obs = np.asarray(observed, dtype=np.float64)
+    below = np.maximum(0.0, box[0] - obs[0])
+    above = np.maximum(0.0, obs[1] - box[1])
+    excess = np.maximum(below, above)
+    stale_axes = [a for a, e in zip(_AXES, excess) if e > tolerance_voxels]
+    slack = np.maximum(0.0, np.maximum(obs[0] - box[0], box[1] - obs[1]))
+    return {
+        **out,
+        "status": "stale" if stale_axes else "consistent",
+        "metadata_bbox_xyz": box.tolist(),
+        "contains_observed_vertices": not stale_axes,
+        "max_abs_error_voxels": float(np.max(np.abs(box - obs))),
+        "excess_voxels_xyz": [float(e) for e in excess],
+        "max_excess_voxels": float(excess.max()),
+        "stale_axes": stale_axes,
+        "max_slack_voxels": float(slack.max()),
+    }
+
+
+def geometry_digest(path: str | Path) -> dict[str, Any]:
+    """Digest the decoded geometry of a TIFXYZ surface, independent of encoding.
+
+    Hashes the validity bitmap and the float32 coordinates of valid vertices
+    only, so a re-encoded TIFF, a rewritten ``meta.json`` uuid, or junk in the
+    masked-out cells does not change it. Two surfaces with equal digests are
+    the same geometry; a producer whose output digest equals its input digest
+    changed nothing.
+    """
+    xyz, valid, info = load_valid_vertices(path)
+    h = hashlib.sha256()
+    h.update(b"scrollq-tifxyz-geometry-v1")
+    h.update(np.asarray(info["shape_yx"], dtype="<i8").tobytes())
+    h.update(np.packbits(valid, axis=None).tobytes())
+    h.update(np.ascontiguousarray(xyz[valid], dtype="<f4").tobytes())
+    return {
+        "coordinate_sha256": h.hexdigest(),
+        "shape_yx": info["shape_yx"],
+        "valid_vertices": info["valid_vertices"],
+    }
+
+
 def _nonnegative_int(value: Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool) and value >= 0
 
@@ -979,6 +1148,7 @@ def audit_tifxyz(
     review_limit_per_kind: int = 20,
     selfcross_report: str | Path | None = None,
     surface_preflight_report: str | Path | None = None,
+    bbox_tolerance_voxels: float = 1e-3,
 ) -> dict[str, Any]:
     root = Path(path)
     errors: list[str] = []
@@ -1086,14 +1256,10 @@ def audit_tifxyz(
     if mask_info.get("present") and not mask_info.get("applied"):
         warnings.append(str(mask_info.get("reason")))
 
-    valid = z > 0
-    if keep is not None:
-        valid &= keep
     xyz = np.stack([x, y, z], axis=-1)
-    nonfinite = valid & ~np.isfinite(xyz).all(axis=-1)
-    if nonfinite.any():
-        errors.append(f"{int(nonfinite.sum())} valid vertices contain non-finite coordinates")
-        valid &= ~nonfinite
+    valid, nonfinite_count = _valid_vertex_mask(xyz, keep)
+    if nonfinite_count:
+        errors.append(f"{nonfinite_count} valid vertices contain non-finite coordinates")
 
     valid_count = int(valid.sum())
     if not valid_count:
@@ -1117,33 +1283,33 @@ def audit_tifxyz(
             "message": f"{holes} enclosed invalid grid component(s)",
         })
 
-    bbox: dict[str, Any] = {"metadata_present": False}
+    # Spatial metadata is always recomputed from the valid vertices; the
+    # declared bbox is only ever compared against it, never trusted alone.
+    # "unverified" until there are vertices to compare against: an empty
+    # surface must not look like one that simply declared no bbox.
+    bbox: dict[str, Any] = {"metadata_present": meta.get("bbox") is not None, "status": "unverified"}
     if valid_count:
         pts = xyz[valid]
         observed = np.asarray([pts.min(axis=0), pts.max(axis=0)])
         bbox["observed_bbox_xyz"] = observed.tolist()
-        raw_bbox = meta.get("bbox")
-        if (
-            isinstance(raw_bbox, list)
-            and len(raw_bbox) == 2
-            and all(isinstance(row, list) and len(row) == 3 for row in raw_bbox)
-        ):
-            bbox["metadata_present"] = True
-            try:
-                declared = np.asarray(raw_bbox, dtype=np.float64)
-                contains = bool(
-                    np.all(declared[0] <= observed[0] + 1e-3)
-                    and np.all(declared[1] >= observed[1] - 1e-3)
-                )
-                bbox.update({
-                    "metadata_bbox_xyz": declared.tolist(),
-                    "contains_observed_vertices": contains,
-                    "max_abs_error_voxels": float(np.max(np.abs(declared - observed))),
-                })
-                if not contains:
-                    warnings.append("meta.json bbox does not contain all valid vertices")
-            except Exception:
-                warnings.append("meta.json bbox could not be interpreted as finite XYZ bounds")
+        bbox.update(compare_bbox(meta.get("bbox"), observed, tolerance_voxels=bbox_tolerance_voxels))
+        if bbox["status"] == "stale":
+            axes = ",".join(bbox["stale_axes"])
+            warnings.append(
+                "meta.json bbox does not contain all valid vertices "
+                f"(stale on axis {axes}; worst excess {bbox['max_excess_voxels']:.6g} voxels)"
+            )
+            findings.append({
+                "kind": "stale-bbox",
+                "severity": "review",
+                "message": (
+                    f"declared bbox misses valid vertices on {axes} by up to "
+                    f"{bbox['max_excess_voxels']:.6g} voxels; recompute it from the "
+                    "vertices before any spatial filtering"
+                ),
+            })
+        elif bbox["status"] == "unreadable":
+            warnings.append(f"meta.json bbox could not be interpreted: {bbox['reason']}")
 
     edges = _edge_metrics(xyz, valid, scale, jump_ratio)
     observed_x = edges["columns"]["distance_voxels"]["median"]
