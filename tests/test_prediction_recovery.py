@@ -200,3 +200,72 @@ def test_read_level_box_stitches_edge_chunks_and_zero_fills_absent_chunk():
     assert box[1, 1, 2] == 0
     # Global [6,7,8] exercises all three edge chunks.
     assert box[4, 5, 6] == (6 * 20 + 7 * 3 + 8)
+
+
+def test_projected_relaxation_moves_shifted_plane_grid_toward_fixed_boundary():
+    h = w = 5
+    # Raw component is a z=0 integer plane large enough for the shifted init.
+    points = np.array(
+        [[0.0, float(y), float(x)] for y in range(0, 7) for x in range(0, 9)],
+        dtype=np.float64,
+    )
+    truth = np.array(
+        [[[0.0, float(y + 1), float(x + 1)] for x in range(w)] for y in range(h)],
+        dtype=np.float64,
+    )
+    initial = truth.copy()
+    initial[:, :, 2] += 2.0
+
+    top = np.array([[0.0, 0.0, float(x + 1)] for x in range(w)])
+    bottom = np.array([[0.0, 6.0, float(x + 1)] for x in range(w)])
+    left = np.array([[0.0, float(y + 1), 0.0] for y in range(h)])
+    right = np.array([[0.0, float(y + 1), 6.0] for y in range(h)])
+
+    before = float(np.mean(np.linalg.norm(initial - truth, axis=2)))
+    result = pr.projected_material_relaxation(
+        initial,
+        points,
+        top_boundary_zyx=top,
+        bottom_boundary_zyx=bottom,
+        left_boundary_zyx=left,
+        right_boundary_zyx=right,
+        iteration_count=20,
+        maximum_projection_residual_voxels=3.0,
+        maximum_movement_per_iteration_voxels=3.0,
+    )
+    after = float(np.mean(np.linalg.norm(result["relaxed_zyx"] - truth, axis=2)))
+
+    assert after < before
+    assert np.all(result["relaxed_zyx"][:, :, 0] == 0)
+    assert len(result["history"]) == 20
+    assert result["history"][0]["maximum_accepted_movement_voxels"] <= 3.0
+    assert result["unique_recovered_voxel_fraction"] > 0.5
+
+
+def test_projected_relaxation_rejects_large_component_jump():
+    initial = np.zeros((2, 2, 3), dtype=np.float64)
+    points = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 100.0]])
+    nan_w = np.full((2, 3), np.nan)
+    result = pr.projected_material_relaxation(
+        initial,
+        points,
+        top_boundary_zyx=nan_w,
+        bottom_boundary_zyx=nan_w,
+        left_boundary_zyx=nan_w,
+        right_boundary_zyx=nan_w,
+        iteration_count=3,
+        maximum_projection_residual_voxels=16.0,
+        maximum_movement_per_iteration_voxels=16.0,
+    )
+
+    assert np.array_equal(result["relaxed_zyx"], initial)
+    assert all(row["maximum_accepted_movement_voxels"] == 0.0 for row in result["history"])
+
+
+def test_projected_relaxation_api_has_no_hidden_truth_parameter():
+    import inspect
+
+    parameters = inspect.signature(pr.projected_material_relaxation).parameters
+    assert "truth" not in parameters
+    assert "reference_xyz" not in parameters
+    assert "hidden_valid" not in parameters
