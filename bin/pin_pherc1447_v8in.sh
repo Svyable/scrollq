@@ -8,6 +8,7 @@ scroliq-hf-pin \
   --repo YoussefMoNader/ink-8um-v8in \
   --repo-type model \
   --revision main \
+  --require-public \
   --require-file README.md \
   --out "$out_dir/v8in-base.hf-pin.json"
 
@@ -15,6 +16,7 @@ scroliq-hf-pin \
   --repo YoussefMoNader/ink-8um-v8in-pherc1447-loo-w062 \
   --repo-type model \
   --revision main \
+  --require-public \
   --require-file README.md \
   --out "$out_dir/v8in-pherc1447-loo-w062.hf-pin.json"
 
@@ -22,6 +24,7 @@ scroliq-hf-pin \
   --repo YoussefMoNader/ink-8um-v8-patchpack \
   --repo-type dataset \
   --revision main \
+  --require-public \
   --require-file README.md \
   --out "$out_dir/v8-patchpack.hf-pin.json"
 
@@ -29,6 +32,7 @@ scroliq-hf-pin \
   --repo YoussefMoNader/ink-8um-pherc1447-surfaces \
   --repo-type dataset \
   --revision main \
+  --require-public \
   --require-file README.md \
   --out "$out_dir/pherc1447-surfaces.hf-pin.json"
 
