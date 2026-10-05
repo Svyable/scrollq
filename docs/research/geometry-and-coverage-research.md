@@ -404,6 +404,41 @@ and must be built, with positive controls, first.
 - geometry-hallucination risk: **medium**; a consistency prior can preserve a
   wrong ordering as effectively as a right one
 
+
+## Overnight batch additions (2026-10-04 / 2026-10-05)
+
+The detailed protocols and self-evaluations are in
+[the overnight research ledger](2026-10-04-overnight-research.md). Geometry-side
+ideas that remain live are:
+
+- **sheet-identity cycle consistency — EXPERIMENT FURTHER**;
+- **cross-laminar fiber stratigraphy / recto-side oracle — EXPERIMENT FURTHER**;
+- **fiber-coordinate flattening — EXPERIMENT FURTHER**;
+- **paired-lamina ribbon consistency — EXPERIMENT FURTHER**;
+- **radial-order braid certificate — EXPERIMENT FURTHER**;
+- **surface loop-closure / holonomy certificate — EXPERIMENT FURTHER**;
+- **evidence-family counterfactual reconstruction — EXPERIMENT FURTHER**;
+- **constraint leverage accounting — INCLUDE as provenance/prioritization evidence**;
+- **preservation viability atlas — EXPERIMENT FURTHER**;
+- **annotation-budget optimizer — EXPERIMENT FURTHER**;
+- **material-coordinate distortion overlay — INCLUDE as a diagnostic experiment**.
+
+Two coverage proposals are deliberately folded into the existing independent
+recto-coverage witness program rather than becoming competing completeness
+scores: a CT-space residual certificate and a papyrus mass-balance formulation.
+Both remain **EXPERIMENT FURTHER** until identity-aware real-papyrus controls
+separate missing recto from neighboring-sheet support.
+
+The existing standalone fiber-coordinate model architecture remains
+**DISMISSED**. The overnight result only promotes the cheaper
+material-coordinate distortion overlay and leaves any model canonicalization as
+a future controlled ablation.
+
+Explicit geometry negatives in the batch include language/ink-selected
+flattening, global constant thickness, globally monotonic winding radius,
+automatic loop-closing optimization, averaging ablated/perturbed surfaces, and
+any geometry tuning against apparent text.
+
 ## Research ordering
 
 Geometry research should remain downstream of measured campaign failures:
