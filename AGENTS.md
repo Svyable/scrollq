@@ -55,6 +55,8 @@ weight-free Pareto frontier (triage, not a readability claim).
     `scroliq-fiber`; `fiber_frame.py` → `scroliq-fiber-frame` for the
     experimental ink-blind cross-ply CT continuity diagnostic
   - `vc3d_run_guard.py` → `scroliq-vc3d-run-guard`: create-only external-command receipt; an exit-zero run is `PRODUCER_SEMANTIC_FAILURE` unless the new TIFXYZ also passes vertex/quad/recomputed-area, voxel-spacing (vs a hashed `--volume-meta`), extent/bbox-consistency and output-differs-from-input (decoded-geometry digest) gates; unexercised gates are listed, not passed; optional exact-volume CT preflight binding
+  - `prediction_support.py` → `scroliq-prediction-support`: per-voxel preflight before any tracer; pred_positive ∩ ct_supported vs ∩ ct_zero, distance to CT support, supported/halo/beyond/unresolved prediction-chunk classes, blend-margin enrichment, seed gate and source filter; built-in positive control, no positives is `unverified`. `docs/prediction-support.md`
+  - `harvest_qc_benchmark.py` → `scroliq-harvest-qc`: frozen manifest of verified-good + invalid (wrong-wrap/cross-roll/drift/…) surfaces, seed/evaluation region separation, spec-bound decisions with `influenced_tracing: false`; PROMOTE only a metric that closes a ScrollQ blind spot with zero false rejects outside its calibration scrolls. Evaluation only. `docs/harvest-qc-benchmark.md`
   - `bbox_census.py` → `scroliq-bbox-census`: recomputes bounds over a TIFXYZ patch pack, compares with declared `meta.json` bboxes, counts vertices a declared-bbox filter would lose; positive control built in, empty census is `unverified`
   - `objective_audit.py` → `scroliq-objective-audit`: configured-vs-effective objective passport audit (+ `ObjectiveTracker`); fails closed on never-evaluated/always-zero/non-finite/ungradiented claimed terms and on ablation arms that were not ablated
   - `geometry_strata.py` → `scroliq-geometry-strata`: preregistered geometry-stratified, label-coverage-conditioned surface evaluation gate (`measure` derives curvature/tilt; `evaluate` applies the frozen rule). Machinery only; no real-data result yet
@@ -114,6 +116,8 @@ scroliq-vc3d-run-guard --help                       # exit code + semantic TIFXY
 scroliq-bbox-census --help                          # declared vs recomputed bbox over a patch pack
 scroliq-objective-audit --help                      # configured vs effective objective
 scroliq-geometry-strata --help                      # geometry-stratified evaluation gate
+scroliq-prediction-support --self-test              # CT-support preflight before a prediction seeds geometry
+scroliq-harvest-qc self-test                        # independent harvest-QC benchmark vs ScrollQ gates
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests

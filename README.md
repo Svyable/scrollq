@@ -927,7 +927,7 @@ independent `verify` command re-hashes and re-decodes those artifacts; with
 
 ### Semantic integrity gates
 
-Four checks treat a *claim* as something to be recomputed, not trusted:
+Six checks treat a *claim* as something to be recomputed, not trusted:
 
 - `scroliq-vc3d-run-guard` — an external geometry producer that exits 0 is
   `PRODUCER_SEMANTIC_FAILURE` unless its new TIFXYZ also has recomputed physical
@@ -946,6 +946,17 @@ Four checks treat a *claim* as something to be recomputed, not trusted:
   [geometry-stratified evaluation](docs/geometry-strata.md); the related
   multi-sheet experiment is a design draft in
   [the Lasagna A/B/C protocol](docs/lasagna-abc-protocol.md).
+- `scroliq-prediction-support` — a surface prediction is not a seed source until
+  its positives are checked against the masked CT on the same grid. It reports
+  supported vs CT == 0 positives, distance to support, and supported/halo/beyond
+  chunk classes, and it gates seeds. Only `pred_positive ∩ ct_supported` may seed
+  geometry. Synthetic positive control only; no real-volume run yet. See
+  [the preflight](docs/prediction-support.md).
+- `scroliq-harvest-qc` — a frozen, leakage-checked benchmark of an outside
+  rejection metric (e.g. `vesuvius-automesh` QC) against ScrollQ's gates. A
+  metric is promoted only if it closes a ScrollQ blind spot with zero false
+  rejects, judged outside its own calibration scrolls. Machinery only. See
+  [the benchmark](docs/harvest-qc-benchmark.md).
 
 ### 2027 Grand Prize submission images
 
