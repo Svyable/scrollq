@@ -975,6 +975,12 @@ Four checks treat a *claim* as something to be recomputed, not trusted:
   [geometry-stratified evaluation](docs/geometry-strata.md); the related
   multi-sheet experiment is a design draft in
   [the Lasagna A/B/C protocol](docs/lasagna-abc-protocol.md).
+- `scroliq-winding-conservation` — checks a stitched winding solution against
+  conservation laws no single surface was built to satisfy: label-free layer
+  count along radial rays, winding pitch, and label continuity across cells.
+  Calibrated only on a synthetic spiral with planted delete/duplicate/merge/switch
+  defects; no real solution measured yet. See
+  [winding conservation](docs/winding-conservation.md).
 
 ### 2027 Grand Prize submission images
 

@@ -1,0 +1,382 @@
+{
+  "as_of": "2026-10-05",
+  "data_disk": {
+    "auto_delete": false,
+    "device_name": "scroliq-data",
+    "name_prefix": "scroliq-pherc0826",
+    "size_gib": 250,
+    "type": "pd-ssd",
+    "type_rationale": "inputs (resident pools, tracks) are re-read on the GPU clock by smoke and full run; SSD PD trades a small storage premium for read throughput"
+  },
+  "evidence_retention": {
+    "checkpoint": "upload",
+    "small_files": "upload: receipts, preflights, logs, gate reports, listings, failure bundles",
+    "tifxyz": "hashes_only"
+  },
+  "experiment_contract": {
+    "expected_fitted_patches": 0,
+    "expected_tracks_in_roi": 480117,
+    "ink_may_select_geometry": false,
+    "optimizer_num_training_steps": 30000,
+    "optimizer_random_seed": 1,
+    "prize_volume_id": "20250821151701",
+    "satisfied_track_points_percent": 41.6,
+    "satisfied_tracks_percent": 12.6,
+    "scroll": "PHerc0826",
+    "z_range_half_open": [
+      11000,
+      12000
+    ]
+  },
+  "gcp": {
+    "evidence_bucket": {
+      "lifecycle_delete_age_days": 30,
+      "name": null
+    },
+    "image": {
+      "list_command": "gcloud compute images list --project deeplearning-platform-release --no-standard-images --filter=\"family~cu128\"",
+      "name": null,
+      "project": "deeplearning-platform-release",
+      "selection_rule": "exact image name (not a family) from a Deep Learning VM family with CUDA 12.8 and an R570+ NVIDIA driver, Ubuntu 24.04 preferred (gcc 13 for the C++23 vc_spiral build); the same image for all four VMs because the villa env is built once on the data disk"
+    },
+    "project": null,
+    "zone": null,
+    "zone_note": "choose a zone with L4 capacity before creating the disk; the disk and all four VMs share it"
+  },
+  "gpu_vm": {
+    "accelerator": {
+      "count": 1,
+      "type": "nvidia-l4"
+    },
+    "boot_disk_gib": 50,
+    "boot_disk_type": "pd-balanced",
+    "default_machine_type": "g2-standard-16",
+    "gate_machine_type": "g2-standard-4",
+    "host_ram_rule": {
+      "base_gib": 16,
+      "note": "heuristic against host OOM, applied to the measured resident-pool bytes from stage-data; not a measurement of villa's peak RSS",
+      "pool_multiplier": 1.25
+    },
+    "machine_type_candidates": [
+      {
+        "host_ram_gib": 32,
+        "name": "g2-standard-8"
+      },
+      {
+        "host_ram_gib": 48,
+        "name": "g2-standard-12"
+      },
+      {
+        "host_ram_gib": 64,
+        "name": "g2-standard-16"
+      },
+      {
+        "host_ram_gib": 128,
+        "name": "g2-standard-32"
+      }
+    ],
+    "max_run_duration_hours": 12,
+    "termination_action": "DELETE"
+  },
+  "purpose": "Infrastructure for one bounded PHerc0826 official-villa Spiral reproduction on a single NVIDIA L4. Changes how the run is executed, never what is run.",
+  "recipe": {
+    "path": "artifacts/2026-10-03-spiral-baseline-target/pherc0826_baseline_recipe.json",
+    "sha256": "e54aa2a7ab42b46bd2425667e5e958c41afaa73bb629496e1da73e747ca29d9a"
+  },
+  "schema_version": 1,
+  "scripts": {
+    "cloud/spiral-gcp/bootstrap.sh": "4f8e600b3128828d853dde803fc6816cb740a8f35e494068ebb61a5c4a63e266",
+    "cloud/spiral-gcp/common.sh": "f99893cca315f4c414d4b72687468b14568a91980464790d867fe6f6b0d70264",
+    "cloud/spiral-gcp/gpu-gate.sh": "c2c04788933794d06e7b39849156fbb3fdebf48248693b3650d3e3a4b33a7f23",
+    "cloud/spiral-gcp/gpu-run.sh": "e9129478d09fa740dac8ba7e77fd1985b86dc8cb434244a77be46333a22073e1",
+    "cloud/spiral-gcp/stage-data.sh": "d581f6613b0744105bcdd5f6f37d5461576b7b5b8528b02d87cfa42976e648fe",
+    "cloud/spiral-gcp/stage-env.sh": "a513e1984a79f271361056c6058e876f9d8532c972d7881214c255dfcec8238a"
+  },
+  "self_path": "artifacts/2026-10-05-spiral-cloud-plan/cloud_execution_manifest.json",
+  "smoke": {
+    "cache_isolated": true,
+    "delete_outputs_after": true,
+    "max_wall_minutes": 45,
+    "optimizer_num_training_steps": 300,
+    "projection_safety_factor": 1.25,
+    "promotional": false
+  },
+  "software": {
+    "assembler": {
+      "commit": "96d4f61da958ca79a7be970c5cd1a726964dfc69",
+      "repository": "https://github.com/ttendoscopie-creator/eligible-spiral-dataset"
+    },
+    "cuda_expectation": {
+      "gpu_name_contains": "L4",
+      "min_driver_major": 570,
+      "source": "villa spiral-fitting/pyproject.toml @5a4388f pins torch>=2.11,<2.13 from the cu128 index; CUDA 12.8 needs an R570+ Linux driver",
+      "torch_index": "pytorch-cu128",
+      "villa_gate_tests": [
+        "spiral-fitting/tests/test_cuda_startup.py",
+        "spiral-fitting/tests/test_spiral_headless.py",
+        "spiral-fitting/tests/test_spiral_progress.py"
+      ],
+      "villa_gate_tests_source": "villa spiral-fitting/README.md 'CUDA startup check' @5a4388f"
+    },
+    "scrollq": {
+      "commit": null,
+      "note": "launch-time: a commit whose copy of this manifest and cloud/spiral-gcp/* is byte-identical (scroliq-spiral-cloud plan verifies)",
+      "repository": "https://github.com/Svyable/scrollq"
+    },
+    "scrollq_python": "3.12",
+    "uv": {
+      "linux_x86_64_tarball_sha256": null,
+      "note": "pin the uv release and its uv-x86_64-unknown-linux-gnu.tar.gz sha256 before launch",
+      "version": null
+    },
+    "villa": {
+      "commit": "5a4388f08cc547e6a1a037f949173e731a3e7aa2",
+      "repository": "https://github.com/ScrollPrize/villa",
+      "sparse_paths": [
+        "spiral-fitting",
+        "lasagna"
+      ]
+    },
+    "villa_python": "3.14",
+    "villa_python_source": "villa spiral-fitting/.python-version and requires-python >=3.14 @5a4388f"
+  },
+  "stage_vm": {
+    "boot_disk_gib": 50,
+    "boot_disk_type": "pd-balanced",
+    "machine_type": "e2-standard-8",
+    "max_run_duration_hours": 6,
+    "termination_action": "DELETE"
+  },
+  "staging_sources": {
+    "lasagna": {
+      "bucket_url": "https://vesuvius-challenge-open-data.s3.us-east-1.amazonaws.com",
+      "dense_bytes_per_store": 17655381270,
+      "group": "2",
+      "manifest_file": {
+        "name": "PHerc0826.lasagna.json",
+        "sha256": "183b9a0c936272b82e1bf9f8f783e6487064122e90d102a88603f62f86550fcc",
+        "size": 717
+      },
+      "note": "only group 2 (= normal_zarr_group) is fetched: villa reads Lasagna only through resident pools packed at that group. Stores are renamed to villa's conventional lasagna_inputs/las_008_* names that scroliq-spiral-preflight checks.",
+      "run_prefix": "PHerc0826/representations/predictions/lasagna/20250821151701-lasagna-20260419180421",
+      "stores": [
+        {
+          "chunks": [
+            32,
+            32,
+            32
+          ],
+          "expected_scale": [
+            4.0,
+            4.0,
+            4.0
+          ],
+          "local": "las_008_nx.ome.zarr",
+          "shape": [
+            4230,
+            2043,
+            2043
+          ],
+          "source": "PHerc0826_nx.ome.zarr",
+          "zarray_sha256": "34bd360a2fbeaabbdf6b1ddae0c12a8b185010da8512bc5a17ff9226280d10ea",
+          "zattrs_sha256": "b6987b478ec07f4fcce8cce231f5a2ea994743fc8f2b0d133251a32cdf297c20",
+          "zgroup_sha256": "7c578b275a7ccb234a2427d173bed71c9e7dc5d413052265b68ab5f9b2812ff3"
+        },
+        {
+          "chunks": [
+            32,
+            32,
+            32
+          ],
+          "expected_scale": [
+            4.0,
+            4.0,
+            4.0
+          ],
+          "local": "las_008_ny.ome.zarr",
+          "shape": [
+            4230,
+            2043,
+            2043
+          ],
+          "source": "PHerc0826_ny.ome.zarr",
+          "zarray_sha256": "34bd360a2fbeaabbdf6b1ddae0c12a8b185010da8512bc5a17ff9226280d10ea",
+          "zattrs_sha256": "4996ab17b8aba7ae3bd85de2ed329af4bb8181b2b89b4e69f73fec7f82c2bb43",
+          "zgroup_sha256": "7c578b275a7ccb234a2427d173bed71c9e7dc5d413052265b68ab5f9b2812ff3"
+        },
+        {
+          "chunks": [
+            32,
+            32,
+            32
+          ],
+          "expected_scale": [
+            4.0,
+            4.0,
+            4.0
+          ],
+          "local": "las_008_grad_mag.ome.zarr",
+          "shape": [
+            4230,
+            2043,
+            2043
+          ],
+          "source": "PHerc0826_grad_mag.ome.zarr",
+          "zarray_sha256": "34bd360a2fbeaabbdf6b1ddae0c12a8b185010da8512bc5a17ff9226280d10ea",
+          "zattrs_sha256": "b049e7bcf70bb31dfe5968dbc69d7b7c4f1e2ab10e34610c2e42ab16382d374e",
+          "zgroup_sha256": "7c578b275a7ccb234a2427d173bed71c9e7dc5d413052265b68ab5f9b2812ff3"
+        }
+      ]
+    },
+    "outward_sense": "CW",
+    "spiral_scroll_json": {
+      "derivation": "assembler @96d4f61 scroll_spec('PHerc0826', 9.362 from the umbilicus metadata, 'CW', dbm name), json.dump(indent=1)",
+      "sha256": "7e4234bb90eefde9994b3c7cc469b74773580a9c804d6d617f049b173e76a252",
+      "size": 240
+    },
+    "tracks": {
+      "base_url": "https://dl.ash2txt.org/datasets/spiral_datasets/PHerc0826/20250821151701/tracks",
+      "crossings": {
+        "approx_bytes": 1400000000,
+        "metadata_member_sha256": "2080a26c1e69b581d83f18b3b0a940274eee22558b39e5de949e850d1265417a",
+        "name": "PHerc0826_20250821151701_surface_m7_L0_th0.2.dbm.crossings.npz",
+        "source": "eligible-spiral-dataset fixtures/PROVENANCE.md @96d4f61"
+      },
+      "dbm": {
+        "name": "PHerc0826_20250821151701_surface_m7_L0_th0.2.dbm",
+        "sha256": null,
+        "sha256_note": "recorded by stage-data (tracks.sha256); not published",
+        "size": 5422211072
+      }
+    },
+    "umbilicus": {
+      "metadata_volume": "20250821151701-9.362um-1.2m-113keV-masked.zarr",
+      "metadata_voxelsize_um": 9.362,
+      "sha256": "fc9c54cdc0ea7f0e0bcdbe4e1a94e4a9017e044e2fd7f371531f12c9e6b21fe1",
+      "size": 3870,
+      "url": "https://vesuvius-challenge-open-data.s3.us-east-1.amazonaws.com/PHerc0826/representations/umbilicus/20250821151701-umbilicus-20260808113303.json"
+    }
+  },
+  "status": "frozen_before_first_vm",
+  "storage_budget_gib": {
+    "components": {
+      "crossings": {
+        "gib": 1.31,
+        "source": "approx 1.4 GB, eligible-spiral-dataset fixtures/PROVENANCE.md @96d4f61"
+      },
+      "evidence": {
+        "gib": 2,
+        "source": "estimate: JSON, logs, listings, bundles"
+      },
+      "lasagna_download": {
+        "gib": 49.33,
+        "source": "upper bound: 3 stores x dense group-2 uint8 [4230,2043,2043] = 16.443 GiB each (.zarray); stored chunks are blosc-compressed and sparse"
+      },
+      "os_tools_python": {
+        "gib": 3,
+        "source": "estimate: uv binary, uv-managed CPython 3.14, scrollq venv"
+      },
+      "resident_pools": {
+        "gib": 49.33,
+        "source": "upper bound: pools hold occupied bricks of the same three group-2 arrays, uncompressed"
+      },
+      "run_outputs": {
+        "gib": 10,
+        "source": "estimate: checkpoints, previews, logs for smoke (deleted) and full run"
+      },
+      "tifxyz_export": {
+        "gib": 10,
+        "source": "estimate: one official TIFXYZ export"
+      },
+      "tracks_dbm": {
+        "gib": 5.05,
+        "source": "exact: 5,422,211,072 B, sidecar db_signature quoted in eligible-spiral-dataset README @96d4f61"
+      },
+      "uv_cache": {
+        "gib": 20,
+        "source": "estimate; deleted by stage-env after the villa env is built"
+      },
+      "villa_cache": {
+        "gib": 20,
+        "source": "estimate: FIT_SPIRAL cache for smoke (deleted) and full run"
+      },
+      "villa_env": {
+        "gib": 20,
+        "source": "estimate: torch cu128, cupy, cucim, triton wheels from villa uv.lock; stage-env records the real freeze"
+      }
+    },
+    "floors": {
+      "before_export": {
+        "covers": [
+          "tifxyz_export",
+          "evidence"
+        ],
+        "min_free_gib": 15
+      },
+      "before_fit": {
+        "covers": [
+          "villa_cache",
+          "run_outputs",
+          "tifxyz_export",
+          "evidence"
+        ],
+        "min_free_gib": 45
+      },
+      "before_lasagna": {
+        "covers": [
+          "lasagna_download",
+          "resident_pools",
+          "villa_cache",
+          "run_outputs",
+          "tifxyz_export",
+          "evidence"
+        ],
+        "min_free_gib": 145
+      },
+      "before_pack": {
+        "covers": [
+          "resident_pools",
+          "villa_cache",
+          "run_outputs",
+          "tifxyz_export",
+          "evidence"
+        ],
+        "min_free_gib": 95
+      },
+      "before_tracks": {
+        "covers": [
+          "tracks_dbm",
+          "crossings",
+          "lasagna_download",
+          "resident_pools",
+          "villa_cache",
+          "run_outputs",
+          "tifxyz_export",
+          "evidence"
+        ],
+        "min_free_gib": 150
+      },
+      "before_villa_env": {
+        "covers": [
+          "villa_env",
+          "uv_cache",
+          "tracks_dbm",
+          "crossings",
+          "lasagna_download",
+          "resident_pools",
+          "villa_cache",
+          "run_outputs",
+          "tifxyz_export",
+          "evidence"
+        ],
+        "min_free_gib": 190
+      }
+    }
+  },
+  "watchdog": {
+    "evidence_sync_interval_minutes": 10,
+    "export_reserve_minutes": 60,
+    "gpu_gate_window_minutes": 30,
+    "gpu_prep_window_minutes": 90
+  }
+}

@@ -55,10 +55,17 @@ weight-free Pareto frontier (triage, not a readability claim).
     `scroliq-fiber`; `fiber_frame.py` → `scroliq-fiber-frame` for the
     experimental ink-blind cross-ply CT continuity diagnostic
   - `vc3d_run_guard.py` → `scroliq-vc3d-run-guard`: create-only external-command receipt; an exit-zero run is `PRODUCER_SEMANTIC_FAILURE` unless the new TIFXYZ also passes vertex/quad/recomputed-area, voxel-spacing (vs a hashed `--volume-meta`), extent/bbox-consistency and output-differs-from-input (decoded-geometry digest) gates; unexercised gates are listed, not passed; optional exact-volume CT preflight binding
+  - `spiral_cloud.py` → `scroliq-spiral-cloud`: execution guard rails for the frozen PHerc0826 Spiral run on one L4 — `check` (frozen manifest in `artifacts/2026-10-05-spiral-cloud-plan/` vs recipe contract, storage floors, script hashes), `plan` (gcloud argv only, executes nothing), on-VM `disk-floor`, `gpu-gate`, `fetch-lasagna`, `smoke-recipe`/`smoke-verdict`, `compare-preflight`, `bundle`. VM scripts live in `cloud/spiral-gcp/` and are hash-pinned by the manifest — edit a script, update its hash. Smoke receipts are `promotional: false` and refused by reproduction-check/export. `docs/spiral-cloud-execution.md`
   - `bbox_census.py` → `scroliq-bbox-census`: recomputes bounds over a TIFXYZ patch pack, compares with declared `meta.json` bboxes, counts vertices a declared-bbox filter would lose; positive control built in, empty census is `unverified`
   - `objective_audit.py` → `scroliq-objective-audit`: configured-vs-effective objective passport audit (+ `ObjectiveTracker`); fails closed on never-evaluated/always-zero/non-finite/ungradiented claimed terms and on ablation arms that were not ablated
   - `geometry_strata.py` → `scroliq-geometry-strata`: preregistered geometry-stratified, label-coverage-conditioned surface evaluation gate (`measure` derives curvature/tilt; `evaluate` applies the frozen rule). Machinery only; no real-data result yet
   - `persistence.py` / `persistence_audit.py` / `persistence_controls.py` → `scroliq-persistence`: threshold-persistence audit of frozen ink predictions. `persistence.py` is a leaf engine (exact H0/H1 persistence on the rank-parameterised superlevel filtration; features are functions of integer levels only, so they are bitwise invariant to injective monotone remaps); `persistence_audit.py` has `measure` (hash-bound manifest with a selection contract) / `evaluate` (frozen leave-one-domain-out rule over the `all` and `within_region` scopes) / `controls`; the spec is pinned as a literal `FROZEN_SPEC_SHA256`. Synthetic controls only, no real-data result. `docs/threshold-persistence.md`
+  - `winding_conservation.py` → `scroliq-winding-conservation`: layer-count, pitch and
+    identity-continuity invariants of a stitched winding solution on (θ, z) cells;
+    `calibrate` plants delete/duplicate/merge/switch defects over an extent ladder
+    with a same-footprint null; `measure` runs a built-in positive control
+    (`unverified` if it does not fire). Synthetic calibration only so far
+    (`artifacts/2026-10-05-winding-conservation-synthetic/`)
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
@@ -116,6 +123,7 @@ scroliq-bbox-census --help                          # declared vs recomputed bbo
 scroliq-objective-audit --help                      # configured vs effective objective
 scroliq-geometry-strata --help                      # geometry-stratified evaluation gate
 scroliq-persistence --help                          # threshold-persistence audit (measure / evaluate / controls)
+scroliq-winding-conservation --help                 # layer-count / pitch / continuity QC
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests

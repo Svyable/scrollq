@@ -221,6 +221,8 @@ def prepare_export(
     run_receipt = _load_json(run_receipt_path, "Spiral run receipt")
     if run_receipt.get("tool") != "scroliq-spiral-run" or run_receipt.get("success") is not True:
         raise SpiralExportError("Spiral run receipt is not a successful scroliq-spiral-run result")
+    if run_receipt.get("mode") == "smoke" or run_receipt.get("promotional") is False:
+        raise SpiralExportError("Spiral run receipt is a non-promotional smoke run")
     if run_receipt.get("scroll") != EXPECTED_SCROLL or run_receipt.get("prize_volume_id") != EXPECTED_VOLUME_ID:
         raise SpiralExportError("Spiral run receipt is not the frozen PHerc0826 prize volume")
 
