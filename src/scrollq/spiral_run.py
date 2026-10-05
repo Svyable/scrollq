@@ -404,6 +404,41 @@ def _inventory(run_dir: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _smoke_contract(recipe: Mapping[str, Any], recipe_bytes: bytes) -> dict[str, Any] | None:
+    """Validate a derived smoke recipe (``scroliq-spiral-cloud smoke-recipe``).
+
+    A smoke run executes the same frozen recipe with fewer steps to prove the
+    environment works. Its receipt is marked non-promotional so that the
+    reproduction check and export refuse it.
+    """
+    smoke = recipe.get("smoke")
+    if smoke is None:
+        return None
+    bounded = recipe.get("bounded_reproduction")
+    steps = bounded.get("optimizer_num_training_steps") if isinstance(bounded, dict) else None
+    base = smoke.get("base_optimizer_num_training_steps") if isinstance(smoke, dict) else None
+    if (
+        not isinstance(smoke, dict)
+        or smoke.get("promotional") is not False
+        or not isinstance(smoke.get("base_recipe_sha256"), str)
+        or not re.fullmatch(r"[0-9a-f]{64}", smoke["base_recipe_sha256"])
+        or not isinstance(steps, int)
+        or not isinstance(base, int)
+        or not 0 < steps < base
+    ):
+        raise SpiralRunError(
+            "recipe.smoke must be non-promotional, name its base recipe hash and run "
+            "strictly fewer steps than the base recipe"
+        )
+    return {
+        "promotional": False,
+        "base_recipe_sha256": smoke["base_recipe_sha256"],
+        "base_optimizer_num_training_steps": base,
+        "optimizer_num_training_steps": steps,
+        "recipe_sha256": hashlib.sha256(recipe_bytes).hexdigest(),
+    }
+
+
 def prepare_run(
     *,
     dataset: Path,
@@ -420,6 +455,8 @@ def prepare_run(
     software = recipe.get("software")
     if not isinstance(software, dict) or not isinstance(software.get("villa_commit"), str):
         raise SpiralRunError("recipe.software.villa_commit is required")
+
+    smoke = _smoke_contract(recipe, recipe_bytes)
 
     try:
         preflight = audit_spiral_dataset(dataset, recipe)
@@ -452,6 +489,8 @@ def prepare_run(
     }
     return {
         "schema_version": SCHEMA_VERSION,
+        "mode": "smoke" if smoke else "baseline",
+        "smoke": smoke,
         "recipe": recipe,
         "recipe_sha256": hashlib.sha256(recipe_bytes).hexdigest(),
         "preflight": preflight,
@@ -544,6 +583,8 @@ def run_baseline(
         "tool": "scroliq-spiral-run",
         "status": "success" if success else "failed",
         "success": success,
+        "mode": plan["mode"],
+        "promotional": plan["mode"] != "smoke",
         "scroll": plan["preflight"]["scroll"],
         "prize_volume_id": plan["preflight"]["prize_volume_id"],
         "started_utc": started_utc,

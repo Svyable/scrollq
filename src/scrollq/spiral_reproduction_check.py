@@ -95,6 +95,8 @@ def evaluate_run(run_dir: Path) -> dict[str, Any]:
     receipt = _load_json(receipt_path, "Spiral run receipt")
     if receipt.get("tool") != "scroliq-spiral-run" or receipt.get("success") is not True:
         raise ReproductionCheckError("run receipt is not a successful scroliq-spiral-run result")
+    if receipt.get("mode") == "smoke" or receipt.get("promotional") is False:
+        raise ReproductionCheckError("run receipt is a non-promotional smoke run")
     if receipt.get("scroll") != EXPECTED_SCROLL or receipt.get("prize_volume_id") != EXPECTED_VOLUME_ID:
         raise ReproductionCheckError("run receipt is not the frozen PHerc0826 prize volume")
 
