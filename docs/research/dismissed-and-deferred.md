@@ -237,6 +237,55 @@ simulated data; the article is restricted-access and no permissively licensed
 implementation or checkpoint stack was found. The sparse-prior idea is
 interesting, but neither licensing nor evidence clears the bar.
 
+
+## 2026-10-04 / 2026-10-05 overnight negative decisions
+
+The full reasoning is in
+[the overnight research ledger](2026-10-04-overnight-research.md). The following
+variants were explicitly rejected so they do not return as attractive shortcuts:
+
+- **language-model / Greek-likelihood selection of geometry — DISMISS**:
+  semantic plausibility must not choose the physical surface;
+- **ink-selected recto direction — DISMISS**: circular evidence;
+- **renderer-agreement parameter tuning — DISMISS**: cross-renderer agreement
+  is a falsification test, not an optimizer;
+- **global nearly constant papyrus thickness — DISMISS**: too brittle under
+  compression, fusion and carbonization;
+- **global monotonic winding radius — DISMISS**: folds/crushing invalidate an
+  ideal spiral rule;
+- **global blank-pixel conformal calibration — DISMISS**: heterogeneous easy
+  blank papyrus hides the difficult false-positive regime;
+- **large-window or checkpoint majority consensus as proof — DISMISS**:
+  correlated models can share the same priors and errors;
+- **higher-resolution target-scan-derived cross-resolution evidence — DISMISS**
+  where prize eligibility forbids that target-derived information;
+- **scalar submitted-mesh area as completeness proof — DISMISS**: duplicates
+  and wrong-wrap substitutions can preserve total area;
+- **automatic graph optimization merely to close loop residuals — DISMISS**
+  until diagnostic loop closure itself is validated;
+- **averaging ablated or perturbed geometry — DISMISS**: counterfactual surfaces
+  intentionally omit or perturb valid evidence and are not equal hypotheses;
+- **multi-scale / rotated prediction averaging as independent ink evidence —
+  DISMISS**;
+- **automatic filling of abstained pixels — DISMISS**: manufactures morphology;
+- **automatic exclusion of damaged regions from prize metrics — DISMISS**:
+  reviewer adjudication must remain external;
+- **inferring physical damage from blank ink output — DISMISS**: circular;
+- **automatic rejection from neighboring-sheet response — DISMISS** until the
+  shadow test itself is calibrated;
+- **neighbor-sheet disagreement as affirmative proof of ink — DISMISS**;
+- **universal bit-for-bit reproducibility — DISMISS** in favor of declared
+  physical/numerical invariants;
+- **snapshot-testing final rendered letter images as the scientific regression
+  gate — DISMISS**;
+- **using counterfactual papyrus transplantation as training augmentation before
+  it earns value as a falsification test — DISMISS**;
+- **automatically suppressing every context-sensitive prediction — DISMISS**;
+- **rotating final 2-D ink output until text looks coherent — DISMISS**.
+
+These decisions do not block the surviving bounded experiments. They define the
+epistemic boundary those experiments must preserve.
+
 ## Deferred, not dismissed
 
 The following remain live but should not consume primary-pipeline priority until

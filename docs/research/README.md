@@ -31,12 +31,36 @@ campaign.
 | Causal context ablation | EXPERIMENT FURTHER | Detect predictions that survive destruction of local CT evidence | Held-out central-vs-distant intervention study |
 | Morphology/topography corroboration | INCLUDE as source-control framework; target transfer EXPERIMENT FURTHER | Independent physical support for ink | Resolve source scale discrepancy, then validate transfer conservatively |
 | Deterministic volumetric-texture ink corroboration | WATCH; clean-room experiment only, no deposited-code reuse or training feedback | Orthogonal training-free volumetric CT texture witness for learned ink / false-positive gates | Independently implement published descriptors; preregister one held-out slab; test supported ink, supervised non-ink, derivation perturbations, and planted strokes |
+| Registered-rescan ink invariance | EXPERIMENT FURTHER | Independent acquisition/reconstruction invariance for physical ink | Visible-ink registered pair + broken-registration and wrong-sheet nulls |
+| Matched-null ink evidence | EXPERIMENT FURTHER | Calibrate candidates against physically similar verified blank papyrus | Leave-fragment/scanner-out calibration and blank-only error audit |
+| Calibrated ink abstention | EXPERIMENT FURTHER | Trade coverage for empirically bounded false-positive risk | Leave-one-scroll-out selective-risk curves on hard negatives |
+| Checkpoint-disagreement cartography | EXPERIMENT FURTHER | Localize model-family epistemic weakness without majority-vote proof | Held-out disagreement vs hard negatives and confidence baselines |
+| Synthetic-resolution ladder | INCLUDE as validation experiment; no production fusion | Measure checkpoint robustness to controlled information loss / voxel scale | Frozen held-out degradation ladder; adaptation remains separate |
+| Scanner-frame equivariance audit | INCLUDE as validation experiment | Detect acquisition-axis / architecture orientation dependence | Exact lattice symmetries with axis-sensitive positive control |
+| Adjacent-sheet shadow test | EXPERIMENT FURTHER | Neighboring windings as naturally matched false-positive controls | Trustworthy sheet identity + held-out target-vs-neighbor specificity |
+| Geometry-conditioned ink uncertainty | EXPERIMENT FURTHER | Propagate calibrated segmentation uncertainty into ink evidence | Calibrated surface-error envelope + incremental held-out discrimination |
 | Acquisition-physics normalization and conditioning | EXPERIMENT FURTHER | Reduce cross-scan/domain shift without larger semantic context | Leave-one-acquisition-regime-out benchmark |
 | Cross-parameterization inference invariance | EXPERIMENT FURTHER | Detect representation-sensitive ink predictions | Real detector + second valid UV parameterization |
 | Stride/blend/seam invariance | EXPERIMENT FURTHER | Detect stitching/crop-grid false positives | Held-out nuisance sweep using existing Villa controls |
 | Exact inference-configuration binding | INCLUDE, merged in PR #142 | Reproducible model evaluation | Maintain as part of the evaluation contract |
 | Scored-result run identity binding | INCLUDE, merged in PR #147 | Prevent stale score files from masquerading as current results | Maintain adapter compliance |
+| Rendering commutativity certificate | INCLUDE as proof infrastructure | Independently verify TIFXYZ→CT rendering and tiling/cropping invariants | Minimal reference renderer + asymmetric synthetic volume |
+| Metamorphic submission harness | INCLUDE as proof infrastructure | Detect cache/chunk/tile/origin/replay defects without truth labels | Seeded faults + machine-readable conformance receipts |
+| Fault-injection CI | INCLUDE | Prove provenance/geometry guards actually fail on known defects | Retain one intentional corruption per major guard |
 | Independent recto coverage witnesses | EXPERIMENT FURTHER; Stage-A deletion calibration passed | Falsify omitted surface outside a declared inventory | Identity/continuity-aware unconditioned witness test; raw surface existence is insufficient |
+| Sheet-identity cycle consistency | EXPERIMENT FURTHER | Catch locally smooth wrong-winding jumps through cycle closure | Injected + real sheet-jump benchmark |
+| Cross-laminar fiber stratigraphy / recto oracle | EXPERIMENT FURTHER | Ink-blind recto-direction evidence from through-thickness fiber ordering | Known-side leave-fragment-out calibration with abstention |
+| Fiber-coordinate flattening | EXPERIMENT FURTHER | Use physical fiber fields as intrinsic flattening coordinates | Recover blinded distorted trusted geometry; scrambled-fiber null |
+| Paired-lamina ribbon consistency | EXPERIMENT FURTHER | Validate a finite-thickness sheet rather than one center surface | Wrong-wrap substitutions vs single-surface sheetness |
+| Radial-order braid certificate | EXPERIMENT FURTHER | Detect unexplained relative-order exchanges among windings | Fold/tear/tangency/umbilicus-uncertainty controls |
+| Surface loop-closure / holonomy | EXPERIMENT FURTHER | Detect globally inconsistent patch assemblies missed by local seams | Injected drift/sheet-jump localization on cycle basis |
+| Evidence-family counterfactual reconstruction | EXPERIMENT FURTHER | Reveal geometry critically dependent on one fragile evidence family | Poisoned-constraint localization on trusted reconstruction |
+| Constraint leverage accounting | INCLUDE as provenance/prioritization evidence | Quantify downstream area/topology controlled by each constraint | Record during future modular reconstructions |
+| Annotation-budget optimizer | EXPERIMENT FURTHER | Maximize correct physical area/topology per bounded human-input second | Retrospective oracle simulation + real VC3D timing |
+| Human-input ledger | INCLUDE as proof infrastructure | Auditable bounded human intervention history | Implement append-only schema when manual interventions begin |
+| Preservation viability atlas | EXPERIMENT FURTHER | Separate physical material loss from pipeline/ink failure | Blind known-damage vs segmentation-dropout benchmark |
+| Explanation packet generator | INCLUDE as proof infrastructure | Reviewer-ready evidence for blank/damaged regions | Bind CT/TIFXYZ locations, support evidence, hashes, reason codes |
+| Material-coordinate distortion overlay | INCLUDE as diagnostic experiment | Quantify UV distortion relative to physical papyrus fiber frame | Frozen fiber field + UV Jacobian comparison |
 | Fiber-texture fingerprints for sheet identity | EXPERIMENT FURTHER | Detect smooth but wrong-winding sheet switches | Adjacent-winding controls on real CT |
 | Phase-preserving microtexture seam authentication | EXPERIMENT FURTHER; executable synthetic harness (`scroliq-seam-fingerprint`); real CT unmeasured | Prove a claimed patch overlap is the same physical sheet, and bound its residual displacement | Real-CT adjacent-winding benchmark with an independent-scan arm (see [protocol](../papyrus-seam-fingerprint.md)) |
 | Cross-ply fiber-frame continuity | EXPERIMENT FURTHER; executable harness + synthetic splice control | Ink-blind CT-conditioned local material continuity + VC3D review | Real-CT adjacent-winding and legitimate-discontinuity benchmark |
@@ -61,6 +85,26 @@ campaign.
 | Gaussian-splatting CT reconstruction (FaCT-GS) | DISMISS for the prize pipeline | Faster reconstruction from raw acquisitions | None; ScrolIQ holds reconstructed volumes and it adds a learned stage upstream of weak ink evidence |
 | Clinical low-dose CT reconstruction (CSRCT) | DISMISS | Sparse-prior reconstruction | None; simulated-data evidence, restricted article, no permissive implementation found |
 
+
+## 2026-10-04 / 2026-10-05 overnight research batch
+
+The full deduplicated ledger for the overnight exploration is
+[2026-10-04-overnight-research.md](2026-10-04-overnight-research.md). It records
+all explored ideas, promotion gates, self-evaluations, absorptions into existing
+experiments, and explicit dismissals.
+
+The strongest **INCLUDE-as-evidence** decisions from that batch are:
+
+- rendering commutativity / independent reference-render checks;
+- human-input ledger and constraint-leverage accounting;
+- synthetic-resolution and exact scanner-frame validation experiments;
+- explanation packets for physically compromised/blank regions;
+- metamorphic submission testing plus fault-injection CI;
+- material-coordinate distortion overlays.
+
+These are research/proof decisions, not claims that their implementations are
+already merged. The primary dependency-order campaign remains authoritative.
+
 ## Files
 
 - [Ink and false-positive research](ink-and-false-positive-research.md)
@@ -68,6 +112,7 @@ campaign.
 - [Structure-aware conformal surface uncertainty](structure-aware-conformal-surface-uncertainty.md)
 - [Reproducibility and proof-chain research](reproducibility-research.md)
 - [Dismissed and deferred ideas](dismissed-and-deferred.md)
+- [2026-10-04 / 2026-10-05 overnight exploratory research](2026-10-04-overnight-research.md)
 
 ## Existing tracked work
 
