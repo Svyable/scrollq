@@ -182,6 +182,96 @@ bbox against recomputed bounds, the run guard blocks stale output metadata, and
 `scroliq-bbox-census` reproduces the count over any patch pack with a positive
 control. The census has not yet been run on the real pack.
 
+
+## 8. Overnight proof-infrastructure additions
+
+The 2026-10-04 / 2026-10-05 research batch identified several proof-chain
+mechanisms that are cheap, deterministic, and directly useful to a final
+submission. Their full protocols and self-evaluations are recorded in
+[the overnight research ledger](2026-10-04-overnight-research.md).
+
+### 8a. Rendering commutativity certificate
+
+**Status:** INCLUDE as proof infrastructure; implementation is not part of this
+docs-only batch.
+
+A deliberately independent reference implementation should reconstruct the
+declared TIFXYZ→CT sampling operation and compare it with the production
+renderer. Whole-vs-tiled, full-vs-cropped, and equivalent-resampling operations
+should satisfy preregistered commutativity tolerances.
+
+The reference renderer must not share the production renderer's sampling code.
+An asymmetric synthetic coordinate-encoding volume supplies positive controls
+for axis swaps, scale mistakes, crop-origin errors, interpolation mismatches and
+tile-boundary defects.
+
+### 8b. Metamorphic submission harness
+
+**Status:** INCLUDE as proof infrastructure.
+
+The pipeline should be tested under scientifically equivalent mutations whose
+expected relationships are known without ink ground truth: clean/warm cache,
+tile order, batch size, monolithic/tiled execution, lossless rechunking and
+physically corrected crop-origin translation.
+
+Each mutation binds its expected invariant, numerical tolerance, artifact
+hashes and measured deviation into a machine-readable conformance receipt.
+
+### 8c. Fault-injection CI
+
+**Status:** INCLUDE.
+
+Every important provenance/geometry guard should retain at least one deliberately
+corrupted positive control that demonstrates the guard actually fails for the
+defect it claims to detect. This extends the repository rule that a clean audit
+which checked nothing is vacuous.
+
+### 8d. Human-input ledger
+
+**Status:** INCLUDE as proof infrastructure.
+
+For any bounded human intervention, record the region, alternatives shown,
+exact response, wall-clock duration, affected geometry, before/after identities
+and cumulative human-input time. The ledger documents activity; it does not
+define Challenge policy.
+
+### 8e. Constraint leverage accounting
+
+**Status:** INCLUDE as provenance/prioritization evidence.
+
+Record the physical area/topology downstream of each constraint so that a tiny
+manual or generated constraint with large causal reach is visible in review and
+can be prioritized for independent validation.
+
+### 8f. Preservation explanation packets
+
+**Status:** INCLUDE as proof infrastructure.
+
+For any blank or physically compromised region, package the CT/TIFXYZ
+coordinates, physical support evidence, reviewer-loadable location, hashes and
+reason code. The packet supplies evidence; it does not automatically alter
+legibility accounting.
+
+### 8g. Material-coordinate distortion overlay
+
+**Status:** INCLUDE as a diagnostic experiment.
+
+Compare UV orientation/shear/reversal with independently estimated physical
+fiber directions. This converts a qualitative material-coordinate check into a
+reproducible review overlay without using ink.
+
+### Claim boundary
+
+None of these INCLUDE decisions means the implementation already exists. This
+batch records that the evidence mechanism is worth implementing when its input
+dependencies are available. They remain non-blocking relative to the primary
+Grand Prize dependency-order campaign.
+
+The batch also rejects two superficially strict reproducibility rules:
+universal bit-for-bit equality and snapshot testing final letter images. Both
+can preserve the wrong scientific behavior; physical/metamorphic invariants are
+the preferred contract.
+
 ## Promotion rule for future proof-chain work
 
 A new provenance mechanism should earn INCLUDE only when all of the following
