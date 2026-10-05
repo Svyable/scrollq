@@ -112,6 +112,21 @@ The surviving morphology path uses conservative descriptors, papyrus-level
 holdout, missingness controls, label controls, and a fail-closed transfer gate.
 See [morphology-ink-control.md](../morphology-ink-control.md).
 
+## Relief-conditioned ink training
+
+**Status:** DISMISS for now (2026-10-05).
+
+Do not feed relief or curvature channels into the ink network yet. Doing so
+would entangle the two evidence sources and destroy the relief witness's value
+as independent corroboration. It would add a retraining surface, and it could
+teach the network to turn cracks or fiber texture into letter-shaped false
+positives.
+
+Reconsider only after the geometry-only relief witness passes its held-out
+fragment promotion gate. Even then, compare the fused model against
+witness-as-gate on the same held-out fragments. See
+[2026-10-05-ink-relief-witness.md](2026-10-05-ink-relief-witness.md).
+
 ## Large-context semantics as a substitute for physical validation
 
 **Status:** DISMISS as a validation strategy.

@@ -65,6 +65,11 @@ weight-free Pareto frontier (triage, not a readability claim).
     with a same-footprint null; `measure` runs a built-in positive control
     (`unverified` if it does not fire). Synthetic calibration only so far
     (`artifacts/2026-10-05-winding-conservation-synthetic/`)
+  - `ink_passport.py` → `scroliq-ink-passport`: one record per ink component / reviewer
+    letter region binding UV extent, mesh-mapped level-0 CT coordinates, prediction +
+    surface + checkpoint hashes, point-by-point training-region exclusion (provenance
+    box format), raw score and optional independent relief support; missing evidence
+    stays `unknown`/`not-measured`. Evidence only, never an ink verdict
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
@@ -122,6 +127,7 @@ scroliq-bbox-census --help                          # declared vs recomputed bbo
 scroliq-objective-audit --help                      # configured vs effective objective
 scroliq-geometry-strata --help                      # geometry-stratified evaluation gate
 scroliq-winding-conservation --help                 # layer-count / pitch / continuity QC
+scroliq-ink-passport --help                         # per-component ink evidence passport
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests

@@ -507,6 +507,23 @@ This is an **evidence-quality audit, not an ink classifier**. A pass means the d
 
 The command fails closed when the mask is empty or single-class, inputs are malformed, the split is not declared held out, training overlap is not declared absent, or no falsification control is supplied. Those checks make the output an auditable evidence artifact; they do not prove that a URL is public, independently establish the declared train/validation split, set a performance threshold, or claim readability. See the [held-out ink protocol](docs/ink-validation.md).
 
+### Per-component evidence passport
+
+`scroliq-ink-passport` emits one record per proposed ink component or reviewer
+letter region. Each record holds:
+
+- the UV extent, and the level-0 CT coordinates mapped through the submitted
+  TIFXYZ;
+- the prediction and surface hashes, and the checkpoint SHA-256;
+- point-by-point training-region exclusion, using the provenance gate's box
+  format;
+- the raw ink score;
+- an independent relief-support statistic when one is supplied.
+
+Missing evidence stays `unknown` or `not-measured`. The passport records
+evidence; it does not classify ink or judge legibility. See
+[the passport contract](docs/ink-passport.md).
+
 ## How ScrolIQ compares with existing tools
 
 ScrolIQ reads the community's tool outputs and checks them against the exact data they claim to describe; where a tool already does a job, ScrolIQ consumes its report instead of reimplementing it.
