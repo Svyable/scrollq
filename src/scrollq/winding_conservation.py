@@ -634,15 +634,16 @@ def calibrate(
     def smallest(kind: str, family: str):
         out = []
         for dz in z_extents:
+            # Smallest theta extent from which every larger one is also reliable.
             found = None
-            for dtheta in theta_extents:
+            for dtheta in sorted(theta_extents, reverse=True):
                 row = next(r for r in rows if r["defect"] == kind and r["dz_voxels"] == dz
                            and r["dtheta_degrees"] == dtheta)
-                if row["detection_rate"][family] >= RELIABLE_RATE:
-                    found = {"dtheta_degrees": dtheta,
-                             "detection_rate": row["detection_rate"][family],
-                             "null_rate": row["null_rate"][family]}
+                if row["detection_rate"][family] < RELIABLE_RATE:
                     break
+                found = {"dtheta_degrees": dtheta,
+                         "detection_rate": row["detection_rate"][family],
+                         "null_rate": row["null_rate"][family]}
             out.append({"dz_voxels": dz, "smallest_reliable": found})
         return out
 
@@ -660,7 +661,8 @@ def calibrate(
         "defect_winding_range": [k_lo, k_hi],
         "detection_rule": (
             "a family fires when any cell in the footprint dilated by one cell carries its flag; "
-            "null_rate is the same footprint on the unmodified solution"),
+            "null_rate is the same footprint on the unmodified solution; smallest_reliable is "
+            "the smallest theta extent from which every larger one reaches reliable_rate"),
         "clean": {key: clean[key] for key in (
             "status", "solution", "parameters", "label_orientation", "cells_evaluated",
             "flagged_cells", "flagged_cells_by_family", "pitch")},
