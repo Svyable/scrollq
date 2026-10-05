@@ -61,6 +61,26 @@ campaign.
 | Gaussian-splatting CT reconstruction (FaCT-GS) | DISMISS for the prize pipeline | Faster reconstruction from raw acquisitions | None; ScrolIQ holds reconstructed volumes and it adds a learned stage upstream of weak ink evidence |
 | Clinical low-dose CT reconstruction (CSRCT) | DISMISS | Sparse-prior reconstruction | None; simulated-data evidence, restricted article, no permissive implementation found |
 
+
+## 2026-10-04 / 2026-10-05 overnight research batch
+
+The full deduplicated ledger for the overnight exploration is
+[2026-10-04-overnight-research.md](2026-10-04-overnight-research.md). It records
+all explored ideas, promotion gates, self-evaluations, absorptions into existing
+experiments, and explicit dismissals.
+
+The strongest **INCLUDE-as-evidence** decisions from that batch are:
+
+- rendering commutativity / independent reference-render checks;
+- human-input ledger and constraint-leverage accounting;
+- synthetic-resolution and exact scanner-frame validation experiments;
+- explanation packets for physically compromised/blank regions;
+- metamorphic submission testing plus fault-injection CI;
+- material-coordinate distortion overlays.
+
+These are research/proof decisions, not claims that their implementations are
+already merged. The primary dependency-order campaign remains authoritative.
+
 ## Files
 
 - [Ink and false-positive research](ink-and-false-positive-research.md)
@@ -68,6 +88,7 @@ campaign.
 - [Structure-aware conformal surface uncertainty](structure-aware-conformal-surface-uncertainty.md)
 - [Reproducibility and proof-chain research](reproducibility-research.md)
 - [Dismissed and deferred ideas](dismissed-and-deferred.md)
+- [2026-10-04 / 2026-10-05 overnight exploratory research](2026-10-04-overnight-research.md)
 
 ## Existing tracked work
 
