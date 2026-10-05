@@ -22,6 +22,16 @@ checkout at exactly `recipe.software.villa_commit`, the official fitter,
 an executable Python, and a new run directory. The clean-tree rule prevents a
 locally edited fitter from masquerading as the pinned official revision.
 
+## Smoke runs
+
+A recipe derived by `scroliq-spiral-cloud smoke-recipe` carries a `smoke` block
+(`promotional: false`, base recipe sha256, strictly fewer steps). The runner
+validates the block, applies the same supervision checks, and writes
+`mode: "smoke", promotional: false` into the receipt.
+`scroliq-spiral-reproduction-check` and `scroliq-spiral-export` refuse such
+receipts. Baseline receipts carry `mode: "baseline", promotional: true`. See
+[`spiral-cloud-execution.md`](spiral-cloud-execution.md).
+
 ## Run
 
 Use the same command without `--prepare-only`. The launcher sets the canonical

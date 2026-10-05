@@ -927,7 +927,7 @@ independent `verify` command re-hashes and re-decodes those artifacts; with
 
 ### Semantic integrity gates
 
-Six checks treat a *claim* as something to be recomputed, not trusted:
+Seven checks treat a *claim* as something to be recomputed, not trusted:
 
 - `scroliq-vc3d-run-guard` — an external geometry producer that exits 0 is
   `PRODUCER_SEMANTIC_FAILURE` unless its new TIFXYZ also has recomputed physical
@@ -957,6 +957,12 @@ Six checks treat a *claim* as something to be recomputed, not trusted:
   metric is promoted only if it closes a ScrollQ blind spot with zero false
   rejects, judged outside its own calibration scrolls. Machinery only. See
   [the benchmark](docs/harvest-qc-benchmark.md).
+- `scroliq-winding-conservation` — checks a stitched winding solution against
+  conservation laws no single surface was built to satisfy: label-free layer
+  count along radial rays, winding pitch, and label continuity across cells.
+  Calibrated only on a synthetic spiral with planted delete/duplicate/merge/switch
+  defects; no real solution measured yet. See
+  [winding conservation](docs/winding-conservation.md).
 
 ### 2027 Grand Prize submission images
 
