@@ -405,6 +405,42 @@ supported ink better than existing controls.
 - unnecessary surface area: **low if kept outside the predictor and dependency graph**
 
 
+
+## Overnight batch additions (2026-10-04 / 2026-10-05)
+
+The detailed protocols and self-evaluations are in
+[the overnight research ledger](2026-10-04-overnight-research.md). The ink-side
+ideas that remain live are:
+
+- **registered-rescan ink invariance — EXPERIMENT FURTHER:** independent
+  acquisitions of the same material as a falsification axis;
+- **matched-null ink evidence — EXPERIMENT FURTHER:** compare candidates with
+  physically matched verified blank papyrus rather than a global blank pool;
+- **calibrated abstention — EXPERIMENT FURTHER:** `INK / NON_INK / ABSTAIN`
+  with leave-one-scroll-out selective-risk evaluation;
+- **checkpoint-disagreement cartography — EXPERIMENT FURTHER:** disagreement is
+  a review/abstention signal, not ensemble proof;
+- **synthetic-resolution ladder — INCLUDE as validation experiment; automatic
+  PSF/resolution adaptation remains EXPERIMENT FURTHER**;
+- **scanner-frame exact-symmetry audit — INCLUDE as validation experiment**;
+- **adjacent-sheet shadow controls — EXPERIMENT FURTHER** where physical sheet
+  identity is independently trustworthy;
+- **geometry-conditioned ink uncertainty — EXPERIMENT FURTHER:** preserve the
+  ensemble as sensitivity evidence rather than averaging it;
+- **normal-depth signature — INCLUDE as a validation refinement of the existing
+  surface-normal campaign**, subject to held-out physical calibration.
+
+Several overnight ideas are refinements rather than new subsystems:
+receptive-field ladders, causal-locality auditing, and counterfactual papyrus
+transplantation belong under **causal context ablation**; dual-flattening
+concordance belongs under **cross-parameterization inference invariance**.
+
+Explicit negatives are preserved in
+[dismissed-and-deferred.md](dismissed-and-deferred.md) and in the batch ledger:
+majority-vote checkpoint ensembles, multi-scale/test-time averaging,
+context-sensitive pixel filling, target-text-tuned calibration, and any use of
+agreement as affirmative proof of ink remain out.
+
 ## Research ordering
 
 These experiments should not all run at once. Prefer the cheapest strong
