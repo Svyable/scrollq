@@ -58,6 +58,12 @@ weight-free Pareto frontier (triage, not a readability claim).
   - `bbox_census.py` → `scroliq-bbox-census`: recomputes bounds over a TIFXYZ patch pack, compares with declared `meta.json` bboxes, counts vertices a declared-bbox filter would lose; positive control built in, empty census is `unverified`
   - `objective_audit.py` → `scroliq-objective-audit`: configured-vs-effective objective passport audit (+ `ObjectiveTracker`); fails closed on never-evaluated/always-zero/non-finite/ungradiented claimed terms and on ablation arms that were not ablated
   - `geometry_strata.py` → `scroliq-geometry-strata`: preregistered geometry-stratified, label-coverage-conditioned surface evaluation gate (`measure` derives curvature/tilt; `evaluate` applies the frozen rule). Machinery only; no real-data result yet
+  - `winding_conservation.py` → `scroliq-winding-conservation`: layer-count, pitch and
+    identity-continuity invariants of a stitched winding solution on (θ, z) cells;
+    `calibrate` plants delete/duplicate/merge/switch defects over an extent ladder
+    with a same-footprint null; `measure` runs a built-in positive control
+    (`unverified` if it does not fire). Synthetic calibration only so far
+    (`artifacts/2026-10-05-winding-conservation-synthetic/`)
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
@@ -114,6 +120,7 @@ scroliq-vc3d-run-guard --help                       # exit code + semantic TIFXY
 scroliq-bbox-census --help                          # declared vs recomputed bbox over a patch pack
 scroliq-objective-audit --help                      # configured vs effective objective
 scroliq-geometry-strata --help                      # geometry-stratified evaluation gate
+scroliq-winding-conservation --help                 # layer-count / pitch / continuity QC
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests
