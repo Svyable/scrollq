@@ -507,6 +507,35 @@ This is an **evidence-quality audit, not an ink classifier**. A pass means the d
 
 The command fails closed when the mask is empty or single-class, inputs are malformed, the split is not declared held out, training overlap is not declared absent, or no falsification control is supplied. Those checks make the output an auditable evidence artifact; they do not prove that a URL is public, independently establish the declared train/validation split, set a performance threshold, or claim readability. See the [held-out ink protocol](docs/ink-validation.md).
 
+### Threshold-persistence audit (experimental)
+
+`scroliq-persistence` asks whether the *shape of a frozen detector's own confidence
+filtration* separates verified ink from false positives beyond what peak and mean
+probability, area and ordinary morphology already say, on domains held out whole.
+It treats a probability map as a scalar field and computes exact component and
+hole persistence over its rank-parameterised superlevel filtration, so the result
+is invariant to monotone recalibration of the scores. A preregistered
+leave-one-domain-out rule decides the outcome, and every gate must pass both
+across regions and within verified-ink regions.
+
+```bash
+scroliq-persistence controls --out out/persistence-controls.json --seed-base 700000 --n 24
+scroliq-persistence measure  --manifest manifest.json --out out/features.json
+scroliq-persistence evaluate --features out/features.json --out out/report.json
+```
+
+The status is **EXPERIMENT FURTHER** and the evidence is synthetic only: no real
+prediction map has been measured, so whether real ink and real false positives
+differ in threshold persistence is unknown. It generates no ink, reads no text,
+never chooses a threshold (each region's nominal threshold is declared in the
+manifest) and never compares topology with character templates. A positive
+verdict would not show that a mark is ink or that text is legible, and a stable
+false positive passes it. Protocol, frozen definitions and limits:
+[`docs/threshold-persistence.md`](docs/threshold-persistence.md); preregistered spec:
+[`artifacts/2026-10-05-threshold-persistence-prereg/`](artifacts/2026-10-05-threshold-persistence-prereg/);
+synthetic controls:
+[`artifacts/2026-10-05-threshold-persistence-synthetic/`](artifacts/2026-10-05-threshold-persistence-synthetic/).
+
 ## How ScrolIQ compares with existing tools
 
 ScrolIQ reads the community's tool outputs and checks them against the exact data they claim to describe; where a tool already does a job, ScrolIQ consumes its report instead of reimplementing it.

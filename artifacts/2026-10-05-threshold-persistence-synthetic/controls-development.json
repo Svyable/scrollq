@@ -1,0 +1,1394 @@
+{
+  "classification": "EXPERIMENT FURTHER",
+  "engine_oracles": {
+    "betti_mismatches": 0,
+    "dihedral_fields": 6,
+    "dihedral_invariant": 6,
+    "euler_checked": 14656,
+    "euler_mismatches": 0,
+    "levels_checked": 21600,
+    "wrong_convention_checked": 4351,
+    "wrong_convention_disagreements": 2590
+  },
+  "environment": {
+    "numpy": "2.4.6",
+    "python": "3.11.15"
+  },
+  "gate_status": "pass",
+  "gates": [
+    {
+      "detail": "0 mismatches over 21600 levels",
+      "name": "engine betti == independent label count",
+      "pass": true
+    },
+    {
+      "detail": "0 mismatches over 14656 levels",
+      "name": "engine beta0-beta1 == independent Euler count",
+      "pass": true
+    },
+    {
+      "detail": "6/6 fields",
+      "name": "diagrams symmetric under 8 grid symmetries",
+      "pass": true
+    },
+    {
+      "detail": "2590/4351 disagree",
+      "name": "oracle has teeth (wrong connectivity is detected)",
+      "pass": true
+    },
+    {
+      "detail": "4 injective remaps over 6 components",
+      "name": "rank features bitwise-invariant to monotone remaps",
+      "pass": true
+    },
+    {
+      "detail": "value-parameterised persistence differs under a non-affine monotone remap",
+      "name": "invariance control has teeth (value persistence changes)",
+      "pass": true
+    },
+    {
+      "detail": "11/12 seeds PERSISTENCE_ADDS_SIGNAL (need >= 0.75)",
+      "name": "planted_sweep_effect: planted persistence-only effect found",
+      "pass": true
+    },
+    {
+      "detail": "0/12 seeds PERSISTENCE_ADDS_SIGNAL (allowed <= 0.17)",
+      "name": "null_no_effect: no signal credited to persistence",
+      "pass": true
+    },
+    {
+      "detail": "0/12 seeds PERSISTENCE_ADDS_SIGNAL (allowed <= 0.17)",
+      "name": "baseline_explained: no signal credited to persistence",
+      "pass": true
+    },
+    {
+      "detail": "0/12 seeds PERSISTENCE_ADDS_SIGNAL (allowed <= 0.17)",
+      "name": "region_confound_only: no signal credited to persistence",
+      "pass": true
+    },
+    {
+      "detail": "12/12 seeds pass the cross-region scope alone (need >= 0.50); the within-region scope passes 0/12",
+      "name": "region_confound_only: confound is real (cross-region scope alone passes)",
+      "pass": true
+    }
+  ],
+  "invariance": {
+    "n_components": 6,
+    "remaps": [
+      {
+        "injective": true,
+        "levels_identical": true,
+        "rank_features_identical": true,
+        "rank_persistence_identical": true,
+        "remap": "cube",
+        "value_persistence_identical": false
+      },
+      {
+        "injective": true,
+        "levels_identical": true,
+        "rank_features_identical": true,
+        "rank_persistence_identical": true,
+        "remap": "expm1_3x",
+        "value_persistence_identical": false
+      },
+      {
+        "injective": true,
+        "levels_identical": true,
+        "rank_features_identical": true,
+        "rank_persistence_identical": true,
+        "remap": "sqrt",
+        "value_persistence_identical": false
+      },
+      {
+        "injective": true,
+        "levels_identical": true,
+        "rank_features_identical": true,
+        "rank_persistence_identical": true,
+        "remap": "scale",
+        "value_persistence_identical": false
+      }
+    ]
+  },
+  "limitation": "Synthetic only. The planted effect is constructed to be invisible at the nominal threshold, so this shows the pipeline can detect a sweep-only difference and does not credit one that peak probability explains; it says nothing about whether real ink and real false positives differ in persistence.",
+  "n_per_scenario": 12,
+  "protocol": "threshold-persistence-v1",
+  "scenarios": [
+    {
+      "adds_signal": 11,
+      "all_scope_alone_passes": 11,
+      "expected": "adds_signal",
+      "mean_gain_median": 0.47089185674269707,
+      "n": 12,
+      "name": "planted_sweep_effect",
+      "runs": [
+        {
+          "all": {
+            "ci95": [
+              0.40011957908163276,
+              0.619375
+            ],
+            "mean_gain": 0.4962117346938776,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 290,
+          "seed": 101000,
+          "verdict": "PERSISTENCE_ADDS_SIGNAL",
+          "within_region": {
+            "ci95": [
+              0.3421052631578948,
+              0.7583333333333334
+            ],
+            "mean_gain": 0.5546052631578947,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "within_region_gates_pass": true
+        },
+        {
+          "all": {
+            "ci95": [
+              0.4369459219858156,
+              0.855673363095238
+            ],
+            "mean_gain": 0.6472954660587639,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 289,
+          "seed": 101001,
+          "verdict": "PERSISTENCE_ADDS_SIGNAL",
+          "within_region": {
+            "ci95": [
+              0.5102941176470588,
+              0.786909722222218
+            ],
+            "mean_gain": 0.648202614379085,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "within_region_gates_pass": true
+        },
+        {
+          "all": {
+            "ci95": [
+              0.068125,
+              0.4748979591836735
+            ],
+            "mean_gain": 0.28432397959183675,
+            "n_positive_domains": 3,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 288,
+          "seed": 101002,
+          "verdict": "PERSISTENCE_ADDS_SIGNAL",
+          "within_region": {
+            "ci95": [
+              0.505718954248366,
+              0.6150793650793651
+            ],
+            "mean_gain": 0.5729140140904847,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "within_region_gates_pass": true
+        },
+        {
+          "all": {
+            "ci95": [
+              0.28307812499999996,
+              0.46754807692307687
+            ],
+            "mean_gain": 0.35564102564102557,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 295,
+          "seed": 101003,
+          "verdict": "PERSISTENCE_ADDS_SIGNAL",
+          "within_region": {
+            "ci95": [
+              0.4876160990712074,
+              0.609625668449198
+            ],
+            "mean_gain": 0.5546017450042218,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "within_region_gates_pass": true
+        },
+        {
+          "all": {
+            "ci95": [
+              0.5582890070921986,
+              0.7821568627450981
+            ],
+            "mean_gain": 0.6702229349186483,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 291,
+          "seed": 101004,
+          "verdict": "PERSISTENCE_ADDS_SIGNAL",
+          "within_region": {
+            "ci95": [
+              0.46679197994987454,
+              0.8354978354978355
+            ],
+            "mean_gain": 0.6569130044362241,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "within_region_gates_pass": true
+        },
+        {
+          "all": {
+            "ci95": [
+              0.35012755102040816,
+              0.5664265706282513
+            ],
+            "mean_gain": 0.4455719787915166,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 293,
+          "seed": 101005,
+          "verdict": "PERSISTENCE_ADDS_SIGNAL",
+          "within_region": {
+            "ci95": [
+              0.4605263157894737,
+              0.7852272727272727
+            ],
+            "mean_gain": 0.5904904306220096,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "within_region_gates_pass": true
+        },
+        {
+          "all": {
+            "ci95": [
+              0.4858695652173913,
+              0.5676467391304338
+            ],
+            "mean_gain": 0.5283695652173912,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 283,
+          "seed": 101006,
+          "verdict": "PERSISTENCE_ADDS_SIGNAL",
+          "within_region": {
+            "ci95": [
+              0.53125,
+              0.7573099415204678
+            ],
+            "mean_gain": 0.6442799707602339,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "within_region_gates_pass": true
+        },
+        {
+          "all": {
+            "ci95": [
+              0.34965262700825006,
+              0.6704931972789115
+            ],
+            "mean_gain": 0.518868052540165,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 288,
+          "seed": 101007,
+          "verdict": "PERSISTENCE_ADDS_SIGNAL",
+          "within_region": {
+            "ci95": [
+              0.46671826625387,
+              0.6973684210526316
+            ],
+            "mean_gain": 0.5897832817337462,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "within_region_gates_pass": true
+        },
+        {
+          "all": {
+            "ci95": [
+              0.27941815023881894,
+              0.6228571428571428
+            ],
+            "mean_gain": 0.4425662179765523,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 292,
+          "seed": 101008,
+          "verdict": "PERSISTENCE_ADDS_SIGNAL",
+          "within_region": {
+            "ci95": [
+              0.26764705882352946,
+              0.7842105263157894
+            ],
+            "mean_gain": 0.5180340557275541,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "within_region_gates_pass": true
+        },
+        {
+          "all": {
+            "ci95": [
+              0.12196932211776346,
+              0.5613266583229036
+            ],
+            "mean_gain": 0.3354944649804504,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 286,
+          "seed": 101009,
+          "verdict": "PERSISTENCE_ADDS_SIGNAL",
+          "within_region": {
+            "ci95": [
+              0.22478991596638653,
+              0.5588235294117647
+            ],
+            "mean_gain": 0.35049019607843135,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "within_region_gates_pass": true
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.046145124716553326,
+              0.6127450980392156
+            ],
+            "mean_gain": 0.32590369481125775,
+            "n_positive_domains": 3,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 288,
+          "seed": 101010,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.04122807017543857,
+              0.590311004784689
+            ],
+            "mean_gain": 0.3134370015948963,
+            "n_positive_domains": 3,
+            "permutation_p": 0.004975124378109453
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              0.40012254901960775,
+              0.7350855235711306
+            ],
+            "mean_gain": 0.5728123696287025,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 291,
+          "seed": 101011,
+          "verdict": "PERSISTENCE_ADDS_SIGNAL",
+          "within_region": {
+            "ci95": [
+              0.5336134453781513,
+              0.7650375939849623
+            ],
+            "mean_gain": 0.6557938965059709,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "within_region_gates_pass": true
+        }
+      ],
+      "verdict_counts": {
+        "EXPLORATORY": 0,
+        "INCONCLUSIVE": 0,
+        "INVALID_DESIGN": 0,
+        "NO_ADDED_SIGNAL": 1,
+        "PERSISTENCE_ADDS_SIGNAL": 11
+      },
+      "within_region_alone_passes": 11
+    },
+    {
+      "adds_signal": 0,
+      "all_scope_alone_passes": 0,
+      "expected": "no_signal",
+      "mean_gain_median": -0.06783913565426168,
+      "n": 12,
+      "name": "null_no_effect",
+      "runs": [
+        {
+          "all": {
+            "ci95": [
+              -0.10682712765957444,
+              0.03191489361702132
+            ],
+            "mean_gain": -0.021595744680851042,
+            "n_positive_domains": 2,
+            "permutation_p": 0.2736318407960199
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 289,
+          "seed": 102000,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.07703081232492998,
+              0.07644110275689225
+            ],
+            "mean_gain": -0.0002948547840188609,
+            "n_positive_domains": 2,
+            "permutation_p": 0.11940298507462686
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.12071078431372545,
+              0.00457057823129256
+            ],
+            "mean_gain": -0.06577631052420965,
+            "n_positive_domains": 1,
+            "permutation_p": 0.572139303482587
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 291,
+          "seed": 102001,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.03571428571428567,
+              0.20833333333333326
+            ],
+            "mean_gain": 0.05753968253968253,
+            "n_positive_domains": 1,
+            "permutation_p": 0.01990049751243781
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.20480392156862745,
+              0.01960784313725497
+            ],
+            "mean_gain": -0.06990196078431371,
+            "n_positive_domains": 1,
+            "permutation_p": 0.6318407960199005
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 299,
+          "seed": 102002,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.14285714285714285,
+              0.0
+            ],
+            "mean_gain": -0.07142857142857142,
+            "n_positive_domains": 0,
+            "permutation_p": 0.5472636815920398
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.11734693877551022,
+              -0.06862745098039214
+            ],
+            "mean_gain": -0.09043617446978791,
+            "n_positive_domains": 0,
+            "permutation_p": 0.7711442786069652
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 294,
+          "seed": 102003,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.21428571428571427,
+              0.05568181818181819
+            ],
+            "mean_gain": -0.0612012987012987,
+            "n_positive_domains": 1,
+            "permutation_p": 0.5024875621890548
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.06382352941176472,
+              -0.004999999999999977
+            ],
+            "mean_gain": -0.029926992073425085,
+            "n_positive_domains": 0,
+            "permutation_p": 0.35323383084577115
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 295,
+          "seed": 102004,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.04677989130434777,
+              0.06807780320366133
+            ],
+            "mean_gain": 0.0029462242562929286,
+            "n_positive_domains": 1,
+            "permutation_p": 0.13930348258706468
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.19867346938775512,
+              -0.03975000000000135
+            ],
+            "mean_gain": -0.11247448979591837,
+            "n_positive_domains": 0,
+            "permutation_p": 0.9154228855721394
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 293,
+          "seed": 102005,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.2618421052631579,
+              -0.07518796992481208
+            ],
+            "mean_gain": -0.15281954887218047,
+            "n_positive_domains": 0,
+            "permutation_p": 0.9303482587064676
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.07,
+              0.06382352941176475
+            ],
+            "mean_gain": -0.010392156862745083,
+            "n_positive_domains": 2,
+            "permutation_p": 0.22885572139303484
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 297,
+          "seed": 102006,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.0714285714285714,
+              0.26249999999999996
+            ],
+            "mean_gain": 0.06011904761904763,
+            "n_positive_domains": 2,
+            "permutation_p": 0.024875621890547265
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.15026010404161666,
+              -0.09129901960784309
+            ],
+            "mean_gain": -0.12077956182472988,
+            "n_positive_domains": 0,
+            "permutation_p": 0.9154228855721394
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 296,
+          "seed": 102007,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.18253968253968256,
+              0.003759398496240546
+            ],
+            "mean_gain": -0.09001670843776108,
+            "n_positive_domains": 1,
+            "permutation_p": 0.6268656716417911
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.1716326530612245,
+              -0.10784313725490191
+            ],
+            "mean_gain": -0.1397378951580632,
+            "n_positive_domains": 0,
+            "permutation_p": 0.9751243781094527
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 296,
+          "seed": 102008,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.058270676691729334,
+              0.08690476190476187
+            ],
+            "mean_gain": 0.026253132832080167,
+            "n_positive_domains": 3,
+            "permutation_p": 0.06467661691542288
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.01941176470588235,
+              0.03999999999999998
+            ],
+            "mean_gain": 0.01945533769063182,
+            "n_positive_domains": 3,
+            "permutation_p": 0.05472636815920398
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 300,
+          "seed": 102009,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.06547619047619047,
+              0.10651629072681709
+            ],
+            "mean_gain": 0.018099225336067448,
+            "n_positive_domains": 2,
+            "permutation_p": 0.1044776119402985
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.07185374149659862,
+              0.020220588235294157
+            ],
+            "mean_gain": -0.025816576630652233,
+            "n_positive_domains": 2,
+            "permutation_p": 0.2935323383084577
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 293,
+          "seed": 102010,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.16249999999999998,
+              -0.04880952380952386
+            ],
+            "mean_gain": -0.08829365079365081,
+            "n_positive_domains": 0,
+            "permutation_p": 0.6915422885572139
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.11937499999999995,
+              -0.02980392156862749
+            ],
+            "mean_gain": -0.07022821864594894,
+            "n_positive_domains": 0,
+            "permutation_p": 0.681592039800995
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 295,
+          "seed": 102011,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.2223684210526316,
+              -0.005978260869565183
+            ],
+            "mean_gain": -0.12176773455377574,
+            "n_positive_domains": 1,
+            "permutation_p": 0.8756218905472637
+          },
+          "within_region_gates_pass": false
+        }
+      ],
+      "verdict_counts": {
+        "EXPLORATORY": 0,
+        "INCONCLUSIVE": 0,
+        "INVALID_DESIGN": 0,
+        "NO_ADDED_SIGNAL": 12,
+        "PERSISTENCE_ADDS_SIGNAL": 0
+      },
+      "within_region_alone_passes": 0
+    },
+    {
+      "adds_signal": 0,
+      "all_scope_alone_passes": 0,
+      "expected": "no_signal",
+      "mean_gain_median": -0.06565795357131007,
+      "n": 12,
+      "name": "baseline_explained",
+      "runs": [
+        {
+          "all": {
+            "ci95": [
+              -0.08391608391608393,
+              0.00016233766233766933
+            ],
+            "mean_gain": -0.04187687312687313,
+            "n_positive_domains": 1,
+            "permutation_p": 0.4527363184079602
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 314,
+          "seed": 103000,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.1158008658008658,
+              -0.023809523809523808
+            ],
+            "mean_gain": -0.0698051948051948,
+            "n_positive_domains": 0,
+            "permutation_p": 0.5373134328358209
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.12657563025210083,
+              0.027746947835738056
+            ],
+            "mean_gain": -0.048699196659795996,
+            "n_positive_domains": 1,
+            "permutation_p": 0.417910447761194
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 305,
+          "seed": 103001,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.2,
+              0.0455486542443064
+            ],
+            "mean_gain": -0.0772256728778468,
+            "n_positive_domains": 2,
+            "permutation_p": 0.6467661691542289
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.14324618736383443,
+              -0.03240740740740741
+            ],
+            "mean_gain": -0.09520799934229457,
+            "n_positive_domains": 0,
+            "permutation_p": 0.8009950248756219
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 310,
+          "seed": 103002,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.2063492063492063,
+              -0.03260869565217392
+            ],
+            "mean_gain": -0.11991028295376122,
+            "n_positive_domains": 0,
+            "permutation_p": 0.8208955223880597
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.3124057315233786,
+              0.04901960784313725
+            ],
+            "mean_gain": -0.11250942684766213,
+            "n_positive_domains": 2,
+            "permutation_p": 0.9054726368159204
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 307,
+          "seed": 103003,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.0692640692640693,
+              0.0
+            ],
+            "mean_gain": -0.03463203463203465,
+            "n_positive_domains": 0,
+            "permutation_p": 0.31343283582089554
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.05696661828737304,
+              0.09837728194726167
+            ],
+            "mean_gain": 0.020705331829944315,
+            "n_positive_domains": 2,
+            "permutation_p": 0.07960199004975124
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 310,
+          "seed": 103004,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.1056547619047619,
+              -0.011904761904761904
+            ],
+            "mean_gain": -0.05451839826839826,
+            "n_positive_domains": 0,
+            "permutation_p": 0.4129353233830846
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.1879661016949152,
+              -0.0388679245283019
+            ],
+            "mean_gain": -0.0926448850513449,
+            "n_positive_domains": 0,
+            "permutation_p": 0.8009950248756219
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 309,
+          "seed": 103005,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.1576086956521739,
+              -0.06250000000000003
+            ],
+            "mean_gain": -0.10552536231884058,
+            "n_positive_domains": 0,
+            "permutation_p": 0.7711442786069652
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.13888888888888884,
+              0.025584795321637363
+            ],
+            "mean_gain": -0.05628654970760236,
+            "n_positive_domains": 1,
+            "permutation_p": 0.5472636815920398
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 309,
+          "seed": 103006,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.14416475972540047,
+              0.020833333333333315
+            ],
+            "mean_gain": -0.061665713196033575,
+            "n_positive_domains": 1,
+            "permutation_p": 0.5074626865671642
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.1933551198257081,
+              -0.09655937846836848
+            ],
+            "mean_gain": -0.1435955933736178,
+            "n_positive_domains": 0,
+            "permutation_p": 0.9303482587064676
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 302,
+          "seed": 103007,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.1666666666666667,
+              -0.09199134199134201
+            ],
+            "mean_gain": -0.11915584415584417,
+            "n_positive_domains": 0,
+            "permutation_p": 0.8009950248756219
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.04910581222056634,
+              -0.02450980392156861
+            ],
+            "mean_gain": -0.036538967300780226,
+            "n_positive_domains": 0,
+            "permutation_p": 0.3482587064676617
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 313,
+          "seed": 103008,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.1504347826086957,
+              -0.02500000000000001
+            ],
+            "mean_gain": -0.08847826086956524,
+            "n_positive_domains": 0,
+            "permutation_p": 0.736318407960199
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.1960377358490566,
+              0.045979020979020985
+            ],
+            "mean_gain": -0.0750293574350178,
+            "n_positive_domains": 2,
+            "permutation_p": 0.6567164179104478
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 305,
+          "seed": 103009,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.04772727272727276,
+              0.1209893048128342
+            ],
+            "mean_gain": 0.03215877259994905,
+            "n_positive_domains": 2,
+            "permutation_p": 0.06467661691542288
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.1870766488413547,
+              -0.019607843137254888
+            ],
+            "mean_gain": -0.09162210338680926,
+            "n_positive_domains": 0,
+            "permutation_p": 0.7711442786069652
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 306,
+          "seed": 103010,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.2,
+              -0.0014822134387351416
+            ],
+            "mean_gain": -0.09822134387351777,
+            "n_positive_domains": 1,
+            "permutation_p": 0.7213930348258707
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              -0.09843937575030015,
+              0.04748822605965458
+            ],
+            "mean_gain": -0.02964433636702546,
+            "n_positive_domains": 1,
+            "permutation_p": 0.2835820895522388
+          },
+          "all_scope_gates_pass": false,
+          "n_components": 299,
+          "seed": 103011,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.12978468899521525,
+              0.0562770562770563
+            ],
+            "mean_gain": -0.04001480975165182,
+            "n_positive_domains": 1,
+            "permutation_p": 0.3781094527363184
+          },
+          "within_region_gates_pass": false
+        }
+      ],
+      "verdict_counts": {
+        "EXPLORATORY": 0,
+        "INCONCLUSIVE": 0,
+        "INVALID_DESIGN": 0,
+        "NO_ADDED_SIGNAL": 12,
+        "PERSISTENCE_ADDS_SIGNAL": 0
+      },
+      "within_region_alone_passes": 0
+    },
+    {
+      "adds_signal": 0,
+      "all_scope_alone_passes": 12,
+      "expected": "no_signal",
+      "mean_gain_median": 0.20539681922722833,
+      "n": 12,
+      "name": "region_confound_only",
+      "runs": [
+        {
+          "all": {
+            "ci95": [
+              0.1864752816020025,
+              0.2418439716312057
+            ],
+            "mean_gain": 0.22099847031010986,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 283,
+          "seed": 104000,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.17647058823529407,
+              0.03947368421052627
+            ],
+            "mean_gain": -0.0456656346749226,
+            "n_positive_domains": 1,
+            "permutation_p": 0.31840796019900497
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              0.26501225490196084,
+              0.5
+            ],
+            "mean_gain": 0.3759191176470589,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 298,
+          "seed": 104001,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              0.0,
+              0.11842105263157898
+            ],
+            "mean_gain": 0.051378446115288245,
+            "n_positive_domains": 2,
+            "permutation_p": 0.014925373134328358
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              0.16717325227963525,
+              0.29591836734693877
+            ],
+            "mean_gain": 0.231545809813287,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 288,
+          "seed": 104002,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.039473684210526355,
+              0.0416666666666666
+            ],
+            "mean_gain": 0.0007309941520467489,
+            "n_positive_domains": 1,
+            "permutation_p": 0.1890547263681592
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              0.10503549245785276,
+              0.2348214285714279
+            ],
+            "mean_gain": 0.172866972876107,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 292,
+          "seed": 104003,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.1507936507936508,
+              0.04411764705882354
+            ],
+            "mean_gain": -0.06069094304388423,
+            "n_positive_domains": 1,
+            "permutation_p": 0.5323383084577115
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              0.04166666666666663,
+              0.1464474678760393
+            ],
+            "mean_gain": 0.09405706727135296,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 294,
+          "seed": 104004,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.15789473684210525,
+              0.05416666666666664
+            ],
+            "mean_gain": -0.048464912280701766,
+            "n_positive_domains": 1,
+            "permutation_p": 0.373134328358209
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              0.1155723158828749,
+              0.33248299319727886
+            ],
+            "mean_gain": 0.21336143152913337,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 285,
+          "seed": 104005,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.22678018575851397,
+              -0.07499999999999996
+            ],
+            "mean_gain": -0.14520123839009288,
+            "n_positive_domains": 0,
+            "permutation_p": 0.9253731343283582
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              0.157920196380439,
+              0.2768838304552591
+            ],
+            "mean_gain": 0.2256579337104944,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 300,
+          "seed": 104006,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.17663043478260868,
+              0.1071428571428571
+            ],
+            "mean_gain": -0.015916149068322977,
+            "n_positive_domains": 2,
+            "permutation_p": 0.21890547263681592
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              0.07588607859531774,
+              0.3088942307692308
+            ],
+            "mean_gain": 0.19724568004459306,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 292,
+          "seed": 104007,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.17440711462450598,
+              -0.015625
+            ],
+            "mean_gain": -0.0813364624505929,
+            "n_positive_domains": 0,
+            "permutation_p": 0.6467661691542289
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              0.020833333333333343,
+              0.2178308823529412
+            ],
+            "mean_gain": 0.10324754901960786,
+            "n_positive_domains": 3,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 297,
+          "seed": 104008,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.1488636363636363,
+              -0.012499999999999983
+            ],
+            "mean_gain": -0.07045454545454541,
+            "n_positive_domains": 0,
+            "permutation_p": 0.5771144278606966
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              0.21875000000000006,
+              0.31285714285714283
+            ],
+            "mean_gain": 0.2658035714285715,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 290,
+          "seed": 104009,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.1578947368421052,
+              -0.07393483709273185
+            ],
+            "mean_gain": -0.11591478696741853,
+            "n_positive_domains": 0,
+            "permutation_p": 0.7661691542288557
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              0.09000000000000002,
+              0.24
+            ],
+            "mean_gain": 0.18208333333333335,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 292,
+          "seed": 104010,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              -0.050000000000000044,
+              0.11964285714285708
+            ],
+            "mean_gain": 0.02321428571428566,
+            "n_positive_domains": 2,
+            "permutation_p": 0.0845771144278607
+          },
+          "within_region_gates_pass": false
+        },
+        {
+          "all": {
+            "ci95": [
+              0.08392156862745093,
+              0.27892156862745093
+            ],
+            "mean_gain": 0.1974322069253233,
+            "n_positive_domains": 4,
+            "permutation_p": 0.004975124378109453
+          },
+          "all_scope_gates_pass": true,
+          "n_components": 292,
+          "seed": 104011,
+          "verdict": "NO_ADDED_SIGNAL",
+          "within_region": {
+            "ci95": [
+              0.0,
+              0.03749999999999995
+            ],
+            "mean_gain": 0.012499999999999983,
+            "n_positive_domains": 1,
+            "permutation_p": 0.11940298507462686
+          },
+          "within_region_gates_pass": false
+        }
+      ],
+      "verdict_counts": {
+        "EXPLORATORY": 0,
+        "INCONCLUSIVE": 0,
+        "INVALID_DESIGN": 0,
+        "NO_ADDED_SIGNAL": 12,
+        "PERSISTENCE_ADDS_SIGNAL": 0
+      },
+      "within_region_alone_passes": 0
+    }
+  ],
+  "schema_version": 1,
+  "seed_base": 100000,
+  "spec_sha256": "31e22a9153463dd514dbffecfaa458a990ea331a7717a49d66326ef1e3699b26",
+  "synthetic": true,
+  "tool": "scroliq-persistence"
+}

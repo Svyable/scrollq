@@ -58,6 +58,7 @@ weight-free Pareto frontier (triage, not a readability claim).
   - `bbox_census.py` → `scroliq-bbox-census`: recomputes bounds over a TIFXYZ patch pack, compares with declared `meta.json` bboxes, counts vertices a declared-bbox filter would lose; positive control built in, empty census is `unverified`
   - `objective_audit.py` → `scroliq-objective-audit`: configured-vs-effective objective passport audit (+ `ObjectiveTracker`); fails closed on never-evaluated/always-zero/non-finite/ungradiented claimed terms and on ablation arms that were not ablated
   - `geometry_strata.py` → `scroliq-geometry-strata`: preregistered geometry-stratified, label-coverage-conditioned surface evaluation gate (`measure` derives curvature/tilt; `evaluate` applies the frozen rule). Machinery only; no real-data result yet
+  - `persistence.py` / `persistence_audit.py` / `persistence_controls.py` → `scroliq-persistence`: threshold-persistence audit of frozen ink predictions. `persistence.py` is a leaf engine (exact H0/H1 persistence on the rank-parameterised superlevel filtration; features are functions of integer levels only, so they are bitwise invariant to injective monotone remaps); `persistence_audit.py` has `measure` (hash-bound manifest with a selection contract) / `evaluate` (frozen leave-one-domain-out rule over the `all` and `within_region` scopes) / `controls`; the spec is pinned as a literal `FROZEN_SPEC_SHA256`. Synthetic controls only, no real-data result. `docs/threshold-persistence.md`
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
@@ -114,6 +115,7 @@ scroliq-vc3d-run-guard --help                       # exit code + semantic TIFXY
 scroliq-bbox-census --help                          # declared vs recomputed bbox over a patch pack
 scroliq-objective-audit --help                      # configured vs effective objective
 scroliq-geometry-strata --help                      # geometry-stratified evaluation gate
+scroliq-persistence --help                          # threshold-persistence audit (measure / evaluate / controls)
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests
@@ -236,6 +238,16 @@ console script. A new entry point must therefore be declared in
    External reports behind these (VC3D exit-0 deletion, stale PHercParis4
    bboxes, Lasagna silent-zero losses) come from the maintainers' research note
    and are not reproduced here; say so when citing them.
+
+14. **Persistence is rank-invariant only for injective remaps, and a cross-region
+   gain can be region texture.** A float offset (`5*v + 2`) merged two distinct
+   scores and changed ranks; saturation and uint8 quantisation do the same.
+   `scroliq-persistence` checks injectivity and reports `not_injective` rather
+   than a pass. Separately, negatives from other regions confound texture with
+   class, so a gain must also hold *within* verified-ink regions
+   (`within_region` scope). A control that never produced the effect it claims
+   to block (the first confound scenario) proves nothing: the suite now requires
+   the cross-region scope to pass alone before crediting the within-region gate.
 
 ## Working rules
 

@@ -23,6 +23,11 @@ SURFACES = {
                         "score"}),
     "stability protocol v2": ({"stability_protocol"}, {"score"}),
     "seam fingerprint": ({"seam_fingerprint"}, set()),
+    # reads ink maps through the existing validator's loaders and nothing else
+    "threshold persistence": (
+        {"persistence", "persistence_audit", "persistence_controls"},
+        {"ink_validation"},
+    ),
 }
 
 
@@ -90,6 +95,7 @@ def test_surfaces_do_not_import_each_other_except_declared_stacking():
 
 
 def test_the_leaf_modules_import_nothing_from_scrollq():
-    for module in ("bucket", "omezarr", "registration", "seam_fingerprint"):
+    for module in ("bucket", "omezarr", "registration", "seam_fingerprint",
+                   "persistence"):
         if _exists(module):  # absent when its surface has been reverted
             assert not _internal_imports(module), module

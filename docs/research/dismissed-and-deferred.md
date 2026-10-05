@@ -238,6 +238,30 @@ implementation or checkpoint stack was found. The sparse-prior idea is
 interesting, but neither licensing nor evidence clears the bar.
 
 
+## Choosing the threshold, checkpoint or component by topology
+
+**Status:** DISMISS (2026-10-05).
+
+The [threshold-persistence audit](../threshold-persistence.md) asks how a
+detector's own confidence filtration behaves. Two variants of it were rejected
+before any code was written because they turn the audit into a hallucination
+route:
+
+- **Automatically choosing the threshold that yields the most letter-like or
+  stroke-like topology.** That is semantic cherry-picking: the sweep would be
+  used to manufacture plausibility instead of testing it. `scroliq-persistence`
+  never searches over thresholds. Every region's nominal threshold comes from
+  the manifest, and the manifest must attest that it was declared before
+  measurement, was not chosen by topology, and was not chosen with OCR or text
+  (`selection_contract`, enforced fail-closed).
+- **Greek-character topology templates as a validator** (expected holes, stroke
+  counts, junction patterns). That rewards textual plausibility rather than
+  physical evidence. No feature is compared to an expected count or shape;
+  hole lifetime is recorded as a number and is label-blind and character-blind.
+
+The same boundary applies to choosing a checkpoint or a component *because* its
+persistence profile looks like writing.
+
 ## 2026-10-04 / 2026-10-05 overnight negative decisions
 
 The full reasoning is in
@@ -292,6 +316,13 @@ The following remain live but should not consume primary-pipeline priority until
 their required inputs exist:
 
 - continuous surface-normal ink response curves;
+- cross-checkpoint topological persistence (stage 2 of the
+  [threshold-persistence audit](../threshold-persistence.md)): does a physical
+  component and its threshold-evolution topology survive across independently
+  trained checkpoints? Not started. It is only worth running if stage 1 returns
+  `PERSISTENCE_ADDS_SIGNAL` on real held-out domains, and it needs its own
+  preregistration: correlated checkpoints remain correlated evidence, and
+  agreement is a falsification signal, not a vote;
 - causal context ablation;
 - acquisition-physics normalization/conditioning;
 - cross-parameterization detector invariance;
