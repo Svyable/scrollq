@@ -30,6 +30,18 @@ https://github.com/superoptimizer/volume-compressor.
 The exact companion Git revision in `pyproject.toml` and
 `requirements-ci.txt` is the authoritative version for the current build.
 
+## External tools referenced by experiments (not dependencies)
+
+The [reconstruction-sensitivity audit](docs/reconstruction-sensitivity.md) is
+designed around variants produced by the Core Imaging Library (CIL,
+Apache-2.0) in an isolated external environment. Its ASTRA projector path is
+separately licensed: the ASTRA Toolbox is GPLv3 and the CIL ASTRA plugin is
+documented as GPLv3 (read only from search summaries on 2026-10-06). ScrolIQ
+installs, imports and redistributes neither; frozen volumes enter as data. Each
+experiment declares the exact transitive dependency manifest and licences of its
+own environment, and the audit classifies them, so a framework's top-level
+licence is never inferred for an execution path.
+
 ## Vesuvius Challenge ecosystem
 
 ScrolIQ interoperates with and derives formats, eligibility metadata, or public

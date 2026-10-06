@@ -247,6 +247,12 @@ a speed benefit that does not justify the new hallucination surface.
 Reconsider only with raw projection data in scope and a preregistered
 comparison against the existing reconstruction on a physical control.
 
+**Update 2026-10-06:** the classical-inverse form of that comparison (official
+versus LSQR and LSQR + Tikhonov, plus bounded calibration perturbations) now has
+an executable audit,
+[`scroliq-reconstruction-sensitivity`](../reconstruction-sensitivity.md), still
+blocked on projections. This dismissal of the Gaussian-splatting method stands.
+
 ## Clinical low-dose CT reconstruction (CSRCT)
 
 **Status:** DISMISS for current incorporation. Recorded 2026-10-04 from the
@@ -350,6 +356,27 @@ Relayed from the maintainer briefing; see
   witnesses — DISMISS.** Replaced by the
   [ensemble-independence gate](../ensemble-independence.md), which counts
   certified independent witnesses from declared ancestry.
+
+## 2026-10-06 reconstruction scan: DISMISS and WATCH decisions
+
+Relayed from the maintainer briefing; see
+[the note](2026-10-06-reconstruction-sensitivity-and-cil.md).
+
+- **OptimusMesh and MEGA as geometry sources — DISMISS.** Autoregressive compact
+  meshes from sparse points, and watertight meshes from rendered supervision on
+  3-D Gaussian scenes, supply a prior or appearance model rather than
+  independent CT evidence.
+- **CIL `LaminographyGeometryCorrector` — WATCH.** Not applied blindly: it is a
+  laminography tool and the Vesuvius acquisition is not established to be one.
+  The generic idea (perturb calibration within plausible bounds) is built into the
+  audit without it.
+- **Standardised DRR pipeline paper — WATCH.** Medical radiographs, not inverse
+  synchrotron reconstruction. Retained: fingerprint preprocessing, coordinate
+  conventions, geometry and software versions in any forward-projection
+  experiment.
+- **Choosing the reconstruction or calibration whose ink looks most readable —
+  DISMISS.** It selects for plausibility; selection must be ink-blind and
+  preregistered.
 
 ## Deferred, not dismissed
 

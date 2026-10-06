@@ -75,6 +75,7 @@ weight-free Pareto frontier (triage, not a readability claim).
     stays `unknown`/`not-measured`. Evidence only, never an ink verdict
   - `shortcut_audit.py` → `scroliq-shortcut-audit`: frozen-embedding, balanced linear nuisance probes and create-only shortcut passports; declared physical-group separation and held-out training-domain exclusions. Diagnostic only, no real checkpoint result; absolute xyz unmeasured. `docs/shortcut-audit.md`
   - `ensemble_independence.py` → `scroliq-ensemble-independence`: declared training-ancestry audit (pairwise supervision overlap, lineage/seed sharing, detected CV-partition vs same-data vs disjoint regime, exact certified independent-witness count; unknown is never independent) and a scroll-disjoint failure-ranking comparison (block-bootstrap AUROC/AURC of mutual information vs entropy) gated by a built-in planted-signal/null control whose seed is a code constant. Evidence only; no real-ensemble result yet. `docs/ensemble-independence.md`
+  - `reconstruction_sensitivity.py` → `scroliq-reconstruction-sensitivity`: audit of which ink and geometry claims survive a preregistered family of reconstructions (official + classical inverse variants) and bounded calibration perturbations over one ROI with projections, geometry and pipeline held fixed; per reference ink component persistence, surface displacement along the normal, neighbouring-sheet separation, fibre orientation, ink position along the normal, known-negative detections. Fails closed on ink in variant selection, mismatched family fingerprints, out-of-bound or unbounded perturbations, undeclared/incomplete dependency licence manifests (copyleft backends such as ASTRA are classified, never inferred from the framework); failed variants are listed, no-op variants cannot be stable; a built-in planted/null/no-op control gates every verdict. Reads frozen arrays only, imports no tomography package; synthetic controls only, no reconstruction run. `docs/reconstruction-sensitivity.md`
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
@@ -134,6 +135,7 @@ scroliq-geometry-strata --help                      # geometry-stratified evalua
 scroliq-prediction-support --self-test              # CT-support preflight before a prediction seeds geometry
 scroliq-harvest-qc self-test                        # independent harvest-QC benchmark vs ScrollQ gates
 scroliq-persistence --help                          # threshold-persistence audit (measure / evaluate / controls)
+scroliq-reconstruction-sensitivity self-test        # reconstruction-family / calibration sensitivity controls
 scroliq-winding-conservation --help                 # layer-count / pitch / continuity QC
 scroliq-ink-passport --help                         # per-component ink evidence passport
 ```

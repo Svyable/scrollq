@@ -12,6 +12,15 @@ frozen scroll-disjoint comparison asks whether disagreement ranks real failures
 or merely reflects fold membership. Synthetic controls only; no real ensemble
 has been audited.
 
+Reconstruction choices can be audited the same way
+([reconstruction-sensitivity audit](docs/reconstruction-sensitivity.md),
+`scroliq-reconstruction-sensitivity`): which ink and geometry claims survive an
+ink-blind, preregistered family of reconstructions and bounded calibration
+perturbations of one ROI. A component that exists under only one reconstruction
+assumption is reconstruction-sensitive evidence, not prize-grade ink. Synthetic
+controls only; no reconstruction has been run and raw-projection availability is
+not established.
+
 **Find the bottleneck. Fix the bottleneck. Read the scroll.**
 
 ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](https://scrollprize.org/) virtual-unwrapping pipeline. The existing `scrollq` package measures **real level-0 CT voxels** and keeps its current commands for compatibility, but the project is expanding beyond a single volume-quality ranking toward evidence-backed diagnostics for the Challenge's published [2026 Open Problems](https://scrollprize.org/2026_open_problems): scan degradation, surface topology, mesh connectivity, fibers, winding annotations, spiral fitting, label quality, ink reliability, and data-scale reproducibility.

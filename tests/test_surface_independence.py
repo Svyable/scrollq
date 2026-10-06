@@ -26,6 +26,7 @@ SURFACES = {
     "prediction support preflight": ({"prediction_support"}, {"support"}),
     "harvest QC benchmark": ({"harvest_qc_benchmark"}, set()),
     "ensemble independence gate": ({"ensemble_independence"}, set()),
+    "reconstruction sensitivity audit": ({"reconstruction_sensitivity"}, set()),
     # reads ink maps through the existing validator's loaders and nothing else
     "threshold persistence": (
         {"persistence", "persistence_audit", "persistence_controls"},
