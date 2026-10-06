@@ -428,9 +428,14 @@ scroliq-flatten-plan evaluate \
   --require-promote
 ```
 
+The comparison also refuses a candidate that cuts the UV atlas where the sealed
+baseline did not, since per-triangle distortion can always be driven to 1.0 by
+fragmenting the map.
+
 The motivating 2026 Beltrami-prolongation paper is treated as a candidate
-method, not as papyrus evidence. The paper is CC BY 4.0; ScrolIQ does not assume
-that an external software implementation is permissively licensed. See
+method, not as papyrus evidence. The paper is CC BY 4.0, but the authors' official
+implementation is academic-use-only (checked 2026-10-06), so it cannot be used here;
+the paths are a written relicense or an independent MIT implementation. See
 [`docs/flattening-benchmark.md`](docs/flattening-benchmark.md) for the sealed
 A/B protocol and post-promotion TIFXYZ/VC3D gates.
 
@@ -527,6 +532,18 @@ This is an **evidence-quality audit, not an ink classifier**. A pass means the d
 `scroliq-ink-validate` complements that manifest audit with deterministic measurements over explicit 2D NPY/TIFF predictions, known binary labels, and a held-out mask. It reports confusion counts, balanced accuracy, false-positive rate, F1/IoU, probability separation, exact input hashes, and same-mask deltas for named falsification controls. The resulting JSON can be hash-pinned as a `held_out_validations[]` artifact in the Grand Prize provenance manifest.
 
 The command fails closed when the mask is empty or single-class, inputs are malformed, the split is not declared held out, training overlap is not declared absent, or no falsification control is supplied. Those checks make the output an auditable evidence artifact; they do not prove that a URL is public, independently establish the declared train/validation split, set a performance threshold, or claim readability. See the [held-out ink protocol](docs/ink-validation.md).
+
+### Persistent topology of surface patches
+
+`scroliq-topology` tracks how a TIFXYZ patch's connected pieces (H0) and holes
+(H1) change as weakly supported vertices are removed. It compares the resulting
+diagrams by Wasserstein-1 and bottleneck distance. It also emits experimental
+bridge witnesses: a weak saddle joining two large regions, with its location.
+
+On a synthetic planted-fault benchmark, it detected no fault that paired mesh
+metrics missed. The bridge witness put its saddle inside every planted bridge,
+but it also fired on every legitimately faint band. It is an R&D benchmark, not
+a gate. See [persistent topology](docs/persistent-topology.md).
 
 ### Per-component evidence passport
 
@@ -994,7 +1011,7 @@ independent `verify` command re-hashes and re-decodes those artifacts; with
 
 ### Semantic integrity gates
 
-Seven checks treat a *claim* as something to be recomputed, not trusted:
+Ten checks treat a *claim* as something to be recomputed, not trusted:
 
 - `scroliq-vc3d-run-guard` — an external geometry producer that exits 0 is
   `PRODUCER_SEMANTIC_FAILURE` unless its new TIFXYZ also has recomputed physical
@@ -1024,12 +1041,30 @@ Seven checks treat a *claim* as something to be recomputed, not trusted:
   metric is promoted only if it closes a ScrollQ blind spot with zero false
   rejects, judged outside its own calibration scrolls. Machinery only. See
   [the benchmark](docs/harvest-qc-benchmark.md).
+- `scroliq-winding-sync` — reconciles trusted pairwise winding observations
+  by integer L1 synchronization (integrality checked, never rounded) and
+  benchmarks it against BFS propagation under frozen planted ±1/±2
+  corruption. Synthetic calibration only: PROMOTE on a redundant graph,
+  NO_MATERIAL_GAIN on a bridge-heavy one
+  ([artifact](artifacts/2026-10-06-winding-sync-synthetic/README.md)). See
+  [winding reconciliation](docs/winding-sync.md).
+- `scroliq-constraint-gauge` — scores any winding-constraint producer against
+  sealed human-verified pairs (coverage, exact agreement, residual, confidence
+  calibration). Internal consistency is recorded but is never evidence.
+- `scroliq-render-noise` — a small rendered-ink change is evidence only if it
+  exceeds k × the repeat-render noise floor of the unchanged surface, with the
+  determinism mode declared. See [the noise floor](docs/render-noise.md).
 - `scroliq-winding-conservation` — checks a stitched winding solution against
   conservation laws no single surface was built to satisfy: label-free layer
   count along radial rays, winding pitch, and label continuity across cells.
   Calibrated only on a synthetic spiral with planted delete/duplicate/merge/switch
   defects; no real solution measured yet. See
   [winding conservation](docs/winding-conservation.md).
+- `scroliq-crop-invariance` — does a dense embedding of a physical voxel depend
+  on its position inside the crop? Promotes a position-debiasing transform only
+  if dependence falls without losing sheet/ink discrimination; missing
+  embeddings are `unavailable_input`, not failed. Synthetic controls only. See
+  [the gate](docs/crop-invariance.md).
 
 ### 2027 Grand Prize submission images
 
