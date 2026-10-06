@@ -1,0 +1,30 @@
+{
+ "campaign_id": "winding-sync-synthetic-sparse",
+ "graph_sha256": "b55773a3bf54b468f3a20edf839aaca14c8655b02e18a42b90f242618a4ca6e6",
+ "graph_source": "synthetic: scroliq-winding-sync synthetic --nodes 400 --seed 0 (exact observations of known windings)",
+ "locations": [
+  "uniform",
+  "bridge",
+  "bfs_tree",
+  "bfs_tree_high"
+ ],
+ "magnitudes": [
+  1,
+  2
+ ],
+ "rates": [
+  0.01,
+  0.05,
+  0.1,
+  0.2
+ ],
+ "replicates": 20,
+ "rule": {
+  "high_subtree_frac": 0.1,
+  "min_mean_gain": 0.05,
+  "non_inferiority_tol": 0.01,
+  "primary_min_rate": 0.05
+ },
+ "schema_version": 1,
+ "seed": 20261006
+}

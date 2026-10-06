@@ -4,7 +4,9 @@ The comparison intentionally consumes only Wavefront OBJ geometry/UVs. It
 verifies that both parameterizations describe the exact same ordered 3-D
 triangle mesh, reuses ScrolIQ's OBJ audit for local isometry/foldover metrics,
 and makes promotion contingent on permissive implementation licensing plus
-predeclared geometric non-regression gates.
+predeclared geometric non-regression gates. The candidate may not introduce UV
+cuts the baseline lacks: per-island distortion can always be driven down by
+cutting, so the cut set is part of the frozen baseline.
 
 It does not inspect ink, renders, OCR, text, or legibility.
 """
@@ -62,6 +64,40 @@ def _geometry_sha256(mesh: dict[str, Any]) -> str:
         digest.update(b"\0")
         digest.update(arr.tobytes(order="C"))
     return digest.hexdigest()
+
+
+def _uv_seam_edges(mesh: dict[str, Any]) -> set[tuple[int, int]]:
+    """3-D edges across which the UV map is discontinuous (the atlas cuts).
+
+    An edge is a seam when its incident textured faces disagree on the UV
+    coordinates of either endpoint. Coordinates are compared, not ``vt``
+    indices, so duplicated ``vt`` rows at identical coordinates are not cuts.
+    A NaN never compares equal, so it also reads as a seam (fail-closed).
+    """
+    textured = [i for i, fu in enumerate(mesh["face_uvs"]) if fu is not None]
+    if not textured:
+        return set()
+    faces = np.asarray(mesh["faces"], dtype=np.int64)[textured]
+    corner_uv = np.asarray(mesh["uvs"], dtype=np.float64)[
+        np.asarray([mesh["face_uvs"][i] for i in textured], dtype=np.int64)
+    ]
+    rows = []
+    for i, j in ((0, 1), (1, 2), (2, 0)):
+        a, b = faces[:, i], faces[:, j]
+        swap = a > b
+        lo, hi = np.where(swap, b, a), np.where(swap, a, b)
+        u_lo = np.where(swap[:, None], corner_uv[:, j], corner_uv[:, i])
+        u_hi = np.where(swap[:, None], corner_uv[:, i], corner_uv[:, j])
+        rows.append(np.column_stack([lo, hi, u_lo, u_hi]))
+    table = np.concatenate(rows)
+    table = table[table[:, 0] != table[:, 1]]  # repeated-vertex (degenerate) faces
+    if len(table) < 2:
+        return set()
+    table = table[np.lexsort((table[:, 1], table[:, 0]))]
+    same_edge = (table[1:, 0] == table[:-1, 0]) & (table[1:, 1] == table[:-1, 1])
+    uv_differs = (table[1:, 2:] != table[:-1, 2:]).any(axis=1)
+    seam_rows = np.flatnonzero(same_edge & uv_differs)
+    return {(int(table[k, 0]), int(table[k, 1])) for k in seam_rows}
 
 
 def _metric(report: dict[str, Any]) -> dict[str, Any]:
@@ -176,7 +212,16 @@ def compare_flattenings(
     ]
 
     improvement: float | None = None
+    uv_seams: dict[str, int] | None = None
     if baseline_metrics is not None and candidate_metrics is not None:
+        baseline_seams = _uv_seam_edges(baseline_mesh)
+        candidate_seams = _uv_seam_edges(candidate_mesh)
+        new_seams = candidate_seams - baseline_seams
+        uv_seams = {
+            "baseline_edges": len(baseline_seams),
+            "candidate_edges": len(candidate_seams),
+            "candidate_new_edges": len(new_seams),
+        }
         p95_ratio = (
             candidate_metrics["p95_symmetric_stretch"]
             / baseline_metrics["p95_symmetric_stretch"]
@@ -205,6 +250,19 @@ def compare_flattenings(
                     "required": True,
                     "passed": candidate_metrics["degenerate_uv_triangles"] == 0,
                     "value": candidate_metrics["degenerate_uv_triangles"],
+                },
+                {
+                    # Cutting always lowers distortion (one island per triangle is
+                    # isometric), so the candidate may not cut where the sealed
+                    # baseline did not. Fewer cuts than the baseline is allowed.
+                    "name": "candidate_no_new_uv_seams",
+                    "required": True,
+                    "passed": not new_seams,
+                    "value": len(new_seams),
+                    "detail": (
+                        "candidate UV seam edges must be a subset of the baseline's; "
+                        f"baseline has {len(baseline_seams)}, candidate {len(candidate_seams)}"
+                    ),
                 },
                 {
                     "name": "p95_isometry_nonregression",
@@ -286,6 +344,7 @@ def compare_flattenings(
             "baseline": baseline_metrics,
             "candidate": candidate_metrics,
             "p95_improvement_fraction": improvement,
+            "uv_seams": uv_seams,
         },
         "gates": gates,
         "decision": {"verdict": verdict, "reason": reason},

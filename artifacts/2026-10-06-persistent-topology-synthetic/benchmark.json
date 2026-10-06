@@ -1,0 +1,1701 @@
+{
+  "constants": {
+    "bridge_min_area_fraction": 0.05,
+    "bridge_min_persistence": 0.3,
+    "low_support": 0.5,
+    "min_persistence": 0.1
+  },
+  "detection_rule": "an edit is detected by a metric when its distance from the clean patch exceeds every one of 19 clean-vs-clean support-noise redraws (exact level 1/20)",
+  "diagnostic": "persistent-topology-benchmark",
+  "limitation": "Persistent topology describes how the patch's connectivity depends on the supplied support field. A flagged merge is a review cue: a legitimately faint band of papyrus splits the patch exactly as a wrong-winding bridge does, so topology alone cannot tell them apart. It does not establish sheet identity, CT support quality, ink or readability.",
+  "local_support_metrics": [
+    "support_mean",
+    "low_support_fraction"
+  ],
+  "mesh_metrics": [
+    "valid_fraction",
+    "components",
+    "holes",
+    "edge_median",
+    "edge_p99"
+  ],
+  "method": "scroliq-persistent-topology-v1",
+  "null_draws": 19,
+  "rows": [
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.47401457364343585,
+        "h0_w1": 0.5946886390909555,
+        "h1_bottleneck": 0.05321618093167879,
+        "h1_w1": 1.200770039740704
+      },
+      "edit": "bridge",
+      "ordinary_fired": [
+        "edge_median",
+        "edge_p99",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 0,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.4878654500293987,
+        "h0_w1": 2.4677413728486584,
+        "h1_bottleneck": 0.07800078727358437,
+        "h1_w1": 2.2415952479433026
+      },
+      "edit": "bridge_gentle",
+      "ordinary_fired": [
+        "edge_median",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 0,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.06385468887158835,
+        "h0_w1": 0.06385468887158835,
+        "h1_bottleneck": 0.4857297610295872,
+        "h1_w1": 1.5004310254814814
+      },
+      "edit": "deleted_strip",
+      "ordinary_fired": [
+        "holes",
+        "valid_fraction"
+      ],
+      "seed": 0,
+      "topology_fired": [
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.06385468887158835,
+        "h0_w1": 0.4572598203634479,
+        "h1_bottleneck": 0.05007222764211705,
+        "h1_w1": 0.3723560492153014
+      },
+      "edit": "false_fill",
+      "ordinary_fired": [
+        "holes",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 0,
+      "topology_fired": [
+        "h0_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.06385468887158835,
+        "h0_w1": 0.06385468887158835,
+        "h1_bottleneck": 0.05097988284498661,
+        "h1_w1": 0.4733486351803208
+      },
+      "edit": "island",
+      "ordinary_fired": [
+        "components",
+        "low_support_fraction",
+        "valid_fraction"
+      ],
+      "seed": 0,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.06385468887158835,
+        "h0_w1": 0.06385468887158835,
+        "h1_bottleneck": 0.0502289543817625,
+        "h1_w1": 0.42086279221830775
+      },
+      "edit": "orientation_reversal",
+      "ordinary_fired": [],
+      "seed": 0,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.06385468887158835,
+        "h0_w1": 0.06385468887158835,
+        "h1_bottleneck": 0.05143843275556087,
+        "h1_w1": 0.6496265545855127
+      },
+      "edit": "narrow_neck",
+      "ordinary_fired": [
+        "valid_fraction"
+      ],
+      "seed": 0,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.3630300988182523,
+        "h0_w1": 0.6927736387915251,
+        "h1_bottleneck": 0.07690634860017555,
+        "h1_w1": 1.7254224512592393
+      },
+      "edit": "faint_band",
+      "ordinary_fired": [
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 0,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.48027804666993645,
+        "h0_w1": 0.6544137249806481,
+        "h1_bottleneck": 0.05173037351504628,
+        "h1_w1": 0.6020668516891445
+      },
+      "edit": "bridge",
+      "ordinary_fired": [
+        "edge_median",
+        "edge_p99",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 1,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.4877196139967841,
+        "h0_w1": 2.4420426796627837,
+        "h1_bottleneck": 0.057767671126762676,
+        "h1_w1": 1.9724424992853138
+      },
+      "edit": "bridge_gentle",
+      "ordinary_fired": [
+        "edge_median",
+        "edge_p99",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 1,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.48673973743347604,
+        "h1_w1": 1.1493270055839886
+      },
+      "edit": "deleted_strip",
+      "ordinary_fired": [
+        "holes",
+        "valid_fraction"
+      ],
+      "seed": 1,
+      "topology_fired": [
+        "h1_bottleneck"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.06519586292145685,
+        "h0_w1": 0.2937800575700047,
+        "h1_bottleneck": 0.05200968671158679,
+        "h1_w1": 0.762829124567069
+      },
+      "edit": "false_fill",
+      "ordinary_fired": [
+        "holes",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 1,
+      "topology_fired": [
+        "h0_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05360594463412305,
+        "h1_w1": 0.9379746640612474
+      },
+      "edit": "island",
+      "ordinary_fired": [
+        "components",
+        "valid_fraction"
+      ],
+      "seed": 1,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05040885907229459,
+        "h1_w1": 0.4506432431914605
+      },
+      "edit": "orientation_reversal",
+      "ordinary_fired": [],
+      "seed": 1,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.051900024835780045,
+        "h1_w1": 0.8795187850509107
+      },
+      "edit": "narrow_neck",
+      "ordinary_fired": [
+        "valid_fraction"
+      ],
+      "seed": 1,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.365520624411509,
+        "h0_w1": 1.0655189056432197,
+        "h1_bottleneck": 0.08198692539602487,
+        "h1_w1": 0.9350715400334909
+      },
+      "edit": "faint_band",
+      "ordinary_fired": [
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 1,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.47376951655238847,
+        "h0_w1": 0.6434856030188646,
+        "h1_bottleneck": 0.05009430483874394,
+        "h1_w1": 0.33770827344695337
+      },
+      "edit": "bridge",
+      "ordinary_fired": [
+        "edge_median",
+        "edge_p99",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 2,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.48267245609715076,
+        "h0_w1": 2.919223307237638,
+        "h1_bottleneck": 0.10390411845739798,
+        "h1_w1": 1.3302234766029624
+      },
+      "edit": "bridge_gentle",
+      "ordinary_fired": [
+        "edge_median",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 2,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.48026869685809725,
+        "h1_w1": 1.3461109725389044
+      },
+      "edit": "deleted_strip",
+      "ordinary_fired": [
+        "holes",
+        "valid_fraction"
+      ],
+      "seed": 2,
+      "topology_fired": [
+        "h1_bottleneck"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.05745712040006443,
+        "h0_w1": 0.05745712040006443,
+        "h1_bottleneck": 0.05262438587653412,
+        "h1_w1": 0.7403251867226743
+      },
+      "edit": "false_fill",
+      "ordinary_fired": [
+        "holes",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 2,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.05405836814608379,
+        "h0_w1": 0.05405836814608379,
+        "h1_bottleneck": 0.050995242328449486,
+        "h1_w1": 0.7236214508836383
+      },
+      "edit": "island",
+      "ordinary_fired": [
+        "components",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 2,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.052051197818402395,
+        "h1_w1": 0.9693494582710028
+      },
+      "edit": "orientation_reversal",
+      "ordinary_fired": [],
+      "seed": 2,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.05588798322184346,
+        "h0_w1": 0.05588798322184346,
+        "h1_bottleneck": 0.050420908760811345,
+        "h1_w1": 0.4371302315769032
+      },
+      "edit": "narrow_neck",
+      "ordinary_fired": [
+        "valid_fraction"
+      ],
+      "seed": 2,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.3628595111958152,
+        "h0_w1": 0.6318292051645777,
+        "h1_bottleneck": 0.06814672985856869,
+        "h1_w1": 0.5157034506523398
+      },
+      "edit": "faint_band",
+      "ordinary_fired": [
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 2,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.4772626230620797,
+        "h0_w1": 0.6340337578300519,
+        "h1_bottleneck": 0.053292559369842674,
+        "h1_w1": 1.0171114704666855
+      },
+      "edit": "bridge",
+      "ordinary_fired": [
+        "edge_median",
+        "edge_p99",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 3,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.4855928678478652,
+        "h0_w1": 2.578285859055254,
+        "h1_bottleneck": 0.06821165402355164,
+        "h1_w1": 1.9047829714443458
+      },
+      "edit": "bridge_gentle",
+      "ordinary_fired": [
+        "edge_median",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 3,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.4878568196040511,
+        "h1_w1": 1.137901331342642
+      },
+      "edit": "deleted_strip",
+      "ordinary_fired": [
+        "holes",
+        "valid_fraction"
+      ],
+      "seed": 3,
+      "topology_fired": [
+        "h1_bottleneck"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.08466119579559357,
+        "h0_w1": 0.08466119579559357,
+        "h1_bottleneck": 0.051647502714505744,
+        "h1_w1": 0.8350968967673981
+      },
+      "edit": "false_fill",
+      "ordinary_fired": [
+        "holes",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 3,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.05489024319566013,
+        "h0_w1": 0.05489024319566013,
+        "h1_bottleneck": 0.0505626580621612,
+        "h1_w1": 0.41061763669725576
+      },
+      "edit": "island",
+      "ordinary_fired": [
+        "components",
+        "low_support_fraction",
+        "valid_fraction"
+      ],
+      "seed": 3,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.053140035177145384,
+        "h1_w1": 1.1050426347848101
+      },
+      "edit": "orientation_reversal",
+      "ordinary_fired": [],
+      "seed": 3,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05002316991581823,
+        "h1_w1": 0.36397233948198593
+      },
+      "edit": "narrow_neck",
+      "ordinary_fired": [
+        "valid_fraction"
+      ],
+      "seed": 3,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.36972745059820245,
+        "h0_w1": 0.806746380649059,
+        "h1_bottleneck": 0.08165026780689372,
+        "h1_w1": 0.8598008277782497
+      },
+      "edit": "faint_band",
+      "ordinary_fired": [
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 3,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.4640433861724159,
+        "h0_w1": 0.581877652525287,
+        "h1_bottleneck": 0.050731653560600276,
+        "h1_w1": 0.44319876210076226
+      },
+      "edit": "bridge",
+      "ordinary_fired": [
+        "edge_median",
+        "edge_p99",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 4,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.4934832597362967,
+        "h0_w1": 2.4576324148706896,
+        "h1_bottleneck": 0.05924076044387139,
+        "h1_w1": 1.041969881909413
+      },
+      "edit": "bridge_gentle",
+      "ordinary_fired": [
+        "edge_median",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 4,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.4855933073672387,
+        "h1_w1": 1.0715302509162061
+      },
+      "edit": "deleted_strip",
+      "ordinary_fired": [
+        "holes",
+        "low_support_fraction",
+        "valid_fraction"
+      ],
+      "seed": 4,
+      "topology_fired": [
+        "h1_bottleneck"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.09050997953982495,
+        "h0_w1": 0.19762137697356663,
+        "h1_bottleneck": 0.05401278981458296,
+        "h1_w1": 1.4534336285925282
+      },
+      "edit": "false_fill",
+      "ordinary_fired": [
+        "holes",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 4,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05165284204566356,
+        "h1_w1": 0.9561031080868113
+      },
+      "edit": "island",
+      "ordinary_fired": [
+        "components",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 4,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05244264976134033,
+        "h1_w1": 1.0825725491020735
+      },
+      "edit": "orientation_reversal",
+      "ordinary_fired": [],
+      "seed": 4,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05221439243895848,
+        "h1_w1": 0.6726663906083636
+      },
+      "edit": "narrow_neck",
+      "ordinary_fired": [
+        "valid_fraction"
+      ],
+      "seed": 4,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.3612296640878107,
+        "h0_w1": 0.8539612640630262,
+        "h1_bottleneck": 0.09748977405309808,
+        "h1_w1": 1.214793457992539
+      },
+      "edit": "faint_band",
+      "ordinary_fired": [
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 4,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.4764725522922174,
+        "h0_w1": 0.5868720059914385,
+        "h1_bottleneck": 0.05298959137837467,
+        "h1_w1": 1.2952288295618597
+      },
+      "edit": "bridge",
+      "ordinary_fired": [
+        "edge_median",
+        "edge_p99",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 5,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.49054917985839286,
+        "h0_w1": 2.3220546034108707,
+        "h1_bottleneck": 0.0640878218365398,
+        "h1_w1": 2.1568939393356743
+      },
+      "edit": "bridge_gentle",
+      "ordinary_fired": [
+        "edge_median",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 5,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.05166546495079255,
+        "h0_w1": 0.05166546495079255,
+        "h1_bottleneck": 0.48543943990271327,
+        "h1_w1": 1.057164148667654
+      },
+      "edit": "deleted_strip",
+      "ordinary_fired": [
+        "holes",
+        "valid_fraction"
+      ],
+      "seed": 5,
+      "topology_fired": [
+        "h1_bottleneck"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.09416597193059922,
+        "h0_w1": 0.09416597193059922,
+        "h1_bottleneck": 0.05144803912352797,
+        "h1_w1": 0.7421398332630269
+      },
+      "edit": "false_fill",
+      "ordinary_fired": [
+        "holes",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 5,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.06605415192986024,
+        "h0_w1": 0.12933784615128424,
+        "h1_bottleneck": 0.05028691176303168,
+        "h1_w1": 0.4689580627388211
+      },
+      "edit": "island",
+      "ordinary_fired": [
+        "components",
+        "low_support_fraction",
+        "valid_fraction"
+      ],
+      "seed": 5,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05144803912352797,
+        "h1_w1": 0.7693710607773332
+      },
+      "edit": "orientation_reversal",
+      "ordinary_fired": [],
+      "seed": 5,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.052641284258063636,
+        "h1_w1": 1.299564230698778
+      },
+      "edit": "narrow_neck",
+      "ordinary_fired": [
+        "valid_fraction"
+      ],
+      "seed": 5,
+      "topology_fired": [
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.3571044263862845,
+        "h0_w1": 0.5844463110039119,
+        "h1_bottleneck": 0.08999754327812882,
+        "h1_w1": 1.3260839936870665
+      },
+      "edit": "faint_band",
+      "ordinary_fired": [
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 5,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.48531808486711997,
+        "h0_w1": 0.6673830207540491,
+        "h1_bottleneck": 0.05025803605920315,
+        "h1_w1": 0.3697341556075563
+      },
+      "edit": "bridge",
+      "ordinary_fired": [
+        "edge_median",
+        "edge_p99",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 6,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.4863759687157427,
+        "h0_w1": 3.109365584636039,
+        "h1_bottleneck": 0.06098222430669781,
+        "h1_w1": 2.5922631367273103
+      },
+      "edit": "bridge_gentle",
+      "ordinary_fired": [
+        "edge_median",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 6,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.05596750346308815,
+        "h0_w1": 0.05596750346308815,
+        "h1_bottleneck": 0.4828784070375548,
+        "h1_w1": 1.0124128265594723
+      },
+      "edit": "deleted_strip",
+      "ordinary_fired": [
+        "holes",
+        "valid_fraction"
+      ],
+      "seed": 6,
+      "topology_fired": [
+        "h1_bottleneck"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.061319200785070825,
+        "h0_w1": 0.17455831136459568,
+        "h1_bottleneck": 0.05040294923902461,
+        "h1_w1": 0.37486112675652206
+      },
+      "edit": "false_fill",
+      "ordinary_fired": [
+        "holes",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 6,
+      "topology_fired": [
+        "h0_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05049703142621487,
+        "h1_w1": 0.5660376570777597
+      },
+      "edit": "island",
+      "ordinary_fired": [
+        "components",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 6,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05049703142621487,
+        "h1_w1": 0.4808740457611293
+      },
+      "edit": "orientation_reversal",
+      "ordinary_fired": [],
+      "seed": 6,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05060738163132983,
+        "h1_w1": 0.6406872347782551
+      },
+      "edit": "narrow_neck",
+      "ordinary_fired": [
+        "valid_fraction"
+      ],
+      "seed": 6,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.3654392893607644,
+        "h0_w1": 0.6073759161449881,
+        "h1_bottleneck": 0.06850573655242144,
+        "h1_w1": 1.8324240471544677
+      },
+      "edit": "faint_band",
+      "ordinary_fired": [
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 6,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.4761504813614306,
+        "h0_w1": 0.8157874509740097,
+        "h1_bottleneck": 0.05140435538766147,
+        "h1_w1": 0.7717220930515258
+      },
+      "edit": "bridge",
+      "ordinary_fired": [
+        "edge_median",
+        "edge_p99",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 7,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.48942016911117014,
+        "h0_w1": 2.753607880652585,
+        "h1_bottleneck": 0.060032863973800865,
+        "h1_w1": 2.29728353713823
+      },
+      "edit": "bridge_gentle",
+      "ordinary_fired": [
+        "edge_median",
+        "edge_p99",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 7,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.48696398570419186,
+        "h1_w1": 1.5576814440384439
+      },
+      "edit": "deleted_strip",
+      "ordinary_fired": [
+        "edge_p99",
+        "holes",
+        "valid_fraction"
+      ],
+      "seed": 7,
+      "topology_fired": [
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.055628449094210525,
+        "h0_w1": 0.16017625559824336,
+        "h1_bottleneck": 0.05216866565169792,
+        "h1_w1": 0.7801509509156606
+      },
+      "edit": "false_fill",
+      "ordinary_fired": [
+        "holes",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 7,
+      "topology_fired": [
+        "h0_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05018418718612394,
+        "h1_w1": 0.3923665064667582
+      },
+      "edit": "island",
+      "ordinary_fired": [
+        "components",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 7,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.051280646141787345,
+        "h1_w1": 0.5375676753997944
+      },
+      "edit": "orientation_reversal",
+      "ordinary_fired": [],
+      "seed": 7,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05232958075393884,
+        "h1_w1": 0.7417712800164897
+      },
+      "edit": "narrow_neck",
+      "ordinary_fired": [
+        "low_support_fraction",
+        "valid_fraction"
+      ],
+      "seed": 7,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.3650779782187228,
+        "h0_w1": 0.8549768185117724,
+        "h1_bottleneck": 0.0746064478685026,
+        "h1_w1": 0.6700655530271066
+      },
+      "edit": "faint_band",
+      "ordinary_fired": [
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 7,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.4742576086926973,
+        "h0_w1": 0.8125486595578632,
+        "h1_bottleneck": 0.052533615652590904,
+        "h1_w1": 0.9215675611130275
+      },
+      "edit": "bridge",
+      "ordinary_fired": [
+        "edge_median",
+        "edge_p99",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 8,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.4915708490122937,
+        "h0_w1": 2.149986742582491,
+        "h1_bottleneck": 0.05730028788221869,
+        "h1_w1": 1.9060756293502719
+      },
+      "edit": "bridge_gentle",
+      "ordinary_fired": [
+        "edge_median",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 8,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.4821606060764488,
+        "h1_w1": 0.9508800093332803
+      },
+      "edit": "deleted_strip",
+      "ordinary_fired": [
+        "holes",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 8,
+      "topology_fired": [
+        "h1_bottleneck"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.06738479454177561,
+        "h0_w1": 0.1782381622446655,
+        "h1_bottleneck": 0.05068552925955494,
+        "h1_w1": 0.4693121801478621
+      },
+      "edit": "false_fill",
+      "ordinary_fired": [
+        "holes",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 8,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.051443244505015084,
+        "h1_w1": 0.6004967436636235
+      },
+      "edit": "island",
+      "ordinary_fired": [
+        "components",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 8,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05043772445712008,
+        "h1_w1": 0.3674254068068282
+      },
+      "edit": "orientation_reversal",
+      "ordinary_fired": [
+        "edge_p99"
+      ],
+      "seed": 8,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.054241199740318546,
+        "h0_w1": 0.054241199740318546,
+        "h1_bottleneck": 0.052264289112587126,
+        "h1_w1": 0.80724077559644
+      },
+      "edit": "narrow_neck",
+      "ordinary_fired": [
+        "valid_fraction"
+      ],
+      "seed": 8,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.3604844230941163,
+        "h0_w1": 0.5988620806363635,
+        "h1_bottleneck": 0.07532247780993846,
+        "h1_w1": 1.0105897780597433
+      },
+      "edit": "faint_band",
+      "ordinary_fired": [
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 8,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.47705538476969545,
+        "h0_w1": 0.8143130669889131,
+        "h1_bottleneck": 0.05229256363149615,
+        "h1_w1": 0.8597487762419531
+      },
+      "edit": "bridge",
+      "ordinary_fired": [
+        "edge_median",
+        "edge_p99",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 9,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.49044285772024715,
+        "h0_w1": 2.152255422075447,
+        "h1_bottleneck": 0.0631522031305041,
+        "h1_w1": 2.2552010964018976
+      },
+      "edit": "bridge_gentle",
+      "ordinary_fired": [
+        "edge_median",
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 9,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck",
+        "h1_w1"
+      ],
+      "witness_localized": true
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.48774996089951395,
+        "h1_w1": 0.8741705545864558
+      },
+      "edit": "deleted_strip",
+      "ordinary_fired": [
+        "edge_p99",
+        "holes",
+        "valid_fraction"
+      ],
+      "seed": 9,
+      "topology_fired": [
+        "h1_bottleneck"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0635800698036656,
+        "h0_w1": 0.27706218040962427,
+        "h1_bottleneck": 0.05135745345515719,
+        "h1_w1": 0.5049219076425835
+      },
+      "edit": "false_fill",
+      "ordinary_fired": [
+        "holes",
+        "low_support_fraction",
+        "support_mean",
+        "valid_fraction"
+      ],
+      "seed": 9,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1"
+      ],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05146846136970101,
+        "h1_w1": 0.7158270139960979
+      },
+      "edit": "island",
+      "ordinary_fired": [
+        "components",
+        "valid_fraction"
+      ],
+      "seed": 9,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05026501053133281,
+        "h1_w1": 0.44697259553559093
+      },
+      "edit": "orientation_reversal",
+      "ordinary_fired": [],
+      "seed": 9,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 0,
+      "distances": {
+        "h0_bottleneck": 0.0,
+        "h0_w1": 0.0,
+        "h1_bottleneck": 0.05272573911043549,
+        "h1_w1": 0.922545444741924
+      },
+      "edit": "narrow_neck",
+      "ordinary_fired": [
+        "low_support_fraction",
+        "valid_fraction"
+      ],
+      "seed": 9,
+      "topology_fired": [],
+      "witness_localized": false
+    },
+    {
+      "bridge_witnesses": 1,
+      "distances": {
+        "h0_bottleneck": 0.3689527981311811,
+        "h0_w1": 0.7798398316026109,
+        "h1_bottleneck": 0.07598295380102263,
+        "h1_w1": 1.0810865516425687
+      },
+      "edit": "faint_band",
+      "ordinary_fired": [
+        "low_support_fraction",
+        "support_mean"
+      ],
+      "seed": 9,
+      "topology_fired": [
+        "h0_bottleneck",
+        "h0_w1",
+        "h1_bottleneck"
+      ],
+      "witness_localized": true
+    }
+  ],
+  "schema_version": 1,
+  "seeds": 10,
+  "substrate": {
+    "kind": "synthetic",
+    "parameters": {
+      "bridge_transition_cols": 16,
+      "gentle_transition_cols": 40,
+      "grid": 96,
+      "noise_sigma": 0.05,
+      "pitch_voxels": 20.0,
+      "sheet_sigma_voxels": 3.0,
+      "step_voxels": 2.0,
+      "tear": {
+        "cols": [
+          10,
+          30
+        ],
+        "rows": [
+          10,
+          22
+        ]
+      },
+      "undulation_voxels": 4.0,
+      "vertex_jitter_voxels": 0.25
+    }
+  },
+  "summary": {
+    "bridge": {
+      "bridge_witness_rate": 1.0,
+      "class": "fault",
+      "local_support_detect_rate": 1.0,
+      "mesh_metric_detect_rate": 1.0,
+      "topology_detect_rate": 1.0,
+      "trials": 10,
+      "witness_localized_rate": 1.0
+    },
+    "bridge_gentle": {
+      "bridge_witness_rate": 1.0,
+      "class": "fault",
+      "local_support_detect_rate": 1.0,
+      "mesh_metric_detect_rate": 1.0,
+      "topology_detect_rate": 1.0,
+      "trials": 10,
+      "witness_localized_rate": 1.0
+    },
+    "deleted_strip": {
+      "bridge_witness_rate": 0.0,
+      "class": "fault",
+      "local_support_detect_rate": 0.2,
+      "mesh_metric_detect_rate": 1.0,
+      "topology_detect_rate": 1.0,
+      "trials": 10,
+      "witness_localized_rate": 0.0
+    },
+    "faint_band": {
+      "bridge_witness_rate": 1.0,
+      "class": "benign",
+      "local_support_detect_rate": 1.0,
+      "mesh_metric_detect_rate": 0.0,
+      "topology_detect_rate": 1.0,
+      "trials": 10,
+      "witness_localized_rate": 1.0
+    },
+    "false_fill": {
+      "bridge_witness_rate": 0.0,
+      "class": "fault",
+      "local_support_detect_rate": 1.0,
+      "mesh_metric_detect_rate": 1.0,
+      "topology_detect_rate": 0.9,
+      "trials": 10,
+      "witness_localized_rate": 0.0
+    },
+    "island": {
+      "bridge_witness_rate": 0.0,
+      "class": "fault",
+      "local_support_detect_rate": 0.8,
+      "mesh_metric_detect_rate": 1.0,
+      "topology_detect_rate": 0.2,
+      "trials": 10,
+      "witness_localized_rate": 0.0
+    },
+    "narrow_neck": {
+      "bridge_witness_rate": 0.0,
+      "class": "benign",
+      "local_support_detect_rate": 0.2,
+      "mesh_metric_detect_rate": 1.0,
+      "topology_detect_rate": 0.2,
+      "trials": 10,
+      "witness_localized_rate": 0.0
+    },
+    "orientation_reversal": {
+      "bridge_witness_rate": 0.0,
+      "class": "benign",
+      "local_support_detect_rate": 0.0,
+      "mesh_metric_detect_rate": 0.1,
+      "topology_detect_rate": 0.0,
+      "trials": 10,
+      "witness_localized_rate": 0.0
+    }
+  }
+}
