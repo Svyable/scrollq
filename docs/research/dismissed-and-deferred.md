@@ -127,6 +127,28 @@ fragment promotion gate. Even then, compare the fused model against
 witness-as-gate on the same held-out fragments. See
 [2026-10-05-ink-relief-witness.md](2026-10-05-ink-relief-witness.md).
 
+## Persistent-homology training loss for surfaces
+
+**Status:** DISMISS for now (2026-10-06).
+
+Topology-preserving losses work in other imaging domains, but ScrollQ does not
+know what topology to demand of crushed papyrus. Real sheets tear, fragment,
+fold and leave the scan. A loss that penalizes components or holes could
+manufacture exactly the false bridges the topology audit is meant to find.
+
+Revisit only after the audit shows a specific, stable error signature on real
+accepted geometry. See
+[2026-10-06-persistent-topology.md](2026-10-06-persistent-topology.md).
+
+## "Papyrus must be a disk" as a hard constraint
+
+**Status:** DISMISS (2026-10-06).
+
+A carbonized sheet inside a finite CT volume is not obliged to be one component
+with no holes. Tears, scan boundaries, missing material and detached pieces
+make hard genus or component constraints unjustified. Topology stays a
+comparative witness, never a prior.
+
 ## Large-context semantics as a substitute for physical validation
 
 **Status:** DISMISS as a validation strategy.
@@ -165,6 +187,27 @@ a volumetric mesh becomes part of the evidence chain.
 surface-mesh experiment with CT support as the oracle. Implementation
 integration stays refused (relayed: GPLv3+ without a commercial license). See
 [the 2026-10-06 note](2026-10-06-recto-baseline-and-cgal-watch.md).
+
+## The authors' Beltrami-prolongation code as a dependency or source
+
+**Status:** DISMISS (2026-10-06). The method itself is a WATCH item (see the deferred
+list below).
+
+`github.com/GuyFa/BCP` (checked at `2f3808d6ea0156b0c3dca77abb2a9fadf8315b03`) states
+"The use of this application is limited to academic use only!", has no license file,
+needs MATLAB and PARDISO, and bundles Shewchuk's *Triangle*. The paper's CC BY 4.0 covers
+the article, not this code. Do not vendor it, depend on it, or port it by reading it.
+Reconsider only on a written permissive relicense that also clears the bundled third-party
+code. See [the note](2026-10-06-beltrami-prolongation-watch.md).
+
+## Winning a flattening comparison by cutting the atlas
+
+**Status:** DISMISS (2026-10-06), enforced by `candidate_no_new_uv_seams`.
+
+Per-triangle distortion can always be driven to 1.0 by laying each triangle out as its
+own island. The old comparator returned PROMOTE for exactly that. A candidate may not
+cut where the sealed baseline did not, and a disk-only method on a multi-loop mesh is
+`out_of_domain`, not silently dropped.
 
 ## Learned uncertainty head on a frozen backbone (SegWithU-style)
 
@@ -412,6 +455,20 @@ their required inputs exist:
   error and sheet-switch count rather than Dice alone. The risk is that a
   mechanism built to reconnect interrupted structures connects two neighbouring
   windings instead.
+
+- Beltrami-coefficient prolongation flattening (Fargion and Weber): WATCH. The
+  official implementation is academic-use-only, so the trigger is a written permissive
+  relicense or a clean-room MIT implementation (issue #114), not "licensed code
+  appears". Smallest experiment then: one frozen disk-topology column mesh above 500K
+  triangles (the relayed speedups apply only above that size), flattened by the current
+  baseline and the candidate with identical cuts, judged on the frozen metric panel in
+  [the benchmark](../flattening-benchmark.md#frozen-metric-panel-for-the-first-sealed-ab):
+  zero flips with exact predicates, symmetric stretch and symmetric Dirichlet, physical
+  length/area distortion, boundary behaviour, fiber trajectories, runtime and peak RAM
+  against a measured baseline noise floor. Ink only after the report hash is frozen. The
+  risk is selecting a flattener because text looks better; the order of operations
+  forbids it. The method assumes disk topology, so multi-loop meshes are out of domain
+  unless the cut is sealed.
 
 "Deferred" means the hypothesis survived reasoning, not that implementation has
 been approved.
