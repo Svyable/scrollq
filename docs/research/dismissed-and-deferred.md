@@ -112,6 +112,21 @@ The surviving morphology path uses conservative descriptors, papyrus-level
 holdout, missingness controls, label controls, and a fail-closed transfer gate.
 See [morphology-ink-control.md](../morphology-ink-control.md).
 
+## Relief-conditioned ink training
+
+**Status:** DISMISS for now (2026-10-05).
+
+Do not feed relief or curvature channels into the ink network yet. Doing so
+would entangle the two evidence sources and destroy the relief witness's value
+as independent corroboration. It would add a retraining surface, and it could
+teach the network to turn cracks or fiber texture into letter-shaped false
+positives.
+
+Reconsider only after the geometry-only relief witness passes its held-out
+fragment promotion gate. Even then, compare the fused model against
+witness-as-gate on the same held-out fragments. See
+[2026-10-05-ink-relief-witness.md](2026-10-05-ink-relief-witness.md).
+
 ## Large-context semantics as a substitute for physical validation
 
 **Status:** DISMISS as a validation strategy.
@@ -145,6 +160,11 @@ deciding one. Its release timing (announcement date, CGAL 6.3 schedule) was
 Keep the inversion-barrier idea as a test-design reference for fold/inversion
 controls on surface meshes. Do not import the implementation. Reconsider only if
 a volumetric mesh becomes part of the evidence chain.
+
+**Update 2026-10-06:** the method moves to WATCH for a clean-room
+surface-mesh experiment with CT support as the oracle. Implementation
+integration stays refused (relayed: GPLv3+ without a commercial license). See
+[the 2026-10-06 note](2026-10-06-recto-baseline-and-cgal-watch.md).
 
 ## Learned uncertainty head on a frozen backbone (SegWithU-style)
 
