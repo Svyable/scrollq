@@ -419,9 +419,14 @@ scroliq-flatten-plan evaluate \
   --require-promote
 ```
 
+The comparison also refuses a candidate that cuts the UV atlas where the sealed
+baseline did not, since per-triangle distortion can always be driven to 1.0 by
+fragmenting the map.
+
 The motivating 2026 Beltrami-prolongation paper is treated as a candidate
-method, not as papyrus evidence. The paper is CC BY 4.0; ScrolIQ does not assume
-that an external software implementation is permissively licensed. See
+method, not as papyrus evidence. The paper is CC BY 4.0, but the authors' official
+implementation is academic-use-only (checked 2026-10-06), so it cannot be used here;
+the paths are a written relicense or an independent MIT implementation. See
 [`docs/flattening-benchmark.md`](docs/flattening-benchmark.md) for the sealed
 A/B protocol and post-promotion TIFXYZ/VC3D gates.
 
