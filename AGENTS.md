@@ -72,6 +72,7 @@ weight-free Pareto frontier (triage, not a readability claim).
     surface + checkpoint hashes, point-by-point training-region exclusion (provenance
     box format), raw score and optional independent relief support; missing evidence
     stays `unknown`/`not-measured`. Evidence only, never an ink verdict
+  - `shortcut_audit.py` → `scroliq-shortcut-audit`: frozen-embedding, balanced linear nuisance probes and create-only shortcut passports; declared physical-group separation and held-out training-domain exclusions. Diagnostic only, no real checkpoint result; absolute xyz unmeasured. `docs/shortcut-audit.md`
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's

@@ -2,6 +2,10 @@
 
 **Status:** living research notebook. Created 2026-10-03.
 
+New: [provenance dependence and shortcut audit](2026-10-06-provenance-dependence.md)
+adds executable balanced linear probes and a hash-bound diagnostic passport;
+real-checkpoint evaluation remains unmeasured.
+
 This folder consolidates the high-upside ideas explored independently of the
 primary Grand Prize dependency-order pipeline. It is intentionally not a second
 roadmap. The main execution campaign remains authoritative; research here may

@@ -1,5 +1,10 @@
 # ScrolIQ
 
+Frozen ink checkpoints can be inspected with [provenance shortcut probes](docs/shortcut-audit.md)
+(`scroliq-shortcut-audit`): balanced linear identity probes, held-out ink errors,
+and hashes of embeddings, checkpoint and sample manifest. Diagnostic machinery
+only; no real-checkpoint result or causal shortcut claim yet.
+
 **Find the bottleneck. Fix the bottleneck. Read the scroll.**
 
 ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](https://scrollprize.org/) virtual-unwrapping pipeline. The existing `scrollq` package measures **real level-0 CT voxels** and keeps its current commands for compatibility, but the project is expanding beyond a single volume-quality ranking toward evidence-backed diagnostics for the Challenge's published [2026 Open Problems](https://scrollprize.org/2026_open_problems): scan degradation, surface topology, mesh connectivity, fibers, winding annotations, spiral fitting, label quality, ink reliability, and data-scale reproducibility.
