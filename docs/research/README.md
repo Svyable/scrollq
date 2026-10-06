@@ -13,6 +13,12 @@ are a written relicense or a clean-room MIT implementation. It also closes a hol
 on the way: the flattening gate would PROMOTE a candidate that cut the atlas into
 one island per triangle (`candidate_no_new_uv_seams`, commit `69c7e07`).
 
+Earlier: [reconstruction-family invariance and calibration sensitivity](2026-10-06-reconstruction-sensitivity-and-cil.md)
+adds an executable audit of which ink and geometry claims survive a preregistered
+family of reconstructions and bounded calibration perturbations
+(`scroliq-reconstruction-sensitivity`); synthetic controls only, no reconstruction
+run, raw-projection availability not established.
+
 Earlier: [ensemble independence and conditional risk](2026-10-06-ensemble-independence-and-conditional-risk.md)
 adds an executable ancestry/witness-count gate and a CV-versus-independent
 failure-ranking comparison (`scroliq-ensemble-independence`); synthetic controls
@@ -136,6 +142,11 @@ campaign.
 | Conditional risk control (COAT-style adaptive thresholds) | WATCH (2026-10-06); no code incorporated, license not read | Aggregate FPR/FNR can hide catastrophic per-window tails | Clean-room per-window FPR/FNR tail test against the aggregate on sealed negatives/positives before any adaptive threshold; calibration ancestry tracked like training data ([note](2026-10-06-ensemble-independence-and-conditional-risk.md)) |
 | T3lescope / SILSA generative geometry | DISMISS (2026-10-06) | Plausible completion of sparse surfaces | None; geometry must be anchored to CT support |
 | L2L-Flow stochastic volumetric segmentation | WATCH (2026-10-06) | Multi-sample sheet-identity ambiguity | A permissive license and papyrus evidence |
+| Reconstruction-family invariance (official vs CIL LSQR / LSQR + Tikhonov) | INCLUDE as validation experiment, bounded role (2026-10-06); `scroliq-reconstruction-sensitivity`, synthetic controls only | Which ink and geometry claims survive a change of reconstruction mathematics, projections and pipeline held fixed; a one-strength component is reconstruction-sensitive, not prize-grade | One ROI with released projections, exact acquisition geometry and a reproducible official reconstruction; frozen spec committed before ink inference; exact dependency licence manifest in an isolated environment ([doc](../reconstruction-sensitivity.md)) |
+| Acquisition-calibration sensitivity (bounded centre-of-rotation perturbation) | INCLUDE as a bounded arm of the above (2026-10-06) | Tiny calibration changes that manufacture or erase glyph-like components raise reconstruction uncertainty | Preregistered plausible bound with evidence per parameter; same algorithm as the baseline |
+| CIL `LaminographyGeometryCorrector` | WATCH (2026-10-06) | Projection-matching search over tilt and centre-of-rotation offsets | Evidence that the Vesuvius acquisition is a laminography-like problem; not applied blindly |
+| Standardised reproducible DRR pipeline paper (October 3) | WATCH (2026-10-06); fingerprint practice retained | Undocumented preprocessing makes "synthetic projection" ill-defined | Any forward-projection experiment fingerprints preprocessing, coordinate conventions, geometry and software versions |
+| OptimusMesh / MEGA generative meshing | DISMISS (2026-10-06) | Compact or watertight plausible meshes | None; priors, not CT-supported papyrus topology |
 
 
 ## 2026-10-04 / 2026-10-05 overnight research batch
@@ -172,6 +183,7 @@ already merged. The primary dependency-order campaign remains authoritative.
 - [2026-10-06 persistent topology as a sheet-validity witness](2026-10-06-persistent-topology.md)
 - [2026-10-06 official recto baseline and CGAL smoothing watch](2026-10-06-recto-baseline-and-cgal-watch.md)
 - [2026-10-06 ensemble independence and conditional risk](2026-10-06-ensemble-independence-and-conditional-risk.md)
+- [2026-10-06 reconstruction-family invariance and calibration sensitivity](2026-10-06-reconstruction-sensitivity-and-cil.md)
 - [2026-10-06 Beltrami-prolongation flattening watch, CGAL and Challenge-page re-checks](2026-10-06-beltrami-prolongation-watch.md)
 - [2026-10-06 Dinovol positional debiasing and public-data limits](2026-10-06-dinovol-positional-debiasing.md)
 

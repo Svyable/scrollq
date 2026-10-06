@@ -29,6 +29,7 @@ SURFACES = {
     "render noise floor": ({"render_noise"}, set()),
     "crop invariance gate": ({"crop_invariance"}, set()),
     "ensemble independence gate": ({"ensemble_independence"}, set()),
+    "reconstruction sensitivity audit": ({"reconstruction_sensitivity"}, set()),
     # post-hoc audit stacked on the ensemble gate and the persistence engine
     "topology uncertainty audit": (
         {"topology_uncertainty"}, {"ensemble_independence", "persistent_topology"}),
