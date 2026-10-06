@@ -1051,6 +1051,11 @@ Ten checks treat a *claim* as something to be recomputed, not trusted:
   Calibrated only on a synthetic spiral with planted delete/duplicate/merge/switch
   defects; no real solution measured yet. See
   [winding conservation](docs/winding-conservation.md).
+- `scroliq-crop-invariance` — does a dense embedding of a physical voxel depend
+  on its position inside the crop? Promotes a position-debiasing transform only
+  if dependence falls without losing sheet/ink discrimination; missing
+  embeddings are `unavailable_input`, not failed. Synthetic controls only. See
+  [the gate](docs/crop-invariance.md).
 
 ### 2027 Grand Prize submission images
 
