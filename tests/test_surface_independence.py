@@ -28,6 +28,9 @@ SURFACES = {
     "winding sync + constraint gauge": ({"winding_sync", "constraint_gauge"}, set()),
     "render noise floor": ({"render_noise"}, set()),
     "ensemble independence gate": ({"ensemble_independence"}, set()),
+    # post-hoc audit stacked on the ensemble gate and the persistence engine
+    "topology uncertainty audit": (
+        {"topology_uncertainty"}, {"ensemble_independence", "persistent_topology"}),
     # reads ink maps through the existing validator's loaders and nothing else
     "threshold persistence": (
         {"persistence", "persistence_audit", "persistence_controls"},
@@ -95,7 +98,8 @@ def test_surfaces_do_not_import_each_other_except_declared_stacking():
     allowed = {("protocol pairs", "bucket helpers"),
                ("protocol pairs", "OME-Zarr reader + registration"),
                ("chunk-size audit", "bucket helpers"),
-               ("prize manifests", "bucket helpers")}
+               ("prize manifests", "bucket helpers"),
+               ("topology uncertainty audit", "ensemble independence gate")}
     assert edges <= allowed, f"unexpected surface dependencies: {edges - allowed}"
 
 

@@ -78,6 +78,7 @@ weight-free Pareto frontier (triage, not a readability claim).
     stays `unknown`/`not-measured`. Evidence only, never an ink verdict
   - `shortcut_audit.py` → `scroliq-shortcut-audit`: frozen-embedding, balanced linear nuisance probes and create-only shortcut passports; declared physical-group separation and held-out training-domain exclusions. Diagnostic only, no real checkpoint result; absolute xyz unmeasured. `docs/shortcut-audit.md`
   - `ensemble_independence.py` → `scroliq-ensemble-independence`: declared training-ancestry audit (pairwise supervision overlap, lineage/seed sharing, detected CV-partition vs same-data vs disjoint regime, exact certified independent-witness count; unknown is never independent) and a scroll-disjoint failure-ranking comparison (block-bootstrap AUROC/AURC of mutual information vs entropy) gated by a built-in planted-signal/null control whose seed is a code constant. Evidence only; no real-ensemble result yet. `docs/ensemble-independence.md`
+  - `topology_uncertainty.py` → `scroliq-topology-uncertainty`: post-hoc audit of frozen ensemble surface predictions — does member disagreement (MI) rank cross-roll/drift/unscanned-CT/winding-error fixtures better than predictive-entropy confidence? Block-bootstrap AUROC, frozen PROMOTE/DISMISS/UNVERIFIED rule, built-in planted/confident-error/null control with code-constant seed; reuses `ensemble_independence` ancestry and `persistent_topology`. No TUNE++ code (unlicensed), no retraining, synthetic controls only. `docs/topology-uncertainty.md`
   - `persistent_topology.py` → `scroliq-topology`: H0/H1 superlevel persistence of a
     per-vertex support field on a TIFXYZ grid (own union-find, scipy distances),
     W1/bottleneck diagram distances, experimental bridge witnesses; `benchmark`
@@ -149,6 +150,7 @@ scroliq-constraint-gauge self-test                  # external calibration of wi
 scroliq-render-noise --self-test                    # flatten/render noise floor for small-effect claims
 scroliq-ink-passport --help                         # per-component ink evidence passport
 scroliq-topology --help                             # persistent topology + bridge witnesses
+scroliq-topology-uncertainty self-test              # disagreement vs confidence on structural failures
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests
