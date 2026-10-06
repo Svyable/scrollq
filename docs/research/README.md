@@ -87,6 +87,10 @@ campaign.
 | Multi-sheet consistency (Lasagna) A/B/C | EXPERIMENT FURTHER, held at WATCH (2026-10-04) | Joint stacked-sheet prior for compressed regions | Task 0 instrumentation plus three fitted-sheet measurements |
 | Gaussian-splatting CT reconstruction (FaCT-GS) | DISMISS for the prize pipeline | Faster reconstruction from raw acquisitions | None; ScrolIQ holds reconstructed volumes and it adds a learned stage upstream of weak ink evidence |
 | Clinical low-dose CT reconstruction (CSRCT) | DISMISS | Sparse-prior reconstruction | None; simulated-data evidence, restricted article, no permissive implementation found |
+| Prediction-volume CT-support invariant (nothing on CT == 0 seeds geometry) | INCLUDE (2026-10-05); `scroliq-prediction-support`, synthetic control only | Stops tracers from following phantom halo/end-cap positives | First dated real-volume run; see [automesh note](2026-10-05-automesh-harvest-qc.md) |
+| Rejection-first harvest QC (vesuvius-automesh) vs ScrollQ gates | EXPERIMENT FURTHER (2026-10-05); `scroliq-harvest-qc` machinery, no corpus yet | Independent check that harvested area is papyrus on the right sheet, not just papyrus-looking | Freeze good + wrong-wrap/cross-roll/drift corpus; PROMOTE only a metric that closes a blind spot with zero false rejects |
+| Texture-similarity gate as a universal page definition | WATCH (2026-10-05) | Cheap operational filter | Leave-one-scroll-out calibration stays stable across acquisitions |
+| Generative/autoregressive meshing (XSpecMesh-style) | DISMISS (2026-10-05) | Faster plausible meshes | None; not anchored to measured CT |
 
 
 ## 2026-10-04 / 2026-10-05 overnight research batch
@@ -116,6 +120,7 @@ already merged. The primary dependency-order campaign remains authoritative.
 - [Reproducibility and proof-chain research](reproducibility-research.md)
 - [Dismissed and deferred ideas](dismissed-and-deferred.md)
 - [2026-10-04 / 2026-10-05 overnight exploratory research](2026-10-04-overnight-research.md)
+- [vesuvius-automesh: harvest QC and prediction CT support](2026-10-05-automesh-harvest-qc.md)
 - [2026-10-05 winding conservation and two WATCH items](2026-10-05-winding-conservation-and-watch.md)
 
 ## Existing tracked work
