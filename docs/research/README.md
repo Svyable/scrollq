@@ -158,6 +158,7 @@ already merged. The primary dependency-order campaign remains authoritative.
 - [2026-10-06 persistent topology as a sheet-validity witness](2026-10-06-persistent-topology.md)
 - [2026-10-06 official recto baseline and CGAL smoothing watch](2026-10-06-recto-baseline-and-cgal-watch.md)
 - [2026-10-06 ensemble independence and conditional risk](2026-10-06-ensemble-independence-and-conditional-risk.md)
+- [2026-10-06 Dinovol positional debiasing and public-data limits](2026-10-06-dinovol-positional-debiasing.md)
 
 ## Existing tracked work
 
