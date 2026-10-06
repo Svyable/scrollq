@@ -58,6 +58,9 @@ weight-free Pareto frontier (triage, not a readability claim).
   - `prediction_support.py` → `scroliq-prediction-support`: per-voxel preflight before any tracer; pred_positive ∩ ct_supported vs ∩ ct_zero, distance to CT support, supported/halo/beyond/unresolved prediction-chunk classes, blend-margin enrichment, seed gate and source filter; built-in positive control, no positives is `unverified`. `docs/prediction-support.md`
   - `harvest_qc_benchmark.py` → `scroliq-harvest-qc`: frozen manifest of verified-good + invalid (wrong-wrap/cross-roll/drift/…) surfaces, seed/evaluation region separation, spec-bound decisions with `influenced_tracing: false`; PROMOTE only a metric that closes a ScrollQ blind spot with zero false rejects outside its calibration scrolls. Evaluation only. `docs/harvest-qc-benchmark.md`
   - `spiral_cloud.py` → `scroliq-spiral-cloud`: execution guard rails for the frozen PHerc0826 Spiral run on one L4 — `check` (frozen manifest in `artifacts/2026-10-05-spiral-cloud-plan/` vs recipe contract, storage floors, script hashes), `plan` (gcloud argv only, executes nothing), on-VM `disk-floor`, `gpu-gate`, `fetch-lasagna`, `smoke-recipe`/`smoke-verdict`, `compare-preflight`, `bundle`. VM scripts live in `cloud/spiral-gcp/` and are hash-pinned by the manifest — edit a script, update its hash. Smoke receipts are `promotional: false` and refused by reproduction-check/export. `docs/spiral-cloud-execution.md`
+  - `winding_sync.py` → `scroliq-winding-sync`: reconciles trusted pairwise winding observations (d = w_i − w_j) by BFS propagation vs integer L1 synchronization (TU LP, integrality checked, never rounded) vs rounded L2; `campaign` plants frozen ±k errors into uniform/bridge/BFS-tree edges of a hash-bound graph and PROMOTEs L1 only if it reproduces the clean solution, gains materially and is never worse beyond tolerance. Refuses ink fields. Synthetic calibration only (`artifacts/2026-10-06-winding-sync-synthetic/`: dense PROMOTE, sparse NO_MATERIAL_GAIN). `docs/winding-sync.md`
+  - `constraint_gauge.py` → `scroliq-constraint-gauge`: producer-neutral external scoring of winding constraints against sealed human-verified pairs (coverage, exact/within-1, residuals, per-bin confidence calibration); internal metrics are recorded as not evidence
+  - `render_noise.py` → `scroliq-render-noise`: passport `measurement_noise` block; a rendered small-effect claim must exceed k × the repeat-render noise floor of the unchanged surface, with the determinism mode declared. `docs/render-noise.md`
   - `bbox_census.py` → `scroliq-bbox-census`: recomputes bounds over a TIFXYZ patch pack, compares with declared `meta.json` bboxes, counts vertices a declared-bbox filter would lose; positive control built in, empty census is `unverified`
   - `objective_audit.py` → `scroliq-objective-audit`: configured-vs-effective objective passport audit (+ `ObjectiveTracker`); fails closed on never-evaluated/always-zero/non-finite/ungradiented claimed terms and on ablation arms that were not ablated
   - `geometry_strata.py` → `scroliq-geometry-strata`: preregistered geometry-stratified, label-coverage-conditioned surface evaluation gate (`measure` derives curvature/tilt; `evaluate` applies the frozen rule). Machinery only; no real-data result yet
@@ -135,6 +138,9 @@ scroliq-prediction-support --self-test              # CT-support preflight befor
 scroliq-harvest-qc self-test                        # independent harvest-QC benchmark vs ScrollQ gates
 scroliq-persistence --help                          # threshold-persistence audit (measure / evaluate / controls)
 scroliq-winding-conservation --help                 # layer-count / pitch / continuity QC
+scroliq-winding-sync self-test                      # L1 vs BFS winding reconciliation under planted errors
+scroliq-constraint-gauge self-test                  # external calibration of winding-constraint producers
+scroliq-render-noise --self-test                    # flatten/render noise floor for small-effect claims
 scroliq-ink-passport --help                         # per-component ink evidence passport
 ```
 
@@ -268,6 +274,15 @@ console script. A new entry point must therefore be declared in
    (`within_region` scope). A control that never produced the effect it claims
    to block (the first confound scenario) proves nothing: the suite now requires
    the cross-region scope to pass alone before crediting the within-region gate.
+
+15. **Internal consistency is not external correctness.** A winding-constraint
+   generator can raise its own cycle consistency while recovering the wrong
+   number of windings; score every producer against sealed human-verified
+   pairs (`scroliq-constraint-gauge`) and let declared confidence carry weight
+   only if it is externally calibrated. A reconciler (`scroliq-winding-sync`)
+   cannot fix bad measurements or errors on bridges; report redundancy with
+   every result. The external figures behind this rule (constraint-gauge vs
+   winding-sync) are not reproduced here.
 
 ## Working rules
 
