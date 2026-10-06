@@ -2,7 +2,11 @@
 
 **Status:** living research notebook. Created 2026-10-03.
 
-New: [ensemble independence and conditional risk](2026-10-06-ensemble-independence-and-conditional-risk.md)
+New: [topology-conditioned uncertainty](2026-10-07-topology-conditioned-uncertainty.md)
+adds a post-hoc disagreement-vs-confidence audit on structural failures
+(`scroliq-topology-uncertainty`); synthetic controls only, no real verdict.
+
+Earlier: [ensemble independence and conditional risk](2026-10-06-ensemble-independence-and-conditional-risk.md)
 adds an executable ancestry/witness-count gate and a CV-versus-independent
 failure-ranking comparison (`scroliq-ensemble-independence`); synthetic controls
 only, no real ensemble audited.
