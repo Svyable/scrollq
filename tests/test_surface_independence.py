@@ -25,6 +25,8 @@ SURFACES = {
     "seam fingerprint": ({"seam_fingerprint"}, set()),
     "prediction support preflight": ({"prediction_support"}, {"support"}),
     "harvest QC benchmark": ({"harvest_qc_benchmark"}, set()),
+    "winding sync + constraint gauge": ({"winding_sync", "constraint_gauge"}, set()),
+    "render noise floor": ({"render_noise"}, set()),
     "ensemble independence gate": ({"ensemble_independence"}, set()),
     # reads ink maps through the existing validator's loaders and nothing else
     "threshold persistence": (

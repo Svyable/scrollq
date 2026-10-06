@@ -106,6 +106,11 @@ campaign.
 | Gaussian-splatting CT reconstruction (FaCT-GS) | DISMISS for the prize pipeline | Faster reconstruction from raw acquisitions | None; ScrolIQ holds reconstructed volumes and it adds a learned stage upstream of weak ink evidence |
 | Clinical low-dose CT reconstruction (CSRCT) | DISMISS | Sparse-prior reconstruction | None; simulated-data evidence, restricted article, no permissive implementation found |
 | Prediction-volume CT-support invariant (nothing on CT == 0 seeds geometry) | INCLUDE (2026-10-05); `scroliq-prediction-support`, synthetic control only | Stops tracers from following phantom halo/end-cap positives | First dated real-volume run; see [automesh note](2026-10-05-automesh-harvest-qc.md) |
+| L1 integer winding synchronization of trusted constraints | INTEGRATE (2026-10-06); `scroliq-winding-sync`, synthetic calibration: PROMOTE dense / NO_MATERIAL_GAIN sparse | One wrong BFS tree edge no longer shifts a whole subtree when redundant edges exist | Human-verified winding graph, frozen with bridge count; see [note](2026-10-06-winding-sync-and-render-noise.md) |
+| External calibration of winding-constraint producers | INTEGRATE EXPERIMENT (2026-10-06); `scroliq-constraint-gauge` | Internal consistency ≠ external correctness; confidence must earn weight | First sealed human-verified pair set |
+| Automatic winding-constraint generation (winding-sync detector) | WATCH (2026-10-06) | Human-free constraints at scale | External exact agreement must improve substantially |
+| Direct surface extraction from a generated winding field | DISMISS (2026-10-06) | Bypass VC3D/spiral fitting | Real-scroll end-to-end demonstration |
+| Flatten/render noise floor for small-effect claims | INTEGRATE NOW for controlled experiments (2026-10-06); `scroliq-render-noise` | A 1–2% ink change is not evidence if an unchanged surface moves ~3% | First within-surface perturbation experiment records it |
 | Rejection-first harvest QC (vesuvius-automesh) vs ScrollQ gates | EXPERIMENT FURTHER (2026-10-05); `scroliq-harvest-qc` machinery, no corpus yet | Independent check that harvested area is papyrus on the right sheet, not just papyrus-looking | Freeze good + wrong-wrap/cross-roll/drift corpus; PROMOTE only a metric that closes a blind spot with zero false rejects |
 | Texture-similarity gate as a universal page definition | WATCH (2026-10-05) | Cheap operational filter | Leave-one-scroll-out calibration stays stable across acquisitions |
 | Generative/autoregressive meshing (XSpecMesh-style) | DISMISS (2026-10-05) | Faster plausible meshes | None; not anchored to measured CT |
@@ -143,6 +148,7 @@ already merged. The primary dependency-order campaign remains authoritative.
 - [Dismissed and deferred ideas](dismissed-and-deferred.md)
 - [2026-10-04 / 2026-10-05 overnight exploratory research](2026-10-04-overnight-research.md)
 - [vesuvius-automesh: harvest QC and prediction CT support](2026-10-05-automesh-harvest-qc.md)
+- [winding-sync, constraint-gauge and flattening nondeterminism](2026-10-06-winding-sync-and-render-noise.md)
 - [2026-10-05 winding conservation and two WATCH items](2026-10-05-winding-conservation-and-watch.md)
 - [2026-10-05 ink relief witnesses and per-component passports](2026-10-05-ink-relief-witness.md)
 - [2026-10-06 official recto baseline and CGAL smoothing watch](2026-10-06-recto-baseline-and-cgal-watch.md)

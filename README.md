@@ -985,7 +985,7 @@ independent `verify` command re-hashes and re-decodes those artifacts; with
 
 ### Semantic integrity gates
 
-Seven checks treat a *claim* as something to be recomputed, not trusted:
+Ten checks treat a *claim* as something to be recomputed, not trusted:
 
 - `scroliq-vc3d-run-guard` — an external geometry producer that exits 0 is
   `PRODUCER_SEMANTIC_FAILURE` unless its new TIFXYZ also has recomputed physical
@@ -1015,6 +1015,19 @@ Seven checks treat a *claim* as something to be recomputed, not trusted:
   metric is promoted only if it closes a ScrollQ blind spot with zero false
   rejects, judged outside its own calibration scrolls. Machinery only. See
   [the benchmark](docs/harvest-qc-benchmark.md).
+- `scroliq-winding-sync` — reconciles trusted pairwise winding observations
+  by integer L1 synchronization (integrality checked, never rounded) and
+  benchmarks it against BFS propagation under frozen planted ±1/±2
+  corruption. Synthetic calibration only: PROMOTE on a redundant graph,
+  NO_MATERIAL_GAIN on a bridge-heavy one
+  ([artifact](artifacts/2026-10-06-winding-sync-synthetic/README.md)). See
+  [winding reconciliation](docs/winding-sync.md).
+- `scroliq-constraint-gauge` — scores any winding-constraint producer against
+  sealed human-verified pairs (coverage, exact agreement, residual, confidence
+  calibration). Internal consistency is recorded but is never evidence.
+- `scroliq-render-noise` — a small rendered-ink change is evidence only if it
+  exceeds k × the repeat-render noise floor of the unchanged surface, with the
+  determinism mode declared. See [the noise floor](docs/render-noise.md).
 - `scroliq-winding-conservation` — checks a stitched winding solution against
   conservation laws no single surface was built to satisfy: label-free layer
   count along radial rays, winding pitch, and label continuity across cells.
