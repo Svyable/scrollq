@@ -2,7 +2,18 @@
 
 **Status:** living research notebook. Created 2026-10-03.
 
-New: [reconstruction-family invariance and calibration sensitivity](2026-10-06-reconstruction-sensitivity-and-cil.md)
+New: [topology-conditioned uncertainty](2026-10-07-topology-conditioned-uncertainty.md)
+adds a post-hoc disagreement-vs-confidence audit on structural failures
+(`scroliq-topology-uncertainty`); synthetic controls only, no real verdict.
+
+Earlier: [Beltrami-prolongation flattening watch](2026-10-06-beltrami-prolongation-watch.md)
+records the method at WATCH with its benchmark defined, and corrects the license
+premise: the authors' official code exists but is academic-use-only, so the only routes
+are a written relicense or a clean-room MIT implementation. It also closes a hole found
+on the way: the flattening gate would PROMOTE a candidate that cut the atlas into
+one island per triangle (`candidate_no_new_uv_seams`, commit `69c7e07`).
+
+Earlier: [reconstruction-family invariance and calibration sensitivity](2026-10-06-reconstruction-sensitivity-and-cil.md)
 adds an executable audit of which ink and geometry claims survive a preregistered
 family of reconstructions and bounded calibration perturbations
 (`scroliq-reconstruction-sensitivity`); synthetic controls only, no reconstruction
@@ -89,8 +100,11 @@ campaign.
 | CSWinUNETR (thin-structure segmentation) | WATCH; no explicit license found, so no vendoring or derivation | Long-range sheet continuity through low-contrast gaps | A license, then an architecture-only A/B on identical cubes/ROIs judged on winding bridges and sheet switches |
 | Learned (Siamese) patch matcher for sheet identity | DISMISS for now | Could learn weak identity cues | None until the deterministic correlation test shows physical identity information exists |
 | Fiber-coordinate canonicalization as a model architecture | DISMISS for now | Possible orientation normalization | Reconsider only if an ablation inside another experiment supports it |
-| CGAL `Mesh_smoothing_3` as an integration | DISMISS for current integration; method WATCH (2026-10-06) | Connectivity-preserving vertex optimization with an inversion barrier | Clean-room surface experiment only, CT support as the oracle; implementation is GPL-encumbered ([note](2026-10-06-recto-baseline-and-cgal-watch.md)) |
+| CGAL `Mesh_smoothing_3` as an integration | DISMISS for current integration; method WATCH (2026-10-06) | Connectivity-preserving vertex optimization with an inversion barrier | Clean-room surface experiment only, CT support as the oracle; implementation is GPL-encumbered ([note](2026-10-06-recto-baseline-and-cgal-watch.md); re-confirmed in the [Beltrami note](2026-10-06-beltrami-prolongation-watch.md)) |
 | Official `surface_recto_3dunet` as a frozen external baseline | INCLUDE as frozen reference (2026-10-06); registered **unpinned** ([artifact](../../artifacts/2026-10-06-recto-3dunet-reference/README.md)) | Canonical scroll-disjoint surface baseline any future ScrolIQ surface claim must beat | Pin checkpoint hash/revision and license evidence; resolve PHerc0343 vs 0343P; one sealed-crop geometry-only run on a scroll-disjoint volume |
+| Beltrami-coefficient prolongation flattening (Fargion-Weber, CGF 2026) | WATCH (2026-10-06); authors' code (`GuyFa/BCP`) is academic-use-only with MATLAB/PARDISO/Triangle dependencies, so DISMISS as a dependency | Fast injective low-distortion flattening of very large meshes; throughput side of the complete-scroll requirement | A written permissive relicense, or a clean-room MIT implementation (issue #114); then the sealed A/B on a disk-topology mesh above 500K triangles against the [frozen metric panel](../flattening-benchmark.md#frozen-metric-panel-for-the-first-sealed-ab) ([note](2026-10-06-beltrami-prolongation-watch.md)) |
+| Cut-set identity for flattening comparisons (no new UV seams) | INCLUDE as integrity gate (2026-10-06); `scroliq-flatten-compare` / `scroliq-flatten-plan`, tested | Cutting lowers distortion for free; a shattered one-island-per-triangle atlas used to PROMOTE | Real sealed A/B; baseline must be produced on the same cut mesh for multi-loop meshes |
+| Throughput-only promotion verdict (`PROMOTE_THROUGHPUT`) | PROPOSED, not implemented (2026-10-06) | Lets an equivalent-distortion but much faster flattener be adopted without being called a quality gain | Maintainer decision (issue #114 treats runtime as descriptive); sealed `min_speedup`; baseline repeat-noise floor measured first |
 | SPECTRE CT foundation-model weights | DISMISS (re-checked 2026-10-06) | Generic CT features | Permissive weights plus a Vesuvius held-out result |
 | Self-supervised CT denoising / Deep Pseudo-Proximal Map | WATCH (2026-10-06); no preprocessing adoption | Cleaner CT | Raw projections plus a physically independent ink benchmark |
 | Global histogram matching | DISMISS | Superficial domain normalization | None; retain only as a negative control |
@@ -102,6 +116,10 @@ campaign.
 | Recomputed spatial metadata (declared bbox never alone) | INCLUDE (2026-10-04) | Stale bounds silently discard valid geometry in prefilters and separation certificates | Run `scroliq-bbox-census` on the PHercParis4 pack |
 | Configured vs effective objective audit | INCLUDE (2026-10-04) | A nonzero loss weight is not a contributing loss | Wire into model-card preflight |
 | Label-coverage-conditioned surface evaluation | EXPERIMENT FURTHER (2026-10-04) | Aggregate held-out gain can live only in easy, well-labeled geometry | Real run of the frozen strata spec on committed ROIs |
+| Persistent-topology planted-fault benchmark | INCLUDE as R&D benchmark (2026-10-06); `scroliq-topology`, synthetic only | Tests whether connectivity-across-evidence catches faults local metrics miss | Synthetic answer: **no** (paired mesh metrics caught every fault); real PHerc1667 run not done ([note](2026-10-06-persistent-topology.md)) |
+| Topological bridge witness | EXPERIMENT FURTHER, high priority (2026-10-06) | Localizes the weak neck holding two large regions together | Localized 10/10 planted bridges but also fired on 10/10 legitimate faint bands; add a cross-saddle sheet-change condition and test unpaired |
+| Topology-stability VC3D / proof layer | Not included (2026-10-06) | Reviewer-facing fragility layer | Waits on the bridge witness separating bridges from faint bands |
+| Persistent-homology training loss; hard disk-topology constraint | DISMISS (2026-10-06) | Would coerce damaged papyrus / manufacture bridges | Loss: only after a stable real error signature; disk constraint: never |
 | Per-component physical-evidence passport | INCLUDE as proof infrastructure (2026-10-05); `scroliq-ink-passport` | Every proposed ink component / letter region bound to mesh, CT coordinates, checkpoint, training exclusion, raw score and relief support | Emit on the first real rendered column; take reviewer regions from the legibility ledger |
 | Geometry-only (CT-native) ink relief witness | EXPERIMENT FURTHER (2026-10-05) | Independent physical corroboration of frozen ink candidates from mesh + raw CT | Pin labelled detached fragments; fragment-held-out AUPRC of candidate × witness vs raw probability, with label-roll, mesh-offset and missingness controls ([note](2026-10-05-ink-relief-witness.md)) |
 | Relief-conditioned ink training | DISMISS for now (2026-10-05) | Would entangle evidence sources | Only after the independent witness passes held-out |
@@ -112,6 +130,11 @@ campaign.
 | Gaussian-splatting CT reconstruction (FaCT-GS) | DISMISS for the prize pipeline | Faster reconstruction from raw acquisitions | None; ScrolIQ holds reconstructed volumes and it adds a learned stage upstream of weak ink evidence |
 | Clinical low-dose CT reconstruction (CSRCT) | DISMISS | Sparse-prior reconstruction | None; simulated-data evidence, restricted article, no permissive implementation found |
 | Prediction-volume CT-support invariant (nothing on CT == 0 seeds geometry) | INCLUDE (2026-10-05); `scroliq-prediction-support`, synthetic control only | Stops tracers from following phantom halo/end-cap positives | First dated real-volume run; see [automesh note](2026-10-05-automesh-harvest-qc.md) |
+| L1 integer winding synchronization of trusted constraints | INTEGRATE (2026-10-06); `scroliq-winding-sync`, synthetic calibration: PROMOTE dense / NO_MATERIAL_GAIN sparse | One wrong BFS tree edge no longer shifts a whole subtree when redundant edges exist | Human-verified winding graph, frozen with bridge count; see [note](2026-10-06-winding-sync-and-render-noise.md) |
+| External calibration of winding-constraint producers | INTEGRATE EXPERIMENT (2026-10-06); `scroliq-constraint-gauge` | Internal consistency ≠ external correctness; confidence must earn weight | First sealed human-verified pair set |
+| Automatic winding-constraint generation (winding-sync detector) | WATCH (2026-10-06) | Human-free constraints at scale | External exact agreement must improve substantially |
+| Direct surface extraction from a generated winding field | DISMISS (2026-10-06) | Bypass VC3D/spiral fitting | Real-scroll end-to-end demonstration |
+| Flatten/render noise floor for small-effect claims | INTEGRATE NOW for controlled experiments (2026-10-06); `scroliq-render-noise` | A 1–2% ink change is not evidence if an unchanged surface moves ~3% | First within-surface perturbation experiment records it |
 | Rejection-first harvest QC (vesuvius-automesh) vs ScrollQ gates | EXPERIMENT FURTHER (2026-10-05); `scroliq-harvest-qc` machinery, no corpus yet | Independent check that harvested area is papyrus on the right sheet, not just papyrus-looking | Freeze good + wrong-wrap/cross-roll/drift corpus; PROMOTE only a metric that closes a blind spot with zero false rejects |
 | Texture-similarity gate as a universal page definition | WATCH (2026-10-05) | Cheap operational filter | Leave-one-scroll-out calibration stays stable across acquisitions |
 | Generative/autoregressive meshing (XSpecMesh-style) | DISMISS (2026-10-05) | Faster plausible meshes | None; not anchored to measured CT |
@@ -154,11 +177,15 @@ already merged. The primary dependency-order campaign remains authoritative.
 - [Dismissed and deferred ideas](dismissed-and-deferred.md)
 - [2026-10-04 / 2026-10-05 overnight exploratory research](2026-10-04-overnight-research.md)
 - [vesuvius-automesh: harvest QC and prediction CT support](2026-10-05-automesh-harvest-qc.md)
+- [winding-sync, constraint-gauge and flattening nondeterminism](2026-10-06-winding-sync-and-render-noise.md)
 - [2026-10-05 winding conservation and two WATCH items](2026-10-05-winding-conservation-and-watch.md)
 - [2026-10-05 ink relief witnesses and per-component passports](2026-10-05-ink-relief-witness.md)
+- [2026-10-06 persistent topology as a sheet-validity witness](2026-10-06-persistent-topology.md)
 - [2026-10-06 official recto baseline and CGAL smoothing watch](2026-10-06-recto-baseline-and-cgal-watch.md)
 - [2026-10-06 ensemble independence and conditional risk](2026-10-06-ensemble-independence-and-conditional-risk.md)
 - [2026-10-06 reconstruction-family invariance and calibration sensitivity](2026-10-06-reconstruction-sensitivity-and-cil.md)
+- [2026-10-06 Beltrami-prolongation flattening watch, CGAL and Challenge-page re-checks](2026-10-06-beltrami-prolongation-watch.md)
+- [2026-10-06 Dinovol positional debiasing and public-data limits](2026-10-06-dinovol-positional-debiasing.md)
 
 ## Existing tracked work
 
