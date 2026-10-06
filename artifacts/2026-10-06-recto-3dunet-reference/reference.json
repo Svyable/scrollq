@@ -1,0 +1,58 @@
+{
+  "schema": "scroliq-frozen-reference/1",
+  "reference_id": "scrollprize-surface-recto-3dunet-ps256",
+  "as_of": "2026-10-06",
+  "role": "frozen_external_surface_baseline",
+  "task": "recto-surface",
+  "pin_status": "unpinned",
+  "source": {
+    "model_card_url": "https://huggingface.co/scrollprize/surface_recto_3dunet",
+    "revision": null,
+    "checkpoint_filename": "checkpoint_inference_ready.pth",
+    "checkpoint_sha256": null,
+    "checkpoint_bytes": null,
+    "access_note": "huggingface.co is blocked by the build container's egress policy (403 on CONNECT). The model card's existence, architecture summary, loader keys and training ancestry were read only from a web-search snippet of the card; no file was downloaded and no revision or hash was read."
+  },
+  "claimed": {
+    "architecture": "nnU-Net-style residual-encoder 3D U-Net with scSE; vesuvius NetworkFromConfig model name ps256_bs2_msr_default",
+    "input": "1-channel CT, 256^3 patches, z-score normalized",
+    "output": "2 channels (surface vs background), ignore_label = 2",
+    "loss": "Medial Surface Recall (Skeleton-Recall-style) + Dice/CE",
+    "loader": "torch.load(..., weights_only=False); weights under key 'model', architecture config under 'model_config'",
+    "epoch": 3504,
+    "train_patches_approx": 116500,
+    "val_patches_approx": 2400,
+    "pipeline": "recto-surface predictor behind 'Complete virtual unwrapping and reading of a rolled Herculaneum papyrus' (Angelotti et al., Nature, 2026)",
+    "claimed_source": "web-search snippet of the model card (architecture, I/O, loss, loader, ancestry, patch counts) and the 2026-10-06 maintainer briefing (epoch 3504); unchecked against the checkpoint bytes or its embedded config"
+  },
+  "training_ancestry": [
+    {"scroll": "PHerc0139", "volume_id": null},
+    {"scroll": "PHerc1667", "volume_id": null},
+    {"scroll": "PHerc0343P", "volume_id": null},
+    {"scroll": "PHerc0500P2", "volume_id": null},
+    {"scroll": "PHercMANBp", "volume_id": null}
+  ],
+  "training_ancestry_note": "Scroll-level only. The card lists PHerc. 0139, 1667, 0343P, 0500P2 and MAN Bp; which volumes (scan IDs, resolutions) and which regions of them were annotated is not recorded. Until it is, every volume of these five scrolls is treated as in-ancestry, not only the annotated scan.",
+  "licenses": {
+    "checkpoint": {
+      "statement": "MIT, as relayed in the 2026-10-06 maintainer briefing",
+      "evidence_url": null,
+      "verified": false
+    },
+    "training_data": {
+      "statement": "underlying tomography CC BY-NC 4.0, per the model card as relayed in the 2026-10-06 maintainer briefing; the checkpoint license does not relicense the source scans",
+      "evidence_url": null,
+      "verified": false
+    }
+  },
+  "ancestry_conflicts_to_resolve": [
+    "PHerc0343 (First Letters target, 8.640 um scan 20250521140437) vs PHerc0343P (training ancestry): whether these are the same physical object is not established here; until it is, PHerc0343 is NOT treated as scroll-disjoint.",
+    "The published PHerc0139 surface-recto-090.zarr prediction already consumed by ScrollQ campaigns may come from this model family; PHerc0139 is in the training ancestry, so no PHerc0139 result is held-out evidence for this checkpoint."
+  ],
+  "claim_limits": [
+    "Reference only: never trained, fine-tuned, thresholded or early-stopped on any ScrollQ evaluation region.",
+    "Rank-ineligible in scroliq-eval until checkpoint_sha256, revision and the embedded model_config hash are pinned from the downloaded bytes.",
+    "Compared only on geometry-only gates (CT support, sheet count/separation, sheet switching, topology, winding consistency, cross-roll impostors, renderability); ink never selects between surfaces.",
+    "A clean result on any in-ancestry scroll is not generalization evidence."
+  ]
+}
