@@ -61,6 +61,7 @@ weight-free Pareto frontier (triage, not a readability claim).
   - `winding_sync.py` → `scroliq-winding-sync`: reconciles trusted pairwise winding observations (d = w_i − w_j) by BFS propagation vs integer L1 synchronization (TU LP, integrality checked, never rounded) vs rounded L2; `campaign` plants frozen ±k errors into uniform/bridge/BFS-tree edges of a hash-bound graph and PROMOTEs L1 only if it reproduces the clean solution, gains materially and is never worse beyond tolerance. Refuses ink fields. Synthetic calibration only (`artifacts/2026-10-06-winding-sync-synthetic/`: dense PROMOTE, sparse NO_MATERIAL_GAIN). `docs/winding-sync.md`
   - `constraint_gauge.py` → `scroliq-constraint-gauge`: producer-neutral external scoring of winding constraints against sealed human-verified pairs (coverage, exact/within-1, residuals, per-bin confidence calibration); internal metrics are recorded as not evidence
   - `render_noise.py` → `scroliq-render-noise`: passport `measurement_noise` block; a rendered small-effect claim must exceed k × the repeat-render noise floor of the unchanged surface, with the determinism mode declared. `docs/render-noise.md`
+  - `crop_invariance.py` → `scroliq-crop-invariance`: frozen dense-embedding fixture of the same voxels under shifted crop frames; held-out crop-position R², same-voxel cosine, NN-identity stability and sheet/ink separation before vs after a calibration-fitted position-debiasing transform. PROMOTE only if dependence falls with no loss of discrimination; missing embeddings are `unavailable_input`, not failed. Synthetic controls only, no real Dinovol result. `docs/crop-invariance.md`
   - `bbox_census.py` → `scroliq-bbox-census`: recomputes bounds over a TIFXYZ patch pack, compares with declared `meta.json` bboxes, counts vertices a declared-bbox filter would lose; positive control built in, empty census is `unverified`
   - `objective_audit.py` → `scroliq-objective-audit`: configured-vs-effective objective passport audit (+ `ObjectiveTracker`); fails closed on never-evaluated/always-zero/non-finite/ungradiented claimed terms and on ablation arms that were not ablated
   - `geometry_strata.py` → `scroliq-geometry-strata`: preregistered geometry-stratified, label-coverage-conditioned surface evaluation gate (`measure` derives curvature/tilt; `evaluate` applies the frozen rule). Machinery only; no real-data result yet
@@ -78,6 +79,7 @@ weight-free Pareto frontier (triage, not a readability claim).
     stays `unknown`/`not-measured`. Evidence only, never an ink verdict
   - `shortcut_audit.py` → `scroliq-shortcut-audit`: frozen-embedding, balanced linear nuisance probes and create-only shortcut passports; declared physical-group separation and held-out training-domain exclusions. Diagnostic only, no real checkpoint result; absolute xyz unmeasured. `docs/shortcut-audit.md`
   - `ensemble_independence.py` → `scroliq-ensemble-independence`: declared training-ancestry audit (pairwise supervision overlap, lineage/seed sharing, detected CV-partition vs same-data vs disjoint regime, exact certified independent-witness count; unknown is never independent) and a scroll-disjoint failure-ranking comparison (block-bootstrap AUROC/AURC of mutual information vs entropy) gated by a built-in planted-signal/null control whose seed is a code constant. Evidence only; no real-ensemble result yet. `docs/ensemble-independence.md`
+  - `topology_uncertainty.py` → `scroliq-topology-uncertainty`: post-hoc audit of frozen ensemble surface predictions — does member disagreement (MI) rank cross-roll/drift/unscanned-CT/winding-error fixtures better than predictive-entropy confidence? Block-bootstrap AUROC, frozen PROMOTE/DISMISS/UNVERIFIED rule, built-in planted/confident-error/null control with code-constant seed; reuses `ensemble_independence` ancestry and `persistent_topology`. No TUNE++ code (unlicensed), no retraining, synthetic controls only. `docs/topology-uncertainty.md`
   - `persistent_topology.py` → `scroliq-topology`: H0/H1 superlevel persistence of a
     per-vertex support field on a TIFXYZ grid (own union-find, scipy distances),
     W1/bottleneck diagram distances, experimental bridge witnesses; `benchmark`
@@ -147,8 +149,10 @@ scroliq-winding-conservation --help                 # layer-count / pitch / cont
 scroliq-winding-sync self-test                      # L1 vs BFS winding reconciliation under planted errors
 scroliq-constraint-gauge self-test                  # external calibration of winding-constraint producers
 scroliq-render-noise --self-test                    # flatten/render noise floor for small-effect claims
+scroliq-crop-invariance --self-test                 # crop-coordinate invariance of dense embeddings
 scroliq-ink-passport --help                         # per-component ink evidence passport
 scroliq-topology --help                             # persistent topology + bridge witnesses
+scroliq-topology-uncertainty self-test              # disagreement vs confidence on structural failures
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests
