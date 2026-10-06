@@ -58,6 +58,10 @@ weight-free Pareto frontier (triage, not a readability claim).
   - `prediction_support.py` → `scroliq-prediction-support`: per-voxel preflight before any tracer; pred_positive ∩ ct_supported vs ∩ ct_zero, distance to CT support, supported/halo/beyond/unresolved prediction-chunk classes, blend-margin enrichment, seed gate and source filter; built-in positive control, no positives is `unverified`. `docs/prediction-support.md`
   - `harvest_qc_benchmark.py` → `scroliq-harvest-qc`: frozen manifest of verified-good + invalid (wrong-wrap/cross-roll/drift/…) surfaces, seed/evaluation region separation, spec-bound decisions with `influenced_tracing: false`; PROMOTE only a metric that closes a ScrollQ blind spot with zero false rejects outside its calibration scrolls. Evaluation only. `docs/harvest-qc-benchmark.md`
   - `spiral_cloud.py` → `scroliq-spiral-cloud`: execution guard rails for the frozen PHerc0826 Spiral run on one L4 — `check` (frozen manifest in `artifacts/2026-10-05-spiral-cloud-plan/` vs recipe contract, storage floors, script hashes), `plan` (gcloud argv only, executes nothing), on-VM `disk-floor`, `gpu-gate`, `fetch-lasagna`, `smoke-recipe`/`smoke-verdict`, `compare-preflight`, `bundle`. VM scripts live in `cloud/spiral-gcp/` and are hash-pinned by the manifest — edit a script, update its hash. Smoke receipts are `promotional: false` and refused by reproduction-check/export. `docs/spiral-cloud-execution.md`
+  - `winding_sync.py` → `scroliq-winding-sync`: reconciles trusted pairwise winding observations (d = w_i − w_j) by BFS propagation vs integer L1 synchronization (TU LP, integrality checked, never rounded) vs rounded L2; `campaign` plants frozen ±k errors into uniform/bridge/BFS-tree edges of a hash-bound graph and PROMOTEs L1 only if it reproduces the clean solution, gains materially and is never worse beyond tolerance. Refuses ink fields. Synthetic calibration only (`artifacts/2026-10-06-winding-sync-synthetic/`: dense PROMOTE, sparse NO_MATERIAL_GAIN). `docs/winding-sync.md`
+  - `constraint_gauge.py` → `scroliq-constraint-gauge`: producer-neutral external scoring of winding constraints against sealed human-verified pairs (coverage, exact/within-1, residuals, per-bin confidence calibration); internal metrics are recorded as not evidence
+  - `render_noise.py` → `scroliq-render-noise`: passport `measurement_noise` block; a rendered small-effect claim must exceed k × the repeat-render noise floor of the unchanged surface, with the determinism mode declared. `docs/render-noise.md`
+  - `crop_invariance.py` → `scroliq-crop-invariance`: frozen dense-embedding fixture of the same voxels under shifted crop frames; held-out crop-position R², same-voxel cosine, NN-identity stability and sheet/ink separation before vs after a calibration-fitted position-debiasing transform. PROMOTE only if dependence falls with no loss of discrimination; missing embeddings are `unavailable_input`, not failed. Synthetic controls only, no real Dinovol result. `docs/crop-invariance.md`
   - `bbox_census.py` → `scroliq-bbox-census`: recomputes bounds over a TIFXYZ patch pack, compares with declared `meta.json` bboxes, counts vertices a declared-bbox filter would lose; positive control built in, empty census is `unverified`
   - `objective_audit.py` → `scroliq-objective-audit`: configured-vs-effective objective passport audit (+ `ObjectiveTracker`); fails closed on never-evaluated/always-zero/non-finite/ungradiented claimed terms and on ablation arms that were not ablated
   - `geometry_strata.py` → `scroliq-geometry-strata`: preregistered geometry-stratified, label-coverage-conditioned surface evaluation gate (`measure` derives curvature/tilt; `evaluate` applies the frozen rule). Machinery only; no real-data result yet
@@ -76,6 +80,13 @@ weight-free Pareto frontier (triage, not a readability claim).
   - `shortcut_audit.py` → `scroliq-shortcut-audit`: frozen-embedding, balanced linear nuisance probes and create-only shortcut passports; declared physical-group separation and held-out training-domain exclusions. Diagnostic only, no real checkpoint result; absolute xyz unmeasured. `docs/shortcut-audit.md`
   - `ensemble_independence.py` → `scroliq-ensemble-independence`: declared training-ancestry audit (pairwise supervision overlap, lineage/seed sharing, detected CV-partition vs same-data vs disjoint regime, exact certified independent-witness count; unknown is never independent) and a scroll-disjoint failure-ranking comparison (block-bootstrap AUROC/AURC of mutual information vs entropy) gated by a built-in planted-signal/null control whose seed is a code constant. Evidence only; no real-ensemble result yet. `docs/ensemble-independence.md`
   - `reconstruction_sensitivity.py` → `scroliq-reconstruction-sensitivity`: audit of which ink and geometry claims survive a preregistered family of reconstructions (official + classical inverse variants) and bounded calibration perturbations over one ROI with projections, geometry and pipeline held fixed; per reference ink component persistence, surface displacement along the normal, neighbouring-sheet separation, fibre orientation, ink position along the normal, known-negative detections. Fails closed on ink in variant selection, mismatched family fingerprints, out-of-bound or unbounded perturbations, undeclared/incomplete dependency licence manifests (copyleft backends such as ASTRA are classified, never inferred from the framework); failed variants are listed, no-op variants cannot be stable; a built-in planted/null/no-op control gates every verdict. Reads frozen arrays only, imports no tomography package; synthetic controls only, no reconstruction run. `docs/reconstruction-sensitivity.md`
+  - `topology_uncertainty.py` → `scroliq-topology-uncertainty`: post-hoc audit of frozen ensemble surface predictions — does member disagreement (MI) rank cross-roll/drift/unscanned-CT/winding-error fixtures better than predictive-entropy confidence? Block-bootstrap AUROC, frozen PROMOTE/DISMISS/UNVERIFIED rule, built-in planted/confident-error/null control with code-constant seed; reuses `ensemble_independence` ancestry and `persistent_topology`. No TUNE++ code (unlicensed), no retraining, synthetic controls only. `docs/topology-uncertainty.md`
+  - `persistent_topology.py` → `scroliq-topology`: H0/H1 superlevel persistence of a
+    per-vertex support field on a TIFXYZ grid (own union-find, scipy distances),
+    W1/bottleneck diagram distances, experimental bridge witnesses; `benchmark`
+    plants faults in a synthetic sheet stack. Synthetic result: no fault missed by
+    paired mesh metrics; witness localizes bridges but fires on faint bands too
+    (`artifacts/2026-10-06-persistent-topology-synthetic/`)
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
@@ -137,7 +148,13 @@ scroliq-harvest-qc self-test                        # independent harvest-QC ben
 scroliq-persistence --help                          # threshold-persistence audit (measure / evaluate / controls)
 scroliq-reconstruction-sensitivity self-test        # reconstruction-family / calibration sensitivity controls
 scroliq-winding-conservation --help                 # layer-count / pitch / continuity QC
+scroliq-winding-sync self-test                      # L1 vs BFS winding reconciliation under planted errors
+scroliq-constraint-gauge self-test                  # external calibration of winding-constraint producers
+scroliq-render-noise --self-test                    # flatten/render noise floor for small-effect claims
+scroliq-crop-invariance --self-test                 # crop-coordinate invariance of dense embeddings
 scroliq-ink-passport --help                         # per-component ink evidence passport
+scroliq-topology --help                             # persistent topology + bridge witnesses
+scroliq-topology-uncertainty self-test              # disagreement vs confidence on structural failures
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests
@@ -270,6 +287,15 @@ console script. A new entry point must therefore be declared in
    (`within_region` scope). A control that never produced the effect it claims
    to block (the first confound scenario) proves nothing: the suite now requires
    the cross-region scope to pass alone before crediting the within-region gate.
+
+15. **Internal consistency is not external correctness.** A winding-constraint
+   generator can raise its own cycle consistency while recovering the wrong
+   number of windings; score every producer against sealed human-verified
+   pairs (`scroliq-constraint-gauge`) and let declared confidence carry weight
+   only if it is externally calibrated. A reconciler (`scroliq-winding-sync`)
+   cannot fix bad measurements or errors on bridges; report redundancy with
+   every result. The external figures behind this rule (constraint-gauge vs
+   winding-sync) are not reproduced here.
 
 ## Working rules
 
