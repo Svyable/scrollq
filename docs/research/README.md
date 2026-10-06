@@ -2,7 +2,11 @@
 
 **Status:** living research notebook. Created 2026-10-03.
 
-New: [Beltrami-prolongation flattening watch](2026-10-06-beltrami-prolongation-watch.md)
+New: [topology-conditioned uncertainty](2026-10-07-topology-conditioned-uncertainty.md)
+adds a post-hoc disagreement-vs-confidence audit on structural failures
+(`scroliq-topology-uncertainty`); synthetic controls only, no real verdict.
+
+Earlier: [Beltrami-prolongation flattening watch](2026-10-06-beltrami-prolongation-watch.md)
 records the method at WATCH with its benchmark defined, and corrects the license
 premise: the authors' official code exists but is academic-use-only, so the only routes
 are a written relicense or a clean-room MIT implementation. It also closes a hole found
@@ -169,6 +173,7 @@ already merged. The primary dependency-order campaign remains authoritative.
 - [2026-10-06 official recto baseline and CGAL smoothing watch](2026-10-06-recto-baseline-and-cgal-watch.md)
 - [2026-10-06 ensemble independence and conditional risk](2026-10-06-ensemble-independence-and-conditional-risk.md)
 - [2026-10-06 Beltrami-prolongation flattening watch, CGAL and Challenge-page re-checks](2026-10-06-beltrami-prolongation-watch.md)
+- [2026-10-06 Dinovol positional debiasing and public-data limits](2026-10-06-dinovol-positional-debiasing.md)
 
 ## Existing tracked work
 
