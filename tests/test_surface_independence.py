@@ -25,6 +25,7 @@ SURFACES = {
     "seam fingerprint": ({"seam_fingerprint"}, set()),
     "prediction support preflight": ({"prediction_support"}, {"support"}),
     "harvest QC benchmark": ({"harvest_qc_benchmark"}, set()),
+    "ensemble independence gate": ({"ensemble_independence"}, set()),
     # reads ink maps through the existing validator's loaders and nothing else
     "threshold persistence": (
         {"persistence", "persistence_audit", "persistence_controls"},

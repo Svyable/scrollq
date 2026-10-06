@@ -5,6 +5,13 @@ Frozen ink checkpoints can be inspected with [provenance shortcut probes](docs/s
 and hashes of embeddings, checkpoint and sample manifest. Diagnostic machinery
 only; no real-checkpoint result or causal shortcut claim yet.
 
+Ensembles can be audited too ([ensemble-independence gate](docs/ensemble-independence.md),
+`scroliq-ensemble-independence`): declared training ancestry gives a certified
+independent-witness count (a 5-fold CV ensemble counts as 1, not 5), and a
+frozen scroll-disjoint comparison asks whether disagreement ranks real failures
+or merely reflects fold membership. Synthetic controls only; no real ensemble
+has been audited.
+
 **Find the bottleneck. Fix the bottleneck. Read the scroll.**
 
 ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](https://scrollprize.org/) virtual-unwrapping pipeline. The existing `scrollq` package measures **real level-0 CT voxels** and keeps its current commands for compatibility, but the project is expanding beyond a single volume-quality ranking toward evidence-backed diagnostics for the Challenge's published [2026 Open Problems](https://scrollprize.org/2026_open_problems): scan degradation, surface topology, mesh connectivity, fibers, winding annotations, spiral fitting, label quality, ink reliability, and data-scale reproducibility.
