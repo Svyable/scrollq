@@ -23,6 +23,8 @@ SURFACES = {
                         "score"}),
     "stability protocol v2": ({"stability_protocol"}, {"score"}),
     "seam fingerprint": ({"seam_fingerprint"}, set()),
+    "prediction support preflight": ({"prediction_support"}, {"support"}),
+    "harvest QC benchmark": ({"harvest_qc_benchmark"}, set()),
     # reads ink maps through the existing validator's loaders and nothing else
     "threshold persistence": (
         {"persistence", "persistence_audit", "persistence_controls"},
