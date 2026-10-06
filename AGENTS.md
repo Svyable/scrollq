@@ -55,6 +55,8 @@ weight-free Pareto frontier (triage, not a readability claim).
     `scroliq-fiber`; `fiber_frame.py` → `scroliq-fiber-frame` for the
     experimental ink-blind cross-ply CT continuity diagnostic
   - `vc3d_run_guard.py` → `scroliq-vc3d-run-guard`: create-only external-command receipt; an exit-zero run is `PRODUCER_SEMANTIC_FAILURE` unless the new TIFXYZ also passes vertex/quad/recomputed-area, voxel-spacing (vs a hashed `--volume-meta`), extent/bbox-consistency and output-differs-from-input (decoded-geometry digest) gates; unexercised gates are listed, not passed; optional exact-volume CT preflight binding
+  - `prediction_support.py` → `scroliq-prediction-support`: per-voxel preflight before any tracer; pred_positive ∩ ct_supported vs ∩ ct_zero, distance to CT support, supported/halo/beyond/unresolved prediction-chunk classes, blend-margin enrichment, seed gate and source filter; built-in positive control, no positives is `unverified`. `docs/prediction-support.md`
+  - `harvest_qc_benchmark.py` → `scroliq-harvest-qc`: frozen manifest of verified-good + invalid (wrong-wrap/cross-roll/drift/…) surfaces, seed/evaluation region separation, spec-bound decisions with `influenced_tracing: false`; PROMOTE only a metric that closes a ScrollQ blind spot with zero false rejects outside its calibration scrolls. Evaluation only. `docs/harvest-qc-benchmark.md`
   - `spiral_cloud.py` → `scroliq-spiral-cloud`: execution guard rails for the frozen PHerc0826 Spiral run on one L4 — `check` (frozen manifest in `artifacts/2026-10-05-spiral-cloud-plan/` vs recipe contract, storage floors, script hashes), `plan` (gcloud argv only, executes nothing), on-VM `disk-floor`, `gpu-gate`, `fetch-lasagna`, `smoke-recipe`/`smoke-verdict`, `compare-preflight`, `bundle`. VM scripts live in `cloud/spiral-gcp/` and are hash-pinned by the manifest — edit a script, update its hash. Smoke receipts are `promotional: false` and refused by reproduction-check/export. `docs/spiral-cloud-execution.md`
   - `bbox_census.py` → `scroliq-bbox-census`: recomputes bounds over a TIFXYZ patch pack, compares with declared `meta.json` bboxes, counts vertices a declared-bbox filter would lose; positive control built in, empty census is `unverified`
   - `objective_audit.py` → `scroliq-objective-audit`: configured-vs-effective objective passport audit (+ `ObjectiveTracker`); fails closed on never-evaluated/always-zero/non-finite/ungradiented claimed terms and on ablation arms that were not ablated
@@ -66,6 +68,12 @@ weight-free Pareto frontier (triage, not a readability claim).
     with a same-footprint null; `measure` runs a built-in positive control
     (`unverified` if it does not fire). Synthetic calibration only so far
     (`artifacts/2026-10-05-winding-conservation-synthetic/`)
+  - `ink_passport.py` → `scroliq-ink-passport`: one record per ink component / reviewer
+    letter region binding UV extent, mesh-mapped level-0 CT coordinates, prediction +
+    surface + checkpoint hashes, point-by-point training-region exclusion (provenance
+    box format), raw score and optional independent relief support; missing evidence
+    stays `unknown`/`not-measured`. Evidence only, never an ink verdict
+  - `shortcut_audit.py` → `scroliq-shortcut-audit`: frozen-embedding, balanced linear nuisance probes and create-only shortcut passports; declared physical-group separation and held-out training-domain exclusions. Diagnostic only, no real checkpoint result; absolute xyz unmeasured. `docs/shortcut-audit.md`
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
@@ -122,8 +130,11 @@ scroliq-vc3d-run-guard --help                       # exit code + semantic TIFXY
 scroliq-bbox-census --help                          # declared vs recomputed bbox over a patch pack
 scroliq-objective-audit --help                      # configured vs effective objective
 scroliq-geometry-strata --help                      # geometry-stratified evaluation gate
+scroliq-prediction-support --self-test              # CT-support preflight before a prediction seeds geometry
+scroliq-harvest-qc self-test                        # independent harvest-QC benchmark vs ScrollQ gates
 scroliq-persistence --help                          # threshold-persistence audit (measure / evaluate / controls)
 scroliq-winding-conservation --help                 # layer-count / pitch / continuity QC
+scroliq-ink-passport --help                         # per-component ink evidence passport
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests
