@@ -2,7 +2,12 @@
 
 **Status:** living research notebook. Created 2026-10-03.
 
-New: [provenance dependence and shortcut audit](2026-10-06-provenance-dependence.md)
+New: [ensemble independence and conditional risk](2026-10-06-ensemble-independence-and-conditional-risk.md)
+adds an executable ancestry/witness-count gate and a CV-versus-independent
+failure-ranking comparison (`scroliq-ensemble-independence`); synthetic controls
+only, no real ensemble audited.
+
+Earlier: [provenance dependence and shortcut audit](2026-10-06-provenance-dependence.md)
 adds executable balanced linear probes and a hash-bound diagnostic passport;
 real-checkpoint evaluation remains unmeasured.
 
@@ -38,7 +43,7 @@ campaign.
 | Registered-rescan ink invariance | EXPERIMENT FURTHER | Independent acquisition/reconstruction invariance for physical ink | Visible-ink registered pair + broken-registration and wrong-sheet nulls |
 | Matched-null ink evidence | EXPERIMENT FURTHER | Calibrate candidates against physically similar verified blank papyrus | Leave-fragment/scanner-out calibration and blank-only error audit |
 | Calibrated ink abstention | EXPERIMENT FURTHER | Trade coverage for empirically bounded false-positive risk | Leave-one-scroll-out selective-risk curves on hard negatives |
-| Checkpoint-disagreement cartography | EXPERIMENT FURTHER | Localize model-family epistemic weakness without majority-vote proof | Held-out disagreement vs hard negatives and confidence baselines |
+| Checkpoint-disagreement cartography | EXPERIMENT FURTHER; ancestry gate now executable (2026-10-06) | Localize model-family epistemic weakness without majority-vote proof | Held-out disagreement vs hard negatives and confidence baselines, with every panel carrying a `scroliq-ensemble-independence` ancestry report |
 | Synthetic-resolution ladder | INCLUDE as validation experiment; no production fusion | Measure checkpoint robustness to controlled information loss / voxel scale | Frozen held-out degradation ladder; adaptation remains separate |
 | Scanner-frame equivariance audit | INCLUDE as validation experiment | Detect acquisition-axis / architecture orientation dependence | Exact lattice symmetries with axis-sensitive positive control |
 | Adjacent-sheet shadow test | EXPERIMENT FURTHER | Neighboring windings as naturally matched false-positive controls | Trustworthy sheet identity + held-out target-vs-neighbor specificity |
@@ -101,6 +106,10 @@ campaign.
 | Rejection-first harvest QC (vesuvius-automesh) vs ScrollQ gates | EXPERIMENT FURTHER (2026-10-05); `scroliq-harvest-qc` machinery, no corpus yet | Independent check that harvested area is papyrus on the right sheet, not just papyrus-looking | Freeze good + wrong-wrap/cross-roll/drift corpus; PROMOTE only a metric that closes a blind spot with zero false rejects |
 | Texture-similarity gate as a universal page definition | WATCH (2026-10-05) | Cheap operational filter | Leave-one-scroll-out calibration stays stable across acquisitions |
 | Generative/autoregressive meshing (XSpecMesh-style) | DISMISS (2026-10-05) | Faster plausible meshes | None; not anchored to measured CT |
+| Ensemble independence / uncertainty-validity gate | INCLUDE as validation experiment (2026-10-06); `scroliq-ensemble-independence`, synthetic controls only | CV folds and same-run checkpoints are not independent witnesses; checks whether disagreement ranks real failures or reflects fold membership | One CV ensemble + one same-size seed ensemble with complete training inventories on a frozen scroll-disjoint set ([doc](../ensemble-independence.md)); `ink9um` soup is the first candidate once run |
+| Conditional risk control (COAT-style adaptive thresholds) | WATCH (2026-10-06); no code incorporated, license not read | Aggregate FPR/FNR can hide catastrophic per-window tails | Clean-room per-window FPR/FNR tail test against the aggregate on sealed negatives/positives before any adaptive threshold; calibration ancestry tracked like training data ([note](2026-10-06-ensemble-independence-and-conditional-risk.md)) |
+| T3lescope / SILSA generative geometry | DISMISS (2026-10-06) | Plausible completion of sparse surfaces | None; geometry must be anchored to CT support |
+| L2L-Flow stochastic volumetric segmentation | WATCH (2026-10-06) | Multi-sample sheet-identity ambiguity | A permissive license and papyrus evidence |
 
 
 ## 2026-10-04 / 2026-10-05 overnight research batch
@@ -134,6 +143,7 @@ already merged. The primary dependency-order campaign remains authoritative.
 - [2026-10-05 winding conservation and two WATCH items](2026-10-05-winding-conservation-and-watch.md)
 - [2026-10-05 ink relief witnesses and per-component passports](2026-10-05-ink-relief-witness.md)
 - [2026-10-06 official recto baseline and CGAL smoothing watch](2026-10-06-recto-baseline-and-cgal-watch.md)
+- [2026-10-06 ensemble independence and conditional risk](2026-10-06-ensemble-independence-and-conditional-risk.md)
 
 ## Existing tracked work
 

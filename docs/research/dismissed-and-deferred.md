@@ -306,6 +306,27 @@ variants were explicitly rejected so they do not return as attractive shortcuts:
 These decisions do not block the surviving bounded experiments. They define the
 epistemic boundary those experiments must preserve.
 
+## 2026-10-06 scan: DISMISS and WATCH decisions
+
+Relayed from the maintainer briefing; see
+[the note](2026-10-06-ensemble-independence-and-conditional-risk.md).
+
+- **T3lescope and SILSA as geometry sources — DISMISS.** Learned completion of
+  sparsely observed surfaces, and topology preserved inside a generated prior,
+  are not measured papyrus geometry; geometry needs CT support, and neither
+  release carries a reusable, papyrus-relevant implementation license.
+- **COAT (adaptive thresholding) code — WATCH.** No license was read. The
+  clean-room falsification (per-window FPR/FNR tails against the aggregate)
+  needs no import; a learned threshold would also need calibration-data
+  ancestry.
+- **L2L-Flow (multi-sample stochastic volumetric segmentation) — WATCH.** Could
+  eventually expose winding or sheet-identity ambiguity across samples; no
+  permissive license exposed and no papyrus evidence.
+- **Treating CV-fold or same-run checkpoint agreement as independent
+  witnesses — DISMISS.** Replaced by the
+  [ensemble-independence gate](../ensemble-independence.md), which counts
+  certified independent witnesses from declared ancestry.
+
 ## Deferred, not dismissed
 
 The following remain live but should not consume primary-pipeline priority until

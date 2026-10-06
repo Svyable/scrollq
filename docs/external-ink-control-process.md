@@ -139,6 +139,15 @@ Generate the same frozen evaluation output for:
 - geometry-perturbation control;
 - an independent checkpoint/control arm where available.
 
+Any arm described as independent (a separate checkpoint, a checkpoint soup, a
+z-window or multi-checkpoint ensemble) must ship an ancestry manifest, and
+agreement counts are quoted as the certified independent witness count from
+`scroliq-ensemble-independence`, not as the number of members. Soup parents
+from one training trajectory, and z-window views of one checkpoint, share
+lineage or checkpoint identity by construction; see the
+[ensemble-independence gate](ensemble-independence.md). This adds no
+promotion criterion and no pass/fail rule to Gate D.
+
 The external repository's physics tests are incorporated conservatively:
 
 - **CT-void test:** candidate active veto. Measure both pre-veto and post-veto

@@ -25,6 +25,7 @@ SURFACES = {
     "seam fingerprint": ({"seam_fingerprint"}, set()),
     "prediction support preflight": ({"prediction_support"}, {"support"}),
     "harvest QC benchmark": ({"harvest_qc_benchmark"}, set()),
+    "ensemble independence gate": ({"ensemble_independence"}, set()),
 }
 
 
