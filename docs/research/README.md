@@ -6,6 +6,13 @@ New: [topology-conditioned uncertainty](2026-10-07-topology-conditioned-uncertai
 adds a post-hoc disagreement-vs-confidence audit on structural failures
 (`scroliq-topology-uncertainty`); synthetic controls only, no real verdict.
 
+Earlier: [Beltrami-prolongation flattening watch](2026-10-06-beltrami-prolongation-watch.md)
+records the method at WATCH with its benchmark defined, and corrects the license
+premise: the authors' official code exists but is academic-use-only, so the only routes
+are a written relicense or a clean-room MIT implementation. It also closes a hole found
+on the way: the flattening gate would PROMOTE a candidate that cut the atlas into
+one island per triangle (`candidate_no_new_uv_seams`, commit `69c7e07`).
+
 Earlier: [ensemble independence and conditional risk](2026-10-06-ensemble-independence-and-conditional-risk.md)
 adds an executable ancestry/witness-count gate and a CV-versus-independent
 failure-ranking comparison (`scroliq-ensemble-independence`); synthetic controls
@@ -87,8 +94,11 @@ campaign.
 | CSWinUNETR (thin-structure segmentation) | WATCH; no explicit license found, so no vendoring or derivation | Long-range sheet continuity through low-contrast gaps | A license, then an architecture-only A/B on identical cubes/ROIs judged on winding bridges and sheet switches |
 | Learned (Siamese) patch matcher for sheet identity | DISMISS for now | Could learn weak identity cues | None until the deterministic correlation test shows physical identity information exists |
 | Fiber-coordinate canonicalization as a model architecture | DISMISS for now | Possible orientation normalization | Reconsider only if an ablation inside another experiment supports it |
-| CGAL `Mesh_smoothing_3` as an integration | DISMISS for current integration; method WATCH (2026-10-06) | Connectivity-preserving vertex optimization with an inversion barrier | Clean-room surface experiment only, CT support as the oracle; implementation is GPL-encumbered ([note](2026-10-06-recto-baseline-and-cgal-watch.md)) |
+| CGAL `Mesh_smoothing_3` as an integration | DISMISS for current integration; method WATCH (2026-10-06) | Connectivity-preserving vertex optimization with an inversion barrier | Clean-room surface experiment only, CT support as the oracle; implementation is GPL-encumbered ([note](2026-10-06-recto-baseline-and-cgal-watch.md); re-confirmed in the [Beltrami note](2026-10-06-beltrami-prolongation-watch.md)) |
 | Official `surface_recto_3dunet` as a frozen external baseline | INCLUDE as frozen reference (2026-10-06); registered **unpinned** ([artifact](../../artifacts/2026-10-06-recto-3dunet-reference/README.md)) | Canonical scroll-disjoint surface baseline any future ScrolIQ surface claim must beat | Pin checkpoint hash/revision and license evidence; resolve PHerc0343 vs 0343P; one sealed-crop geometry-only run on a scroll-disjoint volume |
+| Beltrami-coefficient prolongation flattening (Fargion-Weber, CGF 2026) | WATCH (2026-10-06); authors' code (`GuyFa/BCP`) is academic-use-only with MATLAB/PARDISO/Triangle dependencies, so DISMISS as a dependency | Fast injective low-distortion flattening of very large meshes; throughput side of the complete-scroll requirement | A written permissive relicense, or a clean-room MIT implementation (issue #114); then the sealed A/B on a disk-topology mesh above 500K triangles against the [frozen metric panel](../flattening-benchmark.md#frozen-metric-panel-for-the-first-sealed-ab) ([note](2026-10-06-beltrami-prolongation-watch.md)) |
+| Cut-set identity for flattening comparisons (no new UV seams) | INCLUDE as integrity gate (2026-10-06); `scroliq-flatten-compare` / `scroliq-flatten-plan`, tested | Cutting lowers distortion for free; a shattered one-island-per-triangle atlas used to PROMOTE | Real sealed A/B; baseline must be produced on the same cut mesh for multi-loop meshes |
+| Throughput-only promotion verdict (`PROMOTE_THROUGHPUT`) | PROPOSED, not implemented (2026-10-06) | Lets an equivalent-distortion but much faster flattener be adopted without being called a quality gain | Maintainer decision (issue #114 treats runtime as descriptive); sealed `min_speedup`; baseline repeat-noise floor measured first |
 | SPECTRE CT foundation-model weights | DISMISS (re-checked 2026-10-06) | Generic CT features | Permissive weights plus a Vesuvius held-out result |
 | Self-supervised CT denoising / Deep Pseudo-Proximal Map | WATCH (2026-10-06); no preprocessing adoption | Cleaner CT | Raw projections plus a physically independent ink benchmark |
 | Global histogram matching | DISMISS | Superficial domain normalization | None; retain only as a negative control |
@@ -162,6 +172,7 @@ already merged. The primary dependency-order campaign remains authoritative.
 - [2026-10-06 persistent topology as a sheet-validity witness](2026-10-06-persistent-topology.md)
 - [2026-10-06 official recto baseline and CGAL smoothing watch](2026-10-06-recto-baseline-and-cgal-watch.md)
 - [2026-10-06 ensemble independence and conditional risk](2026-10-06-ensemble-independence-and-conditional-risk.md)
+- [2026-10-06 Beltrami-prolongation flattening watch, CGAL and Challenge-page re-checks](2026-10-06-beltrami-prolongation-watch.md)
 - [2026-10-06 Dinovol positional debiasing and public-data limits](2026-10-06-dinovol-positional-debiasing.md)
 
 ## Existing tracked work
