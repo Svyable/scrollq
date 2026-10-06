@@ -1,5 +1,10 @@
 # ScrolIQ
 
+Frozen ink checkpoints can be inspected with [provenance shortcut probes](docs/shortcut-audit.md)
+(`scroliq-shortcut-audit`): balanced linear identity probes, held-out ink errors,
+and hashes of embeddings, checkpoint and sample manifest. Diagnostic machinery
+only; no real-checkpoint result or causal shortcut claim yet.
+
 **Find the bottleneck. Fix the bottleneck. Read the scroll.**
 
 ScrolIQ is an open, reproducible diagnostic layer for the [Vesuvius Challenge](https://scrollprize.org/) virtual-unwrapping pipeline. The existing `scrollq` package measures **real level-0 CT voxels** and keeps its current commands for compatibility, but the project is expanding beyond a single volume-quality ranking toward evidence-backed diagnostics for the Challenge's published [2026 Open Problems](https://scrollprize.org/2026_open_problems): scan degradation, surface topology, mesh connectivity, fibers, winding annotations, spiral fitting, label quality, ink reliability, and data-scale reproducibility.
@@ -507,6 +512,23 @@ This is an **evidence-quality audit, not an ink classifier**. A pass means the d
 
 The command fails closed when the mask is empty or single-class, inputs are malformed, the split is not declared held out, training overlap is not declared absent, or no falsification control is supplied. Those checks make the output an auditable evidence artifact; they do not prove that a URL is public, independently establish the declared train/validation split, set a performance threshold, or claim readability. See the [held-out ink protocol](docs/ink-validation.md).
 
+### Per-component evidence passport
+
+`scroliq-ink-passport` emits one record per proposed ink component or reviewer
+letter region. Each record holds:
+
+- the UV extent, and the level-0 CT coordinates mapped through the submitted
+  TIFXYZ;
+- the prediction and surface hashes, and the checkpoint SHA-256;
+- point-by-point training-region exclusion, using the provenance gate's box
+  format;
+- the raw ink score;
+- an independent relief-support statistic when one is supplied.
+
+Missing evidence stays `unknown` or `not-measured`. The passport records
+evidence; it does not classify ink or judge legibility. See
+[the passport contract](docs/ink-passport.md).
+
 ### Threshold-persistence audit (experimental)
 
 `scroliq-persistence` asks whether the *shape of a frozen detector's own confidence
@@ -956,7 +978,7 @@ independent `verify` command re-hashes and re-decodes those artifacts; with
 
 ### Semantic integrity gates
 
-Four checks treat a *claim* as something to be recomputed, not trusted:
+Seven checks treat a *claim* as something to be recomputed, not trusted:
 
 - `scroliq-vc3d-run-guard` — an external geometry producer that exits 0 is
   `PRODUCER_SEMANTIC_FAILURE` unless its new TIFXYZ also has recomputed physical
@@ -975,6 +997,17 @@ Four checks treat a *claim* as something to be recomputed, not trusted:
   [geometry-stratified evaluation](docs/geometry-strata.md); the related
   multi-sheet experiment is a design draft in
   [the Lasagna A/B/C protocol](docs/lasagna-abc-protocol.md).
+- `scroliq-prediction-support` — a surface prediction is not a seed source until
+  its positives are checked against the masked CT on the same grid. It reports
+  supported vs CT == 0 positives, distance to support, and supported/halo/beyond
+  chunk classes, and it gates seeds. Only `pred_positive ∩ ct_supported` may seed
+  geometry. Synthetic positive control only; no real-volume run yet. See
+  [the preflight](docs/prediction-support.md).
+- `scroliq-harvest-qc` — a frozen, leakage-checked benchmark of an outside
+  rejection metric (e.g. `vesuvius-automesh` QC) against ScrollQ's gates. A
+  metric is promoted only if it closes a ScrollQ blind spot with zero false
+  rejects, judged outside its own calibration scrolls. Machinery only. See
+  [the benchmark](docs/harvest-qc-benchmark.md).
 - `scroliq-winding-conservation` — checks a stitched winding solution against
   conservation laws no single surface was built to satisfy: label-free layer
   count along radial rays, winding pitch, and label continuity across cells.
