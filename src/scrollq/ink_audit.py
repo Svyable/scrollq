@@ -327,6 +327,10 @@ def audit_ink_manifest(
     if overlaps:
         errors.append(f"{len(overlaps)} training/evaluation spatial overlap(s) detected")
 
+    selection = manifest.get("selection_contract")
+    if isinstance(selection, dict) and selection.get("layer_order_selected_by_ink") is True:
+        errors.append("layer polarity cannot be selected by ink quantity or text-like output")
+
     controls = manifest.get("controls")
     if not isinstance(controls, dict):
         controls = {}
@@ -383,6 +387,40 @@ def audit_ink_manifest(
     if evaluation and missing_run_regions:
         warnings.append("no run provenance for evaluation regions: " + ", ".join(missing_run_regions))
 
+    # An absence claim is inadmissible without recomputed in-situ recovery.
+    negative_evidence = []
+    claims = manifest.get("negative_ink_claims", [])
+    if not isinstance(claims, list):
+        errors.append("negative_ink_claims must be a list")
+        claims = []
+    if manifest.get("absence_of_ink_claimed") is True and not claims:
+        errors.append("absence_of_ink_claimed requires negative_ink_claims detectability evidence")
+    for i, claim in enumerate(claims):
+        from .ink_detectability import DetectabilityError, digest, verify_bundle
+        try:
+            if not isinstance(claim, dict):
+                raise DetectabilityError("claim must be an object")
+            bundle_dir = Path(claim["bundle_dir"])
+            if digest(bundle_dir / "report.json") != claim.get("receipt_sha256"):
+                raise DetectabilityError("receipt differs from committed claim")
+            if digest(bundle_dir / "real.npy") != claim.get("prediction_sha256"):
+                raise DetectabilityError("real prediction differs from absence claim")
+            result = verify_bundle(bundle_dir, claim["spec_sha256"])
+            binding = result["binding"]
+            if (binding["volume_root"] != volume_root or
+                binding["region_id"] not in eval_ids or
+                binding["region_id"] != claim.get("evaluation_region_id") or
+                binding["checkpoint"]["sha256"] != checkpoint_sha or
+                binding["surface"]["sha256"] != claim.get("surface_sha256")):
+                raise DetectabilityError("detectability bundle does not match claim region/model/surface")
+            if result["negative_evidence"] != "SUPPORTED_NEGATIVE":
+                raise DetectabilityError("blank claim is UNINFORMATIVE or prediction is not blank")
+            negative_evidence.append({"evaluation_region_id": binding["region_id"],
+                                      "status": "SUPPORTED_NEGATIVE", "spec_sha256": claim["spec_sha256"]})
+        except (DetectabilityError, OSError, ValueError, KeyError, TypeError) as exc:
+            errors.append(f"negative_ink_claims[{i}] inadmissible: {exc}")
+            negative_evidence.append({"status": "UNINFORMATIVE", "reason": str(exc)})
+
     control_complete = not missing_offsets and not missing_controls
     status = "fail" if errors else ("partial" if warnings else "pass")
     return {
@@ -395,6 +433,7 @@ def audit_ink_manifest(
             "checkpoint_sha256": checkpoint_sha,
         },
         "seeds": seeds if isinstance(seeds, list) else [],
+        "negative_evidence": negative_evidence,
         "external_method": external_method,
         "selection_contract": selection_contract,
         "training_regions": training,

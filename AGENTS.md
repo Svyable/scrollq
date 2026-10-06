@@ -322,3 +322,7 @@ console script. A new entry point must therefore be declared in
 - Do not commit environments, caches, egg-info or build archives.
 - PRs follow `.github/pull_request_template.md`: What / Evidence / Stability
   check / Grand Prize + frozen data / Docs.
+
+## Negative ink evidence
+
+A declared absence claim requires the exact window/model/surface detectability bundle via `negative_ink_claims` in the ink manifest. Blank + failed or missing synthetic recovery is UNINFORMATIVE. Never select polarity from ink quantity, legibility, or probe response. Use independent geometry/provenance or retain both frozen orders. Preprocessing must preserve sealed known-positive performance as well as synthetic detectability; do not retune the surface, window, normalization or cutoff after viewing recovery. Synthetic arrays must remain separate from real predictions and never enter training/submission images. `scroliq-ink-detectability` is synthetic-tested machinery, not a real-scroll result; see `docs/ink-detectability.md`.

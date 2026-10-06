@@ -1231,3 +1231,5 @@ A fast way to inspect the project end to end:
 MIT licensed.
 
 Built in September 2026 for the **Vesuvius Challenge September Progress Prize** by **Sven + Muse (AI assistant)**.
+
+In-situ negative ink evidence now has a [synthetic detectability gate](docs/ink-detectability.md): `scroliq-ink-detectability` preserves the full contrast/width curve and `scroliq-ink-audit` rejects declared absence claims without matching recomputed recovery. Synthetic fixtures only; no real-scroll detectability result yet.

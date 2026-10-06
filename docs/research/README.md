@@ -224,3 +224,5 @@ Every new research proposal should be judged against the same questions:
 
 The default is not to accumulate research machinery. A failed gate is a useful
 result.
+
+- [In-situ synthetic detectability](2026-10-06-ink-detectability.md): integrated negative-evidence machinery; geometry-derived polarity, preprocessing adversarial controls; dual-energy WATCH.
