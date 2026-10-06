@@ -78,6 +78,12 @@ weight-free Pareto frontier (triage, not a readability claim).
     stays `unknown`/`not-measured`. Evidence only, never an ink verdict
   - `shortcut_audit.py` → `scroliq-shortcut-audit`: frozen-embedding, balanced linear nuisance probes and create-only shortcut passports; declared physical-group separation and held-out training-domain exclusions. Diagnostic only, no real checkpoint result; absolute xyz unmeasured. `docs/shortcut-audit.md`
   - `ensemble_independence.py` → `scroliq-ensemble-independence`: declared training-ancestry audit (pairwise supervision overlap, lineage/seed sharing, detected CV-partition vs same-data vs disjoint regime, exact certified independent-witness count; unknown is never independent) and a scroll-disjoint failure-ranking comparison (block-bootstrap AUROC/AURC of mutual information vs entropy) gated by a built-in planted-signal/null control whose seed is a code constant. Evidence only; no real-ensemble result yet. `docs/ensemble-independence.md`
+  - `persistent_topology.py` → `scroliq-topology`: H0/H1 superlevel persistence of a
+    per-vertex support field on a TIFXYZ grid (own union-find, scipy distances),
+    W1/bottleneck diagram distances, experimental bridge witnesses; `benchmark`
+    plants faults in a synthetic sheet stack. Synthetic result: no fault missed by
+    paired mesh metrics; witness localizes bridges but fires on faint bands too
+    (`artifacts/2026-10-06-persistent-topology-synthetic/`)
   - `bucket.py` — leaf helpers for the open bucket's metadata (constants, gz-aware
     JSON load, stable seeds); imports nothing else from `scrollq`
   - `omezarr.py` — strict, dependency-light reader for the open S3 bucket's
@@ -142,6 +148,7 @@ scroliq-winding-sync self-test                      # L1 vs BFS winding reconcil
 scroliq-constraint-gauge self-test                  # external calibration of winding-constraint producers
 scroliq-render-noise --self-test                    # flatten/render noise floor for small-effect claims
 scroliq-ink-passport --help                         # per-component ink evidence passport
+scroliq-topology --help                             # persistent topology + bridge witnesses
 ```
 
 `scrollq-score` and `scrollq-health` hit the network (dl.ash2txt.org); tests

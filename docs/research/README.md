@@ -96,6 +96,10 @@ campaign.
 | Recomputed spatial metadata (declared bbox never alone) | INCLUDE (2026-10-04) | Stale bounds silently discard valid geometry in prefilters and separation certificates | Run `scroliq-bbox-census` on the PHercParis4 pack |
 | Configured vs effective objective audit | INCLUDE (2026-10-04) | A nonzero loss weight is not a contributing loss | Wire into model-card preflight |
 | Label-coverage-conditioned surface evaluation | EXPERIMENT FURTHER (2026-10-04) | Aggregate held-out gain can live only in easy, well-labeled geometry | Real run of the frozen strata spec on committed ROIs |
+| Persistent-topology planted-fault benchmark | INCLUDE as R&D benchmark (2026-10-06); `scroliq-topology`, synthetic only | Tests whether connectivity-across-evidence catches faults local metrics miss | Synthetic answer: **no** (paired mesh metrics caught every fault); real PHerc1667 run not done ([note](2026-10-06-persistent-topology.md)) |
+| Topological bridge witness | EXPERIMENT FURTHER, high priority (2026-10-06) | Localizes the weak neck holding two large regions together | Localized 10/10 planted bridges but also fired on 10/10 legitimate faint bands; add a cross-saddle sheet-change condition and test unpaired |
+| Topology-stability VC3D / proof layer | Not included (2026-10-06) | Reviewer-facing fragility layer | Waits on the bridge witness separating bridges from faint bands |
+| Persistent-homology training loss; hard disk-topology constraint | DISMISS (2026-10-06) | Would coerce damaged papyrus / manufacture bridges | Loss: only after a stable real error signature; disk constraint: never |
 | Per-component physical-evidence passport | INCLUDE as proof infrastructure (2026-10-05); `scroliq-ink-passport` | Every proposed ink component / letter region bound to mesh, CT coordinates, checkpoint, training exclusion, raw score and relief support | Emit on the first real rendered column; take reviewer regions from the legibility ledger |
 | Geometry-only (CT-native) ink relief witness | EXPERIMENT FURTHER (2026-10-05) | Independent physical corroboration of frozen ink candidates from mesh + raw CT | Pin labelled detached fragments; fragment-held-out AUPRC of candidate × witness vs raw probability, with label-roll, mesh-offset and missingness controls ([note](2026-10-05-ink-relief-witness.md)) |
 | Relief-conditioned ink training | DISMISS for now (2026-10-05) | Would entangle evidence sources | Only after the independent witness passes held-out |
@@ -151,6 +155,7 @@ already merged. The primary dependency-order campaign remains authoritative.
 - [winding-sync, constraint-gauge and flattening nondeterminism](2026-10-06-winding-sync-and-render-noise.md)
 - [2026-10-05 winding conservation and two WATCH items](2026-10-05-winding-conservation-and-watch.md)
 - [2026-10-05 ink relief witnesses and per-component passports](2026-10-05-ink-relief-witness.md)
+- [2026-10-06 persistent topology as a sheet-validity witness](2026-10-06-persistent-topology.md)
 - [2026-10-06 official recto baseline and CGAL smoothing watch](2026-10-06-recto-baseline-and-cgal-watch.md)
 - [2026-10-06 ensemble independence and conditional risk](2026-10-06-ensemble-independence-and-conditional-risk.md)
 

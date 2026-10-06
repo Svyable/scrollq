@@ -519,6 +519,18 @@ This is an **evidence-quality audit, not an ink classifier**. A pass means the d
 
 The command fails closed when the mask is empty or single-class, inputs are malformed, the split is not declared held out, training overlap is not declared absent, or no falsification control is supplied. Those checks make the output an auditable evidence artifact; they do not prove that a URL is public, independently establish the declared train/validation split, set a performance threshold, or claim readability. See the [held-out ink protocol](docs/ink-validation.md).
 
+### Persistent topology of surface patches
+
+`scroliq-topology` tracks how a TIFXYZ patch's connected pieces (H0) and holes
+(H1) change as weakly supported vertices are removed. It compares the resulting
+diagrams by Wasserstein-1 and bottleneck distance. It also emits experimental
+bridge witnesses: a weak saddle joining two large regions, with its location.
+
+On a synthetic planted-fault benchmark, it detected no fault that paired mesh
+metrics missed. The bridge witness put its saddle inside every planted bridge,
+but it also fired on every legitimately faint band. It is an R&D benchmark, not
+a gate. See [persistent topology](docs/persistent-topology.md).
+
 ### Per-component evidence passport
 
 `scroliq-ink-passport` emits one record per proposed ink component or reviewer
