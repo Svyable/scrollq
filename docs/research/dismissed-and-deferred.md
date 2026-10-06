@@ -127,6 +127,28 @@ fragment promotion gate. Even then, compare the fused model against
 witness-as-gate on the same held-out fragments. See
 [2026-10-05-ink-relief-witness.md](2026-10-05-ink-relief-witness.md).
 
+## Persistent-homology training loss for surfaces
+
+**Status:** DISMISS for now (2026-10-06).
+
+Topology-preserving losses work in other imaging domains, but ScrollQ does not
+know what topology to demand of crushed papyrus. Real sheets tear, fragment,
+fold and leave the scan. A loss that penalizes components or holes could
+manufacture exactly the false bridges the topology audit is meant to find.
+
+Revisit only after the audit shows a specific, stable error signature on real
+accepted geometry. See
+[2026-10-06-persistent-topology.md](2026-10-06-persistent-topology.md).
+
+## "Papyrus must be a disk" as a hard constraint
+
+**Status:** DISMISS (2026-10-06).
+
+A carbonized sheet inside a finite CT volume is not obliged to be one component
+with no holes. Tears, scan boundaries, missing material and detached pieces
+make hard genus or component constraints unjustified. Topology stays a
+comparative witness, never a prior.
+
 ## Large-context semantics as a substitute for physical validation
 
 **Status:** DISMISS as a validation strategy.
