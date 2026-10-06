@@ -1,0 +1,81 @@
+{
+  "decision": {
+    "alpha": 0.05,
+    "bootstrap_samples": 2000,
+    "bootstrap_seed": 20261005,
+    "min_domains": 3,
+    "min_mean_gain": 0.05,
+    "min_negatives_per_domain": 20,
+    "min_positive_domain_fraction": 0.66,
+    "min_positives_per_domain": 20,
+    "permutation_seed": 20261006,
+    "permutations": 200,
+    "recall_target": 0.9,
+    "within_region_min_negatives_per_domain": 10,
+    "within_region_min_positives_per_domain": 10
+  },
+  "features": {
+    "baseline_expansion": "squares+pairwise",
+    "baseline_full": [
+      "peak_prob",
+      "mean_prob",
+      "log_area",
+      "peak_margin_log",
+      "elongation",
+      "bbox_fill"
+    ],
+    "baseline_rank": [
+      "log_area",
+      "peak_margin_log",
+      "elongation",
+      "bbox_fill"
+    ],
+    "persistence": [
+      "down_slack_log",
+      "area_growth_log",
+      "area_retention_tight",
+      "centroid_drift_norm",
+      "skeleton_log_change",
+      "hole_life_log",
+      "n_significant_peaks"
+    ]
+  },
+  "filtration": {
+    "background_connectivity": 4,
+    "direction": "superlevel",
+    "foreground_connectivity": 8,
+    "masked_pixels": "outside",
+    "parameter": "mid-rank kept fraction"
+  },
+  "freeze": {
+    "date": "2026-10-05",
+    "real_prediction_maps_read": 0
+  },
+  "labeling": {
+    "clear_margin_px": 3,
+    "ink_overlap_min": 0.5
+  },
+  "model": {
+    "kind": "ridge-logistic",
+    "l2": 1.0,
+    "max_iter": 50,
+    "tol": 1e-08
+  },
+  "protocol": "threshold-persistence-v1",
+  "region": {
+    "invariance_remaps": [
+      "cube",
+      "expm1_3x"
+    ],
+    "max_pixels": 1048576,
+    "min_valid_pixels": 4096
+  },
+  "sweep": {
+    "max_components": 400,
+    "min_component_pixels": 12,
+    "significant_persistence": 0.0005,
+    "skeleton": "zhang-suen-v1",
+    "steps_per_side": 4,
+    "window_log10": 0.5
+  }
+}

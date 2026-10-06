@@ -406,6 +406,72 @@ supported ink better than existing controls.
 
 
 
+## 8. Threshold-persistence audit
+
+**Status:** EXPERIMENT FURTHER. Executable as `scroliq-persistence` with
+synthetic controls; no real prediction map has been measured. Protocol, frozen
+definitions, decision rule and limits are in
+[`docs/threshold-persistence.md`](../threshold-persistence.md).
+
+### Hypothesis
+
+Treat a frozen detector's probability map as a scalar field and ask how
+components, holes, merges and stroke skeletons persist as the threshold sweeps.
+Real surface-bound ink may have a different persistence signature from brittle
+model artifacts even when both look letter-like at one threshold. It fails
+cleanly if verified ink is as topologically unstable as false positives.
+
+### Why it is distinct
+
+The overnight ledger's checkpoint-disagreement item (section 15) lists
+"persistence across thresholds" as one quantity to map; no merge tree, hole,
+skeleton or rank-invariance machinery was specified or implemented there. The
+surface-normal harness measures a fixed support across *depth*, never re-segmenting
+across *threshold*. This audit varies only the threshold, uses one checkpoint, and
+is parameterised by rank so it does not depend on calibration. Matched-null
+calibration, causal-context intervention, scanner-frame equivariance, the
+resolution ladder and checkpoint disagreement are orthogonal.
+
+### Promotion gate
+
+Preregistered and frozen (spec hash pinned in the code): on at least three domains
+held out whole, persistence features must reduce false-positive rate at 90 %
+verified-ink recall beyond peak/mean probability, area and morphology (linear and
+quadratic baselines), with a domain-bootstrap interval above zero, a within-domain
+permutation test, and the same gates holding *within* verified-ink regions so a
+region-texture difference cannot pass for topology.
+
+### Kill criterion
+
+Verified ink and false positives are indistinguishable in persistence on held-out
+domains, or the gain vanishes within a region. Either returns `NO_ADDED_SIGNAL`,
+which is a result.
+
+### Self-evaluation
+
+- prize impact: **medium-high if false positives are substantially more
+  threshold-fragile than real ink; zero otherwise**
+- plausibility: **high that the quantities are computable; unknown that they
+  separate real ink**
+- evidence burden: **moderate; whole-domain holdout, matched negatives and
+  in-region false positives are the hard part**
+- implementation cost: **low (three modules, one entry point)**
+- reproducibility burden: **very low; deterministic, hash-bound, create-only**
+- hallucination risk: **favorable; generates no ink and uses no language prior**
+- invalid-evaluation risk: **medium if thresholds are tuned after seeing target
+  text; mitigated by a manifest selection contract, a pinned spec and an
+  `EXPLORATORY` verdict for any other spec**
+- VC3D compatibility: **a per-region persistence-margin raster can be exported;
+  ingestion is not implemented**
+- unnecessary surface area: **low; evaluation-only, independently revertable**
+
+### Dismissed variants
+
+Choosing the most letter-like threshold, and Greek-character topology templates
+as a validator, are DISMISSED (see
+[dismissed-and-deferred.md](dismissed-and-deferred.md)). Cross-checkpoint
+persistence is the deferred second stage.
+
 ## Overnight batch additions (2026-10-04 / 2026-10-05)
 
 The detailed protocols and self-evaluations are in
