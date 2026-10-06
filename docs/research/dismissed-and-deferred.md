@@ -161,6 +161,11 @@ Keep the inversion-barrier idea as a test-design reference for fold/inversion
 controls on surface meshes. Do not import the implementation. Reconsider only if
 a volumetric mesh becomes part of the evidence chain.
 
+**Update 2026-10-06:** the method moves to WATCH for a clean-room
+surface-mesh experiment with CT support as the oracle. Implementation
+integration stays refused (relayed: GPLv3+ without a commercial license). See
+[the 2026-10-06 note](2026-10-06-recto-baseline-and-cgal-watch.md).
+
 ## Learned uncertainty head on a frozen backbone (SegWithU-style)
 
 **Status:** DEFERRED (WATCH). Checked 2026-10-04.

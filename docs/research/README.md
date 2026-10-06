@@ -71,7 +71,10 @@ campaign.
 | CSWinUNETR (thin-structure segmentation) | WATCH; no explicit license found, so no vendoring or derivation | Long-range sheet continuity through low-contrast gaps | A license, then an architecture-only A/B on identical cubes/ROIs judged on winding bridges and sheet switches |
 | Learned (Siamese) patch matcher for sheet identity | DISMISS for now | Could learn weak identity cues | None until the deterministic correlation test shows physical identity information exists |
 | Fiber-coordinate canonicalization as a model architecture | DISMISS for now | Possible orientation normalization | Reconsider only if an ablation inside another experiment supports it |
-| CGAL `Mesh_smoothing_3` as an integration | DISMISS for current integration | Tetrahedral-mesh smoothing; inversion-barrier idea only | None; the barrier concept may inform tests |
+| CGAL `Mesh_smoothing_3` as an integration | DISMISS for current integration; method WATCH (2026-10-06) | Connectivity-preserving vertex optimization with an inversion barrier | Clean-room surface experiment only, CT support as the oracle; implementation is GPL-encumbered ([note](2026-10-06-recto-baseline-and-cgal-watch.md)) |
+| Official `surface_recto_3dunet` as a frozen external baseline | INCLUDE as frozen reference (2026-10-06); registered **unpinned** ([artifact](../../artifacts/2026-10-06-recto-3dunet-reference/README.md)) | Canonical scroll-disjoint surface baseline any future ScrolIQ surface claim must beat | Pin checkpoint hash/revision and license evidence; resolve PHerc0343 vs 0343P; one sealed-crop geometry-only run on a scroll-disjoint volume |
+| SPECTRE CT foundation-model weights | DISMISS (re-checked 2026-10-06) | Generic CT features | Permissive weights plus a Vesuvius held-out result |
+| Self-supervised CT denoising / Deep Pseudo-Proximal Map | WATCH (2026-10-06); no preprocessing adoption | Cleaner CT | Raw projections plus a physically independent ink benchmark |
 | Global histogram matching | DISMISS | Superficial domain normalization | None; retain only as a negative control |
 | Transport-only UV invariance | DISMISS | Coordinate arithmetic check | None; material-attached false positives persist too |
 | Ink-selected flattening | DISMISS | Could maximize visual persistence | None; creates geometry-selection leakage |
@@ -126,6 +129,7 @@ already merged. The primary dependency-order campaign remains authoritative.
 - [vesuvius-automesh: harvest QC and prediction CT support](2026-10-05-automesh-harvest-qc.md)
 - [2026-10-05 winding conservation and two WATCH items](2026-10-05-winding-conservation-and-watch.md)
 - [2026-10-05 ink relief witnesses and per-component passports](2026-10-05-ink-relief-witness.md)
+- [2026-10-06 official recto baseline and CGAL smoothing watch](2026-10-06-recto-baseline-and-cgal-watch.md)
 
 ## Existing tracked work
 
