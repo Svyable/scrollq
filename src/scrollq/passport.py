@@ -537,6 +537,7 @@ def _ink_stage(
         "model": dict(audit.get("model") or {}),
         "leakage": dict(audit.get("leakage") or {}),
         "controls": dict(audit.get("controls") or {}),
+        "negative_evidence": list(audit.get("negative_evidence") or []),
         "runs": dict(audit.get("runs") or {}),
         "error_count": int(audit.get("error_count") or 0),
         "warning_count": int(audit.get("warning_count") or 0),
