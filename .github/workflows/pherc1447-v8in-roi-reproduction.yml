@@ -1,0 +1,147 @@
+name: PHerc1447 v8-in pinned ROI reproduction
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/pherc1447-v8in-roi-reproduction.yml"
+      - "scripts/pherc1447_v8in_roi_probe.py"
+      - "artifacts/2026-10-04-pherc1447-v8in-pins/byte-inventory.json"
+
+permissions:
+  contents: read
+
+env:
+  MODEL_REPO: YoussefMoNader/ink-8um-v8in
+  MODEL_REV: d89166b41a3f5fad7749b3d7c0fdd1bd3695d844
+  SURFACES_REPO: YoussefMoNader/ink-8um-pherc1447-surfaces
+  SURFACES_REV: 7e4d918712a8d8642a6fdeee45b80217c1e98317
+  INVENTORY: artifacts/2026-10-04-pherc1447-v8in-pins/byte-inventory.json
+  OUT: out/pherc1447-v8in-roi
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install download and image dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install huggingface_hub numpy Pillow tifffile
+
+      - name: Download only selection inputs at frozen revision
+        shell: python
+        run: |
+          import os
+          from huggingface_hub import snapshot_download
+          snapshot_download(
+              repo_id=os.environ["SURFACES_REPO"],
+              repo_type="dataset",
+              revision=os.environ["SURFACES_REV"],
+              local_dir="out/surfaces",
+              allow_patterns=["w058/layers/*.tif", "w058/labels/mask.png"],
+          )
+
+      - name: Freeze ROI before labels or predictions are observed
+        run: |
+          python scripts/pherc1447_v8in_roi_probe.py select             --inventory "$INVENTORY"             --surfaces-root out/surfaces             --revision "$SURFACES_REV"             --winding w058             --out-dir "$OUT"
+          sha256sum "$OUT/roi-manifest.json" | tee "$OUT/roi-manifest.sha256"
+
+      - name: Assert forbidden scoring inputs were not downloaded during selection
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e out/surfaces/w058/labels/inklabels.png
+          test ! -e out/surfaces/w058/predictions/v8in.png
+
+      - name: Download pinned base model and post-freeze scoring inputs
+        shell: python
+        run: |
+          import os
+          from huggingface_hub import snapshot_download
+          snapshot_download(
+              repo_id=os.environ["MODEL_REPO"],
+              revision=os.environ["MODEL_REV"],
+              local_dir="out/model",
+              ignore_patterns=["training/*"],
+          )
+          snapshot_download(
+              repo_id=os.environ["SURFACES_REPO"],
+              repo_type="dataset",
+              revision=os.environ["SURFACES_REV"],
+              local_dir="out/surfaces",
+              allow_patterns=[
+                  "w058/labels/inklabels.png",
+                  "w058/predictions/v8in.png",
+              ],
+          )
+
+      - name: Verify pinned model execution bytes
+        shell: python
+        run: |
+          import hashlib, json, os
+          from pathlib import Path
+
+          inv = json.loads(Path(os.environ["INVENTORY"]).read_text())
+          repo = next(r for r in inv["repos"] if r["repo_id"] == os.environ["MODEL_REPO"])
+          assert repo["resolved_revision"] == os.environ["MODEL_REV"]
+          rows = {r["path"]: r for r in repo["files"]}
+          wanted = [
+              "model.safetensors",
+              "config.json",
+              "predict.py",
+              "requirements.txt",
+              "ink8um/__init__.py",
+              "ink8um/inference.py",
+          ]
+          for rel in wanted:
+              p = Path("out/model") / rel
+              h = hashlib.sha256()
+              with p.open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              got = h.hexdigest()
+              assert got == rows[rel]["sha256"], (rel, got, rows[rel]["sha256"])
+              print(rel, got)
+
+      - name: Install exact released inference requirements
+        run: python -m pip install -r out/model/requirements.txt
+
+      - name: Run correct PHerc1447 layer order
+        run: |
+          python out/model/predict.py             --reverse             --layers "$OUT/layers"             --output "$OUT/correct.npy"             --batch-size 1
+
+      - name: Run wrong layer order adverse control
+        run: |
+          python out/model/predict.py             --layers "$OUT/layers"             --output "$OUT/wrong-order.npy"             --batch-size 1
+
+      - name: Score rerun against frozen released bytes
+        run: |
+          python scripts/pherc1447_v8in_roi_probe.py score             --inventory "$INVENTORY"             --surfaces-root out/surfaces             --roi-dir "$OUT"             --correct "$OUT/correct.npy"             --reversed "$OUT/wrong-order.npy"             --out "$OUT/result.json"
+
+      - name: Record environment and evidence hashes
+        shell: bash
+        run: |
+          {
+            python --version
+            python -m pip freeze
+          } > "$OUT/environment.txt"
+          (
+            cd "$OUT"
+            find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+          )
+          cat "$OUT/result.json"
+
+      - name: Upload immutable ROI reproduction evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pherc1447-v8in-roi-reproduction
+          path: out/pherc1447-v8in-roi/
+          if-no-files-found: error
+          retention-days: 30
