@@ -1,0 +1,2149 @@
+{
+  "controls": {
+    "unprotected_weak_signal_flips": 232,
+    "protected_weak_signal_flips": 0,
+    "protected_max_score_error": 0.0,
+    "projection_weak_signal_flips": 0,
+    "projection_max_score_error": 0.0,
+    "pass": true
+  },
+  "input": "deterministic generated fixtures, seed 1729; separate control seed 911",
+  "results": [
+    {
+      "schema_version": 1,
+      "tool": "scroliq-e8-moonshot",
+      "source_kind": "synthetic",
+      "rule": {
+        "bits": [
+          1,
+          2,
+          4
+        ],
+        "score_tolerance": 0.05,
+        "min_compression": 4.0,
+        "max_group_auroc_drop": 0.01,
+        "min_raw_group_auroc": 0.6,
+        "min_byte_advantage": 0.05,
+        "min_mse_advantage": 0.1,
+        "max_byte_premium_for_mse_comparison": 0.02
+      },
+      "calibration_rows": 1536,
+      "evaluation_rows": 1536,
+      "raw_groups": {
+        "eval-0": {
+          "auroc": 0.995206106870229,
+          "recall": 0.964,
+          "false_positive_rate": 0.04580152671755725
+        },
+        "eval-1": {
+          "auroc": 0.9970687022900764,
+          "recall": 0.944,
+          "false_positive_rate": 0.019083969465648856
+        },
+        "eval-2": {
+          "auroc": 0.9975429975429976,
+          "recall": 0.9806949806949807,
+          "false_positive_rate": 0.023715415019762844
+        }
+      },
+      "arms": [
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 1,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 10446,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 18.821367030442275,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.3225941994909686,
+          "max_probe_score_error": 1.5886867015702708,
+          "probe_decision_flips": 276,
+          "worst_group_auroc_drop": 0.1002748091603054,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9140152671755725,
+              "recall": 0.816,
+              "false_positive_rate": 0.1717557251908397
+            },
+            "eval-1": {
+              "auroc": 0.896793893129771,
+              "recall": 0.792,
+              "false_positive_rate": 0.1717557251908397
+            },
+            "eval-2": {
+              "auroc": 0.9017504234895539,
+              "recall": 0.8455598455598455,
+              "false_positive_rate": 0.17786561264822134
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.024649859943977614,
+          "mse_advantage_vs_matched_scalar": 0.11600123445729105,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 1,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 201798,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 0.9742812119049743,
+          "escape_rows": 1407,
+          "escape_fraction": 0.916015625,
+          "mse": 0.02669193892102593,
+          "max_probe_score_error": 0.04975504970173139,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.00029007633587785353,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9950534351145038,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9967786259541985,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9976345628519542,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0026490851759961576,
+          "mse_advantage_vs_matched_scalar": 0.046157295530916964,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 1,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 23246,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 8.457713154951389,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.3128258500608483,
+          "max_probe_score_error": 5.8879015329971196e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.011229264142917916,
+          "mse_advantage_vs_matched_scalar": 0.11489494907885045,
+          "verdict": "TEST_ON_REAL_DATA"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 1,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 10710,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 18.357422969187674,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.36492607463418797,
+          "max_probe_score_error": 1.7205162218359855,
+          "probe_decision_flips": 311,
+          "worst_group_auroc_drop": 0.12790839694656486,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.8672977099236642,
+              "recall": 0.772,
+              "false_positive_rate": 0.22900763358778625
+            },
+            "eval-1": {
+              "auroc": 0.8845343511450382,
+              "recall": 0.78,
+              "false_positive_rate": 0.1717557251908397
+            },
+            "eval-2": {
+              "auroc": 0.8803241411937064,
+              "recall": 0.7992277992277992,
+              "false_positive_rate": 0.20948616600790515
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 1,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 202334,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 0.9717002579892653,
+          "escape_rows": 1409,
+          "escape_fraction": 0.9173177083333334,
+          "mse": 0.027983585549236748,
+          "max_probe_score_error": 0.04798200292376831,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.00022900763358779663,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9949923664122138,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9968396946564886,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9976040410823019,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 1,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 23510,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 8.362739259889409,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.3534335836579885,
+          "max_probe_score_error": 5.8421855131385314e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 2,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 16598,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 11.845282564164357,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.10474377171322724,
+          "max_probe_score_error": 0.8549123971736574,
+          "probe_decision_flips": 147,
+          "worst_group_auroc_drop": 0.032152671755725226,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9630534351145038,
+              "recall": 0.868,
+              "false_positive_rate": 0.08778625954198473
+            },
+            "eval-1": {
+              "auroc": 0.9702748091603054,
+              "recall": 0.884,
+              "false_positive_rate": 0.08396946564885496
+            },
+            "eval-2": {
+              "auroc": 0.9731866253605383,
+              "recall": 0.9111969111969112,
+              "false_positive_rate": 0.09486166007905138
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.01518927257624303,
+          "mse_advantage_vs_matched_scalar": 0.12314267975188342,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 2,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 195710,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 1.0045884216442695,
+          "escape_rows": 1317,
+          "escape_fraction": 0.857421875,
+          "mse": 0.014687681583306855,
+          "max_probe_score_error": 0.049954885407526683,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0002442748091603386,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9950992366412214,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.996824427480916,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9976650846216064,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": -0.024284293714345484,
+          "mse_advantage_vs_matched_scalar": 0.21803797988791918,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 2,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 29398,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 6.687801891285122,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.10165176932674241,
+          "max_probe_score_error": 6.30358848452417e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.008632899440210395,
+          "mse_advantage_vs_matched_scalar": 0.12281912754358304,
+          "verdict": "TEST_ON_REAL_DATA"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 2,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 16854,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 11.665361338554646,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.11945360926403491,
+          "max_probe_score_error": 1.055436909984111,
+          "probe_decision_flips": 170,
+          "worst_group_auroc_drop": 0.04521800173974089,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9622900763358778,
+              "recall": 0.912,
+              "false_positive_rate": 0.12213740458015267
+            },
+            "eval-1": {
+              "auroc": 0.9598778625954199,
+              "recall": 0.888,
+              "false_positive_rate": 0.10687022900763359
+            },
+            "eval-2": {
+              "auroc": 0.9523249958032567,
+              "recall": 0.8803088803088803,
+              "false_positive_rate": 0.13438735177865613
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 2,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 191070,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 1.0289841419375099,
+          "escape_rows": 1281,
+          "escape_fraction": 0.833984375,
+          "mse": 0.01878311376452993,
+          "max_probe_score_error": 0.04989209690001761,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0002442748091603386,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995175572519084,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.996824427480916,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975277366581714,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 2,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 29654,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 6.630066770081608,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.1158846168659395,
+          "max_probe_score_error": 9.370276121689614e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 4,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 28902,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 6.80257421631721,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.013783368014396119,
+          "max_probe_score_error": 0.4445380849797579,
+          "probe_decision_flips": 50,
+          "worst_group_auroc_drop": 0.005190839694656502,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9900152671755725,
+              "recall": 0.944,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9938931297709923,
+              "recall": 0.952,
+              "false_positive_rate": 0.030534351145038167
+            },
+            "eval-2": {
+              "auroc": 0.993132601828254,
+              "recall": 0.972972972972973,
+              "false_positive_rate": 0.039525691699604744
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.008235536339304073,
+          "mse_advantage_vs_matched_scalar": -0.18486264888929393,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 4,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 144910,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 1.356759367883514,
+          "escape_rows": 853,
+          "escape_fraction": 0.5553385416666666,
+          "mse": 0.004828707731134142,
+          "max_probe_score_error": 0.04981495832253824,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 3.053435114508396e-05,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9951908396946565,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970381679389313,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975582584278236,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": -0.05571826142705194,
+          "mse_advantage_vs_matched_scalar": 0.04639408898588071,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 4,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 41702,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 4.714594024267421,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.013351467339423613,
+          "max_probe_score_error": 7.687871628192511e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.005722187783129051,
+          "mse_advantage_vs_matched_scalar": -0.18143692670304246,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 4,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 29142,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 6.746551369157916,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.011632882534795769,
+          "max_probe_score_error": 0.34594517269322866,
+          "probe_decision_flips": 55,
+          "worst_group_auroc_drop": 0.004946564885496274,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.990824427480916,
+              "recall": 0.956,
+              "false_positive_rate": 0.05725190839694656
+            },
+            "eval-1": {
+              "auroc": 0.9921221374045801,
+              "recall": 0.928,
+              "false_positive_rate": 0.026717557251908396
+            },
+            "eval-2": {
+              "auroc": 0.9933004715613412,
+              "recall": 0.9459459459459459,
+              "false_positive_rate": 0.05138339920948617
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 4,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 137262,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 1.4323556410368492,
+          "escape_rows": 795,
+          "escape_fraction": 0.517578125,
+          "mse": 0.005063630243230159,
+          "max_probe_score_error": 0.04998131011820217,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.00035114503816802145,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9950229007633588,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9967175572519084,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9971919971919971,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 4,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 41942,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 4.687616231939344,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.011301041162377299,
+          "max_probe_score_error": 9.605195305795178e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        }
+      ],
+      "scope": "Frozen binary linear probe only; no nonlinear-head, segmentation, ink or runtime guarantee.",
+      "provenance_scope": "Declared physical/training groups and checkpoint pin; upstream extraction lineage not independently verified.",
+      "scenario": "isotropic"
+    },
+    {
+      "schema_version": 1,
+      "tool": "scroliq-e8-moonshot",
+      "source_kind": "synthetic",
+      "rule": {
+        "bits": [
+          1,
+          2,
+          4
+        ],
+        "score_tolerance": 0.05,
+        "min_compression": 4.0,
+        "max_group_auroc_drop": 0.01,
+        "min_raw_group_auroc": 0.6,
+        "min_byte_advantage": 0.05,
+        "min_mse_advantage": 0.1,
+        "max_byte_premium_for_mse_comparison": 0.02
+      },
+      "calibration_rows": 1536,
+      "evaluation_rows": 1536,
+      "raw_groups": {
+        "eval-0": {
+          "auroc": 0.995206106870229,
+          "recall": 0.964,
+          "false_positive_rate": 0.04580152671755725
+        },
+        "eval-1": {
+          "auroc": 0.9970687022900764,
+          "recall": 0.944,
+          "false_positive_rate": 0.019083969465648856
+        },
+        "eval-2": {
+          "auroc": 0.9975429975429976,
+          "recall": 0.9806949806949807,
+          "false_positive_rate": 0.023715415019762844
+        }
+      },
+      "arms": [
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 1,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 10446,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 18.821367030442275,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 3.894817940158454,
+          "max_probe_score_error": 1.5886866462611193,
+          "probe_decision_flips": 276,
+          "worst_group_auroc_drop": 0.1002748091603054,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9140152671755725,
+              "recall": 0.816,
+              "false_positive_rate": 0.1717557251908397
+            },
+            "eval-1": {
+              "auroc": 0.896793893129771,
+              "recall": 0.792,
+              "false_positive_rate": 0.1717557251908397
+            },
+            "eval-2": {
+              "auroc": 0.9017504234895539,
+              "recall": 0.8455598455598455,
+              "false_positive_rate": 0.17786561264822134
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.024649859943977614,
+          "mse_advantage_vs_matched_scalar": 0.11981344983665543,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 1,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 201798,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 0.9742812119049743,
+          "escape_rows": 1407,
+          "escape_fraction": 0.916015625,
+          "mse": 0.3156484625383806,
+          "max_probe_score_error": 0.04975503807256276,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.00029007633587785353,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9950534351145038,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9967786259541985,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9976345628519542,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0026490851759961576,
+          "mse_advantage_vs_matched_scalar": 0.03855885528936576,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 1,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 23246,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 8.457713154951389,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 3.8932760454455555,
+          "max_probe_score_error": 8.095989989520547e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.011229264142917916,
+          "mse_advantage_vs_matched_scalar": 0.11980106108657218,
+          "verdict": "TEST_ON_REAL_DATA"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 1,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 10710,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 18.357422969187674,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 4.424991428732529,
+          "max_probe_score_error": 1.7205162762188075,
+          "probe_decision_flips": 311,
+          "worst_group_auroc_drop": 0.12790839694656486,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.8672977099236642,
+              "recall": 0.772,
+              "false_positive_rate": 0.22900763358778625
+            },
+            "eval-1": {
+              "auroc": 0.8845343511450382,
+              "recall": 0.78,
+              "false_positive_rate": 0.1717557251908397
+            },
+            "eval-2": {
+              "auroc": 0.8803241411937064,
+              "recall": 0.7992277992277992,
+              "false_positive_rate": 0.20948616600790515
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 1,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 202334,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 0.9717002579892653,
+          "escape_rows": 1409,
+          "escape_fraction": 0.9173177083333334,
+          "mse": 0.3283076288911908,
+          "max_probe_score_error": 0.04798201432575022,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.00022900763358779663,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9949923664122138,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9968396946564886,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9976040410823019,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 1,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 23510,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 8.362739259889409,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 4.423177390160975,
+          "max_probe_score_error": 8.799570760942288e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 2,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 16598,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 11.845282564164357,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 1.2874925229048912,
+          "max_probe_score_error": 0.8549124015580772,
+          "probe_decision_flips": 147,
+          "worst_group_auroc_drop": 0.032152671755725226,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9630534351145038,
+              "recall": 0.868,
+              "false_positive_rate": 0.08778625954198473
+            },
+            "eval-1": {
+              "auroc": 0.9702748091603054,
+              "recall": 0.884,
+              "false_positive_rate": 0.08396946564885496
+            },
+            "eval-2": {
+              "auroc": 0.9731866253605383,
+              "recall": 0.9111969111969112,
+              "false_positive_rate": 0.09486166007905138
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.01518927257624303,
+          "mse_advantage_vs_matched_scalar": 0.10771758405672771,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 2,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 195710,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 1.0045884216442695,
+          "escape_rows": 1317,
+          "escape_fraction": 0.857421875,
+          "mse": 0.1708240269854189,
+          "max_probe_score_error": 0.04995488420023797,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0002442748091603386,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9950992366412214,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.996824427480916,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9976650846216064,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": -0.024284293714345484,
+          "mse_advantage_vs_matched_scalar": 0.23964210010977371,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 2,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 29398,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 6.687801891285122,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 1.2870044651049655,
+          "max_probe_score_error": 6.300287180849296e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.008632899440210395,
+          "mse_advantage_vs_matched_scalar": 0.10770745529085468,
+          "verdict": "TEST_ON_REAL_DATA"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 2,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 16854,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 11.665361338554646,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 1.4429204250806897,
+          "max_probe_score_error": 1.0554369410390185,
+          "probe_decision_flips": 170,
+          "worst_group_auroc_drop": 0.04521800173974089,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9622900763358778,
+              "recall": 0.912,
+              "false_positive_rate": 0.12213740458015267
+            },
+            "eval-1": {
+              "auroc": 0.9598778625954199,
+              "recall": 0.888,
+              "false_positive_rate": 0.10687022900763359
+            },
+            "eval-2": {
+              "auroc": 0.9523249958032567,
+              "recall": 0.8803088803088803,
+              "false_positive_rate": 0.13438735177865613
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 2,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 191070,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 1.0289841419375099,
+          "escape_rows": 1281,
+          "escape_fraction": 0.833984375,
+          "mse": 0.22466265821671735,
+          "max_probe_score_error": 0.0498921086884645,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0002442748091603386,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995175572519084,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.996824427480916,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975277366581714,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 2,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 29654,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 6.630066770081608,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 1.4423570753070472,
+          "max_probe_score_error": 7.334637319722503e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 4,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 28902,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 6.80257421631721,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.16592119182297163,
+          "max_probe_score_error": 0.44453813429930067,
+          "probe_decision_flips": 50,
+          "worst_group_auroc_drop": 0.005190839694656502,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9900152671755725,
+              "recall": 0.944,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9938931297709923,
+              "recall": 0.952,
+              "false_positive_rate": 0.030534351145038167
+            },
+            "eval-2": {
+              "auroc": 0.993132601828254,
+              "recall": 0.972972972972973,
+              "false_positive_rate": 0.039525691699604744
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.008235536339304073,
+          "mse_advantage_vs_matched_scalar": -0.17928667141239796,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 4,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 144910,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 1.356759367883514,
+          "escape_rows": 853,
+          "escape_fraction": 0.5553385416666666,
+          "mse": 0.05671925777707156,
+          "max_probe_score_error": 0.04981495038360828,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 3.053435114508396e-05,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9951908396946565,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970381679389313,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975582584278236,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": -0.05571826142705194,
+          "mse_advantage_vs_matched_scalar": 0.09036934827056542,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 4,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 41702,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 4.714594024267421,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.16585301746021472,
+          "max_probe_score_error": 8.931821393609596e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.005722187783129051,
+          "mse_advantage_vs_matched_scalar": -0.17924114373263533,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 4,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 29142,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 6.746551369157916,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.14069623259987546,
+          "max_probe_score_error": 0.3459451831108241,
+          "probe_decision_flips": 55,
+          "worst_group_auroc_drop": 0.004946564885496274,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.990824427480916,
+              "recall": 0.956,
+              "false_positive_rate": 0.05725190839694656
+            },
+            "eval-1": {
+              "auroc": 0.9921221374045801,
+              "recall": 0.928,
+              "false_positive_rate": 0.026717557251908396
+            },
+            "eval-2": {
+              "auroc": 0.9933004715613412,
+              "recall": 0.9459459459459459,
+              "false_positive_rate": 0.05138339920948617
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 4,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 137262,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 1.4323556410368492,
+          "escape_rows": 795,
+          "escape_fraction": 0.517578125,
+          "mse": 0.06235416283437032,
+          "max_probe_score_error": 0.04998135300779494,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.00035114503816802145,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9950229007633588,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9967175572519084,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9971919971919971,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 4,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 41942,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 4.687616231939344,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.1406438524823197,
+          "max_probe_score_error": 6.881163105987298e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.964,
+              "false_positive_rate": 0.04580152671755725
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.944,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.9806949806949807,
+              "false_positive_rate": 0.023715415019762844
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        }
+      ],
+      "scope": "Frozen binary linear probe only; no nonlinear-head, segmentation, ink or runtime guarantee.",
+      "provenance_scope": "Declared physical/training groups and checkpoint pin; upstream extraction lineage not independently verified.",
+      "scenario": "anisotropic"
+    },
+    {
+      "schema_version": 1,
+      "tool": "scroliq-e8-moonshot",
+      "source_kind": "synthetic",
+      "rule": {
+        "bits": [
+          1,
+          2,
+          4
+        ],
+        "score_tolerance": 0.05,
+        "min_compression": 4.0,
+        "max_group_auroc_drop": 0.01,
+        "min_raw_group_auroc": 0.6,
+        "min_byte_advantage": 0.05,
+        "min_mse_advantage": 0.1,
+        "max_byte_premium_for_mse_comparison": 0.02
+      },
+      "calibration_rows": 1536,
+      "evaluation_rows": 1536,
+      "raw_groups": {
+        "eval-0": {
+          "auroc": 0.995206106870229,
+          "recall": 0.724,
+          "false_positive_rate": 0.0
+        },
+        "eval-1": {
+          "auroc": 0.9970687022900764,
+          "recall": 0.744,
+          "false_positive_rate": 0.0
+        },
+        "eval-2": {
+          "auroc": 0.9975429975429976,
+          "recall": 0.7837837837837838,
+          "false_positive_rate": 0.0
+        }
+      },
+      "arms": [
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 1,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 10446,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 18.821367030442275,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.34027191933256296,
+          "max_probe_score_error": 1.8563372151087412,
+          "probe_decision_flips": 289,
+          "worst_group_auroc_drop": 0.11732824427480926,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9051450381679389,
+              "recall": 0.688,
+              "false_positive_rate": 0.08015267175572519
+            },
+            "eval-1": {
+              "auroc": 0.8797404580152671,
+              "recall": 0.664,
+              "false_positive_rate": 0.12595419847328243
+            },
+            "eval-2": {
+              "auroc": 0.8822622735666213,
+              "recall": 0.6756756756756757,
+              "false_positive_rate": 0.10276679841897234
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.024649859943977614,
+          "mse_advantage_vs_matched_scalar": 0.11428634840175522,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 1,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 203294,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 0.9671116707822169,
+          "escape_rows": 1418,
+          "escape_fraction": 0.9231770833333334,
+          "mse": 0.02518100729204432,
+          "max_probe_score_error": 0.049269976842397145,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 9.15653089565982e-05,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9951908396946565,
+              "recall": 0.724,
+              "false_positive_rate": 0.0
+            },
+            "eval-1": {
+              "auroc": 0.9971145038167939,
+              "recall": 0.744,
+              "false_positive_rate": 0.0
+            },
+            "eval-2": {
+              "auroc": 0.997451432234041,
+              "recall": 0.7837837837837838,
+              "false_positive_rate": 0.0
+            }
+          },
+          "byte_advantage_vs_matched_scalar": -3.9353423255894526e-05,
+          "mse_advantage_vs_matched_scalar": 0.12312707932575817,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 1,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 23246,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 8.457713154951389,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.3297376653108235,
+          "max_probe_score_error": 6.333139213055006e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.724,
+              "false_positive_rate": 0.0
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.744,
+              "false_positive_rate": 0.0
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.7837837837837838,
+              "false_positive_rate": 0.0
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.011229264142917916,
+          "mse_advantage_vs_matched_scalar": 0.11148187352730898,
+          "verdict": "TEST_ON_REAL_DATA"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 1,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 10710,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 18.357422969187674,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.38417824848759197,
+          "max_probe_score_error": 2.1542446715436157,
+          "probe_decision_flips": 319,
+          "worst_group_auroc_drop": 0.1389923664122138,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.8562137404580152,
+              "recall": 0.676,
+              "false_positive_rate": 0.16030534351145037
+            },
+            "eval-1": {
+              "auroc": 0.872824427480916,
+              "recall": 0.688,
+              "false_positive_rate": 0.1297709923664122
+            },
+            "eval-2": {
+              "auroc": 0.8641476032780381,
+              "recall": 0.6988416988416989,
+              "false_positive_rate": 0.16205533596837945
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 1,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 203286,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 0.9671497299371329,
+          "escape_rows": 1416,
+          "escape_fraction": 0.921875,
+          "mse": 0.028716826233705833,
+          "max_probe_score_error": 0.04989496608213284,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0001984732824428237,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9950992366412214,
+              "recall": 0.724,
+              "false_positive_rate": 0.0
+            },
+            "eval-1": {
+              "auroc": 0.9968702290076336,
+              "recall": 0.744,
+              "false_positive_rate": 0.0
+            },
+            "eval-2": {
+              "auroc": 0.9976345628519542,
+              "recall": 0.7837837837837838,
+              "false_positive_rate": 0.0
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 1,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 23510,
+          "index_bytes": 6144,
+          "raw_float32_bytes": 196608,
+          "compression": 8.362739259889409,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.3711096661807474,
+          "max_probe_score_error": 7.187858308554951e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.724,
+              "false_positive_rate": 0.0
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.744,
+              "false_positive_rate": 0.0
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.7837837837837838,
+              "false_positive_rate": 0.0
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 2,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 16598,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 11.845282564164357,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.11196360389422289,
+          "max_probe_score_error": 1.0812948817931218,
+          "probe_decision_flips": 147,
+          "worst_group_auroc_drop": 0.04179956353869396,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9545954198473282,
+              "recall": 0.688,
+              "false_positive_rate": 0.03816793893129771
+            },
+            "eval-1": {
+              "auroc": 0.9586106870229008,
+              "recall": 0.736,
+              "false_positive_rate": 0.019083969465648856
+            },
+            "eval-2": {
+              "auroc": 0.9557434340043036,
+              "recall": 0.7297297297297297,
+              "false_positive_rate": 0.043478260869565216
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.01518927257624303,
+          "mse_advantage_vs_matched_scalar": 0.11567765318306422,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 2,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 191494,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 1.026705797570681,
+          "escape_rows": 1286,
+          "escape_fraction": 0.8372395833333334,
+          "mse": 0.017088000633797822,
+          "max_probe_score_error": 0.04994804447099788,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 7.630442413053551e-05,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9951603053435114,
+              "recall": 0.724,
+              "false_positive_rate": 0.0
+            },
+            "eval-1": {
+              "auroc": 0.9972977099236642,
+              "recall": 0.744,
+              "false_positive_rate": 0.0
+            },
+            "eval-2": {
+              "auroc": 0.997466693118867,
+              "recall": 0.7837837837837838,
+              "false_positive_rate": 0.0
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.032887892286092346,
+          "mse_advantage_vs_matched_scalar": -0.1696977265073627,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 2,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 29398,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 6.687801891285122,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.10848080766774391,
+          "max_probe_score_error": 5.940352654221215e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.724,
+              "false_positive_rate": 0.0
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.744,
+              "false_positive_rate": 0.0
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.7837837837837838,
+              "false_positive_rate": 0.0
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.008632899440210395,
+          "mse_advantage_vs_matched_scalar": 0.11361964110223854,
+          "verdict": "TEST_ON_REAL_DATA"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 2,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 16854,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 11.665361338554646,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.12660949290406268,
+          "max_probe_score_error": 1.207880778641715,
+          "probe_decision_flips": 160,
+          "worst_group_auroc_drop": 0.0526653135348788,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9477862595419847,
+              "recall": 0.716,
+              "false_positive_rate": 0.03816793893129771
+            },
+            "eval-1": {
+              "auroc": 0.9578167938931298,
+              "recall": 0.736,
+              "false_positive_rate": 0.03816793893129771
+            },
+            "eval-2": {
+              "auroc": 0.9448776840081188,
+              "recall": 0.7065637065637066,
+              "false_positive_rate": 0.05533596837944664
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 2,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 198006,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 0.9929396078906699,
+          "escape_rows": 1332,
+          "escape_fraction": 0.8671875,
+          "mse": 0.014608903006780583,
+          "max_probe_score_error": 0.049543213882955794,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.724,
+              "false_positive_rate": 0.0
+            },
+            "eval-1": {
+              "auroc": 0.9973129770992366,
+              "recall": 0.744,
+              "false_positive_rate": 0.0
+            },
+            "eval-2": {
+              "auroc": 0.9977108672760847,
+              "recall": 0.7837837837837838,
+              "false_positive_rate": 0.0
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 2,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 29654,
+          "index_bytes": 12288,
+          "raw_float32_bytes": 196608,
+          "compression": 6.630066770081608,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.12238629452782868,
+          "max_probe_score_error": 8.01371289327335e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.724,
+              "false_positive_rate": 0.0
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.744,
+              "false_positive_rate": 0.0
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.7837837837837838,
+              "false_positive_rate": 0.0
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 4,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 28902,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 6.80257421631721,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.015793619235358592,
+          "max_probe_score_error": 0.56578572881956,
+          "probe_decision_flips": 61,
+          "worst_group_auroc_drop": 0.0065038167938932245,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9892213740458016,
+              "recall": 0.732,
+              "false_positive_rate": 0.003816793893129771
+            },
+            "eval-1": {
+              "auroc": 0.9905648854961832,
+              "recall": 0.756,
+              "false_positive_rate": 0.003816793893129771
+            },
+            "eval-2": {
+              "auroc": 0.9923542967021228,
+              "recall": 0.7722007722007722,
+              "false_positive_rate": 0.003952569169960474
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.008235536339304073,
+          "mse_advantage_vs_matched_scalar": -0.26210247747862225,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 4,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 155246,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 1.2664287646702652,
+          "escape_rows": 929,
+          "escape_fraction": 0.6048177083333334,
+          "mse": 0.004633865873694673,
+          "max_probe_score_error": 0.0499770812695427,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0005188700840874638,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9949923664122138,
+              "recall": 0.724,
+              "false_positive_rate": 0.0
+            },
+            "eval-1": {
+              "auroc": 0.9966564885496183,
+              "recall": 0.744,
+              "false_positive_rate": 0.0
+            },
+            "eval-2": {
+              "auroc": 0.9970241274589101,
+              "recall": 0.7837837837837838,
+              "false_positive_rate": 0.0
+            }
+          },
+          "byte_advantage_vs_matched_scalar": -0.0817179726584818,
+          "mse_advantage_vs_matched_scalar": 0.059296010394306764,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "e8",
+          "bits_per_channel_indices": 4,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 41702,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 4.714594024267421,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.015264182060960788,
+          "max_probe_score_error": 8.511725613224996e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.724,
+              "false_positive_rate": 0.0
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.744,
+              "false_positive_rate": 0.0
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.7837837837837838,
+              "false_positive_rate": 0.0
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.005722187783129051,
+          "mse_advantage_vs_matched_scalar": -0.2568960334711714,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 4,
+          "protected": false,
+          "protection": "none",
+          "archive_bytes_including_model_and_escapes": 29142,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 6.746551369157916,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.012513737606244505,
+          "max_probe_score_error": 0.45762684788454666,
+          "probe_decision_flips": 49,
+          "worst_group_auroc_drop": 0.006015267175572547,
+          "quality_gate": false,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9891908396946565,
+              "recall": 0.736,
+              "false_positive_rate": 0.003816793893129771
+            },
+            "eval-1": {
+              "auroc": 0.9934351145038168,
+              "recall": 0.744,
+              "false_positive_rate": 0.0
+            },
+            "eval-2": {
+              "auroc": 0.9951775603949518,
+              "recall": 0.7876447876447876,
+              "false_positive_rate": 0.0
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 4,
+          "protected": true,
+          "protection": "escape",
+          "archive_bytes_including_model_and_escapes": 143518,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 1.369918755835505,
+          "escape_rows": 841,
+          "escape_fraction": 0.5475260416666666,
+          "mse": 0.0049259553748007496,
+          "max_probe_score_error": 0.049976432800490134,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.00045782654478310203,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.9949465648854962,
+              "recall": 0.724,
+              "false_positive_rate": 0.0
+            },
+            "eval-1": {
+              "auroc": 0.9968702290076336,
+              "recall": 0.744,
+              "false_positive_rate": 0.0
+            },
+            "eval-2": {
+              "auroc": 0.9970851709982145,
+              "recall": 0.7837837837837838,
+              "false_positive_rate": 0.0
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        },
+        {
+          "method": "scalar",
+          "bits_per_channel_indices": 4,
+          "protected": true,
+          "protection": "projection",
+          "archive_bytes_including_model_and_escapes": 41942,
+          "index_bytes": 24576,
+          "raw_float32_bytes": 196608,
+          "compression": 4.687616231939344,
+          "escape_rows": 0,
+          "escape_fraction": 0.0,
+          "mse": 0.012144347387910578,
+          "max_probe_score_error": 7.773115562326183e-08,
+          "probe_decision_flips": 0,
+          "worst_group_auroc_drop": 0.0,
+          "quality_gate": true,
+          "groups": {
+            "eval-0": {
+              "auroc": 0.995206106870229,
+              "recall": 0.724,
+              "false_positive_rate": 0.0
+            },
+            "eval-1": {
+              "auroc": 0.9970687022900764,
+              "recall": 0.744,
+              "false_positive_rate": 0.0
+            },
+            "eval-2": {
+              "auroc": 0.9975429975429976,
+              "recall": 0.7837837837837838,
+              "false_positive_rate": 0.0
+            }
+          },
+          "byte_advantage_vs_matched_scalar": 0.0,
+          "mse_advantage_vs_matched_scalar": 0.0,
+          "verdict": "NO_MATERIAL_GAIN"
+        }
+      ],
+      "scope": "Frozen binary linear probe only; no nonlinear-head, segmentation, ink or runtime guarantee.",
+      "provenance_scope": "Declared physical/training groups and checkpoint pin; upstream extraction lineage not independently verified.",
+      "scenario": "shifted"
+    }
+  ],
+  "environment": {
+    "python": "3.12.14",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1"
+  },
+  "implementation_sha256": {
+    "e8_codec.py": "285dad1f4faa04a43e6b4b7746bd9dd7a51753b24dfac77e805ef0ddaba2d84e",
+    "e8_experiment.py": "a8396512f8f61617fc4f95bb5563fc8bb28af27f0cb239387fa985ebeeea798a"
+  }
+}

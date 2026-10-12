@@ -2,6 +2,11 @@
 
 **Status:** living research notebook. Created 2026-10-03.
 
+New: [E8 feature compression with a protected task subspace](../e8-feature-moonshot.md)
+implements progressive finite-shell coding, a task-score side channel, and
+matched scalar controls. Synthetic low-rate candidates only; four-bit E8 loses
+to optimized scalar clipping. No real CT or GEMS gain measured.
+
 New: [topology-conditioned uncertainty](2026-10-07-topology-conditioned-uncertainty.md)
 adds a post-hoc disagreement-vs-confidence audit on structural failures
 (`scroliq-topology-uncertainty`); synthetic controls only, no real verdict.
