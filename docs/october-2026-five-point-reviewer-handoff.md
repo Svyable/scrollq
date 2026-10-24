@@ -13,6 +13,12 @@ Five PHercParis4 points need human inspection **before** any annotation or patch
 **Pre-registration:** [frozen method and thresholds](winding-attachment-protocol.md).
 **Complete round-trip protocol:** [VC3D-native review bundles](vc3d-review-bundles.md).
 
+## Independent adjudication receipt (new, unfilled)
+
+Use the [five-marker review worksheet](october-2026-review-adjudication-sheet.csv) to record each actual VC3D decision. All five rows intentionally begin as `pending`; **no review has been performed by publishing the worksheet**. Valid final `review_status` values are `patch_issue`, `annotation_corrected`, `no_issue`, or `uncertain`. Record an identifiable reviewer, timezone-aware timestamp, original and reviewed bundle hashes, CT/patch evidence links, review minutes, and a concrete note. Leave before/after metrics empty unless the same frozen evaluation has actually been rerun. Never treat `pending` or `uncertain` as a verified error.
+
+**Promotion gate:** A claimed correction requires (1) a completed review record, (2) exact source and reviewed hashes, (3) an independent confirmation receipt, and (4) a controlled before/after measurement on the same scan and frozen evaluation rule. Without all four, describe the result only as an actionable diagnostic. The worksheet is a coordination aid, not a substitute for the canonical native VC3D PointCollections review ingest described below.
+
 ## Ten-minute first pass — no changes to source data
 
 1. In VC3D open **PHercParis4**, using the matching coordinate frame; do not silently substitute another scan.
