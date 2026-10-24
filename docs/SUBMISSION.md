@@ -7,6 +7,8 @@ This page is the shortest path through ScrolIQ for a Vesuvius Challenge reviewer
 Prize criteria and deadlines can change; check the current official page before judging:
 https://scrollprize.org/prizes
 
+**New: [Five-point native VC3D reviewer handoff](october-2026-five-point-reviewer-handoff.md)** — a ten-minute review of the five PHercParis4 winding markers, their exact source evidence, adjudication statuses, and the still-missing independent downstream-improvement receipt. This is public reviewer material, **not** a submitted prize entry.
+
 ## Five-minute review path
 
 1. **October Progress Prize evidence — claim → committed real-data artifact → falsification control:** start with [What is already demonstrated on real Challenge data](#what-is-already-demonstrated-on-real-challenge-data) below.
