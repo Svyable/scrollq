@@ -7,6 +7,8 @@ This page is the shortest path through ScrolIQ for a Vesuvius Challenge reviewer
 Prize criteria and deadlines can change; check the current official page before judging:
 https://scrollprize.org/prizes
 
+**October 25: [Evidence-ranked two-point review target](../artifacts/2026-10-25-paris4-review-triage/README.md)** — a post-hoc triage of all five native Paris4 markers, prioritizing one closest-patch / four-comparison conflict at `relative:227/2445`. Includes exact coordinates and a machine-readable [priority manifest](../artifacts/2026-10-25-paris4-review-triage/priority.json). **No human adjudication or improvement is claimed.**
+
 **New: [Five-point native VC3D reviewer handoff](october-2026-five-point-reviewer-handoff.md)** — a ten-minute review of the five PHercParis4 winding markers, their exact source evidence, adjudication statuses, and the still-missing independent downstream-improvement receipt. This is public reviewer material, **not** a submitted prize entry.
 
 ## Five-minute review path
