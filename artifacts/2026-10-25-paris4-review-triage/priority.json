@@ -1,0 +1,115 @@
+{
+  "generated_at": "2026-10-25",
+  "kind": "posthoc_descriptive_review_triage_not_ground_truth",
+  "scan": "PHercParis4",
+  "source_commit": "dea843b15f13db068abdb95f8137a2b45353371c",
+  "source_files": [
+    "artifacts/2026-10-03-paris4-winding-attachment/review-context.json",
+    "artifacts/2026-10-03-paris4-winding-attachment/result.json",
+    "artifacts/2026-10-03-paris4-winding-attachment/review-queue.csv"
+  ],
+  "source_input_sha256": {
+    "abs_winding.json": "4e566731f7cbaf8f5ec843de687b3f72f4a784c40b587ebbaf544550902172c1",
+    "relative_windings.json": "a3243511d4eb91387a9b32f4dbff11514b08c3ae36e9b2a2b8222607b4883ac1",
+    "umbilicus.json": "c5f30b0d135c1d333f8170e592079a3d5a636e0071c0dcce560eecebb0ee2602"
+  },
+  "primary_attachment_distance_voxels": 8,
+  "flagged_constraint_count": 6,
+  "unique_marker_count": 5,
+  "triage_rule": "Rank near (<=2 voxel) flagged patches with at least one residual-0 comparison first; then near singleton; then distant/ambiguous. Within groups prioritize larger absolute residual and more agreeing patches. Post-hoc reviewer-effort heuristic, NOT a calibrated error probability or pre-registered outcome.",
+  "candidates": [
+    {
+      "marker": "relative:227/2445",
+      "xyz_voxels": [
+        5255.7,
+        3610.183,
+        12125.7
+      ],
+      "original_winding": 1,
+      "attachment_count": 5,
+      "agreeing_count": 4,
+      "flagged_count": 1,
+      "nearest_flagged_patch": "same_wrap002432_growpatch/#90",
+      "nearest_flagged_distance_voxels": 0.886,
+      "nearest_flagged_residual": -5,
+      "nearest_agreeing_distance_voxels": 3.835,
+      "triage_group": "near_conflict_with_consensus",
+      "review_status": "pending"
+    },
+    {
+      "marker": "relative:242/2549",
+      "xyz_voxels": [
+        5007.217,
+        3022.627,
+        11494.725
+      ],
+      "original_winding": 4,
+      "attachment_count": 2,
+      "agreeing_count": 1,
+      "flagged_count": 1,
+      "nearest_flagged_patch": "auto_grown_20260526143735233_sel_20260526_154138_283/#0",
+      "nearest_flagged_distance_voxels": 1.043,
+      "nearest_flagged_residual": 2,
+      "nearest_agreeing_distance_voxels": 1.05,
+      "triage_group": "near_conflict_with_consensus",
+      "review_status": "pending"
+    },
+    {
+      "marker": "relative:280/2860",
+      "xyz_voxels": [
+        5223.01,
+        3607.992,
+        11825.363
+      ],
+      "original_winding": 8,
+      "attachment_count": 1,
+      "agreeing_count": 0,
+      "flagged_count": 1,
+      "nearest_flagged_patch": "band-seed1254491-20260729-182647-860.tifxyz/#252",
+      "nearest_flagged_distance_voxels": 0.346,
+      "nearest_flagged_residual": -2,
+      "nearest_agreeing_distance_voxels": null,
+      "triage_group": "near_single_without_consensus",
+      "review_status": "pending"
+    },
+    {
+      "marker": "relative:166/2024",
+      "xyz_voxels": [
+        5401.597,
+        4463.881,
+        10728.11
+      ],
+      "original_winding": 10,
+      "attachment_count": 11,
+      "agreeing_count": 9,
+      "flagged_count": 2,
+      "nearest_flagged_patch": "band-seed884465-20260729-224237-509.tifxyz/#330",
+      "nearest_flagged_distance_voxels": 7.788,
+      "nearest_flagged_residual": -2,
+      "nearest_agreeing_distance_voxels": 1.292,
+      "triage_group": "far_or_ambiguous",
+      "review_status": "pending"
+    },
+    {
+      "marker": "relative:198/2233",
+      "xyz_voxels": [
+        4845.294,
+        3449.741,
+        11372.407
+      ],
+      "original_winding": 3,
+      "attachment_count": 9,
+      "agreeing_count": 0,
+      "flagged_count": 1,
+      "nearest_flagged_patch": "middle_3_flat/#114",
+      "nearest_flagged_distance_voxels": 7.865,
+      "nearest_flagged_residual": -2,
+      "nearest_agreeing_distance_voxels": null,
+      "triage_group": "far_or_ambiguous",
+      "review_status": "pending"
+    }
+  ],
+  "independent_review_completed": false,
+  "confirmed_annotation_errors": 0,
+  "confirmed_patch_errors": 0
+}
