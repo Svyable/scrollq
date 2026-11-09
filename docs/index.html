@@ -481,7 +481,12 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
 
   const q = document.getElementById("q");
   const resultCount = document.getElementById("resultCount");
-  let sortK = "score", asc = false, tierF = "", qF = "", currentRows = rows.slice();
+  // Canonical, validated dashboard view state; scientific data is unchanged.
+  const DEFAULT = Object.freeze({sortKey:"score", ascending:false, tier:"", query:""});
+  const view = {...DEFAULT};
+  const SORT_KEYS = new Set(Array.from(document.querySelectorAll("#lb thead th[data-k]"), th => th.dataset.k));
+  const TIERS = new Set(Array.from(document.querySelectorAll(".tierbtn"), b => b.dataset.t));
+  let currentRows = rows.slice();
 
   function tierOf(r){ return r.dataset.tier; }
   function scoreStats(sample){
@@ -510,30 +515,98 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
     document.getElementById("segmentCoverage").textContent = `${segmented} / ${sample.length}`;
   }
   function matchesFilter(r){
-    if (!tierF) return true;
-    if (tierF === "label") return r.dataset.label === "1";
-    if (tierF === "unlabeled") return Number(r.dataset.ink) === 0;
-    if (tierF === "segments") return Number(r.dataset.seg) > 0;
-    return tierOf(r) === tierF;
+    if (!view.tier) return true;
+    if (view.tier === "label") return r.dataset.label === "1";
+    if (view.tier === "unlabeled") return Number(r.dataset.ink) === 0;
+    if (view.tier === "segments") return Number(r.dataset.seg) > 0;
+    return tierOf(r) === view.tier;
   }
   const BANDS = true;
+  function updateControls(){
+    document.querySelectorAll(".tierbtn").forEach(b => {
+      const selected = b.dataset.t === view.tier;
+      b.classList.toggle("on", selected);
+      b.setAttribute("aria-pressed", String(selected));
+    });
+    document.querySelectorAll("#lb thead th[data-k]").forEach(th => {
+      const selected = th.dataset.k === view.sortKey;
+      if (selected) th.setAttribute("aria-sort", view.ascending ? "ascending" : "descending");
+      else th.removeAttribute("aria-sort");
+      th.querySelector(".arr")?.remove();
+      if (selected) {
+        const marker = document.createElement("span");
+        marker.className = "arr";
+        marker.setAttribute("aria-hidden", "true");
+        marker.textContent = view.ascending ? " ▲" : " ▼";
+        th.appendChild(marker);
+      }
+    });
+  }
+  function restoreView(){
+    const params = new URLSearchParams(window.location.search);
+    const sort = params.get("sort"), tier = params.get("tier"), dir = params.get("dir");
+    if (SORT_KEYS.has(sort)) view.sortKey = sort;
+    if (TIERS.has(tier)) view.tier = tier;
+    if (dir === "asc" || dir === "desc") view.ascending = dir === "asc";
+    const query = params.get("q");
+    if (query !== null) { q.value = query; view.query = query.trim().toLowerCase(); }
+  }
+  function persistView(){
+    try {
+      const url = new URL(window.location.href);
+      ["sort", "dir", "tier", "q"].forEach(k => url.searchParams.delete(k));
+      if (view.sortKey !== DEFAULT.sortKey) url.searchParams.set("sort", view.sortKey);
+      if (view.sortKey !== DEFAULT.sortKey || view.ascending !== DEFAULT.ascending)
+        url.searchParams.set("dir", view.ascending ? "asc" : "desc");
+      if (view.tier) url.searchParams.set("tier", view.tier);
+      if (view.query) url.searchParams.set("q", view.query);
+      if (url.href !== window.location.href)
+        window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+    } catch {
+      // Local previews and restricted browser contexts still work.
+    }
+  }
+  function transition(kind, value){
+    switch (kind) {
+      case "sort":
+        if (!SORT_KEYS.has(value)) return;
+        if (view.sortKey === value) view.ascending = !view.ascending;
+        else { view.sortKey = value; view.ascending = value === "id" || value === "tier"; }
+        break;
+      case "tier":
+        if (!TIERS.has(value)) return;
+        view.tier = value;
+        break;
+      case "query":
+        view.query = String(value).trim().toLowerCase();
+        break;
+      case "reset":
+        Object.assign(view, DEFAULT);
+        q.value = "";
+        break;
+      default:
+        throw new Error("Unrecognized dashboard transition: " + kind);
+    }
+    apply();
+    persistView();
+  }
   function apply(){
     let vis = rows.filter(r =>
       matchesFilter(r) &&
-      (!qF || r.dataset.id.toLowerCase().includes(qF)));
+      (!view.query || r.dataset.id.toLowerCase().includes(view.query)));
     vis.sort((a, b) => {
-      const x = parseFloat(a.dataset[sortK] ?? a.dataset.rank),
-            y = parseFloat(b.dataset[sortK] ?? b.dataset.rank);
+      const x = parseFloat(a.dataset[view.sortKey] ?? a.dataset.rank),
+            y = parseFloat(b.dataset[view.sortKey] ?? b.dataset.rank);
       const c = (isNaN(x) || isNaN(y))
-        ? String(a.dataset[sortK]).localeCompare(String(b.dataset[sortK]))
+        ? String(a.dataset[view.sortKey]).localeCompare(String(b.dataset[view.sortKey]))
         : x - y;
-      return asc ? c : -c;
+      return view.ascending ? c : -c;
     });
     const frag = document.createDocumentFragment();
     vis.forEach((r, i) => {
       r.classList.remove("hidden");
-      r._detail.classList.add("hidden");
-      r.setAttribute("aria-expanded", "false");
+      const expanded = r.getAttribute("aria-expanded") === "true";
+      r._detail.classList.toggle("hidden", !expanded);
       if (!BANDS) r.querySelector(".rn").textContent = i + 1;
       frag.append(r, r._detail);
     });
@@ -548,30 +621,21 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
     currentRows = vis;
     resultCount.textContent = `${vis.length} of ${rows.length} shown`;
     updateAnalytics(vis);
+    updateControls();
   }
-  function resetView(){
-    sortK = "score"; asc = false; tierF = ""; qF = ""; q.value = "";
-    document.querySelectorAll(".tierbtn").forEach(x => x.classList.toggle("on", x.dataset.t === ""));
-    document.querySelectorAll("#lb thead th .arr").forEach(e => e.remove());
-    apply();
-  }
+  function resetView(){ transition("reset"); }
   document.querySelectorAll("#lb thead th[data-k]").forEach(th => {
-    th.addEventListener("click", () => {
-      const k = th.dataset.k;
-      if (sortK === k) asc = !asc; else { sortK = k; asc = (k === "id" || k === "tier"); }
-      document.querySelectorAll("#lb thead th .arr").forEach(e => e.remove());
-      const s = document.createElement("span"); s.className = "arr";
-      s.textContent = asc ? " ▲" : " ▼"; th.appendChild(s);
-      apply();
+    th.tabIndex = 0;
+    th.title = "Press Enter or Space to sort";
+    const activate = () => transition("sort", th.dataset.k);
+    th.addEventListener("click", activate);
+    th.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); }
     });
   });
-  document.querySelectorAll(".tierbtn").forEach(b => b.addEventListener("click", () => {
-    document.querySelectorAll(".tierbtn").forEach(x => x.classList.remove("on"));
-    b.classList.add("on"); tierF = b.dataset.t; apply();
-  }));
-  q.addEventListener("input", e => {
-    qF = e.target.value.trim().toLowerCase(); apply();
-  });
+  document.querySelectorAll(".tierbtn").forEach(b =>
+    b.addEventListener("click", () => transition("tier", b.dataset.t)));
+  q.addEventListener("input", e => transition("query", e.target.value));
   document.getElementById("reset").addEventListener("click", resetView);
 
   function csvCell(value){
@@ -601,7 +665,11 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
     URL.revokeObjectURL(url);
   });
 
-  rows.forEach(r => {
+  rows.forEach((r, index) => {
+    if (r._detail) {
+      r._detail.id ||= `volume-detail-${index}`;
+      r.setAttribute("aria-controls", r._detail.id);
+    }
     r.tabIndex = 0;
     r.setAttribute("role", "button");
     r.setAttribute("aria-expanded", "false");
@@ -642,12 +710,11 @@ tbody tr.vol:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
     const tag = document.activeElement?.tagName;
     if (e.key === "/" && tag !== "INPUT" && tag !== "TEXTAREA") {
       e.preventDefault(); q.focus();
-    } else if (e.key === "Escape" && (qF || tierF)) {
+    } else if (e.key === "Escape" && (view.query || view.tier || view.sortKey !== DEFAULT.sortKey || view.ascending !== DEFAULT.ascending)) {
       resetView(); q.blur();
     }
   });
-  const scoreTh = document.querySelector('#lb thead th[data-k="score"]');
-  if (scoreTh) { const s0 = document.createElement("span"); s0.className = "arr"; s0.textContent = " ▼"; scoreTh.appendChild(s0); }
+  restoreView();
   apply();
 })();
 </script>
