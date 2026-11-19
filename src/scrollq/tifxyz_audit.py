@@ -787,16 +787,61 @@ def _selfcross_evidence(
     return evidence, errors, warnings, findings
 
 
+#: Target number of grid vertices held in one row block. Whole-grid
+#: temporaries made the audit run out of memory on the largest published
+#: meshes (~116M vertices, 464 MB per coordinate TIFF); row blocks bound the
+#: temporaries while every reported value stays identical (each per-element
+#: value is computed by the same expression, and every array that feeds a sum,
+#: median or quantile is concatenated back in the original row-major order).
+BLOCK_VERTICES = 2_000_000
+
+
+def _block_rows(shape: tuple[int, ...], block_rows: int | None) -> int:
+    if block_rows is not None:
+        if block_rows < 1:
+            raise ValueError("block_rows must be >= 1")
+        return int(block_rows)
+    width = max(int(shape[1]), 1) if len(shape) > 1 else 1
+    return max(1, BLOCK_VERTICES // width)
+
+
+def _concat(parts: list[np.ndarray], dtype: Any) -> np.ndarray:
+    return np.concatenate(parts) if parts else np.asarray([], dtype=dtype)
+
+
+def _edge_distances(
+    xyz: np.ndarray,
+    valid: np.ndarray,
+    block_rows: int | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Valid column-edge and row-edge lengths, in row-major order."""
+    h = xyz.shape[0]
+    step = _block_rows(xyz.shape, block_rows)
+    cols: list[np.ndarray] = []
+    rows: list[np.ndarray] = []
+    for r0 in range(0, h, step):
+        r1 = min(r0 + step, h)
+        s, v = xyz[r0:r1], valid[r0:r1]
+        cv = v[:, :-1] & v[:, 1:]
+        cols.append(np.linalg.norm(s[:, 1:] - s[:, :-1], axis=-1)[cv])
+        # row edges between vertex rows r and r + 1 for r in [r0, r1)
+        top = min(r1, h - 1)
+        if top > r0:
+            s2, v2 = xyz[r0:top + 1], valid[r0:top + 1]
+            rv = v2[:-1, :] & v2[1:, :]
+            rows.append(np.linalg.norm(s2[1:] - s2[:-1], axis=-1)[rv])
+    return _concat(cols, xyz.dtype), _concat(rows, xyz.dtype)
+
+
 def _edge_metrics(
     xyz: np.ndarray,
     valid: np.ndarray,
     scale: tuple[float, float],
     jump_ratio: float,
+    *,
+    block_rows: int | None = None,
 ) -> dict[str, Any]:
-    cv = valid[:, :-1] & valid[:, 1:]
-    rv = valid[:-1, :] & valid[1:, :]
-    cd = np.linalg.norm(xyz[:, 1:] - xyz[:, :-1], axis=-1)[cv]
-    rd = np.linalg.norm(xyz[1:] - xyz[:-1], axis=-1)[rv]
+    cd, rd = _edge_distances(xyz, valid, block_rows)
     out: dict[str, Any] = {}
     for name, values, nominal in (
         ("columns", cd, 1.0 / scale[0]),
@@ -816,6 +861,25 @@ def _edge_metrics(
     return out
 
 
+def _quad_block(xyz: np.ndarray, valid: np.ndarray, q0: int, q1: int) -> dict[str, np.ndarray]:
+    """Per-quad geometry for quad rows [q0, q1) (vertex rows [q0, q1])."""
+    s, v = xyz[q0:q1 + 1], valid[q0:q1 + 1]
+    vq = v[:-1, :-1] & v[:-1, 1:] & v[1:, :-1] & v[1:, 1:]
+    p00 = s[:-1, :-1]
+    p01 = s[:-1, 1:]
+    p10 = s[1:, :-1]
+    p11 = s[1:, 1:]
+    c1 = np.cross(p01 - p00, p10 - p00)
+    c2 = np.cross(p11 - p01, p10 - p01)
+    normals = c1 + c2
+    norm = np.linalg.norm(normals, axis=-1)
+    ok = vq & np.isfinite(norm) & (norm > 1e-8)
+    unit = np.zeros_like(normals)
+    unit[ok] = normals[ok] / norm[ok, None]
+    return {"vq": vq, "p00": p00, "p01": p01, "p10": p10, "p11": p11,
+            "c1": c1, "c2": c2, "ok": ok, "unit": unit}
+
+
 def _quad_metrics(
     xyz: np.ndarray,
     valid: np.ndarray,
@@ -824,22 +888,68 @@ def _quad_metrics(
     *,
     reference_spacing: tuple[float, float],
     reference_source: str,
+    block_rows: int | None = None,
 ) -> dict[str, Any]:
-    vq = valid[:-1, :-1] & valid[:-1, 1:] & valid[1:, :-1] & valid[1:, 1:]
-    p00 = xyz[:-1, :-1]
-    p01 = xyz[:-1, 1:]
-    p10 = xyz[1:, :-1]
-    p11 = xyz[1:, 1:]
-
-    c1 = np.cross(p01 - p00, p10 - p00)
-    c2 = np.cross(p11 - p01, p10 - p01)
-    area = 0.5 * (np.linalg.norm(c1, axis=-1) + np.linalg.norm(c2, axis=-1))
+    h = xyz.shape[0]
+    nq = max(h - 1, 0)
+    step = _block_rows(xyz.shape, block_rows)
     nominal = 1.0 / (scale[0] * scale[1])
-    ratios = area[vq] / nominal if vq.any() else np.asarray([])
+    ref_x, ref_y = reference_spacing
+
+    vq_count = 0
+    vq_size = 0
+    degenerate_quads = 0
+    area_parts: list[np.ndarray] = []
+    j1_sv: list[np.ndarray] = []
+    j2_sv: list[np.ndarray] = []
+    hd_parts: list[np.ndarray] = []
+    vd_parts: list[np.ndarray] = []
+    prev_unit = prev_ok = None
+
+    def singular_values(jac: np.ndarray) -> np.ndarray:
+        gram = np.einsum("...ki,...kj->...ij", jac, jac)
+        return np.sqrt(np.clip(np.linalg.eigvalsh(gram), 0.0, None))
+
+    for q0 in range(0, nq, step):
+        q1 = min(q0 + step, nq)
+        b = _quad_block(xyz, valid, q0, q1)
+        vq = b["vq"]
+        vq_count += int(vq.sum())
+        vq_size += int(vq.size)
+        area = 0.5 * (np.linalg.norm(b["c1"], axis=-1) + np.linalg.norm(b["c2"], axis=-1))
+        degenerate_quads += int((vq & (~np.isfinite(area) | (area <= 1e-8))).sum())
+        area_parts.append(area[vq])
+        if vq.any():
+            p00, p01, p10, p11 = b["p00"], b["p01"], b["p10"], b["p11"]
+            j1_sv.append(singular_values(np.stack(
+                ((p01 - p00) / ref_x, (p10 - p00) / ref_y), axis=-1)[vq]))
+            j2_sv.append(singular_values(np.stack(
+                ((p11 - p10) / ref_x, (p11 - p01) / ref_y), axis=-1)[vq]))
+        unit, ok = b["unit"], b["ok"]
+        if prev_unit is not None:
+            # vertical pair across the block boundary: last quad row of the
+            # previous block with the first quad row of this one
+            pair = prev_ok & ok[0]
+            vd_parts.append((prev_unit * unit[0]).sum(axis=-1)[pair])
+        horizontal = ok[:, :-1] & ok[:, 1:]
+        vertical = ok[:-1] & ok[1:]
+        hd_parts.append((unit[:, :-1] * unit[:, 1:]).sum(axis=-1)[horizontal])
+        vd_parts.append((unit[:-1] * unit[1:]).sum(axis=-1)[vertical])
+        prev_unit, prev_ok = unit[-1].copy(), ok[-1].copy()
+        del b, area, unit, ok
+
+    area_vq = _concat(area_parts, xyz.dtype)
+    del area_parts
+    any_vq = vq_count > 0
+    ratios = area_vq / nominal if any_vq else np.asarray([])
     distortion = (
         np.maximum(ratios, np.divide(1.0, ratios, out=np.full_like(ratios, np.inf), where=ratios > 0))
         if ratios.size else np.asarray([])
     )
+    area_summary = _summary(ratios)
+    distortion_summary = _summary(distortion)
+    surface_area = float(area_vq.sum()) if any_vq else 0.0
+    del ratios, distortion, area_vq
 
     # Area alone cannot establish a low-distortion isometric parameterization.
     # Normalize the two parameter directions by an explicit expected spacing
@@ -848,53 +958,50 @@ def _quad_metrics(
     # evidence but is not assumed to be a universal physical edge-length
     # contract. That assumption false-positives on real Villa fixtures whose
     # meta.scale describes the parameter grid at a different sampling scale.
-    ref_x, ref_y = reference_spacing
-    if vq.any():
-        j1 = np.stack(
-            ((p01 - p00) / ref_x, (p10 - p00) / ref_y),
-            axis=-1,
-        )[vq]
-        j2 = np.stack(
-            ((p11 - p10) / ref_x, (p11 - p01) / ref_y),
-            axis=-1,
-        )[vq]
-        jacobians = np.concatenate([j1, j2], axis=0)
-        gram = np.einsum("...ki,...kj->...ij", jacobians, jacobians)
-        singular = np.sqrt(np.clip(np.linalg.eigvalsh(gram), 0.0, None))
+    if any_vq:
+        singular = np.concatenate(j1_sv + j2_sv, axis=0)
+        del j1_sv, j2_sv
         usable = np.isfinite(singular).all(axis=1) & (singular[:, 0] > 1e-8)
         sigma_min = singular[usable, 0]
         sigma_max = singular[usable, 1]
-        symmetric_stretch = np.maximum(sigma_max, 1.0 / sigma_min)
-        anisotropy = sigma_max / sigma_min
-        symmetric_dirichlet = (
+        degenerate_triangles = int((~usable).sum())
+        del singular, usable
+        isometry_summaries = {
+            "sigma_min": _summary(sigma_min),
+            "sigma_max": _summary(sigma_max),
+        }
+        derived = np.maximum(sigma_max, 1.0 / sigma_min)
+        isometry_summaries["symmetric_stretch_distortion"] = _summary(derived)
+        derived = sigma_max / sigma_min
+        isometry_summaries["anisotropy"] = _summary(derived)
+        derived = (
             sigma_min**2 + sigma_max**2
             + 1.0 / sigma_min**2 + 1.0 / sigma_max**2
         )
-        degenerate_triangles = int((~usable).sum())
+        isometry_summaries["symmetric_dirichlet_energy"] = _summary(derived)
+        del derived, sigma_min, sigma_max
     else:
-        sigma_min = sigma_max = symmetric_stretch = anisotropy = symmetric_dirichlet = np.asarray([])
+        empty = _summary(np.asarray([]))
+        isometry_summaries = {
+            key: dict(empty)
+            for key in ("sigma_min", "sigma_max", "symmetric_stretch_distortion",
+                        "anisotropy", "symmetric_dirichlet_energy")
+        }
         degenerate_triangles = 0
 
-    normals = c1 + c2
-    norm = np.linalg.norm(normals, axis=-1)
-    ok = vq & np.isfinite(norm) & (norm > 1e-8)
-    unit = np.zeros_like(normals)
-    unit[ok] = normals[ok] / norm[ok, None]
-    horizontal = ok[:, :-1] & ok[:, 1:]
-    vertical = ok[:-1] & ok[1:]
-    hd = (unit[:, :-1] * unit[:, 1:]).sum(axis=-1)[horizontal]
-    vd = (unit[:-1] * unit[1:]).sum(axis=-1)[vertical]
+    hd = _concat(hd_parts, xyz.dtype)
+    vd = _concat(vd_parts, xyz.dtype)
     dots = np.concatenate([hd, vd]) if hd.size or vd.size else np.asarray([])
     cutoff = math.cos(math.radians(flip_angle))
 
     return {
-        "valid_quads": int(vq.sum()),
-        "valid_quad_fraction": float(vq.mean()) if vq.size else 0.0,
-        "degenerate_quads": int((vq & (~np.isfinite(area) | (area <= 1e-8))).sum()),
-        "surface_area_voxels2": float(area[vq].sum()) if vq.any() else 0.0,
-        "nominal_flat_area_voxels2": float(vq.sum() * nominal),
-        "area_ratio_3d_to_flat": _summary(ratios),
-        "symmetric_area_distortion": _summary(distortion),
+        "valid_quads": vq_count,
+        "valid_quad_fraction": float(vq_count / vq_size) if vq_size else 0.0,
+        "degenerate_quads": degenerate_quads,
+        "surface_area_voxels2": surface_area,
+        "nominal_flat_area_voxels2": float(vq_count * nominal),
+        "area_ratio_3d_to_flat": area_summary,
+        "symmetric_area_distortion": distortion_summary,
         "isometry": {
             "method": "per-triangle singular values of directionally normalized local 3D edges",
             "normalization": {
@@ -902,19 +1009,14 @@ def _quad_metrics(
                 "reference_spacing_voxels": [float(ref_x), float(ref_y)],
                 "meta_scale_xy": [float(scale[0]), float(scale[1])],
             },
-            "triangles": int(2 * vq.sum()),
+            "triangles": int(2 * vq_count),
             "degenerate_triangles": degenerate_triangles,
-            "sigma_min": _summary(sigma_min),
-            "sigma_max": _summary(sigma_max),
-            "symmetric_stretch_distortion": _summary(symmetric_stretch),
-            "anisotropy": _summary(anisotropy),
-            "symmetric_dirichlet_energy": _summary(symmetric_dirichlet),
+            **isometry_summaries,
         },
         "normal_neighbor_dot": _summary(dots),
         "normal_flip_angle_deg": flip_angle,
         "normal_reversal_pairs": int((dots < cutoff).sum()) if dots.size else 0,
     }
-
 
 
 def _review_queue(
@@ -924,137 +1026,152 @@ def _review_queue(
     jump_ratio: float,
     flip_angle: float,
     limit_per_kind: int,
+    block_rows: int | None = None,
 ) -> dict[str, Any]:
-    """Return a deterministic, bounded queue of local geometry review sites."""
-    edge_candidates: list[dict[str, Any]] = []
+    """Return a deterministic, bounded queue of local geometry review sites.
 
-    for orientation, a, b, edge_valid in (
-        (
-            "column",
-            xyz[:, :-1],
-            xyz[:, 1:],
-            valid[:, :-1] & valid[:, 1:],
-        ),
-        (
-            "row",
-            xyz[:-1, :],
-            xyz[1:, :],
-            valid[:-1, :] & valid[1:, :],
-        ),
-    ):
-        distance = np.linalg.norm(b - a, axis=-1)
-        values = distance[edge_valid]
+    Candidates are collected as index arrays block by block and ranked with
+    the same keys as before; only the emitted top ``limit_per_kind`` per kind
+    are materialized as records.
+    """
+    h = xyz.shape[0]
+    step = _block_rows(xyz.shape, block_rows)
+
+    # Edge jumps. Orientation code 0 = "column", 1 = "row" sorts like the names.
+    cd, rd = _edge_distances(xyz, valid, block_rows)
+    edge_rows: list[np.ndarray] = []
+    edge_cols: list[np.ndarray] = []
+    edge_orient: list[np.ndarray] = []
+    edge_dist: list[np.ndarray] = []
+    edge_median: dict[int, float] = {}
+    for code, values in ((0, cd), (1, rd)):
         median = float(np.median(values)) if values.size else None
         if median is None or not math.isfinite(median) or median <= 0:
             continue
-        candidate_mask = edge_valid & np.isfinite(distance) & (
-            distance > jump_ratio * median
-        )
-        for row, col in np.argwhere(candidate_mask):
-            d = float(distance[row, col])
-            point = ((a[row, col] + b[row, col]) / 2.0).astype(float)
-            if orientation == "column":
-                endpoints = [[int(row), int(col)], [int(row), int(col + 1)]]
-            else:
-                endpoints = [[int(row), int(col)], [int(row + 1), int(col)]]
-            edge_candidates.append(
-                {
-                    "kind": "edge-jump",
-                    "orientation": orientation,
-                    "grid_endpoints_yx": endpoints,
-                    "xyz": point.tolist(),
-                    "distance_voxels": d,
-                    "axis_median_voxels": median,
-                    "ratio_to_axis_median": d / median,
-                }
-            )
+        edge_median[code] = median
+    del cd, rd
+    for r0 in range(0, h, step):
+        r1 = min(r0 + step, h)
+        blocks = []
+        if 0 in edge_median:
+            s, v = xyz[r0:r1], valid[r0:r1]
+            blocks.append((0, s[:, :-1], s[:, 1:], v[:, :-1] & v[:, 1:]))
+        top = min(r1, h - 1)
+        if 1 in edge_median and top > r0:
+            s2, v2 = xyz[r0:top + 1], valid[r0:top + 1]
+            blocks.append((1, s2[:-1, :], s2[1:, :], v2[:-1, :] & v2[1:, :]))
+        for code, a, b, edge_valid in blocks:
+            distance = np.linalg.norm(b - a, axis=-1)
+            mask = edge_valid & np.isfinite(distance) & (distance > jump_ratio * edge_median[code])
+            rr, cc = np.nonzero(mask)
+            edge_rows.append(rr + r0)
+            edge_cols.append(cc)
+            edge_orient.append(np.full(rr.size, code, dtype=np.int8))
+            edge_dist.append(distance[rr, cc].astype(np.float64))
+    e_rows = _concat(edge_rows, np.intp)
+    e_cols = _concat(edge_cols, np.intp)
+    e_orient = _concat(edge_orient, np.int8)
+    e_dist = _concat(edge_dist, np.float64)
+    e_median = np.asarray([edge_median.get(0, np.nan), edge_median.get(1, np.nan)])[e_orient] \
+        if e_orient.size else np.asarray([], dtype=np.float64)
+    e_ratio = e_dist / e_median if e_dist.size else np.asarray([], dtype=np.float64)
+    e_order = np.lexsort((e_cols, e_rows, e_orient, -e_ratio)) if e_ratio.size else np.asarray([], dtype=np.intp)
 
-    edge_candidates.sort(
-        key=lambda item: (
-            -float(item["ratio_to_axis_median"]),
-            str(item["orientation"]),
-            item["grid_endpoints_yx"][0][0],
-            item["grid_endpoints_yx"][0][1],
-        )
-    )
+    edge_emitted: list[dict[str, Any]] = []
+    for i in e_order[:limit_per_kind]:
+        row, col, code = int(e_rows[i]), int(e_cols[i]), int(e_orient[i])
+        if code == 0:
+            a, b = xyz[row, col], xyz[row, col + 1]
+            endpoints = [[row, col], [row, col + 1]]
+        else:
+            a, b = xyz[row, col], xyz[row + 1, col]
+            endpoints = [[row, col], [row + 1, col]]
+        d = float(e_dist[i])
+        median = float(edge_median[code])
+        edge_emitted.append({
+            "kind": "edge-jump",
+            "orientation": "column" if code == 0 else "row",
+            "grid_endpoints_yx": endpoints,
+            "xyz": ((a + b) / 2.0).astype(float).tolist(),
+            "distance_voxels": d,
+            "axis_median_voxels": median,
+            "ratio_to_axis_median": d / median,
+        })
+    edge_total = int(e_order.size)
+    del e_rows, e_cols, e_orient, e_dist, e_median, e_ratio, e_order
 
-    normal_candidates: list[dict[str, Any]] = []
-    vq = valid[:-1, :-1] & valid[:-1, 1:] & valid[1:, :-1] & valid[1:, 1:]
-    if vq.size:
-        p00 = xyz[:-1, :-1]
-        p01 = xyz[:-1, 1:]
-        p10 = xyz[1:, :-1]
-        p11 = xyz[1:, 1:]
-        c1 = np.cross(p01 - p00, p10 - p00)
-        c2 = np.cross(p11 - p01, p10 - p01)
-        normals = c1 + c2
-        norm = np.linalg.norm(normals, axis=-1)
-        ok = vq & np.isfinite(norm) & (norm > 1e-8)
-        unit = np.zeros_like(normals)
-        unit[ok] = normals[ok] / norm[ok, None]
-        center = (p00 + p01 + p10 + p11) / 4.0
-        cutoff = math.cos(math.radians(flip_angle))
-
-        for orientation, left, right, pair_valid in (
-            (
-                "column",
-                unit[:, :-1],
-                unit[:, 1:],
-                ok[:, :-1] & ok[:, 1:],
-            ),
-            (
-                "row",
-                unit[:-1, :],
-                unit[1:, :],
-                ok[:-1, :] & ok[1:, :],
-            ),
-        ):
+    # Normal reversals between neighbouring valid quads.
+    cutoff = math.cos(math.radians(flip_angle))
+    n_rows: list[np.ndarray] = []
+    n_cols: list[np.ndarray] = []
+    n_orient: list[np.ndarray] = []
+    n_dot: list[np.ndarray] = []
+    nq = max(h - 1, 0)
+    prev_unit = prev_ok = None
+    for q0 in range(0, nq, step):
+        q1 = min(q0 + step, nq)
+        b = _quad_block(xyz, valid, q0, q1)
+        unit, ok = b["unit"], b["ok"]
+        pairs = [(0, unit[:, :-1], unit[:, 1:], ok[:, :-1] & ok[:, 1:], q0)]
+        if prev_unit is not None:
+            pairs.append((1, prev_unit[None], unit[:1], (prev_ok & ok[0])[None], q0 - 1))
+        pairs.append((1, unit[:-1], unit[1:], ok[:-1] & ok[1:], q0))
+        for code, left, right, pair_valid, offset in pairs:
             dot = (left * right).sum(axis=-1)
-            candidate_mask = pair_valid & np.isfinite(dot) & (dot < cutoff)
-            for row, col in np.argwhere(candidate_mask):
-                d = float(np.clip(dot[row, col], -1.0, 1.0))
-                angle = math.degrees(math.acos(d))
-                if orientation == "column":
-                    point = (center[row, col] + center[row, col + 1]) / 2.0
-                    quads = [[int(row), int(col)], [int(row), int(col + 1)]]
-                else:
-                    point = (center[row, col] + center[row + 1, col]) / 2.0
-                    quads = [[int(row), int(col)], [int(row + 1), int(col)]]
-                normal_candidates.append(
-                    {
-                        "kind": "normal-reversal",
-                        "orientation": orientation,
-                        "grid_quads_yx": quads,
-                        "xyz": point.astype(float).tolist(),
-                        "normal_dot": d,
-                        "angle_deg": float(angle),
-                    }
-                )
+            mask = pair_valid & np.isfinite(dot) & (dot < cutoff)
+            rr, cc = np.nonzero(mask)
+            n_rows.append(rr + offset)
+            n_cols.append(cc)
+            n_orient.append(np.full(rr.size, code, dtype=np.int8))
+            n_dot.append(dot[rr, cc])
+        prev_unit, prev_ok = unit[-1].copy(), ok[-1].copy()
+        del b, unit, ok
+    q_rows = _concat(n_rows, np.intp)
+    q_cols = _concat(n_cols, np.intp)
+    q_orient = _concat(n_orient, np.int8)
+    q_dot = _concat(n_dot, xyz.dtype)
+    # Same per-candidate arithmetic as the record: float(clip(dot)), then acos.
+    q_d = np.fromiter((float(v) for v in np.clip(q_dot, -1.0, 1.0)), dtype=np.float64, count=q_dot.size)
+    q_angle = np.fromiter((math.degrees(math.acos(v)) for v in q_d), dtype=np.float64, count=q_d.size)
+    q_order = np.lexsort((q_cols, q_rows, q_orient, -q_angle)) if q_angle.size else np.asarray([], dtype=np.intp)
 
-    normal_candidates.sort(
-        key=lambda item: (
-            -float(item["angle_deg"]),
-            str(item["orientation"]),
-            item["grid_quads_yx"][0][0],
-            item["grid_quads_yx"][0][1],
-        )
-    )
+    def quad_center(row: int, col: int) -> np.ndarray:
+        return (xyz[row, col] + xyz[row, col + 1] + xyz[row + 1, col] + xyz[row + 1, col + 1]) / 4.0
+
+    normal_emitted: list[dict[str, Any]] = []
+    for i in q_order[:limit_per_kind]:
+        row, col, code = int(q_rows[i]), int(q_cols[i]), int(q_orient[i])
+        if code == 0:
+            point = (quad_center(row, col) + quad_center(row, col + 1)) / 2.0
+            quads = [[row, col], [row, col + 1]]
+        else:
+            point = (quad_center(row, col) + quad_center(row + 1, col)) / 2.0
+            quads = [[row, col], [row + 1, col]]
+        normal_emitted.append({
+            "kind": "normal-reversal",
+            "orientation": "column" if code == 0 else "row",
+            "grid_quads_yx": quads,
+            "xyz": point.astype(float).tolist(),
+            "normal_dot": float(q_d[i]),
+            "angle_deg": float(q_angle[i]),
+        })
+    normal_total = int(q_order.size)
 
     emitted: list[dict[str, Any]] = []
-    for candidates in (edge_candidates, normal_candidates):
-        for rank, item in enumerate(candidates[:limit_per_kind], start=1):
+    for candidates in (edge_emitted, normal_emitted):
+        for rank, item in enumerate(candidates, start=1):
             emitted.append({**item, "rank": rank})
 
     return {
         "coordinate_space": "level0-voxel-xyz",
         "limit_per_kind": int(limit_per_kind),
         "total_candidates_by_kind": {
-            "edge-jump": len(edge_candidates),
-            "normal-reversal": len(normal_candidates),
+            "edge-jump": edge_total,
+            "normal-reversal": normal_total,
         },
         "emitted_by_kind": {
-            "edge-jump": min(len(edge_candidates), limit_per_kind),
-            "normal-reversal": min(len(normal_candidates), limit_per_kind),
+            "edge-jump": min(edge_total, limit_per_kind),
+            "normal-reversal": min(normal_total, limit_per_kind),
         },
         "candidates": emitted,
         "limitation": (
@@ -1149,6 +1266,7 @@ def audit_tifxyz(
     selfcross_report: str | Path | None = None,
     surface_preflight_report: str | Path | None = None,
     bbox_tolerance_voxels: float = 1e-3,
+    block_rows: int | None = None,
 ) -> dict[str, Any]:
     root = Path(path)
     errors: list[str] = []
@@ -1257,6 +1375,7 @@ def audit_tifxyz(
         warnings.append(str(mask_info.get("reason")))
 
     xyz = np.stack([x, y, z], axis=-1)
+    del x, y  # only z's shape is needed below; xyz holds the coordinates
     valid, nonfinite_count = _valid_vertex_mask(xyz, keep)
     if nonfinite_count:
         errors.append(f"{nonfinite_count} valid vertices contain non-finite coordinates")
@@ -1311,7 +1430,7 @@ def audit_tifxyz(
         elif bbox["status"] == "unreadable":
             warnings.append(f"meta.json bbox could not be interpreted: {bbox['reason']}")
 
-    edges = _edge_metrics(xyz, valid, scale, jump_ratio)
+    edges = _edge_metrics(xyz, valid, scale, jump_ratio, block_rows=block_rows)
     observed_x = edges["columns"]["distance_voxels"]["median"]
     observed_y = edges["rows"]["distance_voxels"]["median"]
     if expected_spacing_x is not None:
@@ -1339,6 +1458,7 @@ def audit_tifxyz(
         normal_flip_angle_deg,
         reference_spacing=isometry_reference,
         reference_source=isometry_reference_source,
+        block_rows=block_rows,
     )
     if quads["valid_quads"] == 0:
         errors.append("surface contains no valid quads")
@@ -1349,6 +1469,7 @@ def audit_tifxyz(
         jump_ratio=jump_ratio,
         flip_angle=normal_flip_angle_deg,
         limit_per_kind=review_limit_per_kind,
+        block_rows=block_rows,
     )
 
     spacing: dict[str, Any] = {}

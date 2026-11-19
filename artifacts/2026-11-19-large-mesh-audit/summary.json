@@ -1,0 +1,1642 @@
+{
+ "diagnostic": "row-block scroliq-mesh on the 60 meshes 2026-10-01-corpus-mesh-audit could not audit",
+ "source_bucket": "https://vesuvius-challenge-open-data.s3.us-east-1.amazonaws.com",
+ "as_of": "2026-11-19",
+ "status": "complete",
+ "listed_meshes": 60,
+ "audited_meshes": 60,
+ "failed_meshes": 0,
+ "unaccounted_meshes": [],
+ "equivalence": {
+  "baseline_ref": "9807b0c",
+  "meshes": 30,
+  "identical": 30,
+  "same_kinds_as_2026_10_01": 29
+ },
+ "peak_rss_mb_max": 11918,
+ "vertices_max": 116069170,
+ "tier_counts": {
+  "clean": 2,
+  "review": 29,
+  "multi-defect": 29
+ },
+ "finding_counts": {
+  "connectivity": 30,
+  "edge-jump": 32,
+  "hole": 37,
+  "isometry-distortion": 2,
+  "normal-reversal": 55
+ },
+ "corpus": {
+  "tifxyz_meshes_listed_2026_10_01": 903,
+  "tifxyz_meshes_audited": 903,
+  "segments": 307,
+  "segments_first_audited_here": 0,
+  "segments_multi_defect_on_every_registration": 75,
+  "flagged_by_scroll": {
+   "PHerc0172": 11,
+   "PHerc0500P2": 25,
+   "PHerc0814": 12,
+   "PHerc1447": 1,
+   "PHerc1667": 1,
+   "PHercParis4": 25
+  }
+ },
+ "failed": {},
+ "rows": [
+  {
+   "scroll": "PHerc1667",
+   "segment": "20260612121456-w011_20260108140509268_merged_v4_flatboi_straightened_v4",
+   "volume_id": "20251217075048",
+   "voxel": "2.399um",
+   "volume_root": "community-uploads/forrest/volcomp/PHerc1667/volumes/20251217075048-2.399um-0.2m-78keV-masked.zarr",
+   "vertices": 62029917,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.755,
+   "components": 22,
+   "enclosed_invalid_components": 770,
+   "jump_edges": 1177,
+   "normal_reversal_pairs": 25861,
+   "isometry_stretch_p95": 1.401,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 5491,
+    "seconds": 89
+   },
+   "report": "reports/PHerc1667.20260612121456-w011_20260108140509268_merged_v4_flatboi_straightened_v4.20260612121456-on-20251217075048-2.399um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20231007101619",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 63466110,
+   "status": "pass",
+   "tier": "clean",
+   "valid_vertex_fraction": 0.882,
+   "components": 1,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 0,
+   "isometry_stretch_p95": 1.071,
+   "findings": [],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 6561,
+    "seconds": 99
+   },
+   "report": "reports/PHercParis4.20231007101619.20231007101619-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623141135-w046-052_jordi",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 23145552,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.919,
+   "components": 1,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 15,
+   "isometry_stretch_p95": 1.073,
+   "findings": [
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2532,
+    "seconds": 37
+   },
+   "report": "reports/PHercParis4.20260623141135-w046-052_jordi.20260623141135-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623141135-w046-052_jordi",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 104416986,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.918,
+   "components": 1,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 142,
+   "isometry_stretch_p95": 1.072,
+   "findings": [
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 10894,
+    "seconds": 160
+   },
+   "report": "reports/PHercParis4.20260623141135-w046-052_jordi.20260623141135-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623141649-w053-058_jordi",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 22729200,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.91,
+   "components": 1,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 19,
+   "normal_reversal_pairs": 653,
+   "isometry_stretch_p95": 1.08,
+   "findings": [
+    "edge-jump",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2493,
+    "seconds": 36
+   },
+   "report": "reports/PHercParis4.20260623141649-w053-058_jordi.20260623141649-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623141924-w010-027",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 19125984,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.952,
+   "components": 1,
+   "enclosed_invalid_components": 3,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 0,
+   "isometry_stretch_p95": 1.077,
+   "findings": [
+    "hole"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2140,
+    "seconds": 31
+   },
+   "report": "reports/PHercParis4.20260623141924-w010-027.20260623141924-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623141649-w053-058_jordi",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 102537823,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.909,
+   "components": 1,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 112,
+   "normal_reversal_pairs": 1979,
+   "isometry_stretch_p95": 1.08,
+   "findings": [
+    "edge-jump",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 10793,
+    "seconds": 156
+   },
+   "report": "reports/PHercParis4.20260623141649-w053-058_jordi.20260623141649-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623141924-w010-027",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 86284250,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.951,
+   "components": 1,
+   "enclosed_invalid_components": 3,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 263,
+   "isometry_stretch_p95": 1.076,
+   "findings": [
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 9323,
+    "seconds": 136
+   },
+   "report": "reports/PHercParis4.20260623141924-w010-027.20260623141924-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623142658-w028-037",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 20508800,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.936,
+   "components": 1,
+   "enclosed_invalid_components": 1,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 17,
+   "isometry_stretch_p95": 1.067,
+   "findings": [
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2243,
+    "seconds": 31
+   },
+   "report": "reports/PHercParis4.20260623142658-w028-037.20260623142658-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623142658-w028-037",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 92528128,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.935,
+   "components": 1,
+   "enclosed_invalid_components": 1,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 266,
+   "isometry_stretch_p95": 1.066,
+   "findings": [
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 9780,
+    "seconds": 145
+   },
+   "report": "reports/PHercParis4.20260623142658-w028-037.20260623142658-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623143441-w038-045",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 99350195,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.887,
+   "components": 1,
+   "enclosed_invalid_components": 1094,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 323,
+   "isometry_stretch_p95": 1.074,
+   "findings": [
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 10072,
+    "seconds": 147
+   },
+   "report": "reports/PHercParis4.20260623143441-w038-045.20260623143441-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623144224-w046-052",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 23213120,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.916,
+   "components": 1,
+   "enclosed_invalid_components": 2,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 141,
+   "isometry_stretch_p95": 1.073,
+   "findings": [
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2467,
+    "seconds": 35
+   },
+   "report": "reports/PHercParis4.20260623144224-w046-052.20260623144224-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623144224-w046-052",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 104729625,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.915,
+   "components": 1,
+   "enclosed_invalid_components": 2,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 327,
+   "isometry_stretch_p95": 1.073,
+   "findings": [
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 10816,
+    "seconds": 163
+   },
+   "report": "reports/PHercParis4.20260623144224-w046-052.20260623144224-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623144957-w053-058",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 22695424,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.913,
+   "components": 1,
+   "enclosed_invalid_components": 1,
+   "jump_edges": 352,
+   "normal_reversal_pairs": 941,
+   "isometry_stretch_p95": 1.083,
+   "findings": [
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2482,
+    "seconds": 35
+   },
+   "report": "reports/PHercParis4.20260623144957-w053-058.20260623144957-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623144957-w053-058",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 102395286,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.913,
+   "components": 1,
+   "enclosed_invalid_components": 1,
+   "jump_edges": 1710,
+   "normal_reversal_pairs": 2355,
+   "isometry_stretch_p95": 1.083,
+   "findings": [
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 10612,
+    "seconds": 157
+   },
+   "report": "reports/PHercParis4.20260623144957-w053-058.20260623144957-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623145652-w059-063",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 95707416,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.901,
+   "components": 1,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 3795,
+   "normal_reversal_pairs": 4114,
+   "isometry_stretch_p95": 1.097,
+   "findings": [
+    "edge-jump",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 10047,
+    "seconds": 143
+   },
+   "report": "reports/PHercParis4.20260623145652-w059-063.20260623145652-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623150417-w064-068",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 106412454,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.899,
+   "components": 1,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 772,
+   "isometry_stretch_p95": 1.066,
+   "findings": [
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 11126,
+    "seconds": 164
+   },
+   "report": "reports/PHercParis4.20260623150417-w064-068.20260623150417-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623151041-w069-072",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 91881804,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.899,
+   "components": 1,
+   "enclosed_invalid_components": 1,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 301,
+   "isometry_stretch_p95": 1.065,
+   "findings": [
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 9494,
+    "seconds": 139
+   },
+   "report": "reports/PHercParis4.20260623151041-w069-072.20260623151041-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623151729-w073-076",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 97114455,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.896,
+   "components": 1,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 222,
+   "isometry_stretch_p95": 1.066,
+   "findings": [
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 10144,
+    "seconds": 152
+   },
+   "report": "reports/PHercParis4.20260623151729-w073-076.20260623151729-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623152443-w077-080",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 102718275,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.897,
+   "components": 2,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 79,
+   "isometry_stretch_p95": 1.073,
+   "findings": [
+    "connectivity",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 10712,
+    "seconds": 156
+   },
+   "report": "reports/PHercParis4.20260623152443-w077-080.20260623152443-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623153216-w081-084",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 109602819,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.893,
+   "components": 1,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 177,
+   "isometry_stretch_p95": 1.076,
+   "findings": [
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 11173,
+    "seconds": 165
+   },
+   "report": "reports/PHercParis4.20260623153216-w081-084.20260623153216-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623154006-w085-088",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 116069170,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.885,
+   "components": 1,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 51,
+   "isometry_stretch_p95": 1.075,
+   "findings": [
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 11918,
+    "seconds": 172
+   },
+   "report": "reports/PHercParis4.20260623154006-w085-088.20260623154006-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623154617-w089-091",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 92021424,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.878,
+   "components": 1,
+   "enclosed_invalid_components": 2,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 11,
+   "isometry_stretch_p95": 1.082,
+   "findings": [
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 9378,
+    "seconds": 141
+   },
+   "report": "reports/PHercParis4.20260623154617-w089-091.20260623154617-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623155240-w092-094",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 95384804,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.876,
+   "components": 1,
+   "enclosed_invalid_components": 1,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 36,
+   "isometry_stretch_p95": 1.078,
+   "findings": [
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 9575,
+    "seconds": 145
+   },
+   "report": "reports/PHercParis4.20260623155240-w092-094.20260623155240-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623160554-w098-100",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 22162640,
+   "status": "pass",
+   "tier": "clean",
+   "valid_vertex_fraction": 0.873,
+   "components": 1,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 0,
+   "isometry_stretch_p95": 1.073,
+   "findings": [],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2264,
+    "seconds": 34
+   },
+   "report": "reports/PHercParis4.20260623160554-w098-100.20260623160554-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623161233-w101-103",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 22550528,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.873,
+   "components": 1,
+   "enclosed_invalid_components": 1,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 0,
+   "isometry_stretch_p95": 1.071,
+   "findings": [
+    "hole"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2286,
+    "seconds": 34
+   },
+   "report": "reports/PHercParis4.20260623161233-w101-103.20260623161233-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623162614-w107-109",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 23697856,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.866,
+   "components": 1,
+   "enclosed_invalid_components": 1,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 0,
+   "isometry_stretch_p95": 1.073,
+   "findings": [
+    "hole"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2428,
+    "seconds": 36
+   },
+   "report": "reports/PHercParis4.20260623162614-w107-109.20260623162614-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623164141-w113-115",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 110617920,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.859,
+   "components": 1,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 36,
+   "isometry_stretch_p95": 1.084,
+   "findings": [
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 10948,
+    "seconds": 165
+   },
+   "report": "reports/PHercParis4.20260623164141-w113-115.20260623164141-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623164704-w116-117",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 74768989,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.86,
+   "components": 2,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 8,
+   "isometry_stretch_p95": 1.083,
+   "findings": [
+    "connectivity",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 7565,
+    "seconds": 112
+   },
+   "report": "reports/PHercParis4.20260623164704-w116-117.20260623164704-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623165230-w118-119",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 74776464,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.866,
+   "components": 3,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 20,
+   "isometry_stretch_p95": 1.082,
+   "findings": [
+    "connectivity",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 7522,
+    "seconds": 113
+   },
+   "report": "reports/PHercParis4.20260623165230-w118-119.20260623165230-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623165742-w120-121",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 74616633,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.875,
+   "components": 4,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 72,
+   "isometry_stretch_p95": 1.084,
+   "findings": [
+    "connectivity",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 7657,
+    "seconds": 114
+   },
+   "report": "reports/PHercParis4.20260623165742-w120-121.20260623165742-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623170305-w122-123",
+   "volume_id": "20260608103018",
+   "voxel": "1.129um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260608103018-1.129um-0.2m-78keV-masked.zarr",
+   "vertices": 74851013,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.879,
+   "components": 6,
+   "enclosed_invalid_components": 2,
+   "jump_edges": 2259,
+   "normal_reversal_pairs": 200,
+   "isometry_stretch_p95": 1.09,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 7728,
+    "seconds": 114
+   },
+   "report": "reports/PHercParis4.20260623170305-w122-123.20260623170305-on-20260608103018-1.129um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260623171929-w128-129",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 27476064,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.656,
+   "components": 2,
+   "enclosed_invalid_components": 1,
+   "jump_edges": 42218,
+   "normal_reversal_pairs": 79163,
+   "isometry_stretch_p95": 3.837,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "isometry-distortion",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2245,
+    "seconds": 36
+   },
+   "report": "reports/PHercParis4.20260623171929-w128-129.20260623171929-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183124-w010-027",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 29648000,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.952,
+   "components": 3,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 593,
+   "isometry_stretch_p95": 1.118,
+   "findings": [
+    "connectivity",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3228,
+    "seconds": 49
+   },
+   "report": "reports/PHercParis4.20260701183124-w010-027.20260701183124-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183125-w028-037",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 31260560,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.94,
+   "components": 2,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 9,
+   "normal_reversal_pairs": 904,
+   "isometry_stretch_p95": 1.105,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3376,
+    "seconds": 49
+   },
+   "report": "reports/PHercParis4.20260701183125-w028-037.20260701183125-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183126-w038-045",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 34429824,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.904,
+   "components": 9,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 99,
+   "normal_reversal_pairs": 2185,
+   "isometry_stretch_p95": 1.115,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3585,
+    "seconds": 52
+   },
+   "report": "reports/PHercParis4.20260701183126-w038-045.20260701183126-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183127-w046-052",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 36505520,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.907,
+   "components": 7,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 194,
+   "normal_reversal_pairs": 2701,
+   "isometry_stretch_p95": 1.133,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3763,
+    "seconds": 55
+   },
+   "report": "reports/PHercParis4.20260701183127-w046-052.20260701183127-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183128-w053-058",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 33833040,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.938,
+   "components": 12,
+   "enclosed_invalid_components": 1,
+   "jump_edges": 353,
+   "normal_reversal_pairs": 2655,
+   "isometry_stretch_p95": 1.15,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3645,
+    "seconds": 53
+   },
+   "report": "reports/PHercParis4.20260701183128-w053-058.20260701183128-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183129-w059-063",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 32489600,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.927,
+   "components": 4,
+   "enclosed_invalid_components": 1,
+   "jump_edges": 106,
+   "normal_reversal_pairs": 2477,
+   "isometry_stretch_p95": 1.137,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3482,
+    "seconds": 52
+   },
+   "report": "reports/PHercParis4.20260701183129-w059-063.20260701183129-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183130-w064-068",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 35564400,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.921,
+   "components": 5,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 2447,
+   "isometry_stretch_p95": 1.118,
+   "findings": [
+    "connectivity",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3777,
+    "seconds": 58
+   },
+   "report": "reports/PHercParis4.20260701183130-w064-068.20260701183130-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183131-w069-072",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 30400368,
+   "status": "partial",
+   "tier": "review",
+   "valid_vertex_fraction": 0.921,
+   "components": 6,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 0,
+   "normal_reversal_pairs": 711,
+   "isometry_stretch_p95": 1.119,
+   "findings": [
+    "connectivity",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3240,
+    "seconds": 50
+   },
+   "report": "reports/PHercParis4.20260701183131-w069-072.20260701183131-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183132-w073-076",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 34920448,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.848,
+   "components": 9,
+   "enclosed_invalid_components": 3,
+   "jump_edges": 213,
+   "normal_reversal_pairs": 898,
+   "isometry_stretch_p95": 1.129,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3504,
+    "seconds": 52
+   },
+   "report": "reports/PHercParis4.20260701183132-w073-076.20260701183132-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183133-w077-080",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 36210672,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.867,
+   "components": 4,
+   "enclosed_invalid_components": 0,
+   "jump_edges": 2302,
+   "normal_reversal_pairs": 1070,
+   "isometry_stretch_p95": 1.133,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3634,
+    "seconds": 55
+   },
+   "report": "reports/PHercParis4.20260701183133-w077-080.20260701183133-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183134-w081-084",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 38383872,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.868,
+   "components": 2,
+   "enclosed_invalid_components": 4,
+   "jump_edges": 5111,
+   "normal_reversal_pairs": 1893,
+   "isometry_stretch_p95": 1.141,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3873,
+    "seconds": 58
+   },
+   "report": "reports/PHercParis4.20260701183134-w081-084.20260701183134-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183135-w085-088",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 40232224,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.867,
+   "components": 4,
+   "enclosed_invalid_components": 5,
+   "jump_edges": 3276,
+   "normal_reversal_pairs": 889,
+   "isometry_stretch_p95": 1.134,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 4083,
+    "seconds": 62
+   },
+   "report": "reports/PHercParis4.20260701183135-w085-088.20260701183135-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183136-w089-091",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 31336288,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.874,
+   "components": 3,
+   "enclosed_invalid_components": 4,
+   "jump_edges": 5664,
+   "normal_reversal_pairs": 1262,
+   "isometry_stretch_p95": 1.139,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3226,
+    "seconds": 48
+   },
+   "report": "reports/PHercParis4.20260701183136-w089-091.20260701183136-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183137-w092-094",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 32127536,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.88,
+   "components": 1,
+   "enclosed_invalid_components": 4,
+   "jump_edges": 7492,
+   "normal_reversal_pairs": 1368,
+   "isometry_stretch_p95": 1.136,
+   "findings": [
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3331,
+    "seconds": 49
+   },
+   "report": "reports/PHercParis4.20260701183137-w092-094.20260701183137-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183138-w095-097",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 33516032,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.865,
+   "components": 1,
+   "enclosed_invalid_components": 1,
+   "jump_edges": 8321,
+   "normal_reversal_pairs": 1207,
+   "isometry_stretch_p95": 1.136,
+   "findings": [
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3409,
+    "seconds": 51
+   },
+   "report": "reports/PHercParis4.20260701183138-w095-097.20260701183138-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183139-w098-100",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 34142304,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.864,
+   "components": 3,
+   "enclosed_invalid_components": 6,
+   "jump_edges": 6372,
+   "normal_reversal_pairs": 922,
+   "isometry_stretch_p95": 1.138,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3445,
+    "seconds": 50
+   },
+   "report": "reports/PHercParis4.20260701183139-w098-100.20260701183139-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183140-w101-103",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 35322320,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.853,
+   "components": 6,
+   "enclosed_invalid_components": 6,
+   "jump_edges": 10126,
+   "normal_reversal_pairs": 1656,
+   "isometry_stretch_p95": 1.148,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3543,
+    "seconds": 53
+   },
+   "report": "reports/PHercParis4.20260701183140-w101-103.20260701183140-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183141-w104-106",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 34817184,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.878,
+   "components": 3,
+   "enclosed_invalid_components": 7,
+   "jump_edges": 9024,
+   "normal_reversal_pairs": 2001,
+   "isometry_stretch_p95": 1.145,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3614,
+    "seconds": 53
+   },
+   "report": "reports/PHercParis4.20260701183141-w104-106.20260701183141-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183142-w107-109",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 35393904,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.883,
+   "components": 4,
+   "enclosed_invalid_components": 7,
+   "jump_edges": 8383,
+   "normal_reversal_pairs": 2319,
+   "isometry_stretch_p95": 1.147,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3738,
+    "seconds": 53
+   },
+   "report": "reports/PHercParis4.20260701183142-w107-109.20260701183142-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183143-w110-112",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 35780160,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.889,
+   "components": 1,
+   "enclosed_invalid_components": 12,
+   "jump_edges": 12691,
+   "normal_reversal_pairs": 2474,
+   "isometry_stretch_p95": 1.148,
+   "findings": [
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3696,
+    "seconds": 55
+   },
+   "report": "reports/PHercParis4.20260701183143-w110-112.20260701183143-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183144-w113-115",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 36271872,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.891,
+   "components": 1,
+   "enclosed_invalid_components": 9,
+   "jump_edges": 9735,
+   "normal_reversal_pairs": 2807,
+   "isometry_stretch_p95": 1.15,
+   "findings": [
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3732,
+    "seconds": 55
+   },
+   "report": "reports/PHercParis4.20260701183144-w113-115.20260701183144-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183145-w116-117",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 25231536,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.876,
+   "components": 5,
+   "enclosed_invalid_components": 4,
+   "jump_edges": 9166,
+   "normal_reversal_pairs": 2653,
+   "isometry_stretch_p95": 1.149,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2700,
+    "seconds": 38
+   },
+   "report": "reports/PHercParis4.20260701183145-w116-117.20260701183145-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183146-w118-119",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 25718400,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.868,
+   "components": 6,
+   "enclosed_invalid_components": 2,
+   "jump_edges": 8492,
+   "normal_reversal_pairs": 3034,
+   "isometry_stretch_p95": 1.155,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2626,
+    "seconds": 38
+   },
+   "report": "reports/PHercParis4.20260701183146-w118-119.20260701183146-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183147-w120-121",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 26265600,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.861,
+   "components": 14,
+   "enclosed_invalid_components": 6,
+   "jump_edges": 14520,
+   "normal_reversal_pairs": 5831,
+   "isometry_stretch_p95": 1.176,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2649,
+    "seconds": 39
+   },
+   "report": "reports/PHercParis4.20260701183147-w120-121.20260701183147-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183148-w122-123",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 27142336,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.834,
+   "components": 26,
+   "enclosed_invalid_components": 12,
+   "jump_edges": 33456,
+   "normal_reversal_pairs": 9140,
+   "isometry_stretch_p95": 1.236,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2660,
+    "seconds": 38
+   },
+   "report": "reports/PHercParis4.20260701183148-w122-123.20260701183148-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183149-w124-125",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 30076928,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.78,
+   "components": 13,
+   "enclosed_invalid_components": 19,
+   "jump_edges": 60129,
+   "normal_reversal_pairs": 23980,
+   "isometry_stretch_p95": 1.982,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 2797,
+    "seconds": 42
+   },
+   "report": "reports/PHercParis4.20260701183149-w124-125.20260701183149-on-20260411134726-2.4um.json"
+  },
+  {
+   "scroll": "PHercParis4",
+   "segment": "20260701183150-w126-127",
+   "volume_id": "20260411134726",
+   "voxel": "2.4um",
+   "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+   "vertices": 36427776,
+   "status": "partial",
+   "tier": "multi-defect",
+   "valid_vertex_fraction": 0.718,
+   "components": 12,
+   "enclosed_invalid_components": 19,
+   "jump_edges": 75833,
+   "normal_reversal_pairs": 86914,
+   "isometry_stretch_p95": 3.249,
+   "findings": [
+    "connectivity",
+    "edge-jump",
+    "hole",
+    "isometry-distortion",
+    "normal-reversal"
+   ],
+   "run": {
+    "exit": 0,
+    "peak_rss_mb": 3156,
+    "seconds": 48
+   },
+   "report": "reports/PHercParis4.20260701183150-w126-127.20260701183150-on-20260411134726-2.4um.json"
+  }
+ ]
+}
