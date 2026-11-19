@@ -748,8 +748,9 @@ def main() -> None:
     bands = bands_data["rank_bands"] if bands_data else None
     vols = json.load(open(args.inp, encoding="utf-8"))
     cov = json.load(open(args.coverage, encoding="utf-8")) if args.coverage else {}
+    # Ties break on root so the rendered order never depends on input order.
     ok = sorted((v for v in vols if v.get("ok")),
-                key=lambda v: v["score"], reverse=True)
+                key=lambda v: (-v["score"], v["root"]))
     scores = [v["score"] for v in ok]
     lo, hi = min(scores), max(scores)
 
