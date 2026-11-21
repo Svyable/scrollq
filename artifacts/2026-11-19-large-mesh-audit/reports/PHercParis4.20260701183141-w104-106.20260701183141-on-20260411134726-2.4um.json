@@ -1,0 +1,1203 @@
+{
+  "schema_version": 1,
+  "diagnostic": "tifxyz-mesh-audit",
+  "volume_root": "community-uploads/forrest/volcomp/PHercParis4/volumes/20260411134726-2.400um-0.2m-78keV-masked.zarr",
+  "tifxyz_path": "out/large-s3/PHercParis4/segments/20260701183141-w104-106/mesh/20260701183141-on-20260411134726-2.4um.tifxyz",
+  "status": "partial",
+  "metadata": {
+    "format": "tifxyz",
+    "scale": [
+      0.05000000074505806,
+      0.05000000074505806
+    ],
+    "uuid": "out",
+    "type": "seg"
+  },
+  "provenance": {
+    "meta.json": {
+      "sha256": "74f41fdbaba51b6a1224f6f5303b72f838bc9238d12d2efdd60ef3c95b664348",
+      "bytes": 408
+    },
+    "x.tif": {
+      "sha256": "bb3c5e885d5ef5bac86874a67d5dcea3562d30bd2e079e070208adc569114594",
+      "bytes": 139268870
+    },
+    "y.tif": {
+      "sha256": "c33f5ff2009cb6bbebd9595364da8f7d3f21144059b2747c85920cb25725c1d3",
+      "bytes": 139268870
+    },
+    "z.tif": {
+      "sha256": "9d8b6fd7d7e270bf0271119a921bbbcdf32e5d07df240de23081556ea20eaf69",
+      "bytes": 139268870
+    }
+  },
+  "grid": {
+    "shape_yx": [
+      3816,
+      9124
+    ],
+    "vertices": 34817184,
+    "valid_vertices": 30562720,
+    "valid_vertex_fraction": 0.8778056260954361,
+    "mask": {
+      "present": false,
+      "applied": false
+    },
+    "valid_vertex_components": {
+      "components": 3,
+      "cells": 30562720,
+      "largest_component_cells": 30562592,
+      "largest_component_fraction": 0.9999958118910882,
+      "border_touching_components": 0,
+      "enclosed_components": 3
+    },
+    "enclosed_invalid_components": 7
+  },
+  "bbox": {
+    "metadata_present": true,
+    "status": "consistent",
+    "observed_bbox_xyz": [
+      [
+        5662.7998046875,
+        6340.83740234375,
+        12013.4296875
+      ],
+      [
+        30022.2109375,
+        31724.041015625,
+        71987.546875
+      ]
+    ],
+    "tolerance_voxels": 0.001,
+    "metadata_bbox_xyz": [
+      [
+        5662.7998046875,
+        6340.83740234375,
+        12013.4296875
+      ],
+      [
+        30022.2109375,
+        31724.041015625,
+        71987.546875
+      ]
+    ],
+    "contains_observed_vertices": true,
+    "max_abs_error_voxels": 0.0,
+    "excess_voxels_xyz": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "max_excess_voxels": 0.0,
+    "stale_axes": [],
+    "max_slack_voxels": 0.0
+  },
+  "spacing": {
+    "columns": {
+      "measured_median_voxels": 20.178983688354492,
+      "nominal_voxels_from_scale": 19.99999970197678,
+      "measured_to_nominal_ratio": 1.008949199452239,
+      "tolerance_ratio": 1.5,
+      "within_tolerance": true
+    },
+    "rows": {
+      "measured_median_voxels": 19.883520126342773,
+      "nominal_voxels_from_scale": 19.99999970197678,
+      "measured_to_nominal_ratio": 0.9941760211315156,
+      "tolerance_ratio": 1.5,
+      "within_tolerance": true
+    }
+  },
+  "edges": {
+    "columns": {
+      "distance_voxels": {
+        "count": 30555952,
+        "min": 2.744196891784668,
+        "p05": 18.46177101135254,
+        "median": 20.178983688354492,
+        "p95": 21.230031967163086,
+        "max": 3243.19970703125
+      },
+      "nominal_distance_voxels": 19.99999970197678,
+      "stretch_ratio": {
+        "count": 30555952,
+        "min": 0.13720984756946564,
+        "p05": 0.923088550567627,
+        "median": 1.0089491605758667,
+        "p95": 1.0615016222000122,
+        "max": 162.1599884033203
+      },
+      "jump_ratio_threshold": 4.0,
+      "jump_distance_threshold_voxels": 80.71593475341797,
+      "jump_edges": 4622
+    },
+    "rows": {
+      "distance_voxels": {
+        "count": 30552388,
+        "min": 0.6518881916999817,
+        "p05": 18.727482509613036,
+        "median": 19.883520126342773,
+        "p95": 20.829103469848633,
+        "max": 3216.87744140625
+      },
+      "nominal_distance_voxels": 19.99999970197678,
+      "stretch_ratio": {
+        "count": 30552388,
+        "min": 0.032594408839941025,
+        "p05": 0.9363741099834442,
+        "median": 0.9941760301589966,
+        "p95": 1.0414551496505737,
+        "max": 160.8438720703125
+      },
+      "jump_ratio_threshold": 4.0,
+      "jump_distance_threshold_voxels": 79.5340805053711,
+      "jump_edges": 4402
+    }
+  },
+  "quads": {
+    "valid_quads": 30545616,
+    "valid_quad_fraction": 0.8776405291940681,
+    "degenerate_quads": 0,
+    "surface_area_voxels2": 12192121856.0,
+    "nominal_flat_area_voxels2": 12218246035.867891,
+    "area_ratio_3d_to_flat": {
+      "count": 30545616,
+      "min": 0.015399026684463024,
+      "p05": 0.8797834515571594,
+      "median": 1.0030468702316284,
+      "p95": 1.0855741500854492,
+      "max": 193.42332458496094
+    },
+    "symmetric_area_distortion": {
+      "count": 30545616,
+      "min": 1.0,
+      "p05": 1.0025526285171509,
+      "median": 1.0284310579299927,
+      "p95": 1.152131199836731,
+      "max": 193.42332458496094
+    },
+    "isometry": {
+      "method": "per-triangle singular values of directionally normalized local 3D edges",
+      "normalization": {
+        "source": "observed-directional-median",
+        "reference_spacing_voxels": [
+          20.178983688354492,
+          19.883520126342773
+        ],
+        "meta_scale_xy": [
+          0.05000000074505806,
+          0.05000000074505806
+        ]
+      },
+      "triangles": 61091232,
+      "degenerate_triangles": 1,
+      "sigma_min": {
+        "count": 61091231,
+        "min": 0.0015517814317718148,
+        "p05": 0.8799135386943817,
+        "median": 0.9817549586296082,
+        "p95": 1.017561435699463,
+        "max": 8.4829740524292
+      },
+      "sigma_max": {
+        "count": 61091231,
+        "min": 0.4564051628112793,
+        "p05": 0.9789108633995056,
+        "median": 1.0190081596374512,
+        "p95": 1.0753713846206665,
+        "max": 200.31153869628906
+      },
+      "symmetric_stretch_distortion": {
+        "count": 61091231,
+        "min": 1.0000579357147217,
+        "p05": 1.010921835899353,
+        "median": 1.0349676609039307,
+        "p95": 1.1445841789245605,
+        "max": 644.420654296875
+      },
+      "anisotropy": {
+        "count": 61091231,
+        "min": 1.0000046491622925,
+        "p05": 1.009497880935669,
+        "median": 1.0396347045898438,
+        "p95": 1.156236469745636,
+        "max": 7796.0966796875
+      },
+      "symmetric_dirichlet_energy": {
+        "count": 61091231,
+        "min": 3.999999761581421,
+        "p05": 4.000584125518799,
+        "median": 4.005626678466797,
+        "p95": 4.082603454589844,
+        "max": 415286.9375
+      }
+    },
+    "normal_neighbor_dot": {
+      "count": 61074124,
+      "min": -0.9999817609786987,
+      "p05": 0.9945937395095825,
+      "median": 0.999863862991333,
+      "p95": 0.9999990463256836,
+      "max": 1.000000238418579
+    },
+    "normal_flip_angle_deg": 120.0,
+    "normal_reversal_pairs": 2001
+  },
+  "review_queue": {
+    "coordinate_space": "level0-voxel-xyz",
+    "limit_per_kind": 20,
+    "total_candidates_by_kind": {
+      "edge-jump": 9024,
+      "normal-reversal": 2001
+    },
+    "emitted_by_kind": {
+      "edge-jump": 20,
+      "normal-reversal": 20
+    },
+    "candidates": [
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3498,
+            1658
+          ],
+          [
+            3499,
+            1658
+          ]
+        ],
+        "xyz": [
+          16425.986328125,
+          15045.7685546875,
+          13086.189453125
+        ],
+        "distance_voxels": 3216.87744140625,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 161.78611337256902,
+        "rank": 1
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3499,
+            1658
+          ],
+          [
+            3500,
+            1658
+          ]
+        ],
+        "xyz": [
+          13430.6708984375,
+          15690.46875,
+          14066.365234375
+        ],
+        "distance_voxels": 3216.875732421875,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 161.78602742277926,
+        "rank": 2
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3500,
+            1658
+          ],
+          [
+            3501,
+            1658
+          ]
+        ],
+        "xyz": [
+          10435.3564453125,
+          16335.16796875,
+          15046.5390625
+        ],
+        "distance_voxels": 3216.875732421875,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 161.78602742277926,
+        "rank": 3
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3500,
+            1659
+          ],
+          [
+            3501,
+            1659
+          ]
+        ],
+        "xyz": [
+          10435.224609375,
+          16347.623046875,
+          15049.6298828125
+        ],
+        "distance_voxels": 3212.900146484375,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 161.5860836546618,
+        "rank": 4
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3498,
+            1659
+          ],
+          [
+            3499,
+            1659
+          ]
+        ],
+        "xyz": [
+          16415.8359375,
+          15044.654296875,
+          13093.755859375
+        ],
+        "distance_voxels": 3212.89990234375,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 161.5860713761204,
+        "rank": 5
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3499,
+            1659
+          ],
+          [
+            3500,
+            1659
+          ]
+        ],
+        "xyz": [
+          13425.53125,
+          15696.138671875,
+          14071.693359375
+        ],
+        "distance_voxels": 3212.89892578125,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 161.5860222619548,
+        "rank": 6
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3498,
+            1660
+          ],
+          [
+            3499,
+            1660
+          ]
+        ],
+        "xyz": [
+          16405.689453125,
+          15043.54296875,
+          13101.3212890625
+        ],
+        "distance_voxels": 3208.942138671875,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 161.38702394152497,
+        "rank": 7
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3500,
+            1660
+          ],
+          [
+            3501,
+            1660
+          ]
+        ],
+        "xyz": [
+          10435.09375,
+          16360.078125,
+          15052.7197265625
+        ],
+        "distance_voxels": 3208.941650390625,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 161.3869993844422,
+        "rank": 8
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3499,
+            1660
+          ],
+          [
+            3500,
+            1660
+          ]
+        ],
+        "xyz": [
+          13420.3916015625,
+          15701.810546875,
+          14077.0205078125
+        ],
+        "distance_voxels": 3208.94091796875,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 161.386962548818,
+        "rank": 9
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3498,
+            1661
+          ],
+          [
+            3499,
+            1661
+          ]
+        ],
+        "xyz": [
+          16395.541015625,
+          15042.4296875,
+          13108.88671875
+        ],
+        "distance_voxels": 3205.0029296875,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 161.18890967607578,
+        "rank": 10
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3499,
+            1661
+          ],
+          [
+            3500,
+            1661
+          ]
+        ],
+        "xyz": [
+          13415.251953125,
+          15707.4814453125,
+          14082.34765625
+        ],
+        "distance_voxels": 3205.0029296875,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 161.18890967607578,
+        "rank": 11
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3500,
+            1661
+          ],
+          [
+            3501,
+            1661
+          ]
+        ],
+        "xyz": [
+          10434.962890625,
+          16372.5341796875,
+          15055.80859375
+        ],
+        "distance_voxels": 3205.0029296875,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 161.18890967607578,
+        "rank": 12
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "column",
+        "grid_endpoints_yx": [
+          [
+            3501,
+            1650
+          ],
+          [
+            3501,
+            1651
+          ]
+        ],
+        "xyz": [
+          10443.205078125,
+          16207.40234375,
+          15045.826171875
+        ],
+        "distance_voxels": 3243.19970703125,
+        "axis_median_voxels": 20.178983688354492,
+        "ratio_to_axis_median": 160.72165759779742,
+        "rank": 13
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "column",
+        "grid_endpoints_yx": [
+          [
+            3501,
+            1651
+          ],
+          [
+            3501,
+            1652
+          ]
+        ],
+        "xyz": [
+          13473.2861328125,
+          15601.1181640625,
+          14061.2607421875
+        ],
+        "distance_voxels": 3243.197998046875,
+        "axis_median_voxels": 20.178983688354492,
+        "ratio_to_axis_median": 160.72157290649673,
+        "rank": 14
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "column",
+        "grid_endpoints_yx": [
+          [
+            3501,
+            1652
+          ],
+          [
+            3501,
+            1653
+          ]
+        ],
+        "xyz": [
+          16503.3671875,
+          14994.833984375,
+          13076.6962890625
+        ],
+        "distance_voxels": 3243.19775390625,
+        "axis_median_voxels": 20.178983688354492,
+        "ratio_to_axis_median": 160.7215608077395,
+        "rank": 15
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "column",
+        "grid_endpoints_yx": [
+          [
+            3500,
+            1652
+          ],
+          [
+            3500,
+            1653
+          ]
+        ],
+        "xyz": [
+          16493.94921875,
+          15005.4638671875,
+          13076.939453125
+        ],
+        "distance_voxels": 3241.82275390625,
+        "axis_median_voxels": 20.178983688354492,
+        "ratio_to_axis_median": 160.65342060696253,
+        "rank": 16
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "column",
+        "grid_endpoints_yx": [
+          [
+            3500,
+            1651
+          ],
+          [
+            3500,
+            1652
+          ]
+        ],
+        "xyz": [
+          13466.740234375,
+          15608.033203125,
+          14068.0673828125
+        ],
+        "distance_voxels": 3241.822265625,
+        "axis_median_voxels": 20.178983688354492,
+        "ratio_to_axis_median": 160.65339640944802,
+        "rank": 17
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "column",
+        "grid_endpoints_yx": [
+          [
+            3500,
+            1650
+          ],
+          [
+            3500,
+            1651
+          ]
+        ],
+        "xyz": [
+          10439.533203125,
+          16210.6015625,
+          15059.1953125
+        ],
+        "distance_voxels": 3241.8212890625,
+        "axis_median_voxels": 20.178983688354492,
+        "ratio_to_axis_median": 160.65334801441907,
+        "rank": 18
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3478,
+            1662
+          ],
+          [
+            3479,
+            1662
+          ]
+        ],
+        "xyz": [
+          10375.701171875,
+          16431.55859375,
+          15396.666015625
+        ],
+        "distance_voxels": 3193.03857421875,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 160.58718747634822,
+        "rank": 19
+      },
+      {
+        "kind": "edge-jump",
+        "orientation": "row",
+        "grid_endpoints_yx": [
+          [
+            3480,
+            1662
+          ],
+          [
+            3481,
+            1662
+          ]
+        ],
+        "xyz": [
+          16235.56640625,
+          15212.1259765625,
+          13170.2548828125
+        ],
+        "distance_voxels": 3193.037109375,
+        "axis_median_voxels": 19.883520126342773,
+        "ratio_to_axis_median": 160.58711380509985,
+        "rank": 20
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            104,
+            2325
+          ],
+          [
+            105,
+            2325
+          ]
+        ],
+        "xyz": [
+          14511.0625,
+          29425.34765625,
+          71313.0546875
+        ],
+        "normal_dot": -0.9999817609786987,
+        "angle_deg": 179.65394983901908,
+        "rank": 1
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            2024,
+            1391
+          ],
+          [
+            2025,
+            1391
+          ]
+        ],
+        "xyz": [
+          9674.869140625,
+          9666.447265625,
+          42127.28125
+        ],
+        "normal_dot": -0.999976634979248,
+        "angle_deg": 179.60832886961526,
+        "rank": 2
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            2024,
+            1397
+          ],
+          [
+            2025,
+            1397
+          ]
+        ],
+        "xyz": [
+          9754.6640625,
+          9759.146484375,
+          42111.60546875
+        ],
+        "normal_dot": -0.9999685287475586,
+        "angle_deg": 179.5454352207536,
+        "rank": 3
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            177,
+            5258
+          ],
+          [
+            178,
+            5258
+          ]
+        ],
+        "xyz": [
+          14693.796875,
+          29304.66015625,
+          70956.9921875
+        ],
+        "normal_dot": -0.9999336004257202,
+        "angle_deg": 179.33972830381853,
+        "rank": 4
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "column",
+        "grid_quads_yx": [
+          [
+            3481,
+            1661
+          ],
+          [
+            3481,
+            1662
+          ]
+        ],
+        "xyz": [
+          18089.984375,
+          14818.474609375,
+          12462.955078125
+        ],
+        "normal_dot": -0.9999312162399292,
+        "angle_deg": 179.32797864172198,
+        "rank": 5
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            2024,
+            1368
+          ],
+          [
+            2025,
+            1368
+          ]
+        ],
+        "xyz": [
+          9228.58984375,
+          9287.83203125,
+          42155.8046875
+        ],
+        "normal_dot": -0.9998983144760132,
+        "angle_deg": 179.18290815529522,
+        "rank": 6
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            140,
+            5296
+          ],
+          [
+            141,
+            5296
+          ]
+        ],
+        "xyz": [
+          17078.841796875,
+          31676.154296875,
+          71822.2890625
+        ],
+        "normal_dot": -0.9998890161514282,
+        "angle_deg": 179.14636632877938,
+        "rank": 7
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            2024,
+            1396
+          ],
+          [
+            2025,
+            1396
+          ]
+        ],
+        "xyz": [
+          9755.71875,
+          9744.9873046875,
+          42114.71484375
+        ],
+        "normal_dot": -0.9998690485954285,
+        "angle_deg": 179.07274870158463,
+        "rank": 8
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            105,
+            8184
+          ],
+          [
+            106,
+            8184
+          ]
+        ],
+        "xyz": [
+          14186.611328125,
+          29240.123046875,
+          70917.5
+        ],
+        "normal_dot": -0.9998667240142822,
+        "angle_deg": 179.0645546824832,
+        "rank": 9
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            129,
+            8144
+          ],
+          [
+            130,
+            8144
+          ]
+        ],
+        "xyz": [
+          14889.0615234375,
+          28891.31640625,
+          71492.046875
+        ],
+        "normal_dot": -0.999862790107727,
+        "angle_deg": 179.0508490039299,
+        "rank": 10
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            117,
+            8164
+          ],
+          [
+            118,
+            8164
+          ]
+        ],
+        "xyz": [
+          14537.8359375,
+          29065.71875,
+          71204.78125
+        ],
+        "normal_dot": -0.9998576045036316,
+        "angle_deg": 179.03307918207264,
+        "rank": 11
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            116,
+            8166
+          ],
+          [
+            117,
+            8166
+          ]
+        ],
+        "xyz": [
+          14504.6572265625,
+          29082.6484375,
+          71177.453125
+        ],
+        "normal_dot": -0.9998476505279541,
+        "angle_deg": 178.99985349677536,
+        "rank": 12
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            128,
+            8146
+          ],
+          [
+            129,
+            8146
+          ]
+        ],
+        "xyz": [
+          14856.078125,
+          28908.59765625,
+          71464.703125
+        ],
+        "normal_dot": -0.9998408555984497,
+        "angle_deg": 178.9777924772274,
+        "rank": 13
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            124,
+            8153
+          ],
+          [
+            125,
+            8153
+          ]
+        ],
+        "xyz": [
+          14737.01171875,
+          28972.591796875,
+          71365.3515625
+        ],
+        "normal_dot": -0.9998351335525513,
+        "angle_deg": 178.95957749652123,
+        "rank": 14
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            109,
+            8177
+          ],
+          [
+            110,
+            8177
+          ]
+        ],
+        "xyz": [
+          14309.826171875,
+          29183.62890625,
+          71016.421875
+        ],
+        "normal_dot": -0.9998345375061035,
+        "angle_deg": 178.95769840672745,
+        "rank": 15
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            136,
+            8133
+          ],
+          [
+            137,
+            8133
+          ]
+        ],
+        "xyz": [
+          15088.3037109375,
+          28798.3125,
+          71652.6171875
+        ],
+        "normal_dot": -0.9998306035995483,
+        "angle_deg": 178.94538037200198,
+        "rank": 16
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            132,
+            8139
+          ],
+          [
+            133,
+            8139
+          ]
+        ],
+        "xyz": [
+          14979.1845703125,
+          28851.904296875,
+          71563.6328125
+        ],
+        "normal_dot": -0.9998277425765991,
+        "angle_deg": 178.93651140200404,
+        "rank": 17
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            140,
+            8126
+          ],
+          [
+            141,
+            8126
+          ]
+        ],
+        "xyz": [
+          15207.498046875,
+          28734.546875,
+          71751.953125
+        ],
+        "normal_dot": -0.9998270869255066,
+        "angle_deg": 178.9344893257832,
+        "rank": 18
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            112,
+            8098
+          ],
+          [
+            113,
+            8098
+          ]
+        ],
+        "xyz": [
+          13774.41015625,
+          28937.16015625,
+          70646.15625
+        ],
+        "normal_dot": -0.9998213648796082,
+        "angle_deg": 178.91700233820694,
+        "rank": 19
+      },
+      {
+        "kind": "normal-reversal",
+        "orientation": "row",
+        "grid_quads_yx": [
+          [
+            113,
+            8170
+          ],
+          [
+            114,
+            8170
+          ]
+        ],
+        "xyz": [
+          14433.29296875,
+          29127.5859375,
+          71115.3125
+        ],
+        "normal_dot": -0.9998170137405396,
+        "angle_deg": 178.90389163341587,
+        "rank": 20
+      }
+    ],
+    "limitation": "Review sites localize the strongest local geometry cues only. They are VC3D inspection targets, not defect verdicts or sheet-identity proof."
+  },
+  "ct_preflight": {
+    "status": "unknown",
+    "tool": "vesuvius.surface_preflight",
+    "reason": "no upstream vesuvius.surface_preflight report supplied"
+  },
+  "self_intersection": {
+    "status": "unknown",
+    "tool": "vc_tifxyz_selfcross",
+    "reason": "no upstream vc_tifxyz_selfcross report supplied"
+  },
+  "error_count": 0,
+  "warning_count": 4,
+  "errors": [],
+  "warnings": [
+    "valid-vertex grid has 3 disconnected components",
+    "valid-vertex grid contains 7 enclosed invalid component(s)",
+    "9024 local mesh edge(s) exceed 4x axis-median spacing",
+    "2001 neighboring quad pair(s) reverse by more than 120 degrees"
+  ],
+  "findings": [
+    {
+      "kind": "connectivity",
+      "severity": "review",
+      "message": "3 disconnected valid-vertex components"
+    },
+    {
+      "kind": "hole",
+      "severity": "review",
+      "message": "7 enclosed invalid grid component(s)"
+    },
+    {
+      "kind": "edge-jump",
+      "severity": "review",
+      "message": "9024 edges exceed 4x axis-median spacing"
+    },
+    {
+      "kind": "normal-reversal",
+      "severity": "review",
+      "message": "2001 severe neighboring-normal reversals"
+    }
+  ],
+  "limitation": "This audit combines local TIFXYZ geometry. It does not establish correct winding identity or readable ink. CT support remains unverified. Freedom from nonlocal transverse self-intersections remains unverified."
+}
