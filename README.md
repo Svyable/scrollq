@@ -1,5 +1,10 @@
 # ScrolIQ
 
+An experimental [E8 feature moonshot](docs/e8-feature-moonshot.md)
+(`scroliq-e8-moonshot`) tests progressive dense-feature compression with a
+protected linear-task side channel and optimized scalar controls. Low-rate
+synthetic candidates only; no real CT, ink or GEMS improvement measured.
+
 Frozen ink checkpoints can be inspected with [provenance shortcut probes](docs/shortcut-audit.md)
 (`scroliq-shortcut-audit`): balanced linear identity probes, held-out ink errors,
 and hashes of embeddings, checkpoint and sample manifest. Diagnostic machinery
